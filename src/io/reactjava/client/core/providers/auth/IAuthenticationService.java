@@ -1,0 +1,140 @@
+/*==============================================================================
+
+name:       IAuthenticationService.java
+
+purpose:    Authentication Service Interface.
+
+history:    Mon Aug 28, 2017 10:30:00 (Giavaneers - LBM) created
+
+notes:      '-generateJsInteropExports' must be included in Dev Mode parameters
+            setting of GWT debug configuration for java methods to be
+            exported to javascript
+
+                  This program was created by Giavaneers
+        and is the confidential and proprietary product of Giavaneers Inc.
+      Any unauthorized use, reproduction or transfer is strictly prohibited.
+
+                     COPYRIGHT 2017 BY GIAVANEERS, INC.
+      (Subject to limited distribution and restricted disclosure only).
+                           All rights reserved.
+
+
+==============================================================================*/
+                                       // package --------------------------- //
+package io.reactjava.client.core.providers.auth;
+                                       // imports --------------------------- //
+import io.reactjava.client.core.rxjs.observable.Observable;
+import io.reactjava.client.core.react.IProvider;
+
+                                       // IAuthenticationService =============//
+public interface IAuthenticationService extends IProvider
+{
+                                       // class constants --------------------//
+                                       // (none)                              //
+                                       // class variables ------------------- //
+                                       // (none)                              //
+/*------------------------------------------------------------------------------
+
+@name       configure - configuration routine
+                                                                              */
+                                                                             /**
+            Configuration routine.
+
+@return     void
+
+@param      configurationData    configuration data
+
+@history    Sat Oct 21, 2017 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public Observable configure(
+   Object configurationData);
+
+/*------------------------------------------------------------------------------
+
+@name       createUserWithEmailAndPassword  - create user with email and pswd
+                                                                              */
+                                                                             /**
+            Creates a new user account associated with the specified email
+            address and password.
+
+            On successful creation of the user account, this user will also be
+            signed in to the application.
+
+            User account creation can fail if the account already exists or the
+            password is invalid.
+
+@return     void
+
+@param      email       email
+@param      password    password
+
+@history    Thu Sep 7, 2017 08:46:23 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+Observable<String> createUserWithEmailAndPassword(
+   String email,
+   String password);
+
+/*------------------------------------------------------------------------------
+
+@name       signInWithEmailAndPassword - sign in with email and password
+                                                                              */
+                                                                             /**
+            Asynchronously signs in using an email and password.
+
+            Fails with an error if the email address and password do not match.
+
+@return     void
+
+@param      email       email
+@param      password    password
+
+@history    Sat Oct 21, 2017 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+Observable<String> signInWithEmailAndPassword(
+   String email,
+   String password);
+
+/*------------------------------------------------------------------------------
+
+@name       signOut - sign out
+                                                                              */
+                                                                             /**
+            Signs out the current user.
+
+@return     non-null firebase.Promise containing void
+
+@history    Sat Oct 21, 2017 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+Observable<String> signOut();
+
+/*------------------------------------------------------------------------------
+
+@name       unitTest - unit test
+                                                                              */
+                                                                             /**
+            Unit test for either the callback or promise interface.
+
+@return     void
+
+@param      bUsePromise    iff true, use promise interface
+
+@history    Sat Oct 21, 2017 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+void unitTest();
+
+}//====================================// end IAuthenticationService =========//

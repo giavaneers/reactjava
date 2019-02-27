@@ -1,0 +1,43 @@
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.8.2//EN" "http://gwtproject.org/doctype/2.8.0/gwt-module.dtd">
+<module rename-to="ReactJava">
+
+   <!-- from jsinterop.base.Base.core.xml -->
+   <define-property name="jsinterop.checks" values="ENABLED,DISABLED"/>
+
+   <!-- Note that disabling checking only disables it for production. -->
+   <set-property name="jsinterop.checks" value="DISABLED"/>
+
+   <!-- log level (default is WARN) -->
+   <!-- <set-property name="core.logging.logLevel" value="INFO"/> -->
+
+	<!-- Inherit the core Web Toolkit stuff.                  -->
+   <inherits name='com.google.gwt.json.JSON'/>
+   <inherits name='com.google.gwt.user.User'/>
+
+	<!-- transcode the generated code database                -->
+	<source path="generated" />
+
+   <!-- Use generators to create the code database           -->
+   <!-- omitting this will typically generate a rebind error -->
+   <!-- on compilation of the GWT.create() invocation        -->
+   <!-- in React.getReactJavaCodeGenerator()                 -->
+   <!--
+   <generate-with class="io.reactjava.codegenerator.ReactCodeGenerator">
+     <when-type-assignable class="io.reactjava.client.coree.react.IReactCodeGenerator" />
+   </generate-with>
+   -->
+
+	<!-- transcode source paths -->
+   <source path="com/giavaneers/util/" />
+   <source path="com/github/" />
+   <source path="elemental2/" />
+   <source path="io/reactjava/client/components/" />
+   <source path="io/reactjava/client/core/providers/" />
+   <source path="io/reactjava/client/core/react/" />
+   <source path="io/reactjava/client/core/resources/" />
+   <source path="io/reactjava/client/core/rxjs/" />
+   <source path="jsinterop/" />
+
+	<!-- Combine all platform-specific versions                   -->
+	<collapse-all-properties />
+</module>

@@ -1,0 +1,60 @@
+<project default="publishJar">
+   <target name="buildGWTDevJar">
+      <record name="antlog.buildGWTDevJar.txt"/>
+      <java classname="io.reactjava.codegenerator.JavascriptBundler">
+         <arg value="buildGWTDevJar"/>
+         <classpath>
+            <pathelement path="${java.class.path}"/>
+            <pathelement location="out/production/ReactJava" />
+            <pathelement location="/Users/brianm/.reactjava/gwt/gwt-2.8.2/gwt-dev.jar" />
+         </classpath>
+      </java>
+   </target>
+   <target name="buildRelease">
+      <record name="antlog.buildRelease.txt"/>
+      <java classname="io.reactjava.codegenerator.JavascriptBundler">
+         <arg value="BuildRelease"/>
+         <classpath>
+            <pathelement path="${java.class.path}"/>
+            <pathelement location="out/production/ReactJava" />
+            <pathelement location="/Users/brianm/.reactjava/gwt/gwt-2.8.2/gwt-dev.jar" />
+         </classpath>
+      </java>
+   </target>
+   <target name="updateJarManifest">
+      <record name="antlog.updateJarManifest.txt"/>
+      <java classname="io.reactjava.codegenerator.JavascriptBundler">
+         <arg value="UpdateJarManifest"/>
+         <classpath>
+            <pathelement path="${java.class.path}"/>
+            <pathelement location="out/production/ReactJava" />
+         </classpath>
+      </java>
+   </target>
+   <target name="updateProjectTemplateResource">
+      <record name="antlog.updateProjectTemplateResource.txt"/>
+      <java classname="io.reactjava.codegenerator.JavascriptBundler">
+         <arg value="UpdateProjectTemplateResource"/>
+         <classpath>
+            <pathelement path="${java.class.path}"/>
+            <pathelement location="out/production/ReactJava" />
+         </classpath>
+      </java>
+   </target>
+   <target name="publishJar">
+      <record name="antlog.publishJar.txt"/>
+      <java classname="io.reactjava.codegenerator.JavascriptBundler">
+         <arg value="PublishJar"/>
+         <classpath>
+            <pathelement path="${java.class.path}"/>
+            <pathelement location="out/production/ReactJava" />
+            <pathelement location="/Users/brianm/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.9.2/jackson-core-2.9.2.jar" />
+            <pathelement location="/Users/brianm/.m2/repository/com/google/api-client/google-api-client/1.25.0/google-api-client-1.25.0.jar" />
+            <pathelement location="/Users/brianm/.m2/repository/com/google/apis/google-api-services-storage/v1-rev135-1.24.1/google-api-services-storage-v1-rev135-1.24.1.jar" />
+            <pathelement location="/Users/brianm/.m2/repository/com/google/http-client/google-http-client/1.25.0/google-http-client-1.25.0.jar" />
+            <pathelement location="/Users/brianm/.m2/repository/com/google/http-client/google-http-client-jackson2/1.25.0/google-http-client-jackson2-1.25.0.jar" />
+            <pathelement location="/Users/brianm/.m2/repository/com/google/oauth-client/google-oauth-client/1.25.0/google-oauth-client-1.25.0.jar" />
+         </classpath>
+      </java>
+   </target>
+</project>

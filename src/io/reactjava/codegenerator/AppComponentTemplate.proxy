@@ -1,0 +1,144 @@
+/*==============================================================================
+
+name:       AppComponentTemplate.java
+
+purpose:    AppComponentTemplate proxy for compilation by AppComponentInspector
+
+history:    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
+
+notes:
+                  This program was created by Giavaneers
+         and is the confidential and proprietary product of Giavaneers Inc.
+       Any unauthorized use, reproduction or transfer is strictly prohibited.
+
+                     COPYRIGHT 2018 BY GIAVANEERS, INC.
+      (Subject to limited distribution and restricted disclosure only).
+                           All rights reserved.
+
+
+==============================================================================*/
+                                       // package --------------------------- //
+                                       // package --------------------------- //
+package io.reactjava.client.core.react;
+                                       // imports --------------------------- //
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+                                       // AppComponentTemplate ============== //
+public class AppComponentTemplate<P extends Properties> extends Component<P>
+{
+                                       // constants ------------------------- //
+public static Collection<String> importedNodeModules;
+                                       // class variables ------------------- //
+                                       // (none)                              //
+                                       // public instance variables --------- //
+                                       // (none)                              //
+                                       // protected instance variables -------//
+                                       // private instance variables -------- //
+                                       // (none)                              //
+
+/*------------------------------------------------------------------------------
+
+@name       AppComponentTemplate - constructor for specified properties
+                                                                              */
+                                                                             /**
+            AppComponentTemplate for specified properties
+
+@return     An instance of AppComponentTemplate if successful.
+
+@history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public AppComponentTemplate()
+{
+   importedNodeModules = getImportedNodeModules();
+                                       // stop any subsequent operation       //
+   throw new UnsupportedOperationException();
+}
+/*------------------------------------------------------------------------------
+
+@name       AppComponentTemplate - constructor for specified properties
+                                                                              */
+                                                                             /**
+            AppComponentTemplate for specified properties
+
+@return     An instance of AppComponentTemplate if successful.
+
+@history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public AppComponentTemplate(P props)
+{
+   this();
+}
+/*------------------------------------------------------------------------------
+
+@name       getImportedNodeModules - get imported node modules
+                                                                              */
+                                                                             /**
+            Get imported node modules.
+
+@return     collection of node module names
+
+@history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected Collection<String> getImportedNodeModules()
+{
+   return(new ArrayList());
+}
+/*------------------------------------------------------------------------------
+
+@name       getNavRoutes - get routes for application
+                                                                              */
+                                                                             /**
+            Get map of component classname by route path.
+
+@return     void
+
+@history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected Map<String,Class> getNavRoutes()
+{
+   return(super.getNavRoutes());
+}
+/*------------------------------------------------------------------------------
+
+@name       main - standard main routine
+                                                                              */
+                                                                             /**
+            Standard main routine.
+
+@return     void
+
+@param      args     args[0] - platform specification
+
+@history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static void main(
+   String[] args)
+{
+   try
+   {
+      Class.forName(args[0]).newInstance();
+   }
+   catch(Throwable t)
+   {
+                                       // ignore                              //
+   }
+                                       // return result to invoker            //
+   System.out.println(importedNodeModules.toString());
+}
+}//====================================// end AppComponentTemplate -----------//
