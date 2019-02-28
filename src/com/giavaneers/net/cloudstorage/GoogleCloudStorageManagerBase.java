@@ -40,7 +40,6 @@ purpose:    Google Cloud Storage Manager, providing access to Google Cloud
 history:    Tue Apr 08, 2014 10:30:00 (Giavaneers - LBM) created.
 
 notes:
-
                      This program was created by Giavaneers
             and is the confidential and proprietary product of Giavaneers.
          Any unauthorized use, reproduction or transfer is strictly prohibited.

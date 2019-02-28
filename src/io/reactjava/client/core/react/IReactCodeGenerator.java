@@ -7,22 +7,16 @@ purpose:    ReactJava code generator interface.
 history:    Tue May 15, 2017 10:30:00 (Giavaneers - LBM) created
 
 notes:
-
-                  This program was created by Giavaneers
-        and is the confidential and proprietary product of Giavaneers Inc.
-      Any unauthorized use, reproduction or transfer is strictly prohibited.
-
-                     COPYRIGHT 2018 BY GIAVANEERS, INC.
-      (Subject to limited distribution and restricted disclosure only).
-                           All rights reserved.
+                           COPYRIGHT (c) BY GIAVANEERS, INC.
+            This source code is licensed under the MIT license found in the
+                LICENSE file in the root directory of this source tree.
 
 ==============================================================================*/
                                        // package --------------------------- //
 package io.reactjava.client.core.react;
                                        // imports --------------------------- //
 import java.util.function.Function;
-
-// IReactCodeGenerator ================//
+                                       // IReactCodeGenerator ================//
 public interface IReactCodeGenerator
 {
                                        // class constants --------------------//

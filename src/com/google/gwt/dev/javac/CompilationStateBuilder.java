@@ -12,6 +12,13 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
+ *
+ * The enhancement to this program was created by Giavaneers
+ * and is the proprietary product of Giavaneers Inc.
+ *
+ * COPYRIGHT (c) BY GIAVANEERS, INC.
+ * This source code enhancement is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
  */
 package com.google.gwt.dev.javac;
 

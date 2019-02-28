@@ -1,7 +1,31 @@
+/*==============================================================================
+
+name:       TokeniserState.java
+
+purpose:
+
+history:    Mon Aug 28, 2017 10:30:00 (Giavaneers - LBM) created
+
+notes:
+        The original source code from which this enhancement was derived
+           is part of the JSOUP project licensed under the MIT license
+                   Copyright (c) 2009 - 2018 by Jonathan Hedley
+
+          The enhancement to this program was created by Giavaneers
+             and is the proprietary product of Giavaneers Inc.
+
+                     COPYRIGHT (c) BY GIAVANEERS, INC.
+   This source code enhancement is licensed under the MIT license found in the
+             LICENSE file in the root directory of this source tree.
+
+
+==============================================================================*/
 package org.jsoup.parser;
 
 import com.sun.tools.javadoc.Start;
 import org.jsoup.nodes.DocumentType;
+import org.jsoup.parser.CharacterReader;
+import org.jsoup.parser.Tokeniser;
 
 /**
  * States and transition activations for the Tokeniser.

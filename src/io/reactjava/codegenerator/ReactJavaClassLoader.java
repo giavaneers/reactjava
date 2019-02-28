@@ -7,15 +7,11 @@ purpose:    React Java class loader.
 history:    Mon Jan 08, 2019 10:30:00 (Giavaneers - LBM) created
 
 notes:
-                     This program was created by Giavaneers
-            and is the confidential and proprietary product of Giavaneers.
-         Any unauthorized use, reproduction or transfer is strictly prohibited.
+                           COPYRIGHT (c) BY GIAVANEERS, INC.
+            This source code is licensed under the MIT license found in the
+                LICENSE file in the root directory of this source tree.
 
-                        COPYRIGHT 2019 BY GIAVANEERS, INC.
-         (Subject to limited distribution and restricted disclosure only).
-                              All rights reserved.
-
-============================================================================= */
+==============================================================================*/
                                        // package --------------------------- //
 package io.reactjava.codegenerator;
                                        // imports --------------------------- //

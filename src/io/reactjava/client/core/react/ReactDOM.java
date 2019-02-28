@@ -1,6 +1,3 @@
-package io.reactjava.client.core.react;
-import jsinterop.annotations.JsType;
-
 /*==============================================================================
 
 name:       ReactDOM - native react dom
@@ -10,8 +7,15 @@ purpose:    Native react dom
 history:    Mon Aug 28, 2017 10:30:00 (Giavaneers - LBM) created
 
 notes:
+                           COPYRIGHT (c) BY GIAVANEERS, INC.
+            This source code is licensed under the MIT license found in the
+                LICENSE file in the root directory of this source tree.
 
 ==============================================================================*/
+                                       // package --------------------------- //
+package io.reactjava.client.core.react;
+import jsinterop.annotations.JsType;
+
 // namespace = IConfiguration.kSRCCFG_BUNDLE_SCRIPT ? "ReactJava" : JsPackage.GLOBAL
 @JsType(isNative = true, namespace = "ReactJava")
 public class ReactDOM

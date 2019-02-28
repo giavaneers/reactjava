@@ -7,14 +7,9 @@ purpose:    Utilities.
 history:    Mon Aug 28, 2017 10:30:00 (Giavaneers - LBM) created
 
 notes:
-
-                  This program was created by Giavaneers
-        and is the confidential and proprietary product of Giavaneers Inc.
-      Any unauthorized use, reproduction or transfer is strictly prohibited.
-
-                     COPYRIGHT 2017 BY GIAVANEERS, INC.
-      (Subject to limited distribution and restricted disclosure only).
-                           All rights reserved.
+                           COPYRIGHT (c) BY GIAVANEERS, INC.
+            This source code is licensed under the MIT license found in the
+                LICENSE file in the root directory of this source tree.
 
 ==============================================================================*/
                                        // package --------------------------- //
@@ -28,9 +23,6 @@ import com.google.gwt.core.client.ScriptInjector;
 import com.google.gwt.typedarrays.client.Uint8ArrayNative;
 import com.google.gwt.typedarrays.shared.Uint8Array;
 import elemental2.core.JsObject;
-import elemental2.dom.CSSStyleDeclaration;
-import elemental2.dom.DomGlobal;
-import elemental2.dom.ViewCSS;
 import io.reactjava.client.core.providers.http.HttpClientBase;
 import io.reactjava.client.core.providers.http.IHttpResponse;
 import io.reactjava.client.core.providers.http.IHttpResponse.ResponseType;
@@ -41,7 +33,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import jsinterop.base.Js;
 import jsinterop.core.dom.Document;
 import jsinterop.core.dom.Element;
 import jsinterop.core.html.Window;
