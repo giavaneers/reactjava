@@ -150,7 +150,26 @@ public static void logError(
 public static void logError(
    Throwable t)
 {
-   logError(t.toString());
+   logError(t, true);
+}
+/*------------------------------------------------------------------------------
+
+@name       logError - log error level message
+                                                                              */
+                                                                             /**
+            Log error level message.
+
+@history    Thu June 06, 2013 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static void logError(
+   Throwable t,
+   boolean   bStackTrace)
+{
+   logError(t.toString() + (bStackTrace ? getStackTrace(t) : ""));
 }
 /*------------------------------------------------------------------------------
 

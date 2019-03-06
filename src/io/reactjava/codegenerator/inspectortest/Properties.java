@@ -1,18 +1,10 @@
 /*==============================================================================
 
-name:       AppComponentTemplate - app component template
+name:       Properties.java
 
-purpose:    App component template.
+purpose:    ReactJava Component Properties.
 
-            The application configuration executed by default is the 'default'
-            configuration. An alternative choice can be specified at runtime by
-            specifying the 'configurationName' url parameter. For example,
-            to choose a configuration defined at compile time named 'test',
-            the app can be launched with a url of the form:
-
-               http://[applicationPath]?configurationName=test
-
-history:    Mon Aug 28, 2017 10:30:00 (Giavaneers - LBM) created
+history:    Mon June 4, 2018 10:30:00 (Giavaneers - LBM) created
 
 notes:
                            COPYRIGHT (c) BY GIAVANEERS, INC.
@@ -21,15 +13,11 @@ notes:
 
 ==============================================================================*/
                                        // package --------------------------- //
-package io.reactjava.client.core.react;
+package io.reactjava.codegenerator.inspectortest;
                                        // imports --------------------------- //
-import com.google.gwt.core.client.EntryPoint;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-                                       // AppComponentTemplate ============== //
-public class AppComponentTemplate<P extends Properties>
-   extends Component<P> implements EntryPoint
+import java.util.HashMap;
+                                       // Properties =========================//
+public class Properties extends HashMap
 {
                                        // constants ------------------------- //
                                        // (none)                              //
@@ -43,158 +31,197 @@ public class AppComponentTemplate<P extends Properties>
 
 /*------------------------------------------------------------------------------
 
-@name       AppComponentTemplate - constructor for specified properties
+@name       Properties - default constructor
                                                                               */
                                                                              /**
-            AppComponentTemplate for specified properties
+            Default constructor
 
-@return     An instance of AppComponentTemplate if successful.
+@return     An instance of Properties if successful.
+
+@history    Mon Aug 28, 2017 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public Properties()
+{
+}
+/*------------------------------------------------------------------------------
+
+@name       getBoolean - get boolean value of specified property
+                                                                              */
+                                                                             /**
+            Get boolean value of specified property
+
+@return     boolean value of specified property, or null if not found.
+
+@param      propertyName      property name
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public AppComponentTemplate()
+public final boolean getBoolean(
+   String propertyName)
 {
-   super();
-}
-/*------------------------------------------------------------------------------
+   boolean booleanValue;
 
-@name       AppComponentTemplate - constructor for specified properties
-                                                                              */
-                                                                             /**
-            AppComponentTemplate for specified properties
-
-@return     An instance of AppComponentTemplate if successful.
-
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public AppComponentTemplate(P props)
-{
-   super(props);
-}
-/*------------------------------------------------------------------------------
-
-@name       getImportedNodeModules - get imported node modules
-                                                                              */
-                                                                             /**
-            Get imported node modules.
-
-@return     collection of node module names
-
-@history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-protected Collection<String> getImportedNodeModules()
-{
-   return(new ArrayList<>());
-}
-/*------------------------------------------------------------------------------
-
-@name       getConfigurations - get array of configurations
-                                                                              */
-                                                                             /**
-            Get array of configurations. If null, the default configuration
-            is used.
-
-@return     array of configurations
-
-@history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-protected IConfiguration[] getConfigurations()
-{
-   return(null);
-}
-/*------------------------------------------------------------------------------
-
-@name       getConfigurationName - get configuration name
-                                                                              */
-                                                                             /**
-            Get configuration name. If null, the default configuration is used.
-
-@return     configuration name
-
-@history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-protected String getConfigurationName()
-{
-   return(null);
-}
-/*------------------------------------------------------------------------------
-
-@name       getNavRoutes - get routes for application
-                                                                              */
-                                                                             /**
-            Get map of component classname by route path.
-
-@return     void
-
-@history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-protected Map<String,Class> getNavRoutes()
-{
-   return(super.getNavRoutes());
-}
-/*------------------------------------------------------------------------------
-
-@name       initConfiguration - initialize configuration
-                                                                              */
-                                                                             /**
-            Initialize configuration. This implementation is null.
-
-@return     void
-
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-protected void initConfiguration()
-{
-   if (Configuration.sharedInstance() == null)
+   Object value = get(propertyName);
+   if (value instanceof String)
    {
-      IConfiguration.assignSharedInstance(this);
+      booleanValue = "true".equals((String)value);
    }
-   super.initConfiguration();
+   else
+   {
+      booleanValue = (Boolean)value;
+   }
+   return(booleanValue);
 }
 /*------------------------------------------------------------------------------
 
-@name       onModuleLoad - standard core entry point method
+@name       getInt - get int value of specified property
                                                                               */
                                                                              /**
-            Standard core entry point method.
+            Get int value of specified property
 
-@return     void
+@return     int value of specified property, or null if not found.
 
-@history    Sun Jan 7, 2016 10:30:00 (Giavaneers - LBM) created
+@param      propertyName      property name
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes      see set() with invocation of Utilties.setObjectIntValueNative()
+                                                                              */
+//------------------------------------------------------------------------------
+public final int getInt(
+   String propertyName)
+{
+   int intValue;
+
+   Object value = get(propertyName);
+   if (value instanceof String)
+   {
+      intValue = Integer.parseInt((String)value);
+   }
+   else
+   {
+      intValue = (Integer)value;
+   }
+
+   return(intValue);
+}
+/*------------------------------------------------------------------------------
+
+@name       getString - get string value of specified property
+                                                                              */
+                                                                             /**
+            Get string value of specified property
+
+@return     string value of specified property, or null if not found.
+
+@param      propertyName      property name
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public void onModuleLoad()
+public final String getString(
+   String propertyName)
 {
-   ReactJava.boot(this);
-                                       // do it the way it could be done from //
-                                       // javascript, although there seems to //
-                                       // be some problems sometimes in that  //
-                                       // on incremental compile and restart  //
-                                       // the code generator class cannot be  //
-                                       // found as a javascript global...     //
-   //ReactJava.bootNative(getClass().getName());
+   return((String)get(propertyName));
 }
-}//====================================// end AppComponentTemplate ---------- //
+/*------------------------------------------------------------------------------
+
+@name       set - set value of specified property
+                                                                              */
+                                                                             /**
+            Set value of specified property
+
+@return     void
+
+@param      propertyName      property name
+@param      value             value of specified property
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public final Properties set(
+   String propertyName,
+   Object value)
+{
+   put(propertyName, value);
+   return(this);
+}
+/*------------------------------------------------------------------------------
+
+@name       with - factory method
+                                                                              */
+                                                                             /**
+            Factory method creating a Properties instance containing the
+            specified properties specified as a sequence iof tuples, where
+            each tuple consists of a String property name followed by a
+            value object reference.
+
+            For example:
+
+               Properties myProperties =
+                  Properties.with("text", "MyText", "callback", MyCallbackFcn);
+
+             or to create a copy of an instance adding new/overriding properties:
+
+               Properties template =
+                  Properties.with("name", "MyName", "callback", OrigCallbackFcn);
+
+               Properties myProperties =
+                  Properties.with(
+                     template, "text", "MyText", "callback", MyCallbackFcn);
+
+
+@return     An instance of Properties if successful.
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public final static Properties with(Object... args)
+{
+   return(new Properties());
+}
+/*------------------------------------------------------------------------------
+
+@name       without - factory method
+                                                                              */
+                                                                             /**
+            Factory method creating a Properties instance containing the
+            specified properties template without the properties referenced
+            by the specified list of keys.
+
+            For example:
+
+               Properties template =
+                  Properties.with("text", "MyText", "callback", MyCallbackFcn);
+
+               Properties templateWithout =
+                  Properties.without(template, "callback");
+
+             yields the same as:
+
+               Properties.with("text", "MyText");
+
+@return     An instance of Properties if successful.
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public final static Properties without(Properties ref, String... keys)
+{
+   return(new Properties());
+}
+}//====================================// end Properties ---------------------//

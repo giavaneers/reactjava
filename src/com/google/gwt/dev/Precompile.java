@@ -35,6 +35,7 @@ import com.google.gwt.dev.cfg.ModuleDefLoader;
 import com.google.gwt.dev.cfg.PropertyCombinations;
 import com.google.gwt.dev.javac.CompilationState;
 import com.google.gwt.dev.javac.CompilationUnit;
+import com.google.gwt.dev.jjs.InternalCompilerException;
 import com.google.gwt.dev.jjs.JavaToJavaScriptCompiler;
 import com.google.gwt.dev.jjs.PrecompilationContext;
 import com.google.gwt.dev.jjs.UnifiedAst;
@@ -261,17 +262,22 @@ public class Precompile {
         io.reactjava.codegenerator.IPostprocessor.allPostprocessors(
            logger, compilerContext, precompilationContext);
       }
-      catch(Exception e)
+      catch(Throwable t)
       {
-        throw new RuntimeException("Unexpected error postprocessing: " + e);
+        InternalCompilerException ice =
+           new InternalCompilerException(t.getMessage(), t);
+
+        ice.setStackTrace(t.getStackTrace());
+        throw ice;
       }
 /* LBM-END */
+
       // Allow GC later.
       compilationState = null;
 
       UnifiedAst unifiedAst =
-          JavaToJavaScriptCompiler.precompile(logger, compilerContext, precompilationContext);
-
+          JavaToJavaScriptCompiler.precompile(
+             logger, compilerContext, precompilationContext);
       if (jjsOptions.isCompilerMetricsEnabled()) {
         ModuleMetricsArtifact moduleMetrics = new ModuleMetricsArtifact();
         moduleMetrics.setSourceFiles(module.getAllSourceFiles());

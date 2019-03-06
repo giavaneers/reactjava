@@ -63,7 +63,9 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Window;
 import elemental2.dom.DomGlobal;
 import java.util.Map;
-                                       // Router =============================//
+import java.util.function.Function;
+
+// Router =============================//
 public class Router implements IRouter
 {
                                        // constants ------------------------- //
@@ -124,10 +126,16 @@ public static Component componentForHash(
          }
       }
 
-      component = ReactJava.getComponentFactory(classname).apply(props);
+      Function<Properties,Component> factory =
+         ReactJava.getComponentFactory(classname);
+
+      if (factory != null)
+      {
+         component = factory.apply(props);
 
                                        // assign any nested routes            //
-      configuration.setNavRoutesNested(component.getNavRoutes());
+         configuration.setNavRoutesNested(component.getNavRoutes());
+      }
    }
 
    return(component);
@@ -298,10 +306,18 @@ public static Element render()
    }
 
    Element element = elementForHash(hash);
-
-   if (ReactJava.getIsWebPlatform())
+   if (element != null)
    {
-      ReactDOM.render(element, DomGlobal.document.getElementById("root"));
+      if (ReactJava.getIsWebPlatform())
+      {
+         ReactDOM.render(element, DomGlobal.document.getElementById("root"));
+      }
+   }
+   else
+   {
+      kLOGGER.logError(
+         "Router.render(): no element to render."
+       + " Did you forget to specify a route for hash value \"" + hash + "\"?");
    }
    return(element);
 }

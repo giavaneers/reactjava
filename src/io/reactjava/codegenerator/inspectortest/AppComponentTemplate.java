@@ -1,18 +1,10 @@
 /*==============================================================================
 
-name:       AppComponentTemplate - app component template
+name:       AppComponentTemplate.java
 
-purpose:    App component template.
+purpose:    AppComponentTemplate proxy for compilation by AppComponentInspector
 
-            The application configuration executed by default is the 'default'
-            configuration. An alternative choice can be specified at runtime by
-            specifying the 'configurationName' url parameter. For example,
-            to choose a configuration defined at compile time named 'test',
-            the app can be launched with a url of the form:
-
-               http://[applicationPath]?configurationName=test
-
-history:    Mon Aug 28, 2017 10:30:00 (Giavaneers - LBM) created
+history:    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
 
 notes:
                            COPYRIGHT (c) BY GIAVANEERS, INC.
@@ -21,18 +13,18 @@ notes:
 
 ==============================================================================*/
                                        // package --------------------------- //
-package io.reactjava.client.core.react;
+package io.reactjava.codegenerator.inspectortest;
                                        // imports --------------------------- //
-import com.google.gwt.core.client.EntryPoint;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
                                        // AppComponentTemplate ============== //
-public class AppComponentTemplate<P extends Properties>
-   extends Component<P> implements EntryPoint
+public class AppComponentTemplate<P extends Properties> extends Component<P>
 {
                                        // constants ------------------------- //
-                                       // (none)                              //
+public static Collection<String> importedNodeModules = new ArrayList();
+
                                        // class variables ------------------- //
                                        // (none)                              //
                                        // public instance variables --------- //
@@ -50,14 +42,16 @@ public class AppComponentTemplate<P extends Properties>
 
 @return     An instance of AppComponentTemplate if successful.
 
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+@history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
 public AppComponentTemplate()
 {
-   super();
+   importedNodeModules = getImportedNodeModules();
+                                       // stop any subsequent operation       //
+   throw new UnsupportedOperationException();
 }
 /*------------------------------------------------------------------------------
 
@@ -68,14 +62,14 @@ public AppComponentTemplate()
 
 @return     An instance of AppComponentTemplate if successful.
 
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+@history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
 public AppComponentTemplate(P props)
 {
-   super(props);
+   this();
 }
 /*------------------------------------------------------------------------------
 
@@ -86,51 +80,14 @@ public AppComponentTemplate(P props)
 
 @return     collection of node module names
 
-@history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
+@history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
 protected Collection<String> getImportedNodeModules()
 {
-   return(new ArrayList<>());
-}
-/*------------------------------------------------------------------------------
-
-@name       getConfigurations - get array of configurations
-                                                                              */
-                                                                             /**
-            Get array of configurations. If null, the default configuration
-            is used.
-
-@return     array of configurations
-
-@history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-protected IConfiguration[] getConfigurations()
-{
-   return(null);
-}
-/*------------------------------------------------------------------------------
-
-@name       getConfigurationName - get configuration name
-                                                                              */
-                                                                             /**
-            Get configuration name. If null, the default configuration is used.
-
-@return     configuration name
-
-@history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-protected String getConfigurationName()
-{
-   return(null);
+   return(importedNodeModules);
 }
 /*------------------------------------------------------------------------------
 
@@ -152,49 +109,74 @@ protected Map<String,Class> getNavRoutes()
 }
 /*------------------------------------------------------------------------------
 
-@name       initConfiguration - initialize configuration
+@name       main - standard main routine
                                                                               */
                                                                              /**
-            Initialize configuration. This implementation is null.
+            Standard main routine.
 
 @return     void
 
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+@param      args     args[0] - platform specification
+
+@history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-protected void initConfiguration()
+public static void main(
+   String[] args)
 {
-   if (Configuration.sharedInstance() == null)
+   String appClassname = args[0];
+   try
    {
-      IConfiguration.assignSharedInstance(this);
+      Class appClass = Class.forName(appClassname);
+      try
+      {
+                                       // check for the nullary constructor,  //
+                                       // either provided explicitly or       //
+                                       // by the compiler if no other exists  //
+         Constructor ctor = appClass.getConstructor();
+         try
+         {
+                                       // invoke the nullary constructor      //
+            ctor.newInstance();
+         }
+         catch(Exception uoe)
+         {
+                                       // constructor should generate an error//
+                                       // return result to invoker            //
+            System.out.println(importedNodeModules.toString());
+         }
+      }
+      catch(Exception e)
+      {
+         try
+         {
+                                       // check for props constructor         //
+            Constructor ctor = appClass.getConstructor(Properties.class);
+            try
+            {
+                                       // invoke the props constructor        //
+               ctor.newInstance((Properties)null);
+            }
+            catch(Exception uoe)
+            {
+                                       // constructor should generate an error//
+                                       // return result to invoker            //
+               System.out.println(importedNodeModules.toString());
+            }
+         }
+         catch(Exception ee)
+         {
+            System.err.println(
+               "If you supply any custom constructor for " + appClassname
+             + ", you must also supply at least a nullary constructor as well.");
+         }
+      }
    }
-   super.initConfiguration();
+   catch(Throwable t)
+   {
+      System.err.println(t);
+   }
 }
-/*------------------------------------------------------------------------------
-
-@name       onModuleLoad - standard core entry point method
-                                                                              */
-                                                                             /**
-            Standard core entry point method.
-
-@return     void
-
-@history    Sun Jan 7, 2016 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public void onModuleLoad()
-{
-   ReactJava.boot(this);
-                                       // do it the way it could be done from //
-                                       // javascript, although there seems to //
-                                       // be some problems sometimes in that  //
-                                       // on incremental compile and restart  //
-                                       // the code generator class cannot be  //
-                                       // found as a javascript global...     //
-   //ReactJava.bootNative(getClass().getName());
-}
-}//====================================// end AppComponentTemplate ---------- //
+}//====================================// end AppComponentTemplate -----------//

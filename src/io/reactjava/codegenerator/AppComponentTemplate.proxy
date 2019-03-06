@@ -15,6 +15,7 @@ notes:
                                        // package --------------------------- //
 package io.reactjava.client.core.react;
                                        // imports --------------------------- //
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -22,7 +23,8 @@ import java.util.Map;
 public class AppComponentTemplate<P extends Properties> extends Component<P>
 {
                                        // constants ------------------------- //
-public static Collection<String> importedNodeModules;
+public static Collection<String> importedNodeModules = new ArrayList();
+
                                        // class variables ------------------- //
                                        // (none)                              //
                                        // public instance variables --------- //
@@ -85,7 +87,7 @@ public AppComponentTemplate(P props)
 //------------------------------------------------------------------------------
 protected Collection<String> getImportedNodeModules()
 {
-   return(new ArrayList());
+   return(importedNodeModules);
 }
 /*------------------------------------------------------------------------------
 
@@ -124,15 +126,57 @@ protected Map<String,Class> getNavRoutes()
 public static void main(
    String[] args)
 {
+   String appClassname = args[0];
    try
    {
-      Class.forName(args[0]).newInstance();
+      Class appClass = Class.forName(appClassname);
+      try
+      {
+                                       // check for the nullary constructor,  //
+                                       // either provided explicitly or       //
+                                       // by the compiler if no other exists  //
+         Constructor ctor = appClass.getConstructor();
+         try
+         {
+                                       // invoke the nullary constructor      //
+            ctor.newInstance();
+         }
+         catch(Exception uoe)
+         {
+                                       // constructor should generate an error//
+                                       // return result to invoker            //
+            System.out.println(importedNodeModules.toString());
+         }
+      }
+      catch(Exception e)
+      {
+         try
+         {
+                                       // check for props constructor         //
+            Constructor ctor = appClass.getConstructor(Properties.class);
+            try
+            {
+                                       // invoke the nullary constructor      //
+               ctor.newInstance(null);
+            }
+            catch(Exception uoe)
+            {
+                                       // constructor should generate an error//
+                                       // return result to invoker            //
+               System.out.println(importedNodeModules.toString());
+            }
+         }
+         catch(Exception ee)
+         {
+            System.err.println(
+               "If you supply any custom constructor for " + appClassname
+             + ", you must also supply at least a nullary constructor as well.");
+         }
+      }
    }
    catch(Throwable t)
    {
-                                       // ignore                              //
+      System.err.println(t);
    }
-                                       // return result to invoker            //
-   System.out.println(importedNodeModules.toString());
 }
 }//====================================// end AppComponentTemplate -----------//

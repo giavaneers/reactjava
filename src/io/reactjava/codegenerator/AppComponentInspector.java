@@ -23,6 +23,8 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.dev.util.log.PrintWriterTreeLogger;
 import io.reactjava.client.core.react.AppComponentTemplate;
 import io.reactjava.jsx.IConfiguration;
+import io.reactjava.jsx.IJSXTransform;
+import io.reactjava.jsx.JSXTransform;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -54,6 +56,145 @@ public static final String[] kPROXIES =
                                        // private instance variables -------- //
                                        // (none)                              //
 
+/*------------------------------------------------------------------------------
+
+@name       compileInspector - get imported node modules
+                                                                              */
+                                                                             /**
+            Get imported node modules.
+
+@return     collection of node module names
+
+@history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static void compileInspector(
+   String       classpath,
+   List<String> appClassnames,
+   TreeLogger   logger)
+   throws       Exception
+{
+   //File         projectDir = IConfiguration.getProjectDirectory(null, null);
+   //File         srcDir     = new File(projectDir, "src");
+   //List<String> srcFiles   = new ArrayList<>();
+   //
+   //                                    // add each of the app sources         //
+   //for (String appClassname : appClassnames)
+   //{
+   //   File srcFile = new File(srcDir, appClassname.replace(".","/") + ".java");
+   //   srcFiles.add(srcFile.getAbsolutePath());
+   //}
+   //
+   //String inspectorSrcPath =
+   //   new File(projectDir, kOUT_INSPECTOR_SRC_PATH).getAbsolutePath();
+   //
+   //                                    // copy the proxy sources              //
+   //for (String proxy : kPROXIES)
+   //{
+   //   String path    = kPROXY_BASE_PATH + proxy.replace(".proxy",".java");
+   //   File   dstFile = new File(inspectorSrcPath, path);
+   //          dstFile.delete();
+   //          dstFile.getParentFile().mkdirs();
+   //
+   //   IConfiguration.fastChannelCopy(
+   //      AppComponentInspector.class.getResourceAsStream(proxy),
+   //      new FileOutputStream(dstFile));
+   //
+   //   srcFiles.add(dstFile.getAbsolutePath());
+   //}
+   //                                    // ensure a nullary constructor in the //
+   //                                    // app source which is first           //
+   //String appClassname = appClassnames.get(0);
+   //String appContent   =
+   //   JSXTransform.ensureNullaryConstructor(
+   //      appClassname,
+   //      IJSXTransform.getFileAsString(
+   //         new File(srcFiles.remove(0)), logger), logger);
+   //
+   //File resolvedAppSource =
+   //   new File(inspectorSrcPath, appClassname.replace(".","/") + ".java");
+   //
+   //resolvedAppSource.delete();
+   //resolvedAppSource.getParentFile().mkdirs();
+   //
+   //try (FileOutputStream out = new FileOutputStream(resolvedAppSource))
+   //{
+   //   out.write(appContent.getBytes("UTF-8"));
+   //   srcFiles.add(0, resolvedAppSource.getAbsolutePath());
+   //}
+   //                                    // compile the app component with the  //
+   //                                    // proxy and reactjava.jar             //
+   //List<String> commandList = new ArrayList<>();
+   //commandList.addAll(
+   //   Arrays.asList(
+   //      new String[]{"javac","-cp", classpath, "-d", inspectorSrcPath}));
+   //commandList.addAll(srcFiles);
+   //
+   //String[]       commands = commandList.toArray(new String[commandList.size()]);
+   //ProcessBuilder pb       = new ProcessBuilder(commands);
+   //Process        process  = pb.start();
+   //
+   //ByteArrayOutputStream err = new ByteArrayOutputStream();
+   //IConfiguration.fastChannelCopy(process.getErrorStream(), err);
+   //
+   //if (process.waitFor() != 0)
+   //{
+   //   String errMsg = new String(err.toByteArray(), "UTF-8");
+   //   throw new IllegalStateException(
+   //      "Inspector compilation returned error: " + errMsg);
+   //}
+
+
+   File         projectDir = IConfiguration.getProjectDirectory(null, null);
+   File         srcDir     = new File(projectDir, "src");
+   List<String> srcFiles   = new ArrayList<>();
+                                       // add each of the app sources         //
+   for (String classname : appClassnames)
+   {
+      File srcFile = new File(srcDir, classname.replace(".","/") + ".java");
+      srcFiles.add(srcFile.getAbsolutePath());
+   }
+
+   String inspectorSrcPath =
+      new File(projectDir, kOUT_INSPECTOR_SRC_PATH).getAbsolutePath();
+
+                                       // copy the proxy sources              //
+   for (String proxy : kPROXIES)
+   {
+      String path    = kPROXY_BASE_PATH + proxy.replace(".proxy",".java");
+      File   dstFile = new File(inspectorSrcPath, path);
+             dstFile.delete();
+             dstFile.getParentFile().mkdirs();
+
+      IConfiguration.fastChannelCopy(
+         AppComponentInspector.class.getResourceAsStream(proxy),
+         new FileOutputStream(dstFile));
+
+      srcFiles.add(dstFile.getAbsolutePath());
+   }
+                                       // compile the app component with the  //
+                                       // proxy and reactjava.jar             //
+   List<String> commandList = new ArrayList<>();
+   commandList.addAll(
+      Arrays.asList(
+         new String[]{"javac","-cp",classpath, "-d", inspectorSrcPath}));
+   commandList.addAll(srcFiles);
+
+   String[] commands = commandList.toArray(new String[commandList.size()]);
+   Process  process  = new ProcessBuilder(commands).start();
+
+   ByteArrayOutputStream err = new ByteArrayOutputStream();
+   IConfiguration.fastChannelCopy(process.getErrorStream(), err);
+
+   if (process.waitFor() != 0)
+   {
+      String errMsg = new String(err.toByteArray(), "UTF-8");
+      throw new IllegalStateException(
+         "Inspector compilation returned error: " + errMsg);
+   }
+}
 /*------------------------------------------------------------------------------
 
 @name       getCompileClasspath - get compile classpath
@@ -146,6 +287,8 @@ public static Collection<String> getImportedModules(
 
 @return     collection of node module names
 
+@param      collection of node module names
+
 @history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -156,20 +299,19 @@ public static Collection<String> getImportedModules(
    TreeLogger   logger)
    throws       Exception
 {
+                                       // the app classname is first          //
    String appClassname = appClassnames.get(0);
    String classpath    = getCompileClasspath();
 
                                        // compile the component sources       //
-   compileInspector(classpath, appClassnames);
+   compileInspector(classpath, appClassnames, logger);
 
                                        // execute the proxy using the cp      //
                                        // capturing the result                //
 
    String   main     = AppComponentTemplate.class.getName();
    String[] commands = {"java", "-cp", classpath, main, appClassname};
-
-   ProcessBuilder pb = new ProcessBuilder(commands);
-   Process process   = pb.start();
+   Process  process  = new ProcessBuilder(commands).start();
 
    ByteArrayOutputStream out = new ByteArrayOutputStream();
    IConfiguration.fastChannelCopy(process.getInputStream(), out);
@@ -180,15 +322,18 @@ public static Collection<String> getImportedModules(
 
    logger.log(
       logger.INFO,
-      "AppComponentInspector.getImportedModules(): result="
-         + result.substring(0, result.length() - 1));
+      "AppComponentInspector.getImportedModules(): result=" + result);
 
-   int    idxBeg = result.indexOf('[') + 1;
-   int    idxEnd = result.indexOf(']');
-          result = result.substring(idxBeg, idxEnd);
+   int idxBeg = result.indexOf('[') + 1;
+   int idxEnd = result.indexOf(']');
+   if (idxBeg < 0 || idxEnd < 0)
+   {
+      throw new IllegalStateException(
+         "AppComponentInspector.getImportedModules(): result indicates error");
+   }
 
    Collection<String> modules = new HashSet<String>();
-   for (String module : result.split(","))
+   for (String module : result.substring(idxBeg, idxEnd).split(","))
    {
       if (module.length() > 0)
       {
@@ -197,76 +342,6 @@ public static Collection<String> getImportedModules(
    }
 
    return(modules);
-}
-/*------------------------------------------------------------------------------
-
-@name       compileInspector - get imported node modules
-                                                                              */
-                                                                             /**
-            Get imported node modules.
-
-@return     collection of node module names
-
-@history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public static void compileInspector(
-   String       classpath,
-   List<String> appClassnames)
-   throws       Exception
-{
-   File         projectDir = IConfiguration.getProjectDirectory(null, null);
-   File         srcDir     = new File(projectDir, "src");
-   List<String> srcFiles   = new ArrayList<>();
-                                       // add each of the app sources         //
-   for (String classname : appClassnames)
-   {
-      File srcFile = new File(srcDir, classname.replace(".","/") + ".java");
-      srcFiles.add(srcFile.getAbsolutePath());
-   }
-
-   String inspectorSrcPath =
-      new File(projectDir, kOUT_INSPECTOR_SRC_PATH).getAbsolutePath();
-
-                                       // copy the proxy sources              //
-   for (String proxy : kPROXIES)
-   {
-      String path    = kPROXY_BASE_PATH + proxy.replace(".proxy",".java");
-      File   dstFile = new File(inspectorSrcPath, path);
-             dstFile.delete();
-             dstFile.getParentFile().mkdirs();
-
-      IConfiguration.fastChannelCopy(
-         AppComponentInspector.class.getResourceAsStream(proxy),
-         new FileOutputStream(dstFile));
-
-      srcFiles.add(dstFile.getAbsolutePath());
-   }
-                                       // compile the app component with the  //
-                                       // proxy and reactjava.jar             //
-   List<String> commandList = new ArrayList<>();
-   commandList.addAll(
-      Arrays.asList(
-         new String[]{"javac","-cp",classpath, "-d", inspectorSrcPath}));
-   commandList.addAll(srcFiles);
-
-   String[] commands = commandList.toArray(new String[commandList.size()]);
-
-   ProcessBuilder      pb  = new ProcessBuilder(commands);
-   Map<String, String> env = pb.environment();
-   Process process   = pb.start();
-
-   ByteArrayOutputStream err = new ByteArrayOutputStream();
-   IConfiguration.fastChannelCopy(process.getErrorStream(), err);
-
-   if (process.waitFor() != 0)
-   {
-      String errMsg = new String(err.toByteArray(), "UTF-8");
-      throw new IllegalStateException(
-         "Inspector compilation returned error: " + errMsg);
-   }
 }
 /*------------------------------------------------------------------------------
 

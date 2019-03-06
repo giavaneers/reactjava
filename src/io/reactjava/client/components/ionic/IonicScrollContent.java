@@ -16,30 +16,10 @@ notes:
 package io.reactjava.client.components.ionic;
                                        // imports --------------------------- //
 import io.reactjava.client.core.react.Component;
-import io.reactjava.client.core.react.Properties;
 
                                        // IonicScrollContent =================//
 public class IonicScrollContent extends Component
 {
-/*------------------------------------------------------------------------------
-
-@name       IonicScrollContent - default constructor
-                                                                              */
-                                                                             /**
-            Default constructor.
-
-@return     An instance of IonicScrollContent if successful.
-
-@history    Mon Aug 28, 2017 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public IonicScrollContent(
-   Properties props)
-{
-   super(props);
-}
 /*------------------------------------------------------------------------------
 
 @name       render - render markup

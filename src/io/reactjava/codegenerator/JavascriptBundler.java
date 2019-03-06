@@ -594,6 +594,7 @@ public static void buildGWTDevJar()
       //"com/google/core/dev/Compiler",
       //"com/google/core/dev/codeserver/CodeServer",
       "com/google/gwt/dev/Precompile",
+      "com/google/gwt/dev/javac/CompilationProblemReporter",
       "com/google/gwt/dev/javac/CompilationStateBuilder",
       "com/google/gwt/dev/javac/CompilationUnitBuilder",
    };
@@ -602,6 +603,7 @@ public static void buildGWTDevJar()
       //"com/google/core/dev/Compiler",
       //"com/google/core/dev/codeserver/CodeServer",
       "com/google/gwt/dev/Precompile",
+      "com/google/gwt/dev/javac/CompilationProblemReporter",
       "com/google/gwt/dev/javac/CompilationStateBuilder",
       "com/google/gwt/dev/javac/CompilationStateBuilder$1",
       "com/google/gwt/dev/javac/CompilationStateBuilder$CompileMoreLater",

@@ -32,12 +32,12 @@ public class ReactJava
 {
                                        // class constants --------------------//
 private static final Logger kLOGGER  = Logger.newInstance();
-public static final String  kFACTORY = "factory";
-public static final String  kMARKUP  = "markup";
-public static final String  kSTYLES  = "styles";
+public static final  String kFACTORY = "factory";
+public static final  String kMARKUP  = "markup";
+public static final  String kSTYLES  = "styles";
 
                                        // class variables ------------------- //
-                                       // core compiler preprocessor           //
+                                       // core compiler preprocessor          //
 protected static IReactCodeGenerator generator;
 
                                        // map of stylesheet by component class//
@@ -140,7 +140,6 @@ public static Element boot(
                   catch(Throwable t)
                   {
                      kLOGGER.logError(t);
-                     t.printStackTrace();
                   }
                }
             }.schedule(0);

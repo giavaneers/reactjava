@@ -30,6 +30,7 @@ import com.google.gwt.dev.javac.JdtCompiler.AdditionalTypeProviderDelegate;
 import com.google.gwt.dev.javac.JdtCompiler.UnitProcessor;
 import com.google.gwt.dev.javac.typemodel.TypeOracle;
 import com.google.gwt.dev.jjs.CorrelationFactory.DummyCorrelationFactory;
+import com.google.gwt.dev.jjs.InternalCompilerException;
 import com.google.gwt.dev.jjs.ast.JDeclaredType;
 import com.google.gwt.dev.jjs.impl.GwtAstBuilder;
 import com.google.gwt.dev.js.ast.JsRootScope;
@@ -600,7 +601,7 @@ public class CompilationStateBuilder {
             }
             catch(Exception e)
             {
-              throw new RuntimeException(
+              throw new InternalCompilerException(
                  "Unexpected error reading resource '" + resource + "'");
             }
          }

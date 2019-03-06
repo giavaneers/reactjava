@@ -1465,7 +1465,7 @@ protected Map<String,Boolean> parseConstructors(
    }
 
    Map<String,Boolean> result = new HashMap<String,Boolean>();
-   result.put("sefault",    bDefault);
+   result.put("default",    bDefault);
    result.put("propsParam", bProperties);
 
    return(result);
@@ -1488,6 +1488,7 @@ public void process(
    TreeLogger            logger,
    CompilerContext       compilerContext,
    PrecompilationContext precompilationContext)
+   throws                Exception
 {
    long start = System.nanoTime();
 
@@ -1495,47 +1496,36 @@ public void process(
    logger.log(logger.INFO, new Date().toString());
    logger.log(logger.INFO, "nanoTime=" + start);
    logger.log(logger.DEBUG, "process(): entered");
-   try
-   {
-      GeneratorContext context =
-         precompilationContext.getRebindPermutationOracle().getGeneratorContext();
 
-      Map<String,Map<String,JClassType>> providersAndComponents =
-         parseClasses(context.getTypeOracle(), logger);
+   GeneratorContext context =
+      precompilationContext.getRebindPermutationOracle().getGeneratorContext();
 
-      getImportedNodeModules(providersAndComponents, logger);
+   Map<String,Map<String,JClassType>> providersAndComponents =
+      parseClasses(context.getTypeOracle(), logger);
 
-                                    // copy all scripts and css to artifact   //
-      IConfiguration configuration = getConfiguration(context, logger);
+   getImportedNodeModules(providersAndComponents, logger);
 
-      copyResources(configuration, context, logger);
+                                 // copy all scripts and css to artifact   //
+   IConfiguration configuration = getConfiguration(context, logger);
 
-                                    // save current dependencies              //
-      IConfiguration
-         .getDependenciesPrevious()
-         .clear();
+   copyResources(configuration, context, logger);
 
-      IConfiguration
-         .getDependenciesPrevious()
-         .putAll(IConfiguration.getDependencies());
+                                 // save current dependencies              //
+   IConfiguration
+      .getDependenciesPrevious()
+      .clear();
 
-      IConfiguration
-         .getDependenciesSetPrevious()
-         .clear();
+   IConfiguration
+      .getDependenciesPrevious()
+      .putAll(IConfiguration.getDependencies());
 
-      IConfiguration
-         .getDependenciesSetPrevious()
-         .addAll(IConfiguration.getDependenciesSet());
-   }
-   catch(Exception e)
-   {
-      String msg = "process(): " + e;
-      logger.log(logger.ERROR, msg);
-      for (StackTraceElement elem : e.getStackTrace())
-      {
-         logger.log(logger.ERROR, elem.toString());
-      }
-   }
+   IConfiguration
+      .getDependenciesSetPrevious()
+      .clear();
+
+   IConfiguration
+      .getDependenciesSetPrevious()
+      .addAll(IConfiguration.getDependenciesSet());
 
    logger.log(logger.INFO, "nanoTime=" + System.nanoTime());
    logger.log(

@@ -113,10 +113,10 @@ public ReactCodeGeneratorImplementation()
 public Element boot(
    String className)
 {
- return(
-   ReactJava.boot(
-     (AppComponentTemplate)ReactJava.getComponentFactory(className).apply(
-       null)));
+   return(
+      ReactJava.boot(
+      (AppComponentTemplate)ReactJava.getComponentFactory(
+         className).apply(null)));
 }
 /*------------------------------------------------------------------------------
 

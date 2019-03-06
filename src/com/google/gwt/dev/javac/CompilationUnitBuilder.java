@@ -22,6 +22,7 @@
  */
 package com.google.gwt.dev.javac;
 
+import com.google.gwt.dev.jjs.InternalCompilerException;
 import com.google.gwt.dev.jjs.ast.JDeclaredType;
 import com.google.gwt.dev.resource.Resource;
 import com.google.gwt.dev.util.Util;
@@ -78,7 +79,7 @@ public abstract class CompilationUnitBuilder {
        java.util.List<com.google.gwt.dev.jjs.ast.JDeclaredType> types, com.google.gwt.dev.javac.Dependencies dependencies,
        java.util.Collection<? extends JsniMethod> jsniMethods, com.google.gwt.dev.javac.MethodArgNamesLookup methodArgs,
        org.eclipse.jdt.core.compiler.CategorizedProblem[] problems) {
-      return new com.google.gwt.dev.javac.CompilationUnitBuilder.GeneratedCompilationUnit(generatedUnit, compiledClasses, types, dependencies,
+      return new GeneratedCompilationUnit(generatedUnit, compiledClasses, types, dependencies,
           jsniMethods, methodArgs, problems);
     }
   }
@@ -169,15 +170,26 @@ public abstract class CompilationUnitBuilder {
         throw new RuntimeException("Unexpected error reading resource '" + resource + "'", e);
       }
       byte[] content = out.toByteArray();
-/*LBM-START*/
+
       try
       {
-        content = io.reactjava.codegenerator.IPreprocessor.allPreprocessors(
-           getTypeName(), content, com.google.gwt.dev.util.Util.DEFAULT_ENCODING, components, logger);
+/*LBM-START*/
+        content =
+           io.reactjava.codegenerator.IPreprocessor.allPreprocessors(
+              getTypeName(),
+              content,
+              com.google.gwt.dev.util.Util.DEFAULT_ENCODING,
+              components,
+              logger);
       }
-      catch(Exception e)
+      catch(Throwable t)
       {
-        throw new RuntimeException("Unexpected error transforming resource '" + resource + "'", e);
+        InternalCompilerException ice =
+           new InternalCompilerException(
+              getTypeName() + ": " + t.getMessage(), t);
+
+        ice.setStackTrace(t.getStackTrace());
+        throw ice;
       }
 /*LBM-END*/
       contentId = new com.google.gwt.dev.javac.ContentId(

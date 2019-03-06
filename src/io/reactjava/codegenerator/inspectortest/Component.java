@@ -2,9 +2,9 @@
 
 name:       Component.java
 
-purpose:    ReactJava Component.
+purpose:    Component proxy for compilation by AppComponentInspector
 
-history:    Mon June 4, 2018 10:30:00 (Giavaneers - LBM) created
+history:    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
 
 notes:
                            COPYRIGHT (c) BY GIAVANEERS, INC.
@@ -13,20 +13,19 @@ notes:
 
 ==============================================================================*/
                                        // package --------------------------- //
-package io.reactjava.client.core.react;
+package io.reactjava.codegenerator.inspectortest;
                                        // imports --------------------------- //
-import com.giavaneers.util.gwt.Logger;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.Element;
 import elemental2.dom.Node;
+import io.reactjava.client.core.react.IUITheme;
 import java.util.Map;
 import java.util.function.Function;
                                        // Component ==========================//
 public abstract class Component<P extends Properties>
 {
                                        // class constants --------------------//
-private static final Logger kLOGGER  = Logger.newInstance();
-
+                                       // (none)                              //
                                        // class variables                     //
 protected static int nextId;
                                        // protected instance variables ------ //
@@ -36,7 +35,7 @@ protected Function<Properties,io.reactjava.client.core.react.Element>
                      componentFcn;     // component function                  //
 protected String     css;              // css                                 //
 protected P          props;            // component properties                //
-protected IUITheme   theme;            // theme                               //
+protected IUITheme theme;            // theme                               //
 
 /*------------------------------------------------------------------------------
 
@@ -47,14 +46,13 @@ protected IUITheme   theme;            // theme                               //
 
 @return     An instance of Component if successful.
 
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+@history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
 public Component()
 {
-   this(null);
 }
 /*------------------------------------------------------------------------------
 
@@ -65,22 +63,13 @@ public Component()
 
 @return     An instance of Component if successful.
 
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+@history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
 public Component(P props)
 {
-   this.props = props != null ? props : (P)new Properties();
-   this.props.setComponent(this);
-
-   initConfiguration();
-
-   if (ReactJava.getIsWebPlatform())
-   {
-      ReactJava.ensureComponentStyles(this, false);
-   }
 }
 /*------------------------------------------------------------------------------
 
@@ -91,7 +80,7 @@ public Component(P props)
 
 @return     dom element
 
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+@history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
 
@@ -112,7 +101,7 @@ public Element getDOMElement()
 
 @return     dom parent element
 
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+@history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
 
@@ -144,6 +133,9 @@ public Element getDOMParentElement()
                                                                              /**
             Get component map of component classname by route path.
 
+            Note, in general these routes are nested relative to those of the
+            Application Template or its subclasses.
+
 @return     void
 
 @history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
@@ -164,7 +156,7 @@ protected Map<String,Class> getNavRoutes()
 
 @return     next component id
 
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+@history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
 
@@ -183,7 +175,7 @@ protected static String getNextId()
 
 @return     properties
 
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+@history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
 
@@ -198,7 +190,7 @@ public P getProperties()
 @name       getTheme - get theme
                                                                               */
                                                                              /**
-            Get theme.
+            Get theme. This implementation simply returns default theme.
 
 @return     theme
 
@@ -212,55 +204,9 @@ public IUITheme getTheme()
 {
    if (theme == null)
    {
-      theme = props.getConfiguration().getTheme();
+      theme = IUITheme.defaultInstance();
    }
    return(theme);
-}
-/*------------------------------------------------------------------------------
-
-@name       initialize - set properties
-                                                                              */
-                                                                             /**
-            Set properties.
-
-@return     void
-
-@return     props     properties
-
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-
-                                                                              */
-//------------------------------------------------------------------------------
-public P initialize(
-   P props)
-{
-   this.props = props != null ? props : (P)new Properties();
-   this.props.setComponent(this);
-
-   return(props);
-}
-/*------------------------------------------------------------------------------
-
-@name       initConfiguration - initialize configuration
-                                                                              */
-                                                                             /**
-            Initialize configuration. This implementation is null.
-
-@return     void
-
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-protected void initConfiguration()
-{
-   if (getProperties().getConfiguration() == null)
-   {
-      getProperties().setConfiguration(Configuration.sharedInstance());
-   }
 }
 /*------------------------------------------------------------------------------
 
@@ -271,9 +217,7 @@ protected void initConfiguration()
 
 @return     void
 
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
-            Wed Oct 17, 2018 10:30:00 (Giavaneers - LBM) renamed per suggestion
-               by Ethan Elshyeb.
+@history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
 
@@ -291,7 +235,7 @@ public void render()
 
 @return     void
 
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+@history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
 
@@ -302,26 +246,25 @@ public void renderCSS()
 };
 /*------------------------------------------------------------------------------
 
-@name       setTheme - set theme
+@name       initialize - set properties
                                                                               */
                                                                              /**
-            Set theme.
+            Set properties.
 
-@return     theme
+@return     void
 
-@param      new theme
+@return     props     properties
 
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+@history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
 
                                                                               */
 //------------------------------------------------------------------------------
-public IUITheme setTheme(
-   IUITheme theme)
+protected void setProperties(
+   P props)
 {
-   this.theme = theme;
-   return(theme);
+   this.props = props;
 }
 /*------------------------------------------------------------------------------
 
@@ -332,7 +275,7 @@ public IUITheme setTheme(
 
 @return     void
 
-@history    Tue Aug 29, 2017 10:30:00 (Giavaneers - LBM) created
+@history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
 
@@ -340,21 +283,5 @@ public IUITheme setTheme(
 //------------------------------------------------------------------------------
 public void update()
 {
-   try
-   {
-      io.reactjava.client.core.react.Element element =
-         ReactJava.createElement(this);
-
-      if (ReactJava.getIsWebPlatform())
-      {
-                                       // update any styles                   //
-         ReactJava.ensureComponentStyles(this, true);
-         ReactDOM.render(element, getDOMParentElement());
-      }
-   }
-   catch(Exception e)
-   {
-      kLOGGER.logError(e);
-   }
 }
 }//====================================// end Component ----------------------//

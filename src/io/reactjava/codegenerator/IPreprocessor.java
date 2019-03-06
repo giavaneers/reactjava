@@ -17,7 +17,6 @@ package io.reactjava.codegenerator;
                                        // imports --------------------------- //
 import com.google.gwt.core.ext.TreeLogger;
 import io.reactjava.jsx.JSXTransform;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
                                        // IPreprocessor ======================//
@@ -63,6 +62,7 @@ static byte[] allPreprocessors(
 {
    logger.log(
       logger.DEBUG, "IPreprocessor.allPreprocessors(): entered for " + classname);
+
    byte[] processed = contentBytes;
    for (Class preprocessor : preprocessors)
    {
@@ -70,6 +70,7 @@ static byte[] allPreprocessors(
          ((IPreprocessor)preprocessor.newInstance()).process(
             classname, processed, encoding, candidates, components, logger);
    }
+
    logger.log(logger.DEBUG, "IPreprocessor.allPreprocessors(): exiting");
    return(processed);
 }
@@ -89,6 +90,8 @@ static byte[] allPreprocessors(
 @param      components     components identified by preprocessors
 @param      logger         compiler logger
 
+@throws     processed source
+
 @history    Sun Mar 16, 2014 10:30:00 (Giavaneers - LBM) created.
 
 @notes
@@ -101,6 +104,6 @@ byte[] process(
    Map<String,String> candidates,
    Map<String,String> components,
    TreeLogger         logger)
-   throws             IOException;
+   throws             Exception;
 
 }//====================================// end IPreprocessor ==================//

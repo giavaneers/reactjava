@@ -62,7 +62,8 @@ public static final String kINLINE_FTR =
    "if(root != null){element="
  + "io.reactjava.client.core.react.ElementDsc"
  + ".createElement(root);"
- + "this.props = Properties.with(props,\"id\",element.props.get(\"id\"));}"
+ + "this.props = io.reactjava.client.core.react.Properties.with("
+ + "props,\"id\",element.props.get(\"id\"));}"
  + "return(element);};"
  + "this.componentFcn = fcn;";
 
@@ -71,7 +72,8 @@ public static final String kINLINE_FTR_CSS =
 
 public static final String kINLINE_HDR =
    "java.util.function.Function"
- + "<Properties,io.reactjava.client.core.react.Element> fcn="
+ + "<io.reactjava.client.core.react.Properties,"
+ + "io.reactjava.client.core.react.Element> fcn="
  + "(props) ->{"
  + "io.reactjava.client.core.react.Element element = null;"
  + "java.util.Stack<io.reactjava.client.core.react.ElementDsc> parents="
@@ -178,6 +180,77 @@ public StringBuffer addInlineFooter(
 {
    write(buf, kINLINE_FTR);
    return(buf);
+}
+/*------------------------------------------------------------------------------
+
+@name       ensureNullaryConstructor - parse zero arg constructor
+                                                                              */
+                                                                             /**
+            Parse zero constructor arg of specified src.
+
+@return     parsed specified src with zero constructor arg added if required.
+
+@history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static String ensureNullaryConstructor(
+   String          classname,
+   String          src,
+   TreeLogger      logger)
+{
+   String          parsed = src;
+   //int             idx    = classname.lastIndexOf('.');
+   //String          simple = idx < 0 ? classname : classname.substring(idx + 1);
+   //List<MarkupDsc> dscs   = getMethodMarkupDscs(src, simple, logger);
+   //if (dscs == null || dscs.size() == 0)
+   //{
+   //                                    // locate class declaration            //
+   //   String kREGEX_TOKEN = "\\s+class\\s+" + simple + "\\s+[^{}:;]*\\Q{\\E";
+   //
+   //   StringBuffer buf = new StringBuffer();
+   //   Matcher m   = Pattern.compile(kREGEX_TOKEN).matcher(src);
+   //
+   //   while(m.find())
+   //   {
+   //      String token    = m.group();
+   //      int    tokenLen = token.length();
+   //      if (tokenLen > 0)
+   //      {
+   //         String replacement = token + simple + "(){super();}";
+   //         m.appendReplacement(buf, replacement);
+   //      }
+   //   }
+   //   m.appendTail(buf);
+   //
+   //  parsed = buf.toString();
+   //
+   //}
+
+   return(parsed);
+}
+/*------------------------------------------------------------------------------
+
+@name       ensureOneArgConstructor - parse one arg constructor
+                                                                              */
+                                                                             /**
+            Parse zero constructor arg of specified src.
+
+@return     parsed specified src with zero constructor arg added if required.
+
+@history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public String ensureOneArgConstructor(
+   String     classname,
+   String     src,
+   TreeLogger logger)
+{
+   String parsed = src;
+   return(parsed);
 }
 /*------------------------------------------------------------------------------
 
@@ -358,6 +431,11 @@ public void getComponent(
       String parsed  = parse(classname, content, getTagsMap(), logger);
       if (!parsed.equals(content))
       {
+                                       // add any missing constructors        //
+
+         parsed = ensureNullaryConstructor(classname, parsed, logger);
+         parsed = ensureOneArgConstructor(classname, parsed, logger);
+
                                        // add/update component                //
          components.put(classname, parsed);
 
@@ -366,103 +444,6 @@ public void getComponent(
             "JSXTransform.getComponent(): added parsed component " + classname);
       }
    }
-}
-/*------------------------------------------------------------------------------
-
-@name       getComponentMarkupDscs - get component markup dscs from source
-                                                                              */
-                                                                             /**
-            Get component markup descriptors from source.
-
-@return     component markup descriptors from source.
-
-@param      src      src file string.
-
-@history    Mon May 19, 2014 18:00:00 (LBM) created.
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public static List<MarkupDsc> getComponentMarkupDscs(
-   String      src,
-   String      renderMethodName,
-   TreeLogger  logger)
-{
-   logger.log(
-      logger.DEBUG,
-      "JSXTransform.getComponentMarkupDscs(): entered");
-
-                                       // locate any render() method          //
-   List<MarkupDsc> markupDscs = null;
-   String          content    = null;
-   String          regex      =
-      kREGEX_ONE_OR_MORE_WHITESPACE  + renderMethodName
-    + kREGEX_ZERO_OR_MORE_WHITESPACE + "\\Q(\\E"
-    + kREGEX_ZERO_OR_MORE_WHITESPACE + "\\Q)\\E"
-    + kREGEX_ZERO_OR_MORE_WHITESPACE + "\\Q{\\E";
-
-   int idxContentBeg = -1;
-   int idxContent    = -1;
-
-   String[] splits = src.split(regex);
-   if (splits.length == 2)
-   {
-                                       // render method found                 //
-      idxContent    = src.indexOf(splits[1]);
-      idxContentBeg = idxContent;
-
-      for (int depth = 0; depth >= 0;)
-      {
-                                       // find next close brace               //
-         int idxBraceClose = src.indexOf("}", idxContent + 1);
-
-                                       // find next open brace                //
-         int idxBraceOpen = src.indexOf("{", idxContent + 1);
-         if (idxBraceOpen >= 0 && idxBraceOpen < idxBraceClose)
-         {
-            idxContent = idxBraceOpen;
-            depth++;
-            continue;
-         }
-         idxContent = idxBraceClose;
-         if (idxContent >= 0)
-         {
-            depth--;
-         }
-
-         content = src.substring(idxContentBeg, idxContent);
-      }
-   }
-
-   if (content != null && content.trim().length() > 0)
-   {
-                                       // the first dsc is the entire content //
-      markupDscs = new ArrayList<>();
-      markupDscs.add(new MarkupDsc(idxContentBeg, idxContent));
-
-                                       // any additional are for each section //
-      for (int idxBeg = 0, idxEnd = idxBeg, idxMax = content.length(); true;)
-      {
-         idxBeg = content.indexOf(kJSX_MARKUP_BEG, idxEnd);
-         if (idxBeg < 0 || idxBeg > idxMax)
-         {
-            break;
-         }
-         idxEnd = content.indexOf(kJSX_MARKUP_END, idxBeg);
-         idxEnd = content.indexOf("\n", idxEnd) + 1;
-         if (idxEnd < 0 || idxEnd > idxMax)
-         {
-            throw new IllegalStateException("Unmatched markeup delimiters");
-         }
-                                       // subsequent descriptors are the      //
-                                       // number of lines of each markup      //
-                                       // section                             //
-         String[] lines = content.substring(idxBeg, idxEnd).split("\n");
-         markupDscs.add(new MarkupDsc(lines.length, 0));
-      }
-   }
-
-   return(markupDscs);
 }
 /*------------------------------------------------------------------------------
 
@@ -710,6 +691,103 @@ public static boolean getIsStandardTagName(
 }
 /*------------------------------------------------------------------------------
 
+@name       getMethodMarkupDscs - get method markup dscs from source
+                                                                              */
+                                                                             /**
+            Get method markup descriptors from source.
+
+@return     method markup descriptors from source.
+
+@param      src      src file string.
+
+@history    Mon May 19, 2014 18:00:00 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static List<MarkupDsc> getMethodMarkupDscs(
+   String      src,
+   String      methodName,
+   TreeLogger  logger)
+{
+   logger.log(
+      logger.DEBUG,
+      "JSXTransform.getMethodMarkupDscs(): entered");
+
+                                       // locate any specified method         //
+   List<MarkupDsc> markupDscs = null;
+   String          content    = null;
+   String          regex      =
+      kREGEX_ONE_OR_MORE_WHITESPACE  + methodName
+    + kREGEX_ZERO_OR_MORE_WHITESPACE + "\\Q(\\E"
+    + kREGEX_ZERO_OR_MORE_WHITESPACE + "\\Q)\\E"
+    + kREGEX_ZERO_OR_MORE_WHITESPACE + "\\Q{\\E";
+
+   int idxContentBeg = -1;
+   int idxContent    = -1;
+
+   String[] splits = src.split(regex);
+   if (splits.length == 2)
+   {
+                                       // specified method found              //
+      idxContent    = src.indexOf(splits[1]);
+      idxContentBeg = idxContent;
+
+      for (int depth = 0; depth >= 0;)
+      {
+                                       // find next close brace               //
+         int idxBraceClose = src.indexOf("}", idxContent + 1);
+
+                                       // find next open brace                //
+         int idxBraceOpen = src.indexOf("{", idxContent + 1);
+         if (idxBraceOpen >= 0 && idxBraceOpen < idxBraceClose)
+         {
+            idxContent = idxBraceOpen;
+            depth++;
+            continue;
+         }
+         idxContent = idxBraceClose;
+         if (idxContent >= 0)
+         {
+            depth--;
+         }
+
+         content = src.substring(idxContentBeg, idxContent);
+      }
+   }
+
+   if (content != null)
+   {
+                                       // the first dsc is the entire content //
+      markupDscs = new ArrayList<>();
+      markupDscs.add(new MarkupDsc(idxContentBeg, idxContent));
+
+                                       // any additional are for each section //
+      for (int idxBeg = 0, idxEnd = idxBeg, idxMax = content.length(); true;)
+      {
+         idxBeg = content.indexOf(kJSX_MARKUP_BEG, idxEnd);
+         if (idxBeg < 0 || idxBeg > idxMax)
+         {
+            break;
+         }
+         idxEnd = content.indexOf(kJSX_MARKUP_END, idxBeg);
+         idxEnd = content.indexOf("\n", idxEnd) + 1;
+         if (idxEnd < 0 || idxEnd > idxMax)
+         {
+            throw new IllegalStateException("Unmatched markup delimiters");
+         }
+                                       // subsequent descriptors are the      //
+                                       // number of lines of each markup      //
+                                       // section                             //
+         String[] lines = content.substring(idxBeg, idxEnd).split("\n");
+         markupDscs.add(new MarkupDsc(lines.length, 0));
+      }
+   }
+
+   return(markupDscs);
+}
+/*------------------------------------------------------------------------------
+
 @name       getJavaLiteralExpressions - get java literal expressions
                                                                               */
                                                                              /**
@@ -911,11 +989,17 @@ public void handleElement(
           + "\"),");
 
          writeNewline(buf);
+         //write(
+         //   buf,
+         //   "new "
+         // + componentClassname
+         // + "(" + tagProperties + ").getProperties()");
+
          write(
             buf,
             "new "
           + componentClassname
-          + "(" + tagProperties + ").getProperties()");
+          + "().initialize(" + tagProperties + ")");
       }
    }
 
@@ -1523,15 +1607,18 @@ public String parseCSS(
    TreeLogger logger)
 {
    String          parsed = src;
-   List<MarkupDsc> dscs   = getComponentMarkupDscs(src, "renderCSS", logger);
+   List<MarkupDsc> dscs   = getMethodMarkupDscs(src, "renderCSS", logger);
    if (dscs != null && dscs.size() > 0)
    {
       MarkupDsc first   = dscs.get(0);
       int       idxBeg  = first.idxBeg;
       int       idxEnd  = first.idxEnd;
       String    content = src.substring(idxBeg, idxEnd);
-      String    css     = generateStyleSource(content, logger);
+      if (content.trim().length() > 0)
+      {
+         String css     = generateStyleSource(content, logger);
                 parsed  = src.substring(0, idxBeg) + css + src.substring(idxEnd);
+      }
    }
 
    return(parsed);
@@ -1600,7 +1687,7 @@ public String parseElementAttributes(
    TreeLogger logger)
 {
    List<Attribute> attributes =
-      new ArrayList<Attribute>(element.attributes().asList());
+      new ArrayList(element.attributes().asList());
 
    String idValue = null;
    for (Attribute attribute : attributes)
@@ -1619,7 +1706,8 @@ public String parseElementAttributes(
 
    String properties =
       getTagIsRoot(element.tagName())
-         ? "Properties.with(props, " : "Properties.with(";
+         ? "io.reactjava.client.core.react.Properties.with(props, "
+         : "io.reactjava.client.core.react.Properties.with(";
 
    List<Attribute> attributesSansTemplate = new ArrayList<Attribute>();
    String          template               = null;
@@ -1704,7 +1792,7 @@ public String parseElementAttributes(
                                        // the 'style' value is a map          //
             String[] items = value.replace("\"","").split(";");
 
-            value = "Properties.with(";
+            value = "io.reactjava.client.core.react.Properties.with(";
             for (int iItem = 0; iItem < items.length; iItem++)
             {
                String   item   = items[iItem];
@@ -1772,16 +1860,20 @@ public String parseMarkup(
    String             src,
    Map<String,String> components,
    TreeLogger         logger)
-   throws             IOException
 {
    String          parsed = src;
-   List<MarkupDsc> dscs   = getComponentMarkupDscs(src, "render", logger);
+   List<MarkupDsc> dscs   = getMethodMarkupDscs(src, "render", logger);
    if (dscs != null && dscs.size() > 1)
    {
-      MarkupDsc first  = dscs.get(0);
-      String    body   = parse(classname, src, dscs, components, logger);
-
-      parsed = generateRenderableSource(classname, src, first, body, logger);
+      MarkupDsc first   = dscs.get(0);
+      int       idxBeg  = first.idxBeg;
+      int       idxEnd  = first.idxEnd;
+      String    content = src.substring(idxBeg, idxEnd);
+      if (content.trim().length() > 0)
+      {
+         String body = parse(classname, src, dscs, components, logger);
+         parsed = generateRenderableSource(classname, src, first, body, logger);
+      }
    }
 
    return(parsed);
@@ -1908,7 +2000,7 @@ public byte[] process(
    Map<String,String> candidatesNew,
    Map<String,String> components,
    TreeLogger         logger)
-   throws             IOException
+   throws             Exception
 {
    logger.log(logger.DEBUG, "JSXTransform.process(): for " + classname);
 
@@ -1935,6 +2027,7 @@ public byte[] process(
           + "incremental build...");
 
          candidates.put(classname, content);
+
          getComponent(classname, content, components, logger);
 
          parsed = components.get(classname);
@@ -2843,7 +2936,7 @@ public static boolean unitTest(
                            null);
                       content = src;
                  }
-                  else if (true)
+                  else if (false)
                   {
                      classname  = "io.reactjava.client.examples.helloworld.App";
                      src =
@@ -2867,7 +2960,7 @@ public static boolean unitTest(
                            null);
                      content = src;
                   }
-                  else if (false)
+                  else if (true)
                   {
                      components.put(
                         "BoardView",
@@ -2890,8 +2983,8 @@ public static boolean unitTest(
                         IJSXTransform.getFileAsString(
                            new File(
                               "/Users/brianm/working/IdeaProjects/ReactJava/"
-                            + "TicTacToeReactJava/src/"
-                            + "io/reactjava/client/examples/tictactoe/SubBoardView.java"),
+                            + "ReactJavaExamples/src/"
+                            + "io/reactjava/client/examples/tictactoe/App.java"),
                            null);
                      content = src;
                   }
@@ -2959,7 +3052,7 @@ public static boolean unitTest(
                            null);
                      content = src;
                   }
-                  else if (true)
+                  else if (false)
                   {
                      classname  = "reactjavawebsite.App";
                      src =
@@ -2968,6 +3061,18 @@ public static boolean unitTest(
                               "/Users/brianm/working/IdeaProjects/ReactJava/"
                             + "ReactJavaWebsite/src/"
                             + "reactjavawebsite/App.java"),
+                           null);
+                     content = src;
+                  }
+                  else if (false)
+                  {
+                     classname  = "reactjavawebsite.App";
+                     src =
+                        IJSXTransform.getFileAsString(
+                           new File(
+                              "/Users/brianm/working/IdeaProjects/ReactJava/"
+                            + "ReactJavaWebsite/src/"
+                            + "reactjavawebsite/Landing.java"),
                            null);
                      content = src;
                   }

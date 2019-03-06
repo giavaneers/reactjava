@@ -17,14 +17,19 @@ package io.reactjava.jsx;
                                        // imports --------------------------- //
 import com.google.gwt.core.ext.TreeLogger;
 import io.reactjava.codegenerator.IPreprocessor;
+import io.reactjava.jsx.JSXTransform.MarkupDsc;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-                                       // IJSXTransform ======================//
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+// IJSXTransform ======================//
 public interface IJSXTransform extends IPreprocessor
 {
                                        // class constants --------------------//

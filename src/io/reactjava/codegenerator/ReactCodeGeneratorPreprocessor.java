@@ -19,7 +19,6 @@ package io.reactjava.codegenerator;
                                        // imports --------------------------- //
 import com.google.gwt.core.ext.TreeLogger;
 import io.reactjava.client.core.react.ReactCodeGeneratorImplementation;
-import java.io.IOException;
 import java.util.Map;
                                        // ReactCodeGeneratorPreprocessor =====//
 public class ReactCodeGeneratorPreprocessor implements IPreprocessor
@@ -80,7 +79,7 @@ public byte[] process(
    Map<String,String> candidates,
    Map<String,String> components,
    TreeLogger         logger)
-   throws             IOException
+   throws             Exception
 {
    logger.log(
       logger.DEBUG,
@@ -105,7 +104,10 @@ public byte[] process(
           + "      \"" +  componentClassname + "\",\n"
           + "      (Function<Properties,Component>)(props) ->\n"
           + "      {\n"
-          + "         return(new " + componentClassname + "(props));\n"
+        //+ "         return(new " + componentClassname + "(props));\n"
+          + "         Component component = new " + componentClassname + "();\n"
+          + "                   component.initialize(props);\n"
+          + "         return(component);\n"
           + "      });\n";
 
          mapEntries += entry;
