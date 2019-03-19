@@ -17,19 +17,18 @@ package io.reactjava.jsx;
                                        // imports --------------------------- //
 import com.google.gwt.core.ext.TreeLogger;
 import io.reactjava.codegenerator.IPreprocessor;
-import io.reactjava.jsx.JSXTransform.MarkupDsc;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-// IJSXTransform ======================//
+                                       // IJSXTransform ======================//
 public interface IJSXTransform extends IPreprocessor
 {
                                        // class constants --------------------//
@@ -40,6 +39,9 @@ String  kJSX_MARKUP_BEG = "/*--";
 String  kJSX_MARKUP_END = "--*/";
 String  kJSX_REGEXP_BEG = "/\\*--";
 String  kJSX_REGEXP_END = "--\\*/";
+
+String  kJAVA_STRING_BEG = "%javaStringBeg%";
+String  kJAVA_STRING_END = "%javaStringEnd%";
 
 Map<String,String> kREACT_TAGS =
    new HashMap<String,String>()
@@ -92,6 +94,7 @@ Map<String,String> kSTD_TAGS =
       put("map",       "map");
       put("object",    "object");
       put("ol",        "ol");
+      put("pre",       "pre");
       put("option",    "option");
       put("optgroup",  "optgroup");
       put("p",         "p");
@@ -177,6 +180,44 @@ String[] kFILTER_UNSUPPORTED =
                                        // class variables ------------------- //
                                        // (none)                              //
 
+/*------------------------------------------------------------------------------
+
+@name       getFileAsJavaString - get file as string with newline characters
+                                                                              */
+                                                                             /**
+            Get file as string with newline characters; that is, a string
+            in which instances of System.lineSeparator() are replaced with '\n'.
+
+@return     file as string with newline characters.
+
+@param      path     file path.
+
+@history    Mon May 19, 2014 18:00:00 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static String getFileAsJavaString(
+   File       file,
+   TreeLogger logger)
+   throws     IOException
+{
+   ByteArrayInputStream inBytes =
+      new ByteArrayInputStream(getFileBytes(file, logger));
+
+   StringBuilder builder = new StringBuilder();
+   try (BufferedReader in = new BufferedReader(new InputStreamReader(inBytes)))
+   {
+      String line;
+      while ((line = in.readLine()) != null)
+      {
+         builder.append(line);
+         builder.append("\\n");
+      }
+   }
+
+   return(builder.toString());
+}
 /*------------------------------------------------------------------------------
 
 @name       getFileAsString - get file as string
@@ -275,6 +316,56 @@ static byte[] getInputStreamBytes(
    IConfiguration.fastChannelCopy(in, out, in.available());
 
    return(out.toByteArray());
+}
+/*------------------------------------------------------------------------------
+
+@name       getURLAsString - get url as string
+                                                                              */
+                                                                             /**
+            Get url as string.
+
+@return     url as string.
+
+@param      url      target url
+
+@history    Mon May 19, 2014 18:00:00 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static String getURLAsString(
+   String     url,
+   TreeLogger logger)
+   throws     IOException
+{
+   String src = new String(getURLBytes(url, logger), "UTF-8");
+   return(src);
+}
+/*------------------------------------------------------------------------------
+
+@name       getURLBytes - get url bytes
+                                                                              */
+                                                                             /**
+            Get url bytes.
+
+@return     url bytes.
+
+@param      url      target url
+
+@history    Mon May 19, 2014 18:00:00 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static byte[] getURLBytes(
+   String     url,
+   TreeLogger logger)
+   throws     IOException
+{
+   try (InputStream in = new URL(url).openStream())
+   {
+      return(getInputStreamBytes(in, logger));
+   }
 }
 /*------------------------------------------------------------------------------
 

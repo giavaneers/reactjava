@@ -1,0 +1,16 @@
+.descriptiveUnit.body
+ReactJava lets you define components as subclasses of the Component class.
+.end
+
+.descriptiveUnit.caption
+Overview
+.end
+
+.descriptiveUnit.example1
+import java.util.Scanner;
+public class Life
+{
+   // [...]
+}
+.end
+

@@ -41,17 +41,17 @@ public interface INativeRenderableComponent<P extends Properties>
 
             When called, it should examine props return a single child element.
             This child element can be either a virtual representation of a
-            native ReactDOM component (such as ReactJava.ReactDOM.div()) or another composite
-            component that you've definedyourself.
+            native ReactDOM component (such as ReactJava.ReactDOM.div()) or
+            another composite component that you've definedyourself.
 
             You can also return null to indicate that you don't want anything
-            rendered. Behind the scenes, ReactJava renders a <tag> to work with our
-            current diffing algorithm.
+            rendered. Behind the scenes, ReactJava renders a <tag> to work with
+            our current diffing algorithm.
 
             The render() function should be pure, meaning that it does not
             modify componen state, it returns the same result each time it's
-            invoked, and it does not read from r write to the ReactDOM or otherwise
-            interact with the browser (e.g., by using setTimeout).
+            invoked, and it does not read from r write to the ReactDOM or
+            otherwise interact with the browser (e.g., by using setTimeout).
 
 @return     a single ReactJava element, or null if no rendering is desired.
 

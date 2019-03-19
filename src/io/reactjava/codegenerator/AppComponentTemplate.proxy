@@ -156,8 +156,8 @@ public static void main(
             Constructor ctor = appClass.getConstructor(Properties.class);
             try
             {
-                                       // invoke the nullary constructor      //
-               ctor.newInstance(null);
+                                       // invoke the props constructor        //
+               ctor.newInstance(new Properties());
             }
             catch(Exception uoe)
             {

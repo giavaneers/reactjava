@@ -38,6 +38,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarFile;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
                                        // IConfiguration =====================//
 public interface IConfiguration
    extends io.reactjava.client.core.react.IConfiguration
@@ -508,6 +510,10 @@ public static String getLibraryComponentJavascript(
                "Cannot find component for <" + tagName + ">: "
              + "did you forget to install a node module?");
          }
+         catch(Exception e)
+         {
+            throw new RuntimeException(e);
+         }
       }
    }
    return(componentPath);
@@ -622,6 +628,7 @@ static File getModuleDir(
 static String getNodeModuleJavascript(
    String     module,
    TreeLogger logger)
+   throws     Exception
 {
    String nodeModulePath = getDependenciesPrevious().get(module);
    if (nodeModulePath == null)
@@ -678,6 +685,7 @@ static String getNodeModuleJavascript(
 public static String getNodeModuleJavascriptFromPackageJSON(
    String     module,
    TreeLogger logger)
+   throws     Exception
 {
    String exportItem     = null;
    File   nodeModulesDir = IConfiguration.getNodeModulesDir(logger);
@@ -686,7 +694,7 @@ public static String getNodeModuleJavascriptFromPackageJSON(
    String nodeModulePath = nodeModuleDir.getAbsolutePath();
 
    logger.log(
-      logger.DEBUG,
+      logger.INFO,
       "generateInjectScriptBrowserifyExportItem(): nodeModulePath="
          + nodeModulePath);
 
@@ -713,52 +721,122 @@ public static String getNodeModuleJavascriptFromPackageJSON(
    }
    if (json != null)
    {
-      int    idxEnd;
-      int    idxBeg = json.indexOf("\"main\"");
-      if (idxBeg > 0)
+      String main =
+         (String)((JSONObject)new JSONParser().parse(json)).get("main");
+
+      logger.log(
+         logger.INFO,
+         "generateInjectScriptBrowserifyExportItem(): "
+       + "checking package.json for " + main);
+
+      if (main != null)
       {
-         idxEnd = json.indexOf('\n', idxBeg);
-         if (idxEnd > 0)
+         File file = new File(nodeModuleDir, main);
+
+         logger.log(
+            logger.INFO,
+            "generateInjectScriptBrowserifyExportItem(): "
+          + "checking package.json for " + file.getAbsolutePath());
+
+         if (file.exists())
          {
-            idxEnd = json.lastIndexOf('"', idxEnd);
-            if (idxEnd > 0 && idxEnd > idxBeg)
-            {
-               idxBeg = json.indexOf(':', idxBeg);
-               if (idxBeg > 0)
-               {
-                  idxBeg = json.indexOf('"', idxBeg);
-                  if (idxBeg > 0 && idxBeg < idxEnd)
-                  {
-                     String pathname = json.substring(idxBeg + 1, idxEnd);
-                     File   file     = new File(nodeModuleDir, pathname);
-                     if (file.exists())
-                     {
-                        target = file;
-                     }
-                  }
-               }
-            }
+            target = file;
          }
       }
+
+      //int    idxEnd;
+      //int    idxBeg = json.indexOf("\"main\"");
+      //if (idxBeg > 0)
+      //{
+      //   idxEnd = json.indexOf('\n', idxBeg);
+      //
+      //   logger.log(
+      //      logger.INFO,
+      //      "generateInjectScriptBrowserifyExportItem(): "
+      //    + "checking package.json for "
+      //    + json.substring(idxBeg, idxEnd));
+      //
+      //   if (idxEnd > 0)
+      //   {
+      //      idxEnd = json.lastIndexOf('"', idxEnd);
+      //      if (idxEnd > 0 && idxEnd > idxBeg)
+      //      {
+      //         logger.log(
+      //            logger.INFO,
+      //            "generateInjectScriptBrowserifyExportItem(): "
+      //          + "checking package.json for "
+      //          + json.substring(idxBeg, idxEnd));
+      //
+      //         idxBeg = json.indexOf(':', idxBeg);
+      //         if (idxBeg > 0)
+      //         {
+      //            logger.log(
+      //               logger.INFO,
+      //               "generateInjectScriptBrowserifyExportItem(): "
+      //             + "checking package.json for "
+      //             + json.substring(idxBeg, idxEnd));
+      //
+      //            idxBeg = json.indexOf('"', idxBeg);
+      //            if (idxBeg > 0 && idxBeg < idxEnd)
+      //            {
+      //               logger.log(
+      //                  logger.INFO,
+      //                  "generateInjectScriptBrowserifyExportItem(): "
+      //                + "checking package.json for "
+      //                + json.substring(idxBeg + 1, idxEnd));
+      //
+      //               String pathname = json.substring(idxBeg + 1, idxEnd);
+      //               c
+      //
+      //               logger.log(
+      //                  logger.INFO,
+      //                  "generateInjectScriptBrowserifyExportItem(): "
+      //                + "checking package.json for "
+      //                + file.getAbsolutePath());
+      //
+      //               if (file.exists())
+      //               {
+      //                  target = file;
+      //               }
+      //            }
+      //         }
+      //      }
+      //   }
+      //}
    }
 
-   String item =
-      IConfiguration.toReactAttributeName(
-         module.substring(module.lastIndexOf('.') + 1));
-
-   String[] filenames = {"index.js", "default.js", item};
-   for (int i = 0; i < filenames.length; i++)
+   if (target == null)
    {
-      File file = new File(nodeModuleDir, filenames[i]);
-      if (file.exists())
+      String item =
+         IConfiguration.toReactAttributeName(
+            module.substring(module.lastIndexOf('.') + 1));
+
+      String[] filenames = {"index.js", "default.js", item};
+      for (int i = 0; i < filenames.length; i++)
       {
-         target = file;
-         break;
+         File file = new File(nodeModuleDir, filenames[i]);
+
+         logger.log(
+            logger.INFO,
+            "generateInjectScriptBrowserifyExportItem(): checking for "
+               + file.getAbsolutePath());
+
+         if (file.exists())
+         {
+            target = file;
+            break;
+         }
       }
    }
    if (target == null)
    {
       File file = new File(nodeModuleDir + ".js");
+
+      logger.log(
+         logger.INFO,
+         "generateInjectScriptBrowserifyExportItem(): checking for "
+       + file.getAbsolutePath());
+
       if (file.exists())
       {
          target = file;
@@ -767,6 +845,11 @@ public static String getNodeModuleJavascriptFromPackageJSON(
 
    if (target != null)
    {
+      logger.log(
+         logger.INFO,
+         "generateInjectScriptBrowserifyExportItem(): target="
+            + target.getAbsolutePath());
+
       String exportName = target.getName();
       if (exportName.endsWith(".js"))
       {
@@ -776,7 +859,7 @@ public static String getNodeModuleJavascriptFromPackageJSON(
    }
 
    logger.log(
-      logger.DEBUG,
+      logger.INFO,
       "generateInjectScriptBrowserifyExportItem(): for module=" + module
     + ", exportItem=" + exportItem);
 

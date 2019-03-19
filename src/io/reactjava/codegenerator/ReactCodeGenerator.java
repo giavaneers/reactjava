@@ -124,10 +124,6 @@ public static final String kBOOT_JS =
  + "      return(element);\n"
  + "   }\n"
  + "}\n";
-
-public static final String kREGEX_ONE_OR_MORE_WHITESPACE  = "\\s+";
-public static final String kREGEX_ZERO_OR_MORE_WHITESPACE = "\\s*";
-
                                        // class variables ------------------- //
                                        // none                                //
                                        // public instance variables --------- //
@@ -765,6 +761,11 @@ public static String generateInjectScriptBrowserify(
    script += "const Rx       = require('rxjs');\n";
    script += "const _getType = function(type){return module.exports[type]};\n";
 
+   logger.log(
+      logger.INFO,
+      "generateInjectScriptBrowserify(): numDependencies="
+         + IConfiguration.getDependenciesSet().size());
+
    for (String module : IConfiguration.getDependenciesSet())
    {
       logger.log(
@@ -894,10 +895,8 @@ public static String getAppClassname(
 public static JType getAppType(
    Map<String,JClassType> components,
    TreeLogger             logger)
-   throws                 Exception
 {
                                        // find the AppComponentTemplate       //
-
    String     appTemplateClassname = AppComponentTemplate.class.getName();
    JClassType appTemplateType      = null;
    for (String classname : components.keySet())
@@ -1040,7 +1039,6 @@ protected Collection<String> getImportedNodeModules(
    TreeLogger                         logger)
    throws                             Exception
 {
-   logger.log(TreeLogger.INFO, "getImportedNodeModules(): entered");
    Collection<String>     importedModules = new ArrayList<>();
    Map<String,JClassType> components      = typesMap.get(kKEY_COMPONENTS);
 
@@ -1050,6 +1048,10 @@ protected Collection<String> getImportedNodeModules(
    if (appClassname != null
          && !appClassname.equals(AppComponentTemplate.class.getName()))
    {
+      logger.log(
+         TreeLogger.INFO,
+         "getImportedNodeModules(): checking for " + appClassname);
+
                                        // get the component imported modules  //
       Map<String,JClassType> appTypes = typesMap.get(kKEY_APP_TYPES);
 
@@ -1057,27 +1059,35 @@ protected Collection<String> getImportedNodeModules(
          AppComponentInspector.getImportedModules(
             appClassname, appTypes, logger);
 
-      for (String module : importedModules)
+      if (importedModules.size() == 0)
       {
+         logger.log(
+            TreeLogger.INFO,
+            "getImportedNodeModules(): no imported node modules specified");
+      }
+      else
+      {
+         for (String module : importedModules)
+         {
                                        // add the module to the dependency set//
                                        // generating error information if not //
                                        // found                               //
-         String nodeModulePath =
-            IConfiguration.getNodeModuleJavascript(module, logger);
+            String nodeModulePath =
+               IConfiguration.getNodeModuleJavascript(module, logger);
 
-         if (nodeModulePath != null)
-         {
-            IConfiguration.getDependenciesSet().add(module);
-            IConfiguration.getDependencies().put(module, nodeModulePath);
+            if (nodeModulePath != null)
+            {
+               IConfiguration.getDependenciesSet().add(module);
+               IConfiguration.getDependencies().put(module, nodeModulePath);
+            }
+
+            logger.log(TreeLogger.INFO,
+               "getImportedNodeModules(): module=" + module
+             + ", " + (nodeModulePath != null ? "" : "not ") + "found");
          }
-
-         logger.log(TreeLogger.INFO,
-            "getImportedNodeModules(): module=" + module
-          + ", " + (nodeModulePath != null ? "" : "not ") + "found");
       }
    }
 
-   logger.log(TreeLogger.INFO, "getImportedNodeModules(): exiting");
    return(importedModules);
 }
 /*------------------------------------------------------------------------------
@@ -1340,7 +1350,7 @@ protected Map<String,Map<String,JClassType>> parseClasses(
 
    for (JClassType allType : allTypes.values())
    {
-      logger.log(TreeLogger.Type.DEBUG, "parseClasses(): presented " + allType.getQualifiedSourceName());
+      logger.log(TreeLogger.Type.INFO, "parseClasses(): presented " + allType.getQualifiedSourceName());
       if (allType.isInterface() != null)
       {
          continue;
@@ -1362,10 +1372,13 @@ protected Map<String,Map<String,JClassType>> parseClasses(
       }
 
       String classname = allType.getQualifiedSourceName();
-      logger.log(TreeLogger.Type.DEBUG, "parseClasses(): examining " + classname);
+      logger.log(TreeLogger.Type.INFO, "parseClasses(): examining " + classname);
 
-      if (parseConstructors(allType, propertiesType, logger).get("propsParam"))
-      {
+                                       // used to require a default, nullary, //
+                                       // or constructor taking a Properties  //
+                                       // instance as a sole argument (190317)//
+      //if (parseConstructors(allType, propertiesType, logger).get("propsParam"))
+      //{
          if (bComponent)
          {
             components.put(allType.getSimpleSourceName(), allType);
@@ -1378,15 +1391,15 @@ protected Map<String,Map<String,JClassType>> parseClasses(
          {
             providers.put(allType.getSimpleSourceName(), allType);
          }
-      }
+      //}
    }
    for (String classname : providers.keySet())
    {
-      logger.log(TreeLogger.Type.DEBUG,"parseClasses(): provider=" + classname);
+      logger.log(TreeLogger.Type.INFO,"parseClasses(): provider=" + classname);
    }
    for (String classname : components.keySet())
    {
-      logger.log(TreeLogger.Type.DEBUG,"parseClasses(): component=" + classname);
+      logger.log(TreeLogger.Type.INFO,"parseClasses(): component=" + classname);
    }
 
    Map<String,Map<String,JClassType>> providersAndComponents =
@@ -1403,13 +1416,15 @@ protected Map<String,Map<String,JClassType>> parseClasses(
 }
 /*------------------------------------------------------------------------------
 
-@name       parseConstructors - log class information
+@name       parseConstructors - parse constructors of specified type
                                                                               */
                                                                              /**
-            Filter all classes visible to GWT client side and return only those
-            marked as an Injectable.
+            Parse constructors of specified type, checking for a default,
+            nullary, or constructor taking a Properties instance as its sole
+            argument.
 
-@return     void
+@return     A descriptor of the existence of a default, nullary, or constructor
+            taking a Properties instance as its sole argument.
 
 @param      type     class type
 
@@ -1454,13 +1469,6 @@ protected Map<String,Boolean> parseConstructors(
       logger.log(
          TreeLogger.Type.DEBUG,
          "parseConstructors(): resource is not default instantiable: "
-            + type.getQualifiedSourceName());
-   }
-   if (!bProperties)
-   {
-      logger.log(
-         TreeLogger.Type.WARN,
-         "parseConstructors(): has no constructor(Properties): "
             + type.getQualifiedSourceName());
    }
 
@@ -1510,7 +1518,30 @@ public void process(
 
    copyResources(configuration, context, logger);
 
-                                 // save current dependencies              //
+   saveCurrentDependencies(logger);
+
+   logger.log(logger.INFO, "nanoTime=" + System.nanoTime());
+   logger.log(
+      logger.INFO,
+      "process(): exiting, total ms=" + (System.nanoTime() - start) / 1000000L);
+}
+/*------------------------------------------------------------------------------
+
+@name       saveCurrentDependencies - save current dependencies
+                                                                              */
+                                                                             /**
+            Save current dependencies.
+
+@return     void
+
+@history    Sun Mar 16, 2014 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public void saveCurrentDependencies(
+   TreeLogger logger)
+{
    IConfiguration
       .getDependenciesPrevious()
       .clear();
@@ -1526,11 +1557,6 @@ public void process(
    IConfiguration
       .getDependenciesSetPrevious()
       .addAll(IConfiguration.getDependenciesSet());
-
-   logger.log(logger.INFO, "nanoTime=" + System.nanoTime());
-   logger.log(
-      logger.INFO,
-      "process(): exiting, total ms=" + (System.nanoTime() - start) / 1000000L);
 }
 /*------------------------------------------------------------------------------
 

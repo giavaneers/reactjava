@@ -19,8 +19,11 @@ package io.reactjava.jsx;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.dev.util.log.PrintWriterTreeLogger;
 import io.reactjava.client.core.providers.platform.IPlatform;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -49,6 +52,7 @@ public static final String kATTRIB_KEY_ID = "id";
 
 public static final String kHTML_NON_BREAKING_SPACE    = "&nbsp;";
 public static final String kUNICODE_NON_BREAKING_SPACE = "\\u00a0";
+public static final String kUNICODE_TAB                = "\\u00a0\\u00a0\\u00a0";
 
 public static final String kREGEX_ZERO_OR_MORE_CHARACTERS = ".*";
 
@@ -467,11 +471,17 @@ public void getComponents(
    Map<String,String> candidates,
    Map<String,String> components,
    TreeLogger         logger)
-   throws             IOException
 {
    for (String classname : candidates.keySet())
    {
-      getComponent(classname, candidates.get(classname), components, logger);
+      try
+      {
+         getComponent(classname, candidates.get(classname), components, logger);
+      }
+      catch(Exception e)
+      {
+         throw new RuntimeException("classname=" + classname, e);
+      }
    }
 }
 /*------------------------------------------------------------------------------
@@ -772,9 +782,10 @@ public static List<MarkupDsc> getMethodMarkupDscs(
          }
          idxEnd = content.indexOf(kJSX_MARKUP_END, idxBeg);
          idxEnd = content.indexOf("\n", idxEnd) + 1;
-         if (idxEnd < 0 || idxEnd > idxMax)
+         if (idxEnd < 0 || idxEnd > idxMax || idxEnd < idxBeg)
          {
-            throw new IllegalStateException("Unmatched markup delimiters");
+            throw new IllegalStateException(
+               "Unmatched markup delimiters.\n" + content);
          }
                                        // subsequent descriptors are the      //
                                        // number of lines of each markup      //
@@ -1160,10 +1171,17 @@ public Node handleText(
    TextNode           textNode,
    TreeLogger         logger)
 {
-   StringBuffer buf     = getCurrentBuffer(bufs);
-   String       text    = textNode.toString();
-   String       trimmed = text.trim();
    Node         retVal;
+   StringBuffer buf             = getCurrentBuffer(bufs);
+   String       text            = textNode.toString();
+   String       trimmed         = text.trim();
+   Node         parent          = textNode.parent();
+   String       parentName      = parent.nodeName();
+   String       parentClassname = parent.attributes().get("className");
+   boolean      bPrismText      =
+      "code".equals(parentName)
+         && parentClassname != null
+         && parentClassname.startsWith("language-");
 
    if (trimmed.length() == 0)
    {
@@ -1177,7 +1195,7 @@ public Node handleText(
                                        // text node has been processed        //
       retVal = null;
    }
-   else if (!"span".equals(textNode.parent().nodeName()))
+   else if (!"span".equals(parentName) && !bPrismText)
    {
                                        // wrap in a span tag so any sibling   //
                                        // nodes like <code> or <strong> will  //
@@ -1212,16 +1230,18 @@ public Node handleText(
          {
             parsed += trimmed.substring(idx);
          }
+                                       // check for text from a url           //
+         trimmed = handleTextFromURL(parsed, logger);
+      }
+                                       // escape any double-quotes            //
+      trimmed = trimmed.replace("\"","\\\"");
 
-         text = parsed;
-      }
-      else
-      {
-         text = "\"" + trimmed + "\"";
-      }
-                                       // as workaround,                      //
-                                       // explicitly replace html non-breaking//
-                                       // space with unicode literal          //
+                                       // wrap with double-quotes             //
+      text = "\"" + trimmed + "\"";
+                                       // as workaround for react problem     //
+                                       // with '&nbsp;', explicitly replace   //
+                                       // html non-breaking space with        //
+                                       // unicode literal                     //
       text = text.replace(kHTML_NON_BREAKING_SPACE, kUNICODE_NON_BREAKING_SPACE);
 
       write(buf, ",");
@@ -1231,6 +1251,117 @@ public Node handleText(
    }
 
    return(retVal);
+}
+/*------------------------------------------------------------------------------
+
+@name       handleTextFromTextResource - handle text from a text resource
+                                                                              */
+                                                                             /**
+            Get text from a text resource.
+
+            A text resource descriptor has the following format:
+
+               path0/path1/path2/...pathN:.field0.field1.field2...fieldN
+
+            where  path0/path1/path2...pathN      is the relative filepath
+            and    .field0.field1.field2...fieldN is the label of the text
+
+@return     text from the specified text resource.
+
+@param      textResource      text resource descriptor
+
+@history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public String handleTextFromTextResource(
+   String     textResource,
+   TreeLogger logger)
+{
+   String text;
+   try
+   {
+      String[] tokens = textResource.substring("text://".length()).split(":");
+      if (tokens.length != 2)
+      {
+         throw new Exception("Text resource format error: " + textResource);
+      }
+
+      File   warDir  = IConfiguration.getProjectDirectory("war", logger);
+      File   file    = new File(warDir, tokens[0]);
+      String content = IJSXTransform.getFileAsJavaString(file, logger);
+      int    idxBeg  = content.indexOf(tokens[1]);
+      if (idxBeg < 0)
+      {
+         throw new Exception("Text resource label error: " + tokens[1]);
+      }
+          idxBeg += tokens[1].length();
+      int idxEnd  = content.indexOf("\\n.end", idxBeg + 1);
+      if (idxEnd < 0)
+      {
+         idxEnd = content.length();
+      }
+
+      text = content.substring(idxBeg, idxEnd);
+      if (text.startsWith("\\n"))
+      {
+         text = text.substring(2);
+      }
+   }
+   catch(Exception e)
+   {
+      text = e.getMessage();
+   }
+
+   return(kJAVA_STRING_BEG  + text + kJAVA_STRING_END);
+}
+/*------------------------------------------------------------------------------
+
+@name       handleTextFromURL - handle text from a possible URL
+                                                                              */
+                                                                             /**
+            Get text from a possible URL
+
+@return     text from the specified URL, or iff not a url, the specified text.
+
+@param      possibleURL    text or url
+
+@history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public String handleTextFromURL(
+   String     text,
+   TreeLogger logger)
+{
+   int idx = text.indexOf("://");
+   if (idx > 0)
+   {
+      try
+      {
+         switch(text.substring(0, idx))
+         {
+            case "http":
+            case "htts":
+            {
+               text = IJSXTransform.getURLAsString(text, logger);
+               break;
+            }
+            case "text":
+            {
+               text = handleTextFromTextResource(text, logger);
+            }
+         }
+      }
+      catch(Exception e)
+      {
+         text = "Error reading " + text;
+      }
+   }
+
+   return(text);
 }
 /*------------------------------------------------------------------------------
 
@@ -1285,12 +1416,12 @@ public static void main(
 }
 /*------------------------------------------------------------------------------
 
-@name       normalizeParsed - outdent one tab
+@name       normalizeParsed - transform to single line
                                                                               */
                                                                              /**
-            IOutdent one tab.
+            Transform to single line.
 
-@return     void
+@return     transformed
 
 @history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -1317,6 +1448,39 @@ public static String normalizeParsed(
 
    return(normalized);
 }
+/*------------------------------------------------------------------------------
+
+@name       normalizeParsedCharacterEntities - transform to character entities
+                                                                              */
+                                                                             /**
+            Transform whitespace to to character entities.
+
+@return     transformed
+
+@history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+
+                                                                              */
+//------------------------------------------------------------------------------
+//public static String normalizeParsedCharacterEntities(
+//   String  raw,
+//   boolean bEscapeQuotes)
+//{
+//   //String normalized =
+//   //   raw.replace("\n", kUNICODE_CARRIAGE_RETURN)
+//   //   .replace("\t",    kUNICODE_TAB)
+//   //   .replace(" ",     kUNICODE_NON_BREAKING_SPACE);
+//
+//   String normalized = raw;
+//   if (bEscapeQuotes)
+//   {
+//      normalized = normalized.replace("\"","\\\"");
+//   }
+//
+//   return(normalized);
+//}
 /*------------------------------------------------------------------------------
 
 @name       outdent - outdent one tab
@@ -1359,7 +1523,6 @@ public void outdent()
 public String parse(
    String     classname,
    TreeLogger logger)
-   throws     IOException
 {
    //File srcFile = getComponentSourceFile(classname, logger);
    //if (srcFile == null)
@@ -1392,7 +1555,6 @@ public String parse(
    String             src,
    Map<String,String> components,
    TreeLogger         logger)
-   throws             IOException
 {
    String parsed = parseMarkup(classname, src, components, logger);
           parsed = parseCSS(parsed, logger);
@@ -1974,6 +2136,33 @@ protected static String parsePropertyReferences(
 }
 /*------------------------------------------------------------------------------
 
+@name       pretty - make generated source more readable
+                                                                              */
+                                                                             /**
+            Make generated source more readable.
+
+@return     more readable generated source
+
+@param      generated      generated source
+
+@history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes      see replaceComponentTagsWithSymbols()
+                                                                              */
+//------------------------------------------------------------------------------
+public static String pretty(
+   String generated)
+{
+   String pretty =
+      generated
+         .replace(";", ";\n")
+         .replace("{", "\n{\n")
+         .replace("}", "\n}\n");
+
+   return(pretty);
+}
+/*------------------------------------------------------------------------------
+
 @name       process - standard IPreprocessor process method
                                                                               */
                                                                              /**
@@ -2350,7 +2539,24 @@ public static String toCompactSingleLine(
       //      .replace("; ",";")
       //      .replace(", ",",")
       //      .trim();
-      compact = raw.replace("\n", " ").trim();
+
+      StringBuffer buf   = new StringBuffer();
+      String[]     parts = compact.split(kJAVA_STRING_END);
+      for (String part  : parts)
+      {
+         int idxBeg = part.indexOf(kJAVA_STRING_BEG);
+         if (idxBeg >= 0)
+         {
+            buf.append(part.substring(0, idxBeg).replace("\n", " "));
+            buf.append(part.substring(idxBeg + kJAVA_STRING_BEG.length()));
+         }
+         else
+         {
+            buf.append(part.replace("\n", " "));
+         }
+      }
+
+      compact = buf.toString().trim();
    }
 
    return(compact);
@@ -2936,7 +3142,7 @@ public static boolean unitTest(
                            null);
                       content = src;
                  }
-                  else if (false)
+                  else if (true)
                   {
                      classname  = "io.reactjava.client.examples.helloworld.App";
                      src =
@@ -2960,7 +3166,7 @@ public static boolean unitTest(
                            null);
                      content = src;
                   }
-                  else if (true)
+                  else if (false)
                   {
                      components.put(
                         "BoardView",
@@ -3054,13 +3260,18 @@ public static boolean unitTest(
                   }
                   else if (false)
                   {
-                     classname  = "reactjavawebsite.App";
+                     components.put(
+                        "Footer", "reactjavawebsite.Footer");
+                     components.put(
+                        "GeneralAppBar", "reactjavawebsite.GeneralAppBar");
+
+                     classname  = "reactjavawebsite.GetStarted";
                      src =
                         IJSXTransform.getFileAsString(
                            new File(
                               "/Users/brianm/working/IdeaProjects/ReactJava/"
                             + "ReactJavaWebsite/src/"
-                            + "reactjavawebsite/App.java"),
+                            + "reactjavawebsite/GetStarted.java"),
                            null);
                      content = src;
                   }
@@ -3180,6 +3391,8 @@ public static boolean unitTest(
          {
             String generated =
                new JSXTransform().parse(classname, content, components, logger);
+
+            String pretty = JSXTransform.pretty(generated);
 
                                        // assign second arg 'true' when       //
                                        // capturing test result and 'false'   //

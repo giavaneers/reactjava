@@ -15,6 +15,7 @@ notes:
                                        // package --------------------------- //
 package io.reactjava.client.core.react;
                                        // imports --------------------------- //
+import elemental2.core.JsArray;
 import jsinterop.annotations.JsType;
                                        // React ==============================//
 // namespace = IConfiguration.kSRCCFG_BUNDLE_SCRIPT ? "ReactJava" : JsPackage.GLOBAL
@@ -127,5 +128,25 @@ public static native <P extends Properties> Element createElement(
 
 public static native <P extends Properties> Element createElement(
    INativeComponentConstructor<P> type, P props, Element ...children);
+
+/*------------------------------------------------------------------------------
+
+@name       useState - useState hook
+                                                                              */
+                                                                             /**
+            useState hook.
+
+@return     Properties instance containing the following attributes:
+
+
+@param      state       initial state
+
+@history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static native JsArray useState(
+   Object value);
 
 }//====================================// end React --------------------------//

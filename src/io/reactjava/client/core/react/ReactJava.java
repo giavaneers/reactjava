@@ -37,6 +37,8 @@ public static final  String kMARKUP  = "markup";
 public static final  String kSTYLES  = "styles";
 
                                        // class variables ------------------- //
+                                       // whether initialized                 //
+protected static boolean             bInitialized;
                                        // core compiler preprocessor          //
 protected static IReactCodeGenerator generator;
 
@@ -530,8 +532,13 @@ public static Function<Properties,Component> getComponentFactory(
 public static <P extends Properties> Function<P,Element> getComponentFcn(
    Component component)
 {
-   component.render();
    Function<P,Element> fcn = component.componentFcn;
+   if (fcn == null)
+   {
+      component.render();
+      fcn = component.componentFcn;
+   }
+
    return(fcn);
 }
 /*------------------------------------------------------------------------------
@@ -739,12 +746,31 @@ protected static void initialize(
          configuration, null, requestToken,
          (Object response1, Object reqToken1) ->
          {
+            bInitialized = true;
             if (requestor != null)
             {
                requestor.apiResponse(response1, requestToken);
             }
          });
    }
+}
+/*------------------------------------------------------------------------------
+
+@name       initialized - test whether initialized
+                                                                              */
+                                                                             /**
+            Test whether initialized.
+
+@return     true iff initialized
+
+@history    Thu Sep 7, 2017 08:46:23 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static boolean initialized()
+{
+   return(bInitialized);
 }
 /*------------------------------------------------------------------------------
 

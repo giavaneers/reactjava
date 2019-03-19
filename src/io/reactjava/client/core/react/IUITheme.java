@@ -19,6 +19,7 @@ import elemental2.core.JsRegExp;
 import elemental2.dom.CSSStyleDeclaration;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.ViewCSS;
+import io.reactjava.client.core.react.IUITheme.Mixins.Toolbar;
 import io.reactjava.client.core.react.IUITheme.Palette.Action;
 import io.reactjava.client.core.react.IUITheme.Palette.Background;
 import io.reactjava.client.core.react.IUITheme.Palette.Colors;
@@ -222,7 +223,7 @@ String getDirection();
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-Object getMixins();
+IMixins getMixins();
 
 /*------------------------------------------------------------------------------
 
@@ -238,7 +239,7 @@ Object getMixins();
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public Object getOverrides();
+Object getOverrides();
 
 /*------------------------------------------------------------------------------
 
@@ -254,7 +255,7 @@ public Object getOverrides();
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public IPalette getPalette();
+IPalette getPalette();
 
 /*------------------------------------------------------------------------------
 
@@ -270,7 +271,7 @@ public IPalette getPalette();
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public IShape getShape();
+IShape getShape();
 
 /*------------------------------------------------------------------------------
 
@@ -286,7 +287,7 @@ public IShape getShape();
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public ISpacing getSpacing();
+ISpacing getSpacing();
 
 /*------------------------------------------------------------------------------
 
@@ -302,7 +303,7 @@ public ISpacing getSpacing();
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public ITransitions getTransitions();
+ITransitions getTransitions();
 
 /*------------------------------------------------------------------------------
 
@@ -318,7 +319,7 @@ public ITransitions getTransitions();
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public ITypography getTypography();
+ITypography getTypography();
 
 /*------------------------------------------------------------------------------
 
@@ -354,7 +355,7 @@ IZIndex getZIndex();
 
                                                                               */
 //------------------------------------------------------------------------------
-public static String remToPx(
+static String remToPx(
    String rem)
 {
    double remVal = Double.parseDouble(rem.replace("rem","").trim());
@@ -613,7 +614,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static class DefaultInstance extends HashMap<String,Object> implements IUITheme
+class DefaultInstance extends HashMap<String,Object> implements IUITheme
 {
                                        // constants ------------------------- //
                                        // (none)                              //
@@ -701,9 +702,9 @@ public String getDirection()
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public Object getMixins()
+public IMixins getMixins()
 {
-   return(get(kKEY_MIXINS));
+   return((IMixins)get(kKEY_MIXINS));
 }
 /*------------------------------------------------------------------------------
 
@@ -1055,6 +1056,146 @@ int getSizeExtraLarge();
 int getSizeExtraSmall();
 
 }//====================================// end IBreakpoints ===================//
+/*==============================================================================
+
+name:       IMixins - mixins interface
+
+purpose:    Mixins interface
+
+history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+notes:
+
+==============================================================================*/
+public static interface IMixins
+{
+                                       // constants ------------------------- //
+                                       // keys                                //
+String   kKEY_MIXINS_GUTTERS = "gutters";
+String   kKEY_MIXINS_TOOLBAR = "toolbar";
+                                       // default values                      //
+Function kVAL_MIXINS_GUTTERS = null;
+IToolbar kVAL_MIXINS_TOOLBAR = IToolbar.defaultInstance();
+
+                                       // class variables ------------------- //
+                                       // (none)                              //
+                                       // public instance variables --------- //
+                                       // (none)                              //
+                                       // protected instance variables ------ //
+                                       // (none)                              //
+
+/*------------------------------------------------------------------------------
+
+@name       assignSharedInstance - get default instance
+                                                                              */
+                                                                             /**
+            Get default instance.
+
+@return     default instance
+
+@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+static IMixins defaultInstance()
+{
+   return(new Mixins());
+}
+/*------------------------------------------------------------------------------
+
+@name       getGutters - get gutters
+                                                                              */
+                                                                             /**
+            Get gutters.
+
+@return     gutters function
+
+@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+Function getGutters();
+
+/*------------------------------------------------------------------------------
+
+@name       getToolbar - get toolbar
+                                                                              */
+                                                                             /**
+            Get toolbar.
+
+@return     toolbar
+
+@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+IToolbar getToolbar();
+
+/*==============================================================================
+
+name:       IToolbar - mixins toolbar interface
+
+purpose:    Mixins toolbar interface
+
+history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+notes:
+
+==============================================================================*/
+public static interface IToolbar
+{
+                                       // constants ------------------------- //
+                                       // keys                                //
+String kKEY_MIXINS_TOOLBAR_MIN_HEIGHT = "minHeight";
+                                       // default values                      //
+int    kVAL_MIXINS_TOOLBAR_MIN_HEIGHT = 56;
+
+                                       // class variables ------------------- //
+                                       // (none)                              //
+                                       // public instance variables --------- //
+                                       // (none)                              //
+                                       // protected instance variables ------ //
+                                       // (none)                              //
+
+/*------------------------------------------------------------------------------
+
+@name       assignSharedInstance - get default instance
+                                                                              */
+                                                                             /**
+            Get default instance.
+
+@return     default instance
+
+@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+static IToolbar defaultInstance()
+{
+   return(new Toolbar());
+}
+/*------------------------------------------------------------------------------
+
+@name       getMinHeight - get min height
+                                                                              */
+                                                                             /**
+            Get min height.
+
+@return     min height
+
+@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+int getMinHeight();
+
+}//====================================// end IToolbar =======================//
+}//====================================// end IMixins ========================//
 /*==============================================================================
 
 name:       IPalette - palette interface
@@ -5142,7 +5283,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IZIndex
+interface IZIndex
 {
                                        // constants ------------------------- //
                                        // (none)                              //
@@ -5268,6 +5409,141 @@ int getSnackbar();
 int getTooltip();
 
 }//====================================// end IZIndex ========================//
+/*==============================================================================
+
+name:       Mixins - mixins
+
+purpose:    Mixins default instance
+
+history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+notes:
+
+==============================================================================*/
+class Mixins extends java.util.HashMap<String,Object> implements IMixins
+{
+                                       // constants ------------------------- //
+                                       // (none)                              //
+                                       // class variables ------------------- //
+                                       // (none)                              //
+                                       // public instance variables --------- //
+                                       // (none)                              //
+                                       // protected instance variables ------ //
+                                       // (none)                              //
+
+/*------------------------------------------------------------------------------
+
+@name       Mixins - default constructor
+                                                                              */
+                                                                             /**
+            Default constructor
+
+@return     An instance of Mixins if successful.
+
+@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public Mixins()
+{
+}
+/*------------------------------------------------------------------------------
+
+@name       getGutters - get gutters
+                                                                              */
+                                                                             /**
+            Get gutters.
+
+@return     gutters function
+
+@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public Function getGutters()
+{
+   return((Function)get(kKEY_MIXINS_GUTTERS));
+}
+/*------------------------------------------------------------------------------
+
+@name       getToolbar - get toolbar
+                                                                              */
+                                                                             /**
+            Get toolbar.
+
+@return     toolbar
+
+@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public IToolbar getToolbar()
+{
+   return((IToolbar)get(kKEY_MIXINS_TOOLBAR));
+}
+/*==============================================================================
+
+name:       Toolbar - mixins
+
+purpose:    Toolbar default instance
+
+history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+notes:
+
+==============================================================================*/
+public static class Toolbar extends java.util.HashMap<String,Object> implements IToolbar
+{
+                                       // constants ------------------------- //
+                                       // (none)                              //
+                                       // class variables ------------------- //
+                                       // (none)                              //
+                                       // public instance variables --------- //
+                                       // (none)                              //
+                                       // protected instance variables ------ //
+                                       // (none)                              //
+
+/*------------------------------------------------------------------------------
+
+@name       Toolbar - default constructor
+                                                                              */
+                                                                             /**
+            Default constructor
+
+@return     An instance of Toolbar if successful.
+
+@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public Toolbar()
+{
+   put(kKEY_MIXINS_TOOLBAR_MIN_HEIGHT, kVAL_MIXINS_TOOLBAR_MIN_HEIGHT);
+}
+/*------------------------------------------------------------------------------
+
+@name       getMinHeight - get min height
+                                                                              */
+                                                                             /**
+            Get min height.
+
+@return     min height
+
+@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public int getMinHeight()
+{
+   return((Integer)get(kKEY_MIXINS_TOOLBAR_MIN_HEIGHT));
+}
+}//====================================// end Toolbar ========================//
+}//====================================// end Mixins =========================//
 /*==============================================================================
 
 name:       Palette - palette

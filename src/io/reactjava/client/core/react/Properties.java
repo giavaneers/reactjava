@@ -422,7 +422,7 @@ protected final Properties setConfiguration(
                                                                               */
 //------------------------------------------------------------------------------
 @JsOverlay
-public final static Properties with(Object... args)
+public static Properties with(Object... args)
 {
    int i = 0;
    Properties props = new Properties();

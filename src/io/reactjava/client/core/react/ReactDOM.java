@@ -16,7 +16,6 @@ notes:
 package io.reactjava.client.core.react;
 import jsinterop.annotations.JsType;
 
-// namespace = IConfiguration.kSRCCFG_BUNDLE_SCRIPT ? "ReactJava" : JsPackage.GLOBAL
 @JsType(isNative = true, namespace = "ReactJava")
 public class ReactDOM
 {

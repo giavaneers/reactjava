@@ -61,7 +61,9 @@ import com.giavaneers.util.gwt.Logger;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Window;
+import elemental2.dom.DocumentEvent;
 import elemental2.dom.DomGlobal;
+import elemental2.dom.Event;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -311,6 +313,16 @@ public static Element render()
       if (ReactJava.getIsWebPlatform())
       {
          ReactDOM.render(element, DomGlobal.document.getElementById("root"));
+
+                                       // signal (another) DOMContentLoaded   //
+                                       // since some external scripts (such   //
+                                       // as Prism) may use the event to      //
+                                       // indicate the DOM is ready to be     //
+                                       // processed which may have occurred   //
+                                       // before the GWT onModuleLoad() and   //
+                                       // this subsequent ReactDOM.render()   //
+                                       // invocation. Beware of side-effects. //
+         DomGlobal.document.dispatchEvent(new Event("DOMContentLoaded"));
       }
    }
    else
