@@ -50,7 +50,7 @@ public interface IConfiguration
                                        // platform                            //
 IPlatform[]        platform = new IPlatform[1];
                                        // script dependency tags              //
-Set<String>        dependenciesSet = new HashSet<String>();
+List<String>       dependenciesSet = new ArrayList<String>();
                                        // previous script dependency tags     //
 Set<String>        dependenciesSetPrevious = new HashSet<String>();
                                        // script dependencies by tag          //
@@ -276,7 +276,7 @@ static Map<String,String> getDependenciesPrevious()
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-static Set<String> getDependenciesSet()
+static List<String> getDependenciesSet()
 {
    return(dependenciesSet);
 }
@@ -468,8 +468,11 @@ static ILibraryComponent getLibraryComponent(
          "jsx.IConfiguration.getLibraryComponent(): adding dependency="
             + tagName + ", " + componentPath);
 
-      IConfiguration.getDependenciesSet().add(tagName);
-      IConfiguration.getDependencies().put(tagName, componentPath);
+      if (!IConfiguration.getDependenciesSet().contains(tagName))
+      {
+         IConfiguration.getDependenciesSet().add(tagName);
+         IConfiguration.getDependencies().put(tagName, componentPath);
+      }
    }
 
    return(componentPath != null ? component : null);
@@ -611,6 +614,61 @@ static File getModuleDir(
 }
 /*------------------------------------------------------------------------------
 
+@name       getNodeModuleCSS - get node module css path
+                                                                              */
+                                                                             /**
+            Get node module css path specified module name.
+
+@return     node module css path specified module name
+
+@param      nodeModule     node module css name
+
+@history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+static String getNodeModuleCSS(
+   String         module,
+   IConfiguration configuration,
+   TreeLogger     logger)
+   throws         Exception
+{
+   String nodeModulePath = null;
+
+   if (!module.endsWith(".css"))
+   {
+      throw new IllegalArgumentException("Target must end with '.css'");
+   }
+
+   String css = module.substring(0, module.lastIndexOf('.'));
+          css = css.replace(".", "/");
+          css = css + ".css";
+
+   if (!configuration.getGlobalCSS().contains(css))
+   {
+      File stylesheet = new File(getNodeModulesDir(logger), css);
+      if (!stylesheet.exists())
+      {
+         throw new IllegalStateException(
+            "Cannot find node module css " + module + ": "
+          + "did you forget to install it?"
+          + " " + stylesheet.getAbsolutePath());
+      }
+      else
+      {
+         nodeModulePath = stylesheet.getAbsolutePath();
+
+         logger.log(
+            logger.DEBUG,
+            "jsx.IConfiguration.getNodeModuleCSS(): module=" + module
+          + ", cssPath=" + nodeModulePath);
+      }
+   }
+   return(nodeModulePath);
+}
+/*------------------------------------------------------------------------------
+
 @name       getNodeModuleJavascript - get node module javascript path
                                                                               */
                                                                              /**
@@ -668,6 +726,29 @@ static String getNodeModuleJavascript(
 }
 /*------------------------------------------------------------------------------
 
+@name       getNodeModuleCSSFromPackageJSON - get node module css item
+                                                                              */
+                                                                             /**
+            Get node module css item.
+
+@return     browserify inject css item
+
+@param      module      corresponding node module name.
+
+@history    Wed Dec 12, 2018 08:46:23 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static String getNodeModuleCSSFromPackageJSON(
+   String     module,
+   TreeLogger logger)
+   throws     Exception
+{
+   return(getNodeModuleTargetFromPackageJSON(module, false, logger));
+}
+/*------------------------------------------------------------------------------
+
 @name       getNodeModuleJavascriptFromPackageJSON - get node module export item
                                                                               */
                                                                              /**
@@ -687,6 +768,30 @@ public static String getNodeModuleJavascriptFromPackageJSON(
    TreeLogger logger)
    throws     Exception
 {
+   return(getNodeModuleTargetFromPackageJSON(module, true, logger));
+}
+/*------------------------------------------------------------------------------
+
+@name       getNodeModuleJavascriptFromPackageJSON - get node module export item
+                                                                              */
+                                                                             /**
+            Get node module export item.
+
+@return     browserify inject script item
+
+@param      module      corresponding node module name.
+
+@history    Wed Dec 12, 2018 08:46:23 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static String getNodeModuleTargetFromPackageJSON(
+   String     module,
+   boolean    bJavascript,
+   TreeLogger logger)
+   throws     Exception
+{
    String exportItem     = null;
    File   nodeModulesDir = IConfiguration.getNodeModulesDir(logger);
    String require        = module.replace(".","/");
@@ -694,16 +799,9 @@ public static String getNodeModuleJavascriptFromPackageJSON(
    String nodeModulePath = nodeModuleDir.getAbsolutePath();
 
    logger.log(
-      logger.INFO,
-      "generateInjectScriptBrowserifyExportItem(): nodeModulePath="
+      logger.DEBUG,
+      "getNodeModuleTargetFromPackageJSON(): nodeModulePath="
          + nodeModulePath);
-
-   //if (!nodeModuleDir.exists())
-   //{
-   //   throw new IllegalStateException(
-   //      "Node module dir does not exist: " + nodeModulePath);
-   //}
-
                                        // get any package.json 'main' entry   //
    File   target  = null;
    String json    = null;
@@ -721,21 +819,22 @@ public static String getNodeModuleJavascriptFromPackageJSON(
    }
    if (json != null)
    {
-      String main =
-         (String)((JSONObject)new JSONParser().parse(json)).get("main");
+      String key     = bJavascript ? "main" : "style";
+      String relPath =
+         (String)((JSONObject)new JSONParser().parse(json)).get(key);
 
       logger.log(
-         logger.INFO,
-         "generateInjectScriptBrowserifyExportItem(): "
-       + "checking package.json for " + main);
+         logger.DEBUG,
+         "getNodeModuleTargetFromPackageJSON(): "
+       + "checking package.json for " + relPath);
 
-      if (main != null)
+      if (relPath != null)
       {
-         File file = new File(nodeModuleDir, main);
+         File file = new File(nodeModuleDir, relPath);
 
          logger.log(
-            logger.INFO,
-            "generateInjectScriptBrowserifyExportItem(): "
+            logger.DEBUG,
+            "getNodeModuleTargetFromPackageJSON(): "
           + "checking package.json for " + file.getAbsolutePath());
 
          if (file.exists())
@@ -743,69 +842,9 @@ public static String getNodeModuleJavascriptFromPackageJSON(
             target = file;
          }
       }
-
-      //int    idxEnd;
-      //int    idxBeg = json.indexOf("\"main\"");
-      //if (idxBeg > 0)
-      //{
-      //   idxEnd = json.indexOf('\n', idxBeg);
-      //
-      //   logger.log(
-      //      logger.INFO,
-      //      "generateInjectScriptBrowserifyExportItem(): "
-      //    + "checking package.json for "
-      //    + json.substring(idxBeg, idxEnd));
-      //
-      //   if (idxEnd > 0)
-      //   {
-      //      idxEnd = json.lastIndexOf('"', idxEnd);
-      //      if (idxEnd > 0 && idxEnd > idxBeg)
-      //      {
-      //         logger.log(
-      //            logger.INFO,
-      //            "generateInjectScriptBrowserifyExportItem(): "
-      //          + "checking package.json for "
-      //          + json.substring(idxBeg, idxEnd));
-      //
-      //         idxBeg = json.indexOf(':', idxBeg);
-      //         if (idxBeg > 0)
-      //         {
-      //            logger.log(
-      //               logger.INFO,
-      //               "generateInjectScriptBrowserifyExportItem(): "
-      //             + "checking package.json for "
-      //             + json.substring(idxBeg, idxEnd));
-      //
-      //            idxBeg = json.indexOf('"', idxBeg);
-      //            if (idxBeg > 0 && idxBeg < idxEnd)
-      //            {
-      //               logger.log(
-      //                  logger.INFO,
-      //                  "generateInjectScriptBrowserifyExportItem(): "
-      //                + "checking package.json for "
-      //                + json.substring(idxBeg + 1, idxEnd));
-      //
-      //               String pathname = json.substring(idxBeg + 1, idxEnd);
-      //               c
-      //
-      //               logger.log(
-      //                  logger.INFO,
-      //                  "generateInjectScriptBrowserifyExportItem(): "
-      //                + "checking package.json for "
-      //                + file.getAbsolutePath());
-      //
-      //               if (file.exists())
-      //               {
-      //                  target = file;
-      //               }
-      //            }
-      //         }
-      //      }
-      //   }
-      //}
    }
 
-   if (target == null)
+   if (bJavascript && target == null)
    {
       String item =
          IConfiguration.toReactAttributeName(
@@ -817,8 +856,8 @@ public static String getNodeModuleJavascriptFromPackageJSON(
          File file = new File(nodeModuleDir, filenames[i]);
 
          logger.log(
-            logger.INFO,
-            "generateInjectScriptBrowserifyExportItem(): checking for "
+            logger.DEBUG,
+            "getNodeModuleTargetFromPackageJSON(): checking for "
                + file.getAbsolutePath());
 
          if (file.exists())
@@ -828,13 +867,13 @@ public static String getNodeModuleJavascriptFromPackageJSON(
          }
       }
    }
-   if (target == null)
+   if (bJavascript && target == null)
    {
       File file = new File(nodeModuleDir + ".js");
 
       logger.log(
-         logger.INFO,
-         "generateInjectScriptBrowserifyExportItem(): checking for "
+         logger.DEBUG,
+         "getNodeModuleTargetFromPackageJSON(): checking for "
        + file.getAbsolutePath());
 
       if (file.exists())
@@ -846,12 +885,14 @@ public static String getNodeModuleJavascriptFromPackageJSON(
    if (target != null)
    {
       logger.log(
-         logger.INFO,
-         "generateInjectScriptBrowserifyExportItem(): target="
+         logger.DEBUG,
+         "getNodeModuleTargetFromPackageJSON(): target="
             + target.getAbsolutePath());
 
+      String suffix = bJavascript ? ".js" : ".css";
+
       String exportName = target.getName();
-      if (exportName.endsWith(".js"))
+      if (exportName.endsWith(suffix))
       {
          exportName = exportName.substring(0, exportName.length() - 3);
       }
@@ -859,8 +900,8 @@ public static String getNodeModuleJavascriptFromPackageJSON(
    }
 
    logger.log(
-      logger.INFO,
-      "generateInjectScriptBrowserifyExportItem(): for module=" + module
+      logger.DEBUG,
+      "getNodeModuleTargetFromPackageJSON(): for module=" + module
     + ", exportItem=" + exportItem);
 
    return(exportItem);

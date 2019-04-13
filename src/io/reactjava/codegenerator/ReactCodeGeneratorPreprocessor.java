@@ -98,6 +98,11 @@ public byte[] process(
       String mapEntries = "";
       for (String componentClassname : components.keySet())
       {
+         logger.log(
+            logger.INFO,
+            "ReactCodeGeneratorPreprocessor.process(): "
+          + "adding FactoryMap entry for " + componentClassname);
+
          String entry =
             "\n"
           + "   kFACTORY_MAP.put(\n"
@@ -106,7 +111,10 @@ public byte[] process(
           + "      {\n"
         //+ "         return(new " + componentClassname + "(props));\n"
           + "         Component component = new " + componentClassname + "();\n"
-          + "                   component.initialize(props);\n"
+          + "         if (props != null)\n"
+          + "         {\n"
+          + "            component.initialize(props);\n"
+          + "         }\n"
           + "         return(component);\n"
           + "      });\n";
 

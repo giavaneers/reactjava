@@ -16,16 +16,48 @@ purpose:    ReactJava router
 
                Map<String,Class> navRoutes = new HashMap<>()
                {{
+                  put("",                           Component1.class);
+                  put("http://myApp.html#animals",  Component1.class);
                   put("animals",                    Component1.class);
+                  put("animals]heading",            Component1.class);
+                  put(".]heading",                  Component1.class);
                   put("flowers/:color/:leafcount?", Component2.class);
                   put("trees/:height(ten|twenty)",  Component3.class);
                }};
 
-            declares three different routes.
+            declares seven different routes, each with a different format.
 
-            The first matches explictly with the relative url value 'animals',
+            The first is known as the 'default' route; namely, the route
+            specified when only the webApp url is used. For example, if the
+            webApp is accessible at 'http://myApp.html', Component1 will be
+            rendered.
 
-            The second matches with the relative url 'flowers', and also assigns
+            The second specifically specifies the complete url including the
+            path, 'animals' which maps to Component1 as before. Note this is the
+            format to be used in an anchor tag as well. For example,
+
+               <a href="http://myApp.html#animals"></a>
+
+            will cause Component1 to be rendered. This format will work as a
+            navRoute but is discouraged in favor of the format of the third
+            route.
+
+            The third is the simplest way to specify a specific component, in
+            this case, Component1 again.
+
+            The fourth names not only the target component to be rendered, but
+            also the elementId of a specific element that should be scrolled
+            to the top. In this case, Component1 will be rendered and the
+            element with id 'heading' will be scrolled to the top. An anchor
+            tag can accomplish the same thing, such as
+
+               <a href="http://myApp.html#animals]heading"></a>
+
+            The fifth names only a target elementId of the current component
+            rendered. Like the previous, the element with the specified id will
+            be scrolled to the top.
+
+            The sixth matches with the relative url 'flowers', and also assigns
             the target component 'color' property with the path value element
             following the 'flowers' value and assigns the 'leafcount' property
             with the path value element following the 'color' value if it
@@ -38,7 +70,7 @@ purpose:    ReactJava router
             its 'color' property to 'yellow' and leave its 'leafcount' property
             value unassigned.
 
-            The third matches with the relative url 'trees' only if the path
+            The seventh matches with the relative url 'trees' only if the path
             value element following the 'trees' value satisfies the regular
             expression 'ten|twenty', in which case the target component's height
             property value will be assigned whichever value was specified in the
@@ -61,13 +93,10 @@ import com.giavaneers.util.gwt.Logger;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Window;
-import elemental2.dom.DocumentEvent;
 import elemental2.dom.DomGlobal;
-import elemental2.dom.Event;
 import java.util.Map;
 import java.util.function.Function;
-
-// Router =============================//
+                                       // Router =============================//
 public class Router implements IRouter
 {
                                        // constants ------------------------- //
@@ -144,22 +173,22 @@ public static Component componentForHash(
 }
 /*------------------------------------------------------------------------------
 
-@name       elementForHash - find a matching route for specified hash
+@name       elementForPath - find a matching route for specified path
                                                                               */
                                                                              /**
-            Find a matching route for specified hash.
+            Find a matching route for specified path.
 
 @return     void
 
-@param      hash     hash
+@param      path     path
 
 @history    Thu Dec 13, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public static Element elementForHash(
-   String hash)
+public static Element elementForPath(
+   String path)
 {
    Element element = null;
 
@@ -174,7 +203,7 @@ public static Element elementForHash(
       routeMap = configuration.getNavRoutes();
    }
 
-   Map<String,Object> descriptor = IRouter.descriptorForHash(routeMap, hash);
+   Map<String,Object> descriptor = IRouter.descriptorForHash(routeMap, path);
    if (descriptor != null)
    {
       Component component = componentForHash(descriptor);
@@ -301,36 +330,61 @@ public static Element render(
 //------------------------------------------------------------------------------
 public static Element render()
 {
+                                       // path is of the form                 //
+                                       // urlPath#routePath]anchorElementId   //
+                                       // for example:                        //
+                                       // "HelloWorld.html#HelloPage]top"     //
    String hash = Window.Location.getHash();
+
+                                       // entry via Router.push() may present //
+                                       // encoding by the browser, for example//
+                                       // '#RoutingReactJava.html#A]top'      //
+                                       // ->'#RoutingReactJava.html%23A%5Btop'//
    if (hash.startsWith("#"))
    {
       hash = hash.substring(1);
    }
+   hash = hash.replace("%23","#").replace("%5D","]");
 
-   Element element = elementForHash(hash);
-   if (element != null)
+   String[] hashSplits = hash.split("#");
+   if (hashSplits.length > 1)
    {
-      if (ReactJava.getIsWebPlatform())
-      {
-         ReactDOM.render(element, DomGlobal.document.getElementById("root"));
-
-                                       // signal (another) DOMContentLoaded   //
-                                       // since some external scripts (such   //
-                                       // as Prism) may use the event to      //
-                                       // indicate the DOM is ready to be     //
-                                       // processed which may have occurred   //
-                                       // before the GWT onModuleLoad() and   //
-                                       // this subsequent ReactDOM.render()   //
-                                       // invocation. Beware of side-effects. //
-         DomGlobal.document.dispatchEvent(new Event("DOMContentLoaded"));
-      }
+      hash = hashSplits[1];
    }
-   else
+                                       // split off any anchor elementId      //
+   String[] bracketSplits = hash.split("\\]");
+   String   path          = bracketSplits[0];
+   boolean  bNewElement   = !".".equals(path);
+   Element  element       = bNewElement ? elementForPath(path) : null;
+
+   if (bNewElement && element == null)
    {
       kLOGGER.logError(
          "Router.render(): no element to render."
        + " Did you forget to specify a route for hash value \"" + hash + "\"?");
    }
+   else if (ReactJava.getIsWebPlatform())
+   {
+      if (element != null)
+      {
+         ReactDOM.render(element, DomGlobal.document.getElementById("root"));
+      }
+      if (bracketSplits.length > 1)
+      {
+                                    // scroll to specified anchor element  //
+         scrollIntoView(bracketSplits[1], 0);
+      }
+      else
+      {
+                                    // some browsers will leave the scroll //
+                                    // bar unchanged when switching to a   //
+                                    // new path, so if an anchor element   //
+                                    // is not specified along with the     //
+                                    // path, scroll to the top             //
+         DomGlobal.window.scrollTo(0, 0);
+      }
+   }
+
    return(element);
 }
 /*------------------------------------------------------------------------------
@@ -352,5 +406,53 @@ public static Element render()
 public static void replace(String path)
 {
    com.google.gwt.user.client.History.replaceItem(path);
+}
+/*------------------------------------------------------------------------------
+
+@name       scrollIntoView - scroll to specified elementId
+                                                                              */
+                                                                             /**
+            Implements the functionality of going to a specified anchor on the
+            page by scrolling to the specified elementId. This implementation
+            waits up to 1 second for the specified element to be found in the
+            DOM. If it finds it, it scrolls to make the specified element
+            visible.
+
+@return     void
+
+@param      elementId      element id
+@param      vOffset        vertical offset, for example: '10px'
+
+@history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static void scrollIntoView(
+   String elementId,
+   int    vOffset)
+{
+   final double[] timerDsc = new double[2];
+
+   timerDsc[0] = elemental2.dom.DomGlobal.setInterval(e ->
+   {
+      timerDsc[1]++;
+
+      elemental2.dom.Element element =
+         DomGlobal.document.getElementById(elementId);
+
+      if (element != null)
+      {
+         element.scrollIntoView();
+         if (vOffset != 0)
+         {
+            DomGlobal.window.scrollBy(0, vOffset);
+         }
+      }
+      if (element != null || timerDsc[1] > 10)
+      {
+         elemental2.dom.DomGlobal.clearInterval(timerDsc[0]);
+      }
+   }, 100);
 }
 }//====================================// end Router -------------------------//

@@ -34,6 +34,7 @@ import io.reactjava.client.core.react.AppComponentTemplate;
 import io.reactjava.client.core.react.Component;
 import io.reactjava.client.core.react.INativeEventHandler;
 import io.reactjava.client.core.react.IProvider;
+import io.reactjava.client.core.react.IReactCodeGenerator;
 import io.reactjava.client.core.react.IUITheme;
 import io.reactjava.client.core.react.Utilities;
 import io.reactjava.client.core.resources.javascript.IJavascriptResources;
@@ -150,6 +151,111 @@ public static final String kBOOT_JS =
 public ReactCodeGenerator()
 {
    super();
+}
+/*------------------------------------------------------------------------------
+
+@name       addImportedNodeModuleJavascript - add imported node module script
+                                                                              */
+                                                                             /**
+            Add imported node module javascript.
+
+@param      module      module
+@param      logger      logger
+
+@history    Sun Dec 02, 2018 18:00:00 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected void addImportedNodeModuleJavascript(
+   String     module,
+   TreeLogger logger)
+   throws     Exception
+{
+                                       // add the module to the dependency set//
+                                       // generating error information if not //
+                                       // found                               //
+   String path = IConfiguration.getNodeModuleJavascript(module, logger);
+   if (path != null)
+   {
+      if (!IConfiguration.getDependenciesSet().contains(module))
+      {
+         IConfiguration.getDependenciesSet().add(module);
+         IConfiguration.getDependencies().put(module, path);
+      }
+   }
+
+   logger.log(TreeLogger.INFO,
+      "getImportedNodeModules(): module=" + module
+    + ", " + (path != null ? "" : "not ") + "found");
+}
+/*------------------------------------------------------------------------------
+
+@name       addImportedNodeModuleStylesheet - add imported node module css
+                                                                              */
+                                                                             /**
+            Add imported node module css.
+
+@param      module      module
+@param      logger      logger
+
+@history    Sun Dec 02, 2018 18:00:00 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected void addImportedNodeModuleStylesheet(
+   String         module,
+   IConfiguration configuration,
+   TreeLogger     logger)
+   throws         Exception
+{
+   String path =
+      module.endsWith(".css")
+         ? IConfiguration.getNodeModuleCSS(module, configuration, logger)
+         : IConfiguration.getNodeModuleCSSFromPackageJSON(module, logger);
+
+   if (path != null)
+   {
+      configuration.getGlobalCSS().add(path);
+   }
+
+   logger.log(TreeLogger.INFO,
+      "getImportedNodeModules(): stylesheet=" + path
+    + ", " + (path != null ? "" : "not ") + "found");
+}
+/*------------------------------------------------------------------------------
+
+@name       copyCSSFileToArtifact - copy css file to artifact
+                                                                              */
+                                                                             /**
+            copy css file to artifact.
+
+@return     void
+
+@param      filePath      image name
+
+@history    Mon May 19, 2014 18:00:00 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static void copyCSSFileToArtifact(
+   File             src,
+   IConfiguration   configuration,
+   GeneratorContext context,
+   TreeLogger       logger)
+   throws           Exception
+{
+   logger.log(
+      TreeLogger.Type.INFO,
+      "copyCSSFileToArtifact(): " + src.getAbsolutePath());
+
+   copyStreamToArtifact(
+      new FileInputStream(src),
+      "css/" + src.getName(), configuration, context, logger);
+
+   logger.log(TreeLogger.Type.INFO, "copyCSSFileToArtifact(): exiting");
 }
 /*------------------------------------------------------------------------------
 
@@ -332,12 +438,33 @@ protected static void copyResources(
    if (globalCSS.size() > 0)
    {
       logger.log(TreeLogger.Type.INFO, "copyResources(): begin copying css");
+      String imported = "";
       for (String rsrcStylesheet : globalCSS)
       {
                                        // copy each stylesheet from associated//
                                        // resource to the distribution...     //
-         copyCSSResourceToArtifact(
-            rsrcStylesheet, configuration, context, logger);
+         if (rsrcStylesheet.startsWith("/"))
+         {
+                                       // copy an imported stylesheet         //
+            File cssFile = new File(rsrcStylesheet);
+            imported += imported.length() > 0 ? "," : "" + cssFile.getName();
+
+            copyCSSFileToArtifact(cssFile, configuration, context, logger);
+         }
+         else
+         {
+            copyCSSResourceToArtifact(
+               rsrcStylesheet, configuration, context, logger);
+         }
+      }
+      if (imported.length() > 0)
+      {
+                                       // copy the list to the distribution   //
+         copyStreamToArtifact(
+            new ByteArrayInputStream(imported.getBytes("UTF-8")),
+            "css/" + IReactCodeGenerator.kIMPORTED_STYLESHEETS_LIST,
+            configuration, context, logger);
+
       }
       logger.log(TreeLogger.Type.INFO, "copyResources(): done copying css");
    }
@@ -1036,6 +1163,7 @@ public static boolean getDependenciesChanged()
 //------------------------------------------------------------------------------
 protected Collection<String> getImportedNodeModules(
    Map<String,Map<String,JClassType>> typesMap,
+   IConfiguration                     configuration,
    TreeLogger                         logger)
    throws                             Exception
 {
@@ -1067,23 +1195,40 @@ protected Collection<String> getImportedNodeModules(
       }
       else
       {
-         for (String module : importedModules)
+         for (String moduleSpecifier : importedModules)
          {
-                                       // add the module to the dependency set//
-                                       // generating error information if not //
-                                       // found                               //
-            String nodeModulePath =
-               IConfiguration.getNodeModuleJavascript(module, logger);
+                                       // find whether looking for javascript //
+                                       // or css or both                      //
+            String[] splits  = moduleSpecifier.split(":");
+            String   module  = splits[0];
+            boolean  bScript = module.endsWith(".js");
+            boolean  bStyle  = module.endsWith(".css");
 
-            if (nodeModulePath != null)
+            if (!bScript && !bStyle)
             {
-               IConfiguration.getDependenciesSet().add(module);
-               IConfiguration.getDependencies().put(module, nodeModulePath);
+               for (int iSplit = 1; iSplit < splits.length; iSplit++)
+               {
+                  String split = splits[iSplit].trim().toLowerCase();
+                  if ("javascript".equals(split))
+                  {
+                     bScript = true;
+                  }
+                  else if ("css".equals(split))
+                  {
+                     bStyle = true;
+                  }
+               }
             }
 
-            logger.log(TreeLogger.INFO,
-               "getImportedNodeModules(): module=" + module
-             + ", " + (nodeModulePath != null ? "" : "not ") + "found");
+            bScript |= bStyle == false;
+            if (bScript)
+            {
+               addImportedNodeModuleJavascript(module, logger);
+            }
+            if (bStyle)
+            {
+               addImportedNodeModuleStylesheet(module, configuration, logger);
+            }
          }
       }
    }
@@ -1511,11 +1656,11 @@ public void process(
    Map<String,Map<String,JClassType>> providersAndComponents =
       parseClasses(context.getTypeOracle(), logger);
 
-   getImportedNodeModules(providersAndComponents, logger);
-
-                                 // copy all scripts and css to artifact   //
    IConfiguration configuration = getConfiguration(context, logger);
 
+   getImportedNodeModules(providersAndComponents, configuration, logger);
+
+                                 // copy all scripts and css to artifact   //
    copyResources(configuration, context, logger);
 
    saveCurrentDependencies(logger);
@@ -1686,7 +1831,7 @@ public Configuration(
    TreeLogger logger)
 {
    super();
-   putAll(kCONFIGURATION_DEFAULT);
+   putAll(kCONFIGURATION_DEFAULT_SANS_THEME);
 
    IPlatform platform = IConfiguration.getPlatform(logger);
    if (platform != null)
@@ -2106,7 +2251,7 @@ public io.reactjava.client.core.react.IConfiguration setGlobalCSS(
 {
    if (globalCSS != null)
    {
-      setGlobalCSS(Arrays.asList(globalCSS));
+      setGlobalCSS(new ArrayList(Arrays.asList(globalCSS)));
    }
    return(this);
 }

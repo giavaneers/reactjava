@@ -1,8 +1,8 @@
 /*==============================================================================
 
-name:       Properties.java
+name:       NativeObject.java
 
-purpose:    ReactJava Component Properties.
+purpose:    ReactJava Component NativeObject.
 
 history:    Mon June 4, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -15,14 +15,16 @@ notes:
                                        // package --------------------------- //
 package io.reactjava.client.core.react;
                                        // imports --------------------------- //
+import elemental2.core.JsObject;
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;
 import jsinterop.base.Js;
 import jsinterop.base.JsForEachCallbackFn;
-                                       // Properties =========================//
+import jsinterop.base.JsPropertyMap;
+                                       // NativeObject =======================//
 @JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "Object")
-public class Properties extends NativeObject
+public class NativeObject extends JsObject
 {
                                        // constants ------------------------- //
                                        // (none)                              //
@@ -36,49 +38,30 @@ public class Properties extends NativeObject
 
 /*------------------------------------------------------------------------------
 
-@name       Properties - default constructor
+@name       NativeObject - default constructor
                                                                               */
                                                                              /**
             Default constructor
 
-@return     An instance of Properties if successful.
+@return     An instance of NativeObject if successful.
 
 @history    Mon Aug 28, 2017 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public Properties()
+public NativeObject()
 {
    super();
 }
 /*------------------------------------------------------------------------------
 
-@name       getChildren - get children property value
+@name       get - get value of specified property
                                                                               */
                                                                              /**
-            Get children property value
+            Get value of specified property
 
-@return     property value, or null if not found.
-
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-@JsOverlay
-public final Element getChildren()
-{
-   return(Js.uncheckedCast(get("children")));
-}
-/*------------------------------------------------------------------------------
-
-@name       getComponent - get component of these properties
-                                                                              */
-                                                                             /**
-            Get component of these properties
-
-@return     value of component, or null if not found.
+@return     value of specified property, or null if not found.
 
 @param      propertyName      property name
 
@@ -88,65 +71,21 @@ public final Element getChildren()
                                                                               */
 //------------------------------------------------------------------------------
 @JsOverlay
-public final Component getComponent()
-{
-   return((Component)get("component"));
-}
-/*------------------------------------------------------------------------------
-
-@name       getConfiguration - get application configuration
-                                                                              */
-                                                                             /**
-            Get application configuration
-
-@return     application configuration.
-
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-@JsOverlay
-public final IConfiguration getConfiguration()
-{
-   IConfiguration configuration = (IConfiguration)get("configuration");
-   if (configuration == null)
-   {
-      configuration = Configuration.sharedInstance();
-      setConfiguration(configuration);
-   }
-   return(configuration);
-}
-/*------------------------------------------------------------------------------
-
-@name       getEventHandler - get event handler value of specified property
-                                                                              */
-                                                                             /**
-            Get event handler  value of specified property
-
-@return     event handler  value of specified property, or null if not found.
-
-@param      propertyName      property name
-
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-@JsOverlay
-public final INativeEventHandler getEventHandler(
+public final Object get(
    String propertyName)
 {
-   return((INativeEventHandler)get(propertyName));
+   return(Js.asPropertyMap(this).get(propertyName));
 }
 /*------------------------------------------------------------------------------
 
-@name       getHistory - get history property value
+@name       getBoolean - get boolean value of specified property
                                                                               */
                                                                              /**
-            Get history property value
+            Get boolean value of specified property
 
-@return     history value, or null if not found.
+@return     boolean value of specified property, or null if not found.
+
+@param      propertyName      property name
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -154,20 +93,146 @@ public final INativeEventHandler getEventHandler(
                                                                               */
 //------------------------------------------------------------------------------
 @JsOverlay
-public final Router getHistory()
+public final boolean getBoolean(
+   String propertyName)
 {
-   return(Js.uncheckedCast(get("history")));
+   boolean booleanValue;
+
+   Object value = get(propertyName);
+   if (value instanceof String)
+   {
+      booleanValue = "true".equals((String)value);
+   }
+   else
+   {
+      booleanValue = Utilities.getObjectBooleanValueNative(this, propertyName);
+   }
+   return(booleanValue);
 }
 /*------------------------------------------------------------------------------
 
-@name       setComponent - set component for these properties
+@name       getDouble - get double value of specified property
                                                                               */
                                                                              /**
-            Set component for these properties
+            Get double value of specified property
+
+@return     double value of specified property, or null if not found.
+
+@param      propertyName      property name
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes      see set() with invocation of Utilties.setObjectIntValueNative()
+                                                                              */
+//------------------------------------------------------------------------------
+@JsOverlay
+public final double getDouble(
+   String propertyName)
+{
+   double doubleValue;
+
+   Object value = get(propertyName);
+   if (value instanceof String)
+   {
+      doubleValue = Double.parseDouble((String)value);
+   }
+   else
+   {
+      doubleValue = Utilities.getObjectDoubleValueNative(this, propertyName);
+   }
+   return(doubleValue);
+}
+/*------------------------------------------------------------------------------
+
+@name       getInt - get int value of specified property
+                                                                              */
+                                                                             /**
+            Get int value of specified property
+
+@return     int value of specified property, or null if not found.
+
+@param      propertyName      property name
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes      see set() with invocation of Utilties.setObjectIntValueNative()
+                                                                              */
+//------------------------------------------------------------------------------
+@JsOverlay
+public final int getInt(
+   String propertyName)
+{
+   int intValue;
+
+   Object value = get(propertyName);
+   if (value instanceof String)
+   {
+      intValue = Integer.parseInt((String)value);
+   }
+   else
+   {
+      intValue = Utilities.getObjectIntValueNative(this, propertyName);
+   }
+   return(intValue);
+}
+/*------------------------------------------------------------------------------
+
+@name       getString - get string value of specified property
+                                                                              */
+                                                                             /**
+            Get string value of specified property
+
+@return     string value of specified property, or null if not found.
+
+@param      propertyName      property name
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+@JsOverlay
+public final String getString(
+   String propertyName)
+{
+   return((String)get(propertyName));
+}
+/*------------------------------------------------------------------------------
+
+@name       remove - remove specified property
+                                                                              */
+                                                                             /**
+            Remove specified property
+
+@return     value of removed property or null if not found.
+
+@param      propertyName      property name
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+@JsOverlay
+public final Object remove(
+   String propertyName)
+{
+   JsPropertyMap<Object> map = Js.asPropertyMap(this);
+   Object value = map.get(propertyName);
+   map.delete(propertyName);
+   return(value);
+}
+/*------------------------------------------------------------------------------
+
+@name       set - set value of specified property
+                                                                              */
+                                                                             /**
+            Set value of specified property
 
 @return     void
 
-@param      component      component for these properties
+@param      propertyName      property name
+@param      value             value of specified property
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -175,33 +240,40 @@ public final Router getHistory()
                                                                               */
 //------------------------------------------------------------------------------
 @JsOverlay
-public final Properties setComponent(
-   Component value)
+public final NativeObject set(
+   String propertyName,
+   Object value)
 {
-   set("component", value);
-   return(this);
-}
-/*------------------------------------------------------------------------------
+   if (value != null)
+   {
+      JsPropertyMap map = Js.asPropertyMap(this);
+      if (value instanceof Boolean)
+      {
+         map.set(propertyName, ((Boolean)value).booleanValue());
+      }
+      else if (value instanceof Number)
+      {
+                                          // perhaps there is some way to use the//
+                                          // @DoNotAutobox annotation instead... //
+         if (value instanceof Integer)
+         {
+            map.set(propertyName, ((Integer)value).intValue());
+         }
+         else if (value instanceof Double)
+         {
+            map.set(propertyName, ((Double)value).doubleValue());
+         }
+         else if (value instanceof Float)
+         {
+            map.set(propertyName, ((Float)value).floatValue());
+         }
+      }
+      else
+      {
+         map.set(propertyName, value);
+      }
+   }
 
-@name       setComponent - set application configuration
-                                                                              */
-                                                                             /**
-            Set application configuration
-
-@return     void
-
-@param      value    application configuration
-
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-@JsOverlay
-protected final Properties setConfiguration(
-   IConfiguration value)
-{
-   set("configuration", value);
    return(this);
 }
 /*------------------------------------------------------------------------------
@@ -209,27 +281,27 @@ protected final Properties setConfiguration(
 @name       with - factory method
                                                                               */
                                                                              /**
-            Factory method creating a Properties instance containing the
+            Factory method creating a NativeObject instance containing the
             specified properties specified as a sequence iof tuples, where
             each tuple consists of a String property name followed by a
             value object reference.
 
             For example:
 
-               Properties myProperties =
-                  Properties.with("text", "MyText", "callback", MyCallbackFcn);
+               NativeObject myProperties =
+                  NativeObject.with("text", "MyText", "callback", MyCallbackFcn);
 
              or to create a copy of an instance adding new/overriding properties:
 
-               Properties template =
-                  Properties.with("name", "MyName", "callback", OrigCallbackFcn);
+               NativeObject template =
+                  NativeObject.with("name", "MyName", "callback", OrigCallbackFcn);
 
-               Properties myProperties =
-                  Properties.with(
+               NativeObject myProperties =
+                  NativeObject.with(
                      template, "text", "MyText", "callback", MyCallbackFcn);
 
 
-@return     An instance of Properties if successful.
+@return     An instance of NativeObject if successful.
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -237,55 +309,52 @@ protected final Properties setConfiguration(
                                                                               */
 //------------------------------------------------------------------------------
 @JsOverlay
-public static Properties with(Object... args)
+public static NativeObject with(Object... args)
 {
    int i = 0;
-   Properties props = new Properties();
+   NativeObject o = new NativeObject();
 
-   if (args != null && args.length > 0)
+   if (args[0] instanceof NativeObject)
    {
-      if (args[0] != null && args[0] instanceof Properties)
+      NativeObject        template = (NativeObject)args[0];
+      JsForEachCallbackFn callback = new JsForEachCallbackFn()
       {
-         Properties          template = (Properties)args[0];
-         JsForEachCallbackFn callback = new JsForEachCallbackFn()
+         public void onKey(String key)
          {
-            public void onKey(String key)
-            {
-               props.set(key, template.get(key));
-            }
-         };
-         Js.asPropertyMap((Properties)args[0]).forEach(callback);
-         i++;
-      }
-      for (; i < args.length; i++)
-      {
-         props.set((String)args[i], args[++i]);
-      }
+            o.set(key, template.get(key));
+         }
+      };
+      Js.asPropertyMap((NativeObject)args[0]).forEach(callback);
+      i++;
    }
-   return(props);
+   for (; i < args.length; i++)
+   {
+      o.set((String)args[i], args[++i]);
+   }
+   return(o);
 }
 /*------------------------------------------------------------------------------
 
 @name       without - factory method
                                                                               */
                                                                              /**
-            Factory method creating a Properties instance containing the
+            Factory method creating a NativeObject instance containing the
             specified properties template without the properties referenced
             by the specified list of keys.
 
             For example:
 
-               Properties template =
-                  Properties.with("text", "MyText", "callback", MyCallbackFcn);
+               NativeObject template =
+                  NativeObject.with("text", "MyText", "callback", MyCallbackFcn);
 
-               Properties templateWithout =
-                  Properties.without(template, "callback");
+               NativeObject templateWithout =
+                  NativeObject.without(template, "callback");
 
              yields the same as:
 
-               Properties.with("text", "MyText");
+               NativeObject.with("text", "MyText");
 
-@return     An instance of Properties if successful.
+@return     An instance of NativeObject if successful.
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -293,28 +362,28 @@ public static Properties with(Object... args)
                                                                               */
 //------------------------------------------------------------------------------
 @JsOverlay
-public static Properties without(Properties ref, String... keys)
+public static NativeObject without(NativeObject ref, String... keys)
 {
    if (ref == null)
    {
       throw new IllegalArgumentException("Reference may not be null");
    }
 
-   Properties          props    = new Properties();
+   NativeObject        o        = new NativeObject();
    JsForEachCallbackFn callback = new JsForEachCallbackFn()
    {
       public void onKey(String key)
       {
-         props.set(key, ref.get(key));
+         o.set(key, ref.get(key));
       }
    };
    Js.asPropertyMap(ref).forEach(callback);
 
    for (int i = 0; i < keys.length; i++)
    {
-      props.remove(keys[i]);
+      o.remove(keys[i]);
    }
 
-   return(props);
+   return(o);
 }
-}//====================================// end Properties ---------------------//
+}//====================================// end NativeObject -------------------//

@@ -1,0 +1,29 @@
+/*==============================================================================
+
+    User Guide
+
+==============================================================================*/
+.title
+ReactJava User Guide
+.end
+
+.body
+This section will help you install and build your first ReactJava app. If you
+already have ReactJava installed, you can skip ahead to the Tutorial.
+.end
+
+/*==============================================================================
+
+    Example: Three by Three
+
+==============================================================================*/
+.caption
+Example: Three by Three
+.end
+
+.body
+Here's a simple example that we can build upon in a few steps. First we create
+an app that renders a centered simple block that is responsive; that is, a block
+that changes size in steps as the browser window gets narrower or wider. You can
+get the source here.
+.end

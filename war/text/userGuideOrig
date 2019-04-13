@@ -1,0 +1,555 @@
+/*==============================================================================
+
+    User Guide
+
+==============================================================================*/
+.title
+ReactJava User Guide
+.end
+
+.body
+This section will help you install and build your first ReactJava app. If you
+already have ReactJava installed, you can skip ahead to the Tutorial.
+.end
+
+/*==============================================================================
+
+    Example: Three by Three
+
+==============================================================================*/
+.caption
+Example: Three by Three
+.end
+
+.body
+Here's a simple example that we can build upon in a few steps. First we create
+an app that renders a centered simple block that is responsive; that is, a block
+that changes size in steps as the browser window gets narrower or wider. You can
+get the source here.
+.end
+
+.code
+/*==============================================================================
+
+name:       App.java
+
+purpose:    Three By Three App.
+
+history:    Sat Oct 27, 2018 10:30:00 (Giavaneers - LBM) created
+
+notes:
+                    COPYRIGHT (c) BY GIAVANEERS, INC.
+        This source code is licensed under the MIT license found in the
+            LICENSE file in the root directory of this source tree.
+
+==============================================================================*/
+                                       // package --------------------------- //
+package io.reactjava.client.examples.threebythree;
+                                       // imports --------------------------- //
+import elemental2.dom.Element;
+import elemental2.dom.Event;
+import io.reactjava.client.core.react.AppComponentTemplate;
+import io.reactjava.client.core.react.INativeEventHandler;
+import io.reactjava.client.core.react.Properties;
+
+                                       // App ================================//
+public class App extends AppComponentTemplate
+{
+                                       // class constants ------------------- //
+                                       // state variable name                 //
+public static final String kSTATE_COLORS = "colors";
+
+/*------------------------------------------------------------------------------
+
+@name       getColor- get background color for specified index
+                                                                              */
+                                                                             /**
+            Get background color for specified index. Method accessible in
+            markup.
+
+@return     background color for specified index
+
+@history    Sat Oct 27, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public String getColor(
+   int idx)
+{
+   String[] colors = (String[])getState(kSTATE_COLORS);
+   return(idx < 0 ? colors[2] : colors[idx % 2]);
+}
+/*------------------------------------------------------------------------------
+
+@name       getColors - assign a new colors array
+                                                                              */
+                                                                             /**
+            Assign a new colors array.
+
+@return     void
+
+@history    Sat Oct 27, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public String[] getColors()
+{
+   String[] themes =
+   {
+      "blue,lightblue,yellow",
+      "red,grey,blue",
+      "lightcoral,lightpink,lightseagreen",
+      "blue,white,red",
+   };
+
+   return(themes[(int)(Math.random() * themes.length)].split(","));
+}
+/*------------------------------------------------------------------------------
+
+@name       render - render component
+                                                                              */
+                                                                             /**
+            Render component. This implementation is all markup, with no java
+            code included.
+
+@return     void
+
+@history    Sat Oct 27, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public void render()
+{
+                                       // assign state variable initial value //
+                                       // (invocations ignored after first)   //
+   useState(kSTATE_COLORS, getColors());
+                                       // get the state variable current value//
+   String[] colors = (String[])getState(kSTATE_COLORS);
+                                       /*--
+   <div class='container'>
+      <div class='board' style='background-color:{getColor(0)}' />
+   </div>
+                                       --*/
+}
+/*------------------------------------------------------------------------------
+
+@name       renderCSS - get component css
+                                                                              */
+                                                                             /**
+            Get component css.
+
+@return     void
+
+@history    Sat Oct 27, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public void renderCSS()
+{
+/*--
+   .container
+   {
+      display:          flex;
+      flex:             1;
+      flex-direction:   row;
+      width:            100%;
+      align-items:      center;
+      justify-content:  center;
+   }
+   .board
+   {
+      display:          flex;
+      flex-direction:   row;
+      flex-wrap:        wrap;
+      margin-top:       40px;
+   }
+   @media (min-width: 320px)
+   {
+      .board{height: 300px;  width: 300px;}
+   }
+   @media (min-width: 576px)
+   {
+      .board {height: 540px;  width: 540px;}
+   }
+   @media (min-width: 768px)
+   {
+      .board {height: 720px;  width: 720px;}
+   }
+   @media (min-width: 992px)
+   {
+      .board{height:  960px;  width: 960px;}
+   }
+   @media (min-width: 1200px)
+   {
+      .board{height: 1140px; width: 1140px;}
+   }
+--*/
+}
+}//====================================// end App ============================//
+.end
+
+.caption
+Adding a Click Handler
+.end
+
+.body
+We can add a click-handler to the 'board' element and make it switch background
+color when it is clicked. You can get the source here.
+.end
+
+.code
+...
+import io.reactjava.client.gwt.react.INativeEventHandler;
+...
+
+/*------------------------------------------------------------------------------
+
+@name       clickHandler - onClick event handler
+                                                                              */
+                                                                             /**
+            onClick event handler as a public instance variable, accessible
+            in markup.
+
+@return     void
+
+@history    Sat Oct 27, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public INativeEventHandler clickHandler = (Event e) ->
+{
+                                       // the clicked element                 //
+   Element element = (Element)e.target;
+                                       // change the clicked element to the   //
+                                       // third element of the colors array   //
+   element.setAttribute("style", "background-color:" + getColor(-1));
+};
+
+...
+
+public void render()
+{
+                                       // assign state variable initial value //
+                                       // (invocations ignored after first)   //
+   useState(kSTATE_COLORS, getColors());
+                                       // get the state variable current value//
+   String[] colors = (String[])getState(kSTATE_COLORS);
+                                       /*--
+   <div class='container'>
+      <div
+         class='board' style='background-color:{getColor(0)}'
+         onClick={clickHandler}>
+      </div>
+   </div>
+                                       --*/
+}
+.end
+
+.caption
+Adding Nine Cells to the Board
+.end
+
+.body
+Rather than a single block, we can add nine 'cells' to the 'board' element,
+making the layout look like tic-tac-toe. Each cell get's its own independent
+click handler. You can get the source here.
+.end
+
+.code
+
+public void render()
+{
+                                       // assign state variable initial value //
+                                       // (invocations ignored after first)   //
+   useState(kSTATE_COLORS, getColors());
+                                       // get the state variable current value//
+   String[] colors = (String[])getState(kSTATE_COLORS);
+                                       /*--
+   <div class='container'>
+      <div class='board'>
+                                       --*/
+                                       // add nine 'cells' to the board       //
+      for (int i = 0; i < 9; i++)
+      {
+                                       /*--
+         <div
+            class='cell'
+            style='background-color:{getColor(i)}'
+            onClick={clickHandler}
+         />
+                                       --*/
+      }
+                                       /*--
+      </div>
+   </div>
+                                       --*/
+}
+
+public void renderCSS()
+{
+                                        // add support for cells              //
+/*--
+   ...
+
+   .cell
+   {
+   }
+   @media (min-width: 320px)
+   {
+      .board{height:  300px;  width: 300px;}
+      .cell {height:  100px;  width: 100px;}
+   }
+   @media (min-width: 576px)
+   {
+      .board {height: 540px;  width: 540px;}
+      .cell {height:  180px;  width: 180px;}
+   }
+   @media (min-width: 768px)
+   {
+      .board {height: 720px;  width: 720px;}
+      .cell {height:  240px;  width: 240px;}
+   }
+   @media (min-width: 992px)
+   {
+      .board{height:  960px;  width: 960px;}
+      .cell {height:  320px;  width: 320px;}
+   }
+   @media (min-width: 1200px)
+   {
+      .board{height: 1140px; width: 1140px;}
+      .cell {height:  380px; width:  380px;}
+   }
+--*/
+}
+.end
+
+.caption
+Adding a List of the Colors
+.end
+
+.body
+We can add a list of the colors just below the board. You can get the source
+here.
+.end
+
+.code
+public void render()
+{
+                                       // assign state variable initial value //
+                                       // (invocations ignored after first)   //
+   useState(kSTATE_COLORS, getColors());
+                                       // get the state variable current value//
+   String[] colors = (String[])getState(kSTATE_COLORS);
+                                       /*--
+   <div class='container'>
+      <div class='board'>
+                                       --*/
+      for (int i = 0; i < 9; i++)
+      {
+                                       /*--
+         <div
+            class='cell'
+            style='background-color:{getColor(i)}'
+            onClick={clickHandler}
+         />
+                                       --*/
+      }
+                                       // add a list of the colors            //
+                                       /*--
+        <ul>
+                                       --*/
+        for (int i = 0; i < this.colors.length; i++)
+        {
+            String sKey  = Integer.toString(i);
+            String color = colors[i];
+                                       /*--
+            <li key={sKey}>{color}</li>
+                                       --*/
+        }
+                                       /*--
+        </ul>
+   </div>
+                                       --*/
+}
+
+public void renderCSS()
+{
+                                        // add support for the list of colors //
+/*--
+   ...
+
+   ul
+   {
+      font-size: 18pt;
+   }
+   @media (min-width: 320px)
+   {
+      .board{height:  300px;  width: 300px;}
+      .cell {height:  100px;  width: 100px;}
+      ul    {height:  100px;  width: 300px;}
+   }
+   @media (min-width: 576px)
+   {
+      .board {height: 540px;  width: 540px;}
+      .cell {height:  180px;  width: 180px;}
+      ul    {height:  100px;  width: 540px;}
+   }
+   @media (min-width: 768px)
+   {
+      .board {height: 720px;  width: 720px;}
+      .cell {height:  240px;  width: 240px;}
+      ul    {height:  100px;  width: 720px;}
+   }
+   @media (min-width: 992px)
+   {
+      .board{height:  960px;  width: 960px;}
+      .cell {height:  320px;  width: 320px;}
+      ul    {height:  100px;  width: 960px;}
+   }
+   @media (min-width: 1200px)
+   {
+      .board{height: 1140px; width: 1140px;}
+      .cell {height:  380px; width:  380px;}
+      ul    {height:  100px;  width: 1140px;}
+   }
+--*/
+}
+.end
+
+.caption
+Adding a Button to Change the Colors
+.end
+
+.body
+We can add a button between the board and the list and hook it up to change the
+colors when pressed. You can get the source here.
+.end
+
+.code
+...
+/*------------------------------------------------------------------------------
+
+@name       buttonClickHandler - button onClick event handler
+                                                                              */
+                                                                             /**
+            Button onClick event handler as a public instance variable,
+            accessible in the markup.
+
+@return     void
+
+@history    Sat Oct 27, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public INativeEventHandler buttonClickHandler = (Event e) ->
+{
+                                       // reassign the state variable which   //
+                                       // will cause a re-render              //
+   setState(kSTATE_COLORS, getColors());
+};
+
+...
+public void render()
+{
+                                       // assign state variable initial value //
+                                       // (invocations ignored after first)   //
+   useState(kSTATE_COLORS, getColors());
+                                       // get the state variable current value//
+   String[] colors = (String[])getState(kSTATE_COLORS);
+                                       /*--
+   <div class='container'>
+      <div class='board'>
+                                       --*/
+      for (int i = 0; i < 9; i++)
+      {
+                                       /*--
+         <div
+            class='cell'
+            style='background-color:{getColor(i)}'
+            onClick={clickHandler}
+         />
+                                       --*/
+      }
+                                        // add a button to change the colors  //
+                                       /*--
+        <button
+            class='button'
+            variant='contained'
+            fullWidth={true}
+            onClick={buttonClickHandler}>
+            Change Colors
+        </button>
+        <ul>
+                                       --*/
+        for (int i = 0; i < this.colors.length; i++)
+        {
+            String key   = Integer.toString(i);
+            String color = colors[i];
+                                       /*--
+            <li key={key}>{color}</li>
+                                       --*/
+        }
+                                       /*--
+        </ul>
+   </div>
+                                       --*/
+}
+
+public void renderCSS()
+{
+                                        // add support for the button         //
+/*--
+   ...
+
+   .button
+   {
+      font-size:        18pt;
+      margin-top:       20px;
+   }
+   @media (min-width: 320px)
+   {
+      .board{height:  300px;  width: 300px;}
+      .cell {height:  100px;  width: 100px;}
+      ul    {height:  100px;  width: 300px;}
+      button{height:  100px;  width: 300px;}
+   }
+   @media (min-width: 576px)
+   {
+      .board {height: 540px;  width: 540px;}
+      .cell {height:  180px;  width: 180px;}
+      ul    {height:  100px;  width: 540px;}
+      button{height:  100px;  width: 540px;}
+   }
+   @media (min-width: 768px)
+   {
+      .board {height: 720px;  width: 720px;}
+      .cell {height:  240px;  width: 240px;}
+      ul    {height:  100px;  width: 720px;}
+      button{height:  100px;  width: 720px;}
+   }
+   @media (min-width: 992px)
+   {
+      .board{height:  960px;  width: 960px;}
+      .cell {height:  320px;  width: 320px;}
+      ul    {height:  100px;  width: 960px;}
+      button{height:  100px;  width: 960px;}
+   }
+   @media (min-width: 1200px)
+   {
+      .board{height: 1140px; width: 1140px;}
+      .cell {height:  380px; width:  380px;}
+      ul    {height:  100px; width: 1140px;}
+      button{height:  100px; width: 1140px;}
+   }
+   }
+--*/
+}
+.end

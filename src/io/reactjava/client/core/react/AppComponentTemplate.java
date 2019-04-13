@@ -25,7 +25,7 @@ package io.reactjava.client.core.react;
                                        // imports --------------------------- //
 import com.google.gwt.core.client.EntryPoint;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
                                        // AppComponentTemplate ============== //
 public class AppComponentTemplate<P extends Properties>
@@ -84,14 +84,58 @@ public AppComponentTemplate(P props)
                                                                              /**
             Get imported node modules.
 
-@return     collection of node module names
+@return     ordered list of node module names of the folowing forms:
+
+               nodeModuleName[:javascript:css]
+
+               where,
+
+                  nodeModuleName is the name of the node module in the
+                  project node_modules directory
+
+                  :javascript is an optional qualifier indicating the 'main'
+                  module javascript is to be imported
+
+                  :css  is an optional qualifier indicating the 'style'
+                  module css is to be imported
+
+                  and if either ':css' or ':javascript' is included but the
+                  other is not, the other is not imported
+
+                  and if neither ':css' nor ':javascript' is included, the
+                  'main' module javascript is to be imported (the default case)
+
+               or nodeModuleName.js for a specific module script
+
+               or nodeModuleName.css for a specific module stylesheet
+
+            For examples,
+
+               'prismjs'
+                  specifies the default script for module 'prismjs' without
+                  any module css
+
+               'prismjs:javascript:css'
+                  specifies the default script for module 'prismjs' along with
+                  the default module css
+
+               'prismjs.components.prism-core',
+               'prismjs.components.prism-clike',
+               'prismjs.components.prism-java',
+               'prismjs.themes.prism-okaidia.css'
+                  specifies
+                     components.prism-core.js  of module 'prismjs', followed by
+                     components.prism-clike.js of module 'prismjs', followed by
+                     components.prism-java.js  of module 'prismjs'
+                  and
+                     themes.prism-okaidia.css  of module 'prismjs'
 
 @history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-protected Collection<String> getImportedNodeModules()
+protected List<String> getImportedNodeModules()
 {
    return(new ArrayList<>());
 }

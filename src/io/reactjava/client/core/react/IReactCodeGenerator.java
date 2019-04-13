@@ -15,12 +15,14 @@ notes:
                                        // package --------------------------- //
 package io.reactjava.client.core.react;
                                        // imports --------------------------- //
+import java.util.Collection;
 import java.util.function.Function;
                                        // IReactCodeGenerator ================//
 public interface IReactCodeGenerator
 {
                                        // class constants --------------------//
-String kREACT_JAVA_DIR_NAME = "reactjava";
+String kREACT_JAVA_DIR_NAME       = "reactjava";
+String kIMPORTED_STYLESHEETS_LIST = "importedStyleSheets.txt";
 
                                        // class variables ------------------- //
                                        // (none)                              //

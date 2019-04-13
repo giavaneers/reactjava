@@ -23,15 +23,12 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.dev.util.log.PrintWriterTreeLogger;
 import io.reactjava.client.core.react.AppComponentTemplate;
 import io.reactjava.jsx.IConfiguration;
-import io.reactjava.jsx.IJSXTransform;
-import io.reactjava.jsx.JSXTransform;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
                                        // AppComponentInspector ============= //
@@ -45,8 +42,12 @@ public static final String   kPROXY_BASE_PATH =
    "io/reactjava/client/core/react/";
 
 public static final String[] kPROXIES =
-{"AppComponentTemplate.proxy", "Component.proxy", "Properties.proxy"};
-
+{
+   "AppComponentTemplate.proxy",
+   "Component.proxy",
+   "NativeObject.proxy",
+   "Properties.proxy"
+};
                                        // class variables ------------------- //
                                        // (none)                              //
                                        // public instance variables --------- //
@@ -331,13 +332,17 @@ public static Collection<String> getImportedModules(
       throw new IllegalStateException(
          "AppComponentInspector.getImportedModules(): result indicates error");
    }
-
-   Collection<String> modules = new HashSet<String>();
+                                       // preserve order of entries           //
+   Collection<String> modules = new ArrayList<>();
    for (String module : result.substring(idxBeg, idxEnd).split(","))
    {
       if (module.length() > 0)
       {
-         modules.add(module.trim());
+         String trimmed = module.trim();
+         if (!modules.contains(trimmed))
+         {
+            modules.add(trimmed);
+         }
       }
    }
 

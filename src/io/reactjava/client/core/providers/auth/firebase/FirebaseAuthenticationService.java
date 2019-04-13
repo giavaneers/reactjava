@@ -26,8 +26,6 @@ import io.reactjava.client.core.providers.auth.IAuthenticationService;
 import io.reactjava.client.core.providers.auth.firebase
          .FirebaseAuthenticationService.Firebase.Auth;
 import io.reactjava.client.core.react.Properties;
-//import io.reactjava.client.core.rxjs.Observable;
-//import io.reactjava.client.core.rxjs.Subscriber;
 import io.reactjava.client.core.rxjs.observable.Observable;
 import io.reactjava.client.core.rxjs.observable.Subscriber;
 import io.reactjava.client.core.react.Utilities;

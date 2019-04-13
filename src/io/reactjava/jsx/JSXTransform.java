@@ -19,11 +19,8 @@ package io.reactjava.jsx;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.dev.util.log.PrintWriterTreeLogger;
 import io.reactjava.client.core.providers.platform.IPlatform;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -83,7 +80,8 @@ public static final String kINLINE_HDR =
  + "java.util.Stack<io.reactjava.client.core.react.ElementDsc> parents="
  + "new java.util.Stack<>();"
  + "io.reactjava.client.core.react.ElementDsc root = null;"
- + "io.reactjava.client.core.react.ElementDsc elem;";
+ + "io.reactjava.client.core.react.ElementDsc elem;"
+ + "this.props = props;";
 
 public static final String kMARKUP_JAVABLOCK_PLACEHOLDER =
    "<!-- javablock -->";
@@ -1178,6 +1176,7 @@ public Node handleText(
    Node         parent          = textNode.parent();
    String       parentName      = parent.nodeName();
    String       parentClassname = parent.attributes().get("className");
+   boolean      bSpanText       = "span".equals(parentName);
    boolean      bPrismText      =
       "code".equals(parentName)
          && parentClassname != null
@@ -1195,7 +1194,7 @@ public Node handleText(
                                        // text node has been processed        //
       retVal = null;
    }
-   else if (!"span".equals(parentName) && !bPrismText)
+   else if (!bSpanText && !bPrismText)
    {
                                        // wrap in a span tag so any sibling   //
                                        // nodes like <code> or <strong> will  //
@@ -1207,14 +1206,17 @@ public Node handleText(
    }
    else
    {
-      String parsed = "";
-      int    idx    = 0;
+      boolean bWrapWithQuotes = true;
+      boolean bEscapeQuotes   = true;
+      String  parsed          = "";
+      int     idx             = 0;
+
       for (String expression : getJavaLiteralExpressions(trimmed))
       {
-         idx = trimmed.indexOf(expression, idx);
+         idx = text.indexOf(expression, idx);
          if (parsed.length() == 0)
          {
-            parsed = trimmed.substring(0, idx);
+            parsed = text.substring(0, idx);
          }
 
          if (idx >= 0)
@@ -1222,22 +1224,29 @@ public Node handleText(
             parsed += expression.substring(1, expression.length() - 1);
          }
 
-         idx += expression.length();
+         idx  += expression.length();
       }
       if (idx > 0)
       {
-         if (idx < trimmed.length())
+         if (idx < text.length())
          {
-            parsed += trimmed.substring(idx);
+            parsed += text.substring(idx);
          }
                                        // check for text from a url           //
-         trimmed = handleTextFromURL(parsed, logger);
+         text            = handleTextFromURL(parsed, logger);
+         bWrapWithQuotes = !text.equals(parsed);
+         bEscapeQuotes   = false;
       }
                                        // escape any double-quotes            //
-      trimmed = trimmed.replace("\"","\\\"");
-
+      if (bEscapeQuotes)
+      {
+         text = text.replace("\"","\\\"");
+      }
+      if (bWrapWithQuotes)
+      {
                                        // wrap with double-quotes             //
-      text = "\"" + trimmed + "\"";
+         text = "\"" + text + "\"";
+      }
                                        // as workaround for react problem     //
                                        // with '&nbsp;', explicitly replace   //
                                        // html non-breaking space with        //
@@ -1283,30 +1292,34 @@ public String handleTextFromTextResource(
    try
    {
       String[] tokens = textResource.substring("text://".length()).split(":");
-      if (tokens.length != 2)
+      if (tokens.length > 2)
       {
          throw new Exception("Text resource format error: " + textResource);
       }
 
-      File   warDir  = IConfiguration.getProjectDirectory("war", logger);
-      File   file    = new File(warDir, tokens[0]);
-      String content = IJSXTransform.getFileAsJavaString(file, logger);
-      int    idxBeg  = content.indexOf(tokens[1]);
-      if (idxBeg < 0)
-      {
-         throw new Exception("Text resource label error: " + tokens[1]);
-      }
-          idxBeg += tokens[1].length();
-      int idxEnd  = content.indexOf("\\n.end", idxBeg + 1);
-      if (idxEnd < 0)
-      {
-         idxEnd = content.length();
-      }
+      File   warDir = IConfiguration.getProjectDirectory("war", logger);
+      File   file   = new File(warDir, tokens[0]);
+             text   = IJSXTransform.getFileAsJavaString(file, logger);
 
-      text = content.substring(idxBeg, idxEnd);
-      if (text.startsWith("\\n"))
+      if (tokens.length == 2)
       {
-         text = text.substring(2);
+         int idxBeg  = text.indexOf(tokens[1]);
+         if (idxBeg < 0)
+         {
+            throw new Exception("Text resource label error: " + tokens[1]);
+         }
+             idxBeg += tokens[1].length();
+         int idxEnd  = text.indexOf("\\n.end", idxBeg + 1);
+         if (idxEnd < 0)
+         {
+            idxEnd = text.length();
+         }
+
+         text = text.substring(idxBeg, idxEnd);
+         if (text.startsWith("\\n"))
+         {
+            text = text.substring(2);
+         }
       }
    }
    catch(Exception e)
@@ -1920,15 +1933,26 @@ public String parseElementAttributes(
       }
       else
       {
+         boolean bWrapWithQuotes   = !attVal.startsWith("{");
+         boolean bJavaLiteralValue = attVal.startsWith("{") && attVal.endsWith("}");
+
          key = toReactAttributeName(key);
          if (!"style".equals(key))
          {
-            value =
-               attVal.replace("{","")
-               .replace("}/","}")      // fixup jsoup self-closing div error  //
-               .replace("}","");
-               //.replace("this", "props");
 
+                                       // fixup jsoup self-closing div error  //
+            value = attVal.replace("{","").replace("}/","}").replace("}","");
+
+            if (bJavaLiteralValue)
+            {
+               String text = handleTextFromURL(value, logger);
+               if (!value.equals(text))
+               {
+                                       // escape double quotes                //
+                  value = text.replace("\"","\\\"");
+                  bWrapWithQuotes = true;
+               }
+            }
             if (!value.contains("props.get(") && !value.contains("getNextId("))
             {
                                        // check for tag as an attribute value //
@@ -1937,9 +1961,8 @@ public String parseElementAttributes(
                {
                   value = elementCreate;
                }
-               else if (!attVal.startsWith("{"))
+               else if (bWrapWithQuotes)
                {
-                                       // wrap value in quotes                //
                   value = "\"" + value + "\"";
                }
             }
@@ -1948,6 +1971,11 @@ public String parseElementAttributes(
                logger.DEBUG,
                "JSXTransform.parseElementAttributes(): "
              + "attVal=" + attVal + ", value=" + value);
+         }
+         else if (bJavaLiteralValue)
+         {
+                                       // complete 'style' value is a literal //
+            value = value.substring(1, value.length() -1);
          }
          else
          {
@@ -2025,7 +2053,16 @@ public String parseMarkup(
 {
    String          parsed = src;
    List<MarkupDsc> dscs   = getMethodMarkupDscs(src, "render", logger);
-   if (dscs != null && dscs.size() > 1)
+   if (dscs == null)
+   {
+   }
+   else if (dscs.size() == 1)
+   {
+                                       // modify parsed innocuously to        //
+                                       // indicate a render method was found  //
+      parsed += " ";
+   }
+   else if (dscs.size() > 1)
    {
       MarkupDsc first   = dscs.get(0);
       int       idxBeg  = first.idxBeg;
@@ -3142,7 +3179,7 @@ public static boolean unitTest(
                            null);
                       content = src;
                  }
-                  else if (true)
+                  else if (false)
                   {
                      classname  = "io.reactjava.client.examples.helloworld.App";
                      src =
@@ -3224,30 +3261,6 @@ public static boolean unitTest(
                   }
                   else if (false)
                   {
-                     classname  = "io.reactjava.client.components.ionic.IonicButton";
-                     src =
-                        IJSXTransform.getFileAsString(
-                           new File(
-                              "/Users/brianm/working/IdeaProjects/ReactJava/"
-                            + "ReactJava/src/"
-                            + "io/reactjava/client/components/ionic/IonicButton.java"),
-                           null);
-                     content = src;
-                  }
-                  else if (false)
-                  {
-                     classname  = "io.reactjava.client.components.ionic.IonicGrid";
-                     src =
-                        IJSXTransform.getFileAsString(
-                           new File(
-                              "/Users/brianm/working/IdeaProjects/ReactJava/"
-                            + "ReactJava/src/"
-                            + "io/reactjava/client/components/ionic/IonicGrid.java"),
-                           null);
-                     content = src;
-                  }
-                  else if (false)
-                  {
                      classname  = "io.reactjava.client.examples.materialui.pricing.App";
                      src =
                         IJSXTransform.getFileAsString(
@@ -3261,9 +3274,13 @@ public static boolean unitTest(
                   else if (false)
                   {
                      components.put(
+                        "ContentChapter", "reactjavawebsite.ContentChapter");
+                     components.put(
                         "Footer", "reactjavawebsite.Footer");
                      components.put(
                         "GeneralAppBar", "reactjavawebsite.GeneralAppBar");
+                     components.put(
+                        "SideDrawer", "reactjavawebsite.SideDrawer");
 
                      classname  = "reactjavawebsite.GetStarted";
                      src =
@@ -3277,13 +3294,119 @@ public static boolean unitTest(
                   }
                   else if (false)
                   {
-                     classname  = "reactjavawebsite.App";
+                     components.put(
+                        "ContentChapter", "reactjavawebsite.ContentChapter");
+                     components.put(
+                        "Footer", "reactjavawebsite.Footer");
+                     components.put(
+                        "GeneralAppBar", "reactjavawebsite.GeneralAppBar");
+                     components.put(
+                        "SideDrawer", "reactjavawebsite.SideDrawer");
+
+                     classname  = "reactjavawebsite.UserGuide";
+                     src =
+                        IJSXTransform.getFileAsString(
+                           new File(
+                              "/Users/brianm/working/IdeaProjects/ReactJava/"
+                            + "ReactJavaWebsite/src/"
+                            + "reactjavawebsite/UserGuide.java"),
+                           null);
+                     content = src;
+                  }
+                  else if (false)
+                  {
+                     components.put(
+                        "Footer", "reactjavawebsite.Footer");
+                     components.put(
+                        "LandingAppBar", "reactjavawebsite.LandingAppBar");
+
+                     classname  = "reactjavawebsite.Landing";
                      src =
                         IJSXTransform.getFileAsString(
                            new File(
                               "/Users/brianm/working/IdeaProjects/ReactJava/"
                             + "ReactJavaWebsite/src/"
                             + "reactjavawebsite/Landing.java"),
+                           null);
+                     content = src;
+                  }
+                  else if (false)
+                  {
+                     components.put(
+                        "ContentBody",
+                        "io.reactjava.client.examples.materialui.generalpage.ContentBody");
+                     components.put(
+                        "ContentCaption",
+                        "io.reactjava.client.examples.materialui.generalpage.ContentCaption");
+                     components.put(
+                        "ContentCode",
+                        "io.reactjava.client.examples.materialui.generalpage.ContentCode");
+                     components.put(
+                        "ContentImage",
+                        "io.reactjava.client.examples.materialui.generalpage.ContentImage");
+                     components.put(
+                        "ContentTitle",
+                        "io.reactjava.client.examples.materialui.generalpage.ContentTitle");
+
+                     classname  = "io.reactjava.client.examples.materialui.generalpage.ContentPage";
+                     src =
+                        IJSXTransform.getFileAsString(
+                           new File(
+                              "/Users/brianm/working/IdeaProjects/ReactJava/"
+                            + "ReactJavaExamples/src/"
+                            + "io/reactjava/client/examples/materialui/generalpage/ContentPage.java"),
+                           null);
+                     content = src;
+                  }
+                  else if (true)
+                  {
+                     components.put(
+                        "ContentBody",
+                        "io.reactjava.client.examples.materialui.generalpage.ContentBody");
+                     components.put(
+                        "ContentCaption",
+                        "io.reactjava.client.examples.materialui.generalpage.ContentCaption");
+                     components.put(
+                        "ContentCode",
+                        "io.reactjava.client.examples.materialui.generalpage.ContentCode");
+                     components.put(
+                        "ContentImage",
+                        "io.reactjava.client.examples.materialui.generalpage.ContentImage");
+                     components.put(
+                        "ContentPage",
+                        "io.reactjava.client.examples.materialui.generalpage.ContentPage");
+                     components.put(
+                        "ContentTitle",
+                        "io.reactjava.client.examples.materialui.generalpage.ContentTitle");
+                     components.put(
+                        "Footer",
+                        "io.reactjava.client.examples.materialui.generalpage.Footer");
+                     components.put(
+                        "GeneralAppBar",
+                        "io.reactjava.client.examples.materialui.generalpage.GeneralAppBar");
+                     components.put(
+                        "SideDrawer",
+                        "io.reactjava.client.examples.materialui.generalpage.SideDrawer");
+
+                     classname  = "io.reactjava.client.examples.materialui.generalpage.GeneralPage";
+                     src =
+                        IJSXTransform.getFileAsString(
+                           new File(
+                              "/Users/brianm/working/IdeaProjects/ReactJava/"
+                            + "ReactJavaExamples/src/"
+                            + "io/reactjava/client/examples/materialui/generalpage/GeneralPage.java"),
+                           null);
+                     content = src;
+                  }
+                  else if (false)
+                  {
+                     classname  = "io.reactjava.client.examples.displaycode.Prism";
+                     src =
+                        IJSXTransform.getFileAsString(
+                           new File(
+                              "/Users/brianm/working/IdeaProjects/ReactJava/"
+                            + "ReactJavaExamples/src/"
+                            + "io/reactjava/client/examples/displaycode/Prism.java"),
                            null);
                      content = src;
                   }

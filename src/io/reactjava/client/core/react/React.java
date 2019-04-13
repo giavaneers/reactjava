@@ -131,6 +131,25 @@ public static native <P extends Properties> Element createElement(
 
 /*------------------------------------------------------------------------------
 
+@name       useEffect - useEffect hook
+                                                                              */
+                                                                             /**
+            useEffect hook.
+
+@return     void
+
+@param      effectHandler     effect function
+
+@history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static native void useEffect(
+   INativeEffectHandler effectHandler);
+
+/*------------------------------------------------------------------------------
+
 @name       useState - useState hook
                                                                               */
                                                                              /**

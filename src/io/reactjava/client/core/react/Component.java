@@ -38,7 +38,6 @@ protected java.util.function.Function<Properties,Element>
                             componentFcn;
 protected String            css;       // css                                 //
 protected P                 props;     // component properties                //
-protected IUITheme          theme;     // theme                               //
 
 /*------------------------------------------------------------------------------
 
@@ -56,7 +55,7 @@ protected IUITheme          theme;     // theme                               //
 //------------------------------------------------------------------------------
 public Component()
 {
-   this(null);
+   initialize(null);
 }
 /*------------------------------------------------------------------------------
 
@@ -74,15 +73,7 @@ public Component()
 //------------------------------------------------------------------------------
 public Component(P props)
 {
-   this.props = props != null ? props : (P)new Properties();
-   this.props.setComponent(this);
-
-   initConfiguration();
-
-   if (ReactJava.getIsWebPlatform())
-   {
-      ReactJava.ensureComponentStyles(this, false);
-   }
+   initialize(props);
 }
 /*------------------------------------------------------------------------------
 
@@ -369,9 +360,11 @@ protected StateMgr getStateMgr()
 //------------------------------------------------------------------------------
 public IUITheme getTheme()
 {
+   IUITheme theme = (IUITheme)getProperties().get("theme");
    if (theme == null)
    {
-      theme = props.getConfiguration().getTheme();
+      theme = getProperties().getConfiguration().getTheme();
+      setTheme(theme);
    }
    return(theme);
 }
@@ -398,14 +391,21 @@ public P initialize(
    this.props = props != null ? props : (P)new Properties();
    this.props.setComponent(this);
 
-   return(props);
+   initConfiguration();
+   initTheme();
+
+   if (ReactJava.getIsWebPlatform())
+   {
+      ReactJava.ensureComponentStyles(this, false);
+   }
+   return(this.props);
 }
 /*------------------------------------------------------------------------------
 
 @name       initConfiguration - initialize configuration
                                                                               */
                                                                              /**
-            Initialize configuration. This implementation is null.
+            Initialize configuration.
 
 @return     void
 
@@ -420,6 +420,24 @@ protected void initConfiguration()
    {
       getProperties().setConfiguration(Configuration.sharedInstance());
    }
+}
+/*------------------------------------------------------------------------------
+
+@name       initTheme - initialize theme
+                                                                              */
+                                                                             /**
+            Initialize theme.
+
+@return     void
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected void initTheme()
+{
+   getTheme();
 }
 /*------------------------------------------------------------------------------
 
@@ -517,7 +535,7 @@ public void setState(
 public IUITheme setTheme(
    IUITheme theme)
 {
-   this.theme = theme;
+   getProperties().set("theme", (theme));
    return(theme);
 }
 /*------------------------------------------------------------------------------
@@ -551,6 +569,28 @@ public void update()
    {
       kLOGGER.logError(e);
    }
+}
+/*------------------------------------------------------------------------------
+
+@name       useEffect - component side effect handler
+                                                                              */
+                                                                             /**
+            Effect hook handler similar to componentDidMount,
+            componentDidUpdate, and componentWillUnmount combined.
+
+@return     void
+
+@param      effectHandler     function to be invoked on effect
+
+@history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public void useEffect(
+   INativeEffectHandler effectHandler)
+{
+   React.useEffect(effectHandler);
 }
 /*------------------------------------------------------------------------------
 

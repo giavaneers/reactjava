@@ -202,9 +202,11 @@ public P getProperties()
 //------------------------------------------------------------------------------
 public IUITheme getTheme()
 {
+   IUITheme theme = (IUITheme)getProperties().get("theme");
    if (theme == null)
    {
       theme = IUITheme.defaultInstance();
+      getProperties().set("theme", theme);
    }
    return(theme);
 }

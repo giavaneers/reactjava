@@ -1150,28 +1150,35 @@ protected void processCompletion()
       String reason = getClient().getErrorReason();
       if (reason == null)
       {
-         String response = getClient().getXHR().getResponseText();
-         if (response != null && response.length() > 0)
+         try
          {
-            try
+            String response = getClient().getXHR().getResponseText();
+            if (response != null && response.length() > 0)
             {
-               JSONValue  jsonValue  = JSONParser.parseStrict(response);
-               JSONObject jsonObject = jsonValue.isObject();
-               JSONValue  jsonError  = jsonObject.get("error");
-               JSONValue  jsonErrors = jsonError.isObject().get("errors");
-               JSONObject jsonItem   = jsonErrors.isArray().get(0).isObject();
+               try
+               {
+                  JSONValue  jsonValue  = JSONParser.parseStrict(response);
+                  JSONObject jsonObject = jsonValue.isObject();
+                  JSONValue  jsonError  = jsonObject.get("error");
+                  JSONValue  jsonErrors = jsonError.isObject().get("errors");
+                  JSONObject jsonItem   = jsonErrors.isArray().get(0).isObject();
 
-               reason = jsonItem.get("message").isString().stringValue();
-            }
-            catch(Exception e)
-            {
+                  reason = jsonItem.get("message").isString().stringValue();
+               }
+               catch(Exception e)
+               {
                                        // not json                            //
-               reason = response;
+                  reason = response;
+               }
+            }
+            if (reason == null || reason.length() == 0)
+            {
+               reason = statusText;
             }
          }
-         if (reason == null || reason.length() == 0)
+         catch(Exception e)
          {
-            reason = statusText;
+            reason = e.toString();
          }
 
          getClient().setErrorReason(reason);

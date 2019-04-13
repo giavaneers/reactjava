@@ -45,6 +45,12 @@ private static final Logger kLOGGER = Logger.newInstance();
                                        // class variables ------------------- //
                                        // map of script by path               //
 protected static Map<String,String> scriptByPath;
+                                       // list of imported stylesheets        //
+protected static List<String>       importedStylesheets;
+                                       // list of js and css to inject        //
+protected static List<String>       injectRsrcURLs;
+                                       // list of js and css injected         //
+protected static List<String>       injectedRsrcURLs;
 
                                        // public instance variables --------- //
                                        // (none)                              //
@@ -352,6 +358,83 @@ public static String getArtifactReactJavaDirectoryName()
 }
 /*------------------------------------------------------------------------------
 
+@name       getImportedStylesheets - get imported stylesheets
+                                                                              */
+                                                                             /**
+            Get imported stylesheets. Cannot use RxJs here since it has not
+            been loaded yet.
+
+@return     list of imported stylesheets.
+
+@history    Mon May 19, 2014 18:00:00 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static List<String> getImportedStylesheets(
+   Callback<Void,Exception> callback)
+{
+   if (importedStylesheets == null)
+   {
+      APIRequestor requestorLocal = (Object rsp, Object token) ->
+      {
+         IHttpResponse response = (IHttpResponse)rsp;
+         Throwable     error    = response.getError();
+         try
+         {
+            importedStylesheets = new ArrayList<>();
+            if (error == null)
+            {
+               importedStylesheets.addAll(
+                  Arrays.asList(
+                     new String(response.getBytes(), "UTF-8").split(",")));
+            }
+
+            callback.onSuccess(null);
+         }
+         catch(Exception e)
+         {
+            callback.onFailure(e);
+         }
+      };
+
+      String cssListURL =
+         GWT.getModuleBaseForStaticFiles()
+            + getArtifactReactJavaDirectoryName()
+            + "/css/" + IReactCodeGenerator.kIMPORTED_STYLESHEETS_LIST;
+
+                                       // read the remote list of stylesheets //
+      new HttpClientBase(cssListURL)
+         .setResponseType(ResponseType.kARRAYBUFFER)
+         .send(requestorLocal);
+   }
+
+   return(importedStylesheets);
+}
+/*------------------------------------------------------------------------------
+
+@name       getInjectedRsrcURLs - get list of injected resources
+                                                                              */
+                                                                             /**
+            Get list of injected resources.
+
+@return     list list of injected resources.
+
+@history    Mon May 19, 2014 18:00:00 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static List<String> getInjectedRsrcURLs()
+{
+   if (injectedRsrcURLs == null)
+   {
+      injectedRsrcURLs = new ArrayList<>();
+   }
+   return(injectedRsrcURLs);
+}
+/*------------------------------------------------------------------------------
+
 @name       getObjectBooleanValueNative - get primitive boolean property value
                                                                               */
                                                                              /**
@@ -369,6 +452,30 @@ public static String getArtifactReactJavaDirectoryName()
                                                                               */
 //------------------------------------------------------------------------------
 public static native boolean getObjectBooleanValueNative(
+   JsObject properties,
+   String   key)
+/*-{
+   return(properties[key]);
+}-*/;
+/*------------------------------------------------------------------------------
+
+@name       getObjectDoubleValueNative - get primitive double property value
+                                                                              */
+                                                                             /**
+            Get primitive double property value
+
+@return     void
+
+@param      properties     properties instance
+@param      key            property name
+@param      value          primitive double property value
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static native double getObjectDoubleValueNative(
    JsObject properties,
    String   key)
 /*-{
@@ -738,20 +845,11 @@ public static void injectScriptPreloaded(
 //------------------------------------------------------------------------------
 public static void injectScriptsAndCSS(
    IConfiguration configuration,
-   List<String>   inject,
+   List<String>   injectCustom,
    Object         requestToken,
    APIRequestor   requestor)
 {
    boolean bScriptsLoadLazy = configuration.getScriptsLoadLazy();
-
-   if (inject == null)
-   {
-      inject = new ArrayList<String>(configuration.getGlobalCSS());
-      inject.addAll(configuration.getGlobalImages());
-      inject.addAll(configuration.getRequiredPlatformScripts());
-      inject.addAll(configuration.getBundleScripts());
-   }
-   final List<String> injectRsrcURLs = inject;
 
    Callback<Void,Exception> callback =
       new Callback<Void,Exception>()
@@ -770,12 +868,37 @@ public static void injectScriptsAndCSS(
          }
          public void onSuccess(Void result)
          {
-            if (counter >= 0)
+                                       // will be null on initial entry...    //
+            List importedStylesheets = getImportedStylesheets(this);
+            if (importedStylesheets == null)
             {
-               kLOGGER.logInfo(
-                  "Successfully loaded " + injectRsrcURLs.get(counter));
             }
-            if (++counter >= injectRsrcURLs.size())
+            else if (counter < 0)
+            {
+               if (injectCustom == null)
+               {
+                  injectRsrcURLs = new ArrayList<>(importedStylesheets);
+                  injectRsrcURLs.addAll(configuration.getGlobalCSS());
+                  injectRsrcURLs.addAll(configuration.getGlobalImages());
+                  injectRsrcURLs.addAll(configuration.getRequiredPlatformScripts());
+                  injectRsrcURLs.addAll(configuration.getBundleScripts());
+               }
+               else
+               {
+                  injectRsrcURLs = new ArrayList<>(injectCustom);
+               }
+            }
+            else
+            {
+               String injected = injectRsrcURLs.get(counter);
+               getInjectedRsrcURLs().add(injected);
+               kLOGGER.logInfo("Successfully loaded " + injected);
+            }
+
+            if (importedStylesheets == null)
+            {
+            }
+            else if (++counter >= injectRsrcURLs.size())
             {
                kLOGGER.logInfo(
                   "Successfully loaded all resources, ms="
@@ -802,11 +925,16 @@ public static void injectScriptsAndCSS(
 
                boolean  bCompress =
                   configuration.getScriptsCompressed()
-                     && !injectURL.contains(IJavascriptResources.kSCRIPT_PLAT_PAKO);
+                     && !injectURL.contains(
+                           IJavascriptResources.kSCRIPT_PLAT_PAKO);
 
                kLOGGER.logInfo("Loading " + injectURL);
 
-               if (injectURL.endsWith(".ico"))
+               if (getInjectedRsrcURLs().contains(injectURL))
+               {
+                                       // don't inject it twice...            //
+               }
+               else if (injectURL.endsWith(".ico"))
                {
                   injectLink(injectURL, "icon", "image/x-icon");
                   this.onSuccess(null);
@@ -851,7 +979,7 @@ public static void injectScriptsAndCSS(
 
    if (!bScriptsLoadLazy && scriptByPath == null)
    {
-                                       // inject pako for decompression       //
+                                    // inject pako for decompression       //
       injectRsrcURLs.remove(IJavascriptResources.kSCRIPT_PLAT_PAKO);
       injectScriptOrCSS(configuration, IJavascriptResources.kSCRIPT_PLAT_PAKO, null,
          (Object response, Object reqToken) ->
@@ -892,106 +1020,6 @@ public static Map<String,String> scriptByPath()
    }
    return(scriptByPath);
 }
-/*------------------------------------------------------------------------------
-
-@name       setObjectBooleanValueNative - assign primitive boolean value
-                                                                              */
-                                                                             /**
-            Assign primitive boolean property value
-
-@return     void
-
-@param      properties     properties instance
-@param      key            property name
-@param      value          primitive float property value
-
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public static native void setObjectBooleanValueNative(
-   JsObject properties,
-   String   key,
-   boolean  value)
-/*-{
-   properties[key] = value;
-}-*/;
-/*------------------------------------------------------------------------------
-
-@name       setObjectDoubleValueNative - assign primitive double property value
-                                                                              */
-                                                                             /**
-            Assign primitive double property value
-
-@return     void
-
-@param      properties     properties instance
-@param      key            property name
-@param      value          primitive double property value
-
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public static native void setObjectDoubleValueNative(
-   JsObject properties,
-   String   key,
-   double   value)
-/*-{
-   properties[key] = value;
-}-*/;
-/*------------------------------------------------------------------------------
-
-@name       setObjectFloatValueNative - assign primitive float property value
-                                                                              */
-                                                                             /**
-            Assign primitive float property value
-
-@return     void
-
-@param      properties     properties instance
-@param      key            property name
-@param      value          primitive float property value
-
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public static native void setObjectFloatValueNative(
-   JsObject properties,
-   String   key,
-   float    value)
-/*-{
-   properties[key] = value;
-}-*/;
-/*------------------------------------------------------------------------------
-
-@name       setObjectIntValueNative - assign primitive int property value
-                                                                              */
-                                                                             /**
-            Assign primitive int property value
-
-@return     void
-
-@param      properties     properties instance
-@param      key            property name
-@param      value          primitive int property value
-
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public static native void setObjectIntValueNative(
-   JsObject properties,
-   String   key,
-   int      value)
-/*-{
-   properties[key] = value;
-}-*/;
 /*------------------------------------------------------------------------------
 
 @name       uint8ArrayToBytes - get byte array from Uint8Array

@@ -280,11 +280,35 @@ protected String getStateString(
 //------------------------------------------------------------------------------
 public IUITheme getTheme()
 {
+   IUITheme theme = (IUITheme)getProperties().get("theme");
    if (theme == null)
    {
       theme = IUITheme.defaultInstance();
+      getProperties().set("theme", theme);
    }
    return(theme);
+}
+/*------------------------------------------------------------------------------
+
+@name       initialize - set properties
+                                                                              */
+                                                                             /**
+            Set properties.
+
+@return     void
+
+@return     props     properties
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public P initialize(
+   P props)
+{
+   return(props);
 }
 /*------------------------------------------------------------------------------
 
@@ -368,6 +392,28 @@ public void setState(
 }
 /*------------------------------------------------------------------------------
 
+@name       setTheme - set theme
+                                                                              */
+                                                                             /**
+            Set theme.
+
+@return     theme
+
+@param      new theme
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public IUITheme setTheme(
+   IUITheme theme)
+{
+   return(null);
+}
+/*------------------------------------------------------------------------------
+
 @name       update - update component render
                                                                               */
                                                                              /**
@@ -382,6 +428,27 @@ public void setState(
                                                                               */
 //------------------------------------------------------------------------------
 public void update()
+{
+}
+/*------------------------------------------------------------------------------
+
+@name       useEffect - component side effect handler
+                                                                              */
+                                                                             /**
+            Effect hook handler similar to componentDidMount,
+            componentDidUpdate, and componentWillUnmount combined.
+
+@return     void
+
+@param      effectHandler     function to be invoked on effect
+
+@history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public void useEffect(
+   INativeEffectHandler effectHandler)
 {
 }
 /*------------------------------------------------------------------------------

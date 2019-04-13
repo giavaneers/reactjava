@@ -1369,7 +1369,7 @@ public static void deleteTempGWTCache()
    File tempDir = new File(System.getProperty("java.io.tmpdir"));
 
    System.out.println(
-       "Deleting contents of the core and jetty cache files "
+       "Deleting contents of the gwt, core and jetty cache files "
        + "in the java temp directory to ensure the js files are rebuilt.\n"
        + "Java temp directory=" + tempDir.getAbsolutePath());
 
@@ -1384,7 +1384,16 @@ public static void deleteTempGWTCache()
          {
             public boolean accept(File dir, String name)
             {
-               return(name.startsWith("core") || name.startsWith("jetty-"));
+               boolean bAccept =
+                  name.startsWith("core")
+                     || name.startsWith("jetty-")
+                     || name.startsWith("gwt");
+
+               System.out.println(
+                  "Checking " + new File(dir, name).getAbsolutePath()
+                + ": " + (bAccept ? "accepted" : "rejected"));
+
+               return(bAccept);
             }
          });
 

@@ -15,6 +15,7 @@ notes:
                                        // package --------------------------- //
 package io.reactjava.client.core.react;
                                        // imports --------------------------- //
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
@@ -50,10 +51,14 @@ protected static IConfiguration sharedInstance;
 public Configuration()
 {
    super();
-   for (String key : kCONFIGURATION_DEFAULT.keySet())
+   for (String key : kCONFIGURATION_DEFAULT_SANS_THEME.keySet())
    {
-      set(key, kCONFIGURATION_DEFAULT.get(key));
+      set(key, kCONFIGURATION_DEFAULT_SANS_THEME.get(key));
    }
+                                       // add theme at execute time since     //
+                                       // requires js environment which does  //
+                                       // not exists at compile time          //
+   set(kKEY_THEME, IUITheme.defaultInstance());
 }
 /*------------------------------------------------------------------------------
 
@@ -371,21 +376,27 @@ public Map<String,String> getTagMapDefault()
 }
 /*------------------------------------------------------------------------------
 
-@name       getTheme - get default theme
+@name       getTheme - get theme property value
                                                                               */
                                                                              /**
-            Get default theme.
+            Get theme property value
 
-@return     default theme
+@return     theme value, or null if not found.
 
-@history    Thu Sep 7, 2017 08:46:23 (LBM) created.
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
 public IUITheme getTheme()
 {
-   return((IUITheme)get(kKEY_THEME));
+   IUITheme theme = (IUITheme)get("theme");
+   if (theme == null)
+   {
+      theme = IUITheme.defaultInstance();
+      set("theme", theme);
+   }
+   return(theme);
 }
 /*------------------------------------------------------------------------------
 
@@ -458,7 +469,7 @@ public IConfiguration setGlobalCSS(
 {
    if (globalCSS != null)
    {
-      setGlobalCSS(Arrays.asList(globalCSS));
+      setGlobalCSS(new ArrayList(Arrays.asList(globalCSS)));
    }
    return(this);
 }
@@ -668,28 +679,6 @@ public void setTagMap(
    Map<String,String> tagMap)
 {
    set(kKEY_TAG_MAP_CUSTOM, tagMap);
-}
-/*------------------------------------------------------------------------------
-
-@name       setTheme - set default theme
-                                                                              */
-                                                                             /**
-            Set default theme.
-
-@return     theme
-
-@param      theme    new theme
-
-@history    Thu Sep 7, 2017 08:46:23 (LBM) created.
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public IUITheme setTheme(
-   IUITheme theme)
-{
-   set(kKEY_THEME, theme);
-   return(theme);
 }
 /*------------------------------------------------------------------------------
 

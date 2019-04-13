@@ -101,7 +101,7 @@ public static Observable<HttpResponse> get(
    String url)
 {
    Observable<HttpResponse> observable =
-      (Observable<HttpResponse>)new HttpClient()
+      new HttpClient()
          .setURL(url)
          .setMethod(kGET)
          .send((byte[])null);
@@ -130,7 +130,7 @@ public static Observable<HttpResponse> post(
    byte[] data)
 {
    Observable<HttpResponse> observable =
-      (Observable<HttpResponse>)new HttpClient()
+      new HttpClient()
          .setURL(url)
          .setMethod(kPOST)
          .send(data);
@@ -159,7 +159,7 @@ public static Observable<HttpResponse> put(
    byte[] data)
 {
    Observable<HttpResponse> observable =
-      (Observable<HttpResponse>)new HttpClient()
+      new HttpClient()
          .setURL(url)
          .setMethod(kPUT)
          .send(data);

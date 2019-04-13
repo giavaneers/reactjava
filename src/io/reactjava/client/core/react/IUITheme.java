@@ -57,9 +57,10 @@ import io.reactjava.client.core.react.IUITheme.Typography.Subtitle2;
 import io.reactjava.client.core.react.IUITheme.Typography.Title;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
+import jsinterop.annotations.JsPackage;
+import jsinterop.annotations.JsType;
 import jsinterop.base.Js;
                                        // IUITheme ===========================//
 public interface IUITheme
@@ -77,16 +78,26 @@ String kKEY_SPACING     = "spacing";
 String kKEY_TRANSITIONS = "transitions";
 String kKEY_TYPOGRAPHY  = "typography";
 String kKEY_Z_INDEX     = "zIndex";
+
+String[] kKEYS =
+{
+   kKEY_BREAKPOINTS,
+   //kKEY_DIRECTION,
+   //kKEY_MIXINS,
+   //kKEY_OVERRIDES,
+   //kKEY_PALETTE,
+   //kKEY_SHADOWS,
+   //kKEY_SHAPE
+   //kKEY_SPACING,
+   kKEY_TRANSITIONS,
+   //kKEY_TYPOGRAPHY,
+   //kKEY_Z_INDEX
+};
                                        // default values                     //
 String kVAL_DIRECTION   = "ltr";
 Object kVAL_MIXINS      = null;
 Object kVAL_OVERRIDES   = null;
-                                       // default instance                    //
-IUITheme kDEFAULT_INSTANCE = new DefaultInstance();
-
                                        // class variables ------------------- //
-                                       // none                                //
-
 /*------------------------------------------------------------------------------
 
 @name       cssLengthAdd - add specified addend to specified css length value
@@ -107,7 +118,7 @@ IUITheme kDEFAULT_INSTANCE = new DefaultInstance();
 
                                                                               */
 //------------------------------------------------------------------------------
-public static String cssLengthAdd(
+static String cssLengthAdd(
    String cssLength,
    double addend)
 {
@@ -143,7 +154,7 @@ public static String cssLengthAdd(
 
                                                                               */
 //------------------------------------------------------------------------------
-public static String cssLengthScale(
+static String cssLengthScale(
    String cssLength,
    double scale)
 {
@@ -175,7 +186,7 @@ public static String cssLengthScale(
 //------------------------------------------------------------------------------
 static IUITheme defaultInstance()
 {
-   return(kDEFAULT_INSTANCE);
+   return(new DefaultInstance());
 }
 /*------------------------------------------------------------------------------
 
@@ -384,7 +395,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-class Breakpoints extends HashMap<String,Object> implements IBreakpoints
+public class Breakpoints extends NativeObject implements IBreakpoints
 {
                                        // constants ------------------------- //
                                        // (none)                              //
@@ -411,16 +422,16 @@ class Breakpoints extends HashMap<String,Object> implements IBreakpoints
 //------------------------------------------------------------------------------
 public Breakpoints()
 {
-   put(kKEY_BREAKPOINTS_FCN_BETWEEN, kVAL_BREAKPOINTS_FCN_BETWEEN);
-   put(kKEY_BREAKPOINTS_FCN_DOWN,    kVAL_BREAKPOINTS_FCN_DOWN);
-   put(kKEY_BREAKPOINTS_FCN_ONLY,    kVAL_BREAKPOINTS_FCN_ONLY);
-   put(kKEY_BREAKPOINTS_FCN_UP,      kVAL_BREAKPOINTS_FCN_UP);
-   put(kKEY_BREAKPOINTS_FCN_WIDTH,   kVAL_BREAKPOINTS_FCN_WIDTH);
-   put(kKEY_BREAKPOINTS_SIZE_LG,     kVAL_BREAKPOINTS_SIZE_LG);
-   put(kKEY_BREAKPOINTS_SIZE_MD,     kVAL_BREAKPOINTS_SIZE_MD);
-   put(kKEY_BREAKPOINTS_SIZE_SM,     kVAL_BREAKPOINTS_SIZE_SM);
-   put(kKEY_BREAKPOINTS_SIZE_XL,     kVAL_BREAKPOINTS_SIZE_XL);
-   put(kKEY_BREAKPOINTS_SIZE_XS,     kVAL_BREAKPOINTS_SIZE_XS);
+   set(kKEY_BREAKPOINTS_FCN_BETWEEN, kVAL_BREAKPOINTS_FCN_BETWEEN);
+   set(kKEY_BREAKPOINTS_FCN_DOWN,    kVAL_BREAKPOINTS_FCN_DOWN);
+   set(kKEY_BREAKPOINTS_FCN_ONLY,    kVAL_BREAKPOINTS_FCN_ONLY);
+   set(kKEY_BREAKPOINTS_FCN_UP,      kVAL_BREAKPOINTS_FCN_UP);
+   set(kKEY_BREAKPOINTS_FCN_WIDTH,   kVAL_BREAKPOINTS_FCN_WIDTH);
+   set(kKEY_BREAKPOINTS_SIZE_LG,     kVAL_BREAKPOINTS_SIZE_LG);
+   set(kKEY_BREAKPOINTS_SIZE_MD,     kVAL_BREAKPOINTS_SIZE_MD);
+   set(kKEY_BREAKPOINTS_SIZE_SM,     kVAL_BREAKPOINTS_SIZE_SM);
+   set(kKEY_BREAKPOINTS_SIZE_XL,     kVAL_BREAKPOINTS_SIZE_XL);
+   set(kKEY_BREAKPOINTS_SIZE_XS,     kVAL_BREAKPOINTS_SIZE_XS);
 }
 /*------------------------------------------------------------------------------
 
@@ -528,7 +539,7 @@ public Function getFcnWidth()
 //------------------------------------------------------------------------------
 public int getSizeLarge()
 {
-   return((Integer)get(kKEY_BREAKPOINTS_SIZE_LG));
+   return(getInt(kKEY_BREAKPOINTS_SIZE_LG));
 }
 /*------------------------------------------------------------------------------
 
@@ -546,7 +557,7 @@ public int getSizeLarge()
 //------------------------------------------------------------------------------
 public int getSizeMedium()
 {
-   return((Integer)get(kKEY_BREAKPOINTS_SIZE_MD));
+   return(getInt(kKEY_BREAKPOINTS_SIZE_MD));
 }
 /*------------------------------------------------------------------------------
 
@@ -564,7 +575,7 @@ public int getSizeMedium()
 //------------------------------------------------------------------------------
 public int getSizeSmall()
 {
-   return((Integer)get(kKEY_BREAKPOINTS_SIZE_SM));
+   return(getInt(kKEY_BREAKPOINTS_SIZE_SM));
 }
 /*------------------------------------------------------------------------------
 
@@ -582,7 +593,7 @@ public int getSizeSmall()
 //------------------------------------------------------------------------------
 public int getSizeExtraLarge()
 {
-   return((Integer)get(kKEY_BREAKPOINTS_SIZE_XL));
+   return(getInt(kKEY_BREAKPOINTS_SIZE_XL));
 }
 /*------------------------------------------------------------------------------
 
@@ -600,7 +611,7 @@ public int getSizeExtraLarge()
 //------------------------------------------------------------------------------
 public int getSizeExtraSmall()
 {
-   return((Integer)get(kKEY_BREAKPOINTS_SIZE_XS));
+   return(getInt(kKEY_BREAKPOINTS_SIZE_XS));
 }
 }//====================================// end Breakpoints ====================//
 /*==============================================================================
@@ -614,7 +625,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-class DefaultInstance extends HashMap<String,Object> implements IUITheme
+class DefaultInstance extends NativeObject implements IUITheme
 {
                                        // constants ------------------------- //
                                        // (none)                              //
@@ -641,16 +652,16 @@ class DefaultInstance extends HashMap<String,Object> implements IUITheme
 //------------------------------------------------------------------------------
 public DefaultInstance()
 {
-   put(kKEY_BREAKPOINTS, IBreakpoints.defaultInstance());
-   put(kKEY_DIRECTION,   kVAL_DIRECTION);
-   put(kKEY_MIXINS,      kVAL_MIXINS);
-   put(kKEY_OVERRIDES,   kVAL_OVERRIDES);
-   put(kKEY_PALETTE,     IPalette.defaultInstance());
-   put(kKEY_SHAPE,       IShape.defaultInstance());
-   put(kKEY_SPACING,     ISpacing.defaultInstance());
-   put(kKEY_TRANSITIONS, ITransitions.defaultInstance());
-   put(kKEY_TYPOGRAPHY,  ITypography.defaultInstance());
-   put(kKEY_Z_INDEX,     IZIndex.defaultInstance());
+   set(kKEY_BREAKPOINTS, IBreakpoints.defaultInstance());
+   set(kKEY_DIRECTION,   kVAL_DIRECTION);
+   set(kKEY_MIXINS,      kVAL_MIXINS);
+   set(kKEY_OVERRIDES,   kVAL_OVERRIDES);
+   set(kKEY_PALETTE,     IPalette.defaultInstance());
+   set(kKEY_SHAPE,       IShape.defaultInstance());
+   set(kKEY_SPACING,     ISpacing.defaultInstance());
+   set(kKEY_TRANSITIONS, ITransitions.defaultInstance());
+   set(kKEY_TYPOGRAPHY,  ITypography.defaultInstance());
+   set(kKEY_Z_INDEX,     IZIndex.defaultInstance());
 }
 /*------------------------------------------------------------------------------
 
@@ -844,7 +855,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IBreakpoints
+interface IBreakpoints
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -859,6 +870,19 @@ String   kKEY_BREAKPOINTS_SIZE_SM     = "sm";
 String   kKEY_BREAKPOINTS_SIZE_XL     = "xl";
 String   kKEY_BREAKPOINTS_SIZE_XS     = "xs";
 
+String[] kKEYS =
+{
+   kKEY_BREAKPOINTS_FCN_BETWEEN,
+   kKEY_BREAKPOINTS_FCN_DOWN,
+   kKEY_BREAKPOINTS_FCN_ONLY,
+   kKEY_BREAKPOINTS_FCN_UP,
+   kKEY_BREAKPOINTS_FCN_WIDTH,
+   kKEY_BREAKPOINTS_SIZE_LG,
+   kKEY_BREAKPOINTS_SIZE_MD,
+   kKEY_BREAKPOINTS_SIZE_SM,
+   kKEY_BREAKPOINTS_SIZE_XL,
+   kKEY_BREAKPOINTS_SIZE_XS
+};
                                        // default values                      //
 Function kVAL_BREAKPOINTS_FCN_BETWEEN = null;
 Function kVAL_BREAKPOINTS_FCN_DOWN    = null;
@@ -1067,7 +1091,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IMixins
+interface IMixins
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -1145,7 +1169,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IToolbar
+interface IToolbar
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -1207,7 +1231,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IPalette
+interface IPalette
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -1434,7 +1458,7 @@ IColors getPrimary();
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-Properties getProps();
+NativeObject getProps();
 
 /*------------------------------------------------------------------------------
 
@@ -1511,7 +1535,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IAction
+interface IAction
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -1662,7 +1686,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IBackground
+interface IBackground
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -1740,7 +1764,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IColors
+interface IColors
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -1850,7 +1874,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface ICommon
+interface ICommon
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -1928,7 +1952,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IError extends IColors
+interface IError extends IColors
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -1979,7 +2003,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IGreys
+interface IGreys
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -2273,7 +2297,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IPrimary extends IColors
+interface IPrimary extends IColors
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -2323,7 +2347,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface ISecondary extends IColors
+interface ISecondary extends IColors
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -2357,7 +2381,7 @@ String kVAL_PALETTE_SECONDARY_MAIN          = "#f50057";
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public static ISecondary defaultInstance()
+static ISecondary defaultInstance()
 {
    return(new Secondary());
 }
@@ -2373,7 +2397,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IText extends IColors
+interface IText extends IColors
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -2407,7 +2431,7 @@ String kVAL_PALETTE_TEXT_SECONDARY = "rgba(0, 0, 0, 0.54)";
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public static IText defaultInstance()
+static IText defaultInstance()
 {
    return(new Text());
 }
@@ -2488,7 +2512,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IShadows
+interface IShadows
 {
                                        // constants ------------------------- //
                                        // default values                      //
@@ -2599,7 +2623,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IShape
+interface IShape
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -2659,7 +2683,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface ISpacing
+interface ISpacing
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -2719,7 +2743,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface ITransitions
+interface ITransitions
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -2728,6 +2752,14 @@ String   kKEY_TRANSITIONS_EASING                       = "easing";
 String   kKEY_TRANSITIONS_FCN_CREATE                   = "create";
 String   kKEY_TRANSITIONS_FCN_GET_AUTO_HEIGHT_DURATION = "getAutoHeightDuration";
 
+String[] kKEYS =
+{
+   kKEY_TRANSITIONS_DURATION,
+   kKEY_TRANSITIONS_EASING,
+   kKEY_TRANSITIONS_FCN_CREATE,
+   kKEY_TRANSITIONS_FCN_GET_AUTO_HEIGHT_DURATION
+};
+                                       // default values                      //
                                        // default values                      //
 Function kVAL_TRANSITIONS_FCN_CREATE                   = null;
 Function kVAL_TRANSITIONS_FCN_GET_AUTO_HEIGHT_DURATION = null;
@@ -2831,7 +2863,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IDuration
+interface IDuration
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -2843,6 +2875,16 @@ String kKEY_TRANSITIONS_DURATION_SHORTER         = "shorter";
 String kKEY_TRANSITIONS_DURATION_SHORTEST        = "shortest";
 String kKEY_TRANSITIONS_DURATION_STANDARD        = "standard";
 
+String[] kKEYS =
+{
+   kKEY_TRANSITIONS_DURATION_COMPLEX,
+   kKEY_TRANSITIONS_DURATION_ENTERING_SCREEN,
+   kKEY_TRANSITIONS_DURATION_LEAVING_SCREEN,
+   kKEY_TRANSITIONS_DURATION_SHORT,
+   kKEY_TRANSITIONS_DURATION_SHORTER,
+   kKEY_TRANSITIONS_DURATION_SHORTEST,
+   kKEY_TRANSITIONS_DURATION_STANDARD
+};
                                        // default values                      //
 int    kVAL_TRANSITIONS_DURATION_COMPLEX         = 375;
 int    kVAL_TRANSITIONS_DURATION_ENTERING_SCREEN = 225;
@@ -2988,6 +3030,132 @@ int getShortest();
 //------------------------------------------------------------------------------
 int getStandard();
 
+/*------------------------------------------------------------------------------
+
+@name       setComplex - set complex
+                                                                              */
+                                                                             /**
+            Set complex.
+
+@return     void
+
+@param      complex     complex
+
+@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+void setComplex(int complex);
+
+/*------------------------------------------------------------------------------
+
+@name       setEnteringScreen - Set entering screen
+                                                                              */
+                                                                             /**
+            Set entering screen.
+
+@return     void
+
+@param      enteringScreen    entering screen
+
+@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+void setEnteringScreen(int enteringScreen);
+
+/*------------------------------------------------------------------------------
+
+@name       setLeavingScreen - set leaving screen
+                                                                              */
+                                                                             /**
+            Set leaving screen.
+
+@return     void
+
+@param      leavingScreen    leaving screen
+
+@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+void setLeavingScreen(int leavingScreen);
+
+/*------------------------------------------------------------------------------
+
+@name       setShort - set short
+                                                                              */
+                                                                             /**
+            Set short.
+
+@return     void
+
+@param      shortVal    short
+
+@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+void setShort(int shortVal);
+
+/*------------------------------------------------------------------------------
+
+@name       setShorter - set shorter
+                                                                              */
+                                                                             /**
+            Set shorter.
+
+@return     void
+
+@param      shorter    shorter
+
+@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+void setShorter(int shorter);
+
+/*------------------------------------------------------------------------------
+
+@name       setShortest - set shortest
+                                                                              */
+                                                                             /**
+            Set shortest.
+
+@return     void
+
+@param      shortest    shortest
+
+@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+void setShortest(int shortest);
+
+/*------------------------------------------------------------------------------
+
+@name       setStandard - set standard
+                                                                              */
+                                                                             /**
+            Set standard.
+
+@return     standard
+
+@param      standard    standard
+
+@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+void setStandard(int standard);
+
 }//====================================// end IDuration ======================//
 /*==============================================================================
 
@@ -3000,7 +3168,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IEasing
+interface IEasing
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -3009,6 +3177,13 @@ String   kKEY_TRANSITIONS_EASE_IN_OUT = "easeInOut";
 String   kKEY_TRANSITIONS_EASE_OUT    = "easeOut";
 String   kKEY_TRANSITIONS_EASE_SHARP  = "easeSharp";
 
+String[] kKEYS =
+{
+   kKEY_TRANSITIONS_EASE_IN,
+   kKEY_TRANSITIONS_EASE_IN_OUT,
+   kKEY_TRANSITIONS_EASE_OUT,
+   kKEY_TRANSITIONS_EASE_SHARP
+};
                                        // default values                      //
 String   kVAL_TRANSITIONS_EASE_IN     = "cubic-bezier(0.4, 0, 1, 1)";
 String   kVAL_TRANSITIONS_EASE_IN_OUT = "cubic-bezier(0.4, 0, 0.2, 1)";
@@ -3116,7 +3291,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface ITypography
+interface ITypography
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -3716,7 +3891,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IBody1 extends ITypoLetterSpacing
+interface IBody1 extends ITypoLetterSpacing
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -3771,7 +3946,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IBody1Next extends ITypoLetterSpacing
+interface IBody1Next extends ITypoLetterSpacing
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -3826,7 +4001,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IBody2 extends ITypoLetterSpacing
+interface IBody2 extends ITypoLetterSpacing
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -3881,7 +4056,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IBody2Next extends ITypoLetterSpacing
+interface IBody2Next extends ITypoLetterSpacing
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -3936,7 +4111,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IButton extends ITypoLetterSpacingTextTransform
+interface IButton extends ITypoLetterSpacingTextTransform
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -3993,7 +4168,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IButtonNext extends ITypoLetterSpacingTextTransform
+interface IButtonNext extends ITypoLetterSpacingTextTransform
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -4050,7 +4225,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface ICaption extends ITypoLetterSpacing
+interface ICaption extends ITypoLetterSpacing
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -4105,7 +4280,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface ICaptionNext extends ITypoLetterSpacing
+interface ICaptionNext extends ITypoLetterSpacing
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -4160,7 +4335,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IDisplay1 extends ITypoBase
+interface IDisplay1 extends ITypoBase
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -4213,7 +4388,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IDisplay2 extends ITypoMarginLeft
+interface IDisplay2 extends ITypoMarginLeft
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -4268,7 +4443,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IDisplay3 extends ITypoMarginLeftLetterSpacing
+interface IDisplay3 extends ITypoMarginLeftLetterSpacing
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -4325,7 +4500,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IDisplay4 extends ITypoMarginLeftLetterSpacing
+interface IDisplay4 extends ITypoMarginLeftLetterSpacing
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -4382,7 +4557,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IH1 extends ITypoLetterSpacing
+interface IH1 extends ITypoLetterSpacing
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -4437,7 +4612,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IH2 extends ITypoLetterSpacing
+interface IH2 extends ITypoLetterSpacing
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -4492,7 +4667,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IH3 extends ITypoLetterSpacing
+interface IH3 extends ITypoLetterSpacing
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -4547,7 +4722,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IH4 extends ITypoLetterSpacing
+interface IH4 extends ITypoLetterSpacing
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -4602,7 +4777,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IH5 extends ITypoLetterSpacing
+interface IH5 extends ITypoLetterSpacing
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -4657,7 +4832,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IH6 extends ITypoLetterSpacing
+interface IH6 extends ITypoLetterSpacing
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -4712,7 +4887,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IHeadline extends ITypoBase
+interface IHeadline extends ITypoBase
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -4765,7 +4940,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface IOverline extends ITypoLetterSpacingTextTransform
+interface IOverline extends ITypoLetterSpacingTextTransform
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -4822,7 +4997,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface ISubheading extends ITypoBase
+interface ISubheading extends ITypoBase
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -4875,7 +5050,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface ISubtitle1 extends ITypoLetterSpacing
+interface ISubtitle1 extends ITypoLetterSpacing
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -4930,7 +5105,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface ISubtitle2 extends ITypoLetterSpacing
+interface ISubtitle2 extends ITypoLetterSpacing
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -4985,7 +5160,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface ITitle extends ITypoBase
+interface ITitle extends ITypoBase
 {
                                        // constants ------------------------- //
                                        // keys                                //
@@ -5038,7 +5213,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface ITypoBase
+interface ITypoBase
 {
                                        // constants ------------------------- //
                                        // (none)                              //
@@ -5141,7 +5316,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface ITypoMarginLeft extends ITypoBase
+interface ITypoMarginLeft extends ITypoBase
 {
                                        // constants ------------------------- //
                                        // (none)                              //
@@ -5180,7 +5355,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface ITypoLetterSpacing extends ITypoBase
+interface ITypoLetterSpacing extends ITypoBase
 {
                                        // constants ------------------------- //
                                        // (none)                              //
@@ -5219,7 +5394,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface ITypoMarginLeftLetterSpacing
+interface ITypoMarginLeftLetterSpacing
    extends ITypoMarginLeft, ITypoLetterSpacing
 {
                                        // constants ------------------------- //
@@ -5243,7 +5418,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static interface ITypoLetterSpacingTextTransform extends ITypoLetterSpacing
+interface ITypoLetterSpacingTextTransform extends ITypoLetterSpacing
 {
                                        // constants ------------------------- //
                                        // (none)                              //
@@ -5420,7 +5595,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-class Mixins extends java.util.HashMap<String,Object> implements IMixins
+class Mixins extends NativeObject implements IMixins
 {
                                        // constants ------------------------- //
                                        // (none)                              //
@@ -5495,7 +5670,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static class Toolbar extends java.util.HashMap<String,Object> implements IToolbar
+public static class Toolbar extends NativeObject implements IToolbar
 {
                                        // constants ------------------------- //
                                        // (none)                              //
@@ -5522,7 +5697,7 @@ public static class Toolbar extends java.util.HashMap<String,Object> implements 
 //------------------------------------------------------------------------------
 public Toolbar()
 {
-   put(kKEY_MIXINS_TOOLBAR_MIN_HEIGHT, kVAL_MIXINS_TOOLBAR_MIN_HEIGHT);
+   set(kKEY_MIXINS_TOOLBAR_MIN_HEIGHT, kVAL_MIXINS_TOOLBAR_MIN_HEIGHT);
 }
 /*------------------------------------------------------------------------------
 
@@ -5540,7 +5715,7 @@ public Toolbar()
 //------------------------------------------------------------------------------
 public int getMinHeight()
 {
-   return((Integer)get(kKEY_MIXINS_TOOLBAR_MIN_HEIGHT));
+   return(getInt(kKEY_MIXINS_TOOLBAR_MIN_HEIGHT));
 }
 }//====================================// end Toolbar ========================//
 }//====================================// end Mixins =========================//
@@ -5555,7 +5730,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-class Palette extends java.util.HashMap<String,Object> implements IPalette
+class Palette extends NativeObject implements IPalette
 {
                                        // constants ------------------------- //
                                        // (none)                              //
@@ -5582,21 +5757,21 @@ class Palette extends java.util.HashMap<String,Object> implements IPalette
 //------------------------------------------------------------------------------
 public Palette()
 {
-   put(kKEY_PALETTE_ACTION,                IAction.defaultInstance());
-   put(kKEY_PALETTE_BACKGROUND,            IBackground.defaultInstance());
-   put(kKEY_PALETTE_COMMON,                ICommon.defaultInstance());
-   put(kKEY_PALETTE_CONTRAST_THRESHOLD,    kVAL_PALETTE_CONTRAST_THRESHOLD);
-   put(kKEY_PALETTE_DIVIDER,               kVAL_PALETTE_DIVIDER);
-   put(kKEY_PALETTE_ERROR,                 IError.defaultInstance());
-   put(kKEY_PALETTE_FCN_AUGMENT_COLOR,     kVAL_PALETTE_FCN_AUGMENT_COLOR);
-   put(kKEY_PALETTE_FCN_GET_CONTRAST_TEXT, kVAL_PALETTE_FCN_GET_CONTRAST_TEXT);
-   put(kKEY_PALETTE_GREY,                  IGreys.defaultInstance());
-   put(kKEY_PALETTE_PRIMARY,               IPrimary.defaultInstance());
-   put(kKEY_PALETTE_PROPS,                 kVAL_PALETTE_PROPS);
-   put(kKEY_PALETTE_SECONDARY,             ISecondary.defaultInstance());
-   put(kKEY_PALETTE_TEXT,                  IText.defaultInstance());
-   put(kKEY_PALETTE_TONAL_OFFSET,          kVAL_PALETTE_TONAL_OFFSET);
-   put(kKEY_PALETTE_TYPE,                  kVAL_PALETTE_TYPE);
+   set(kKEY_PALETTE_ACTION,                IAction.defaultInstance());
+   set(kKEY_PALETTE_BACKGROUND,            IBackground.defaultInstance());
+   set(kKEY_PALETTE_COMMON,                ICommon.defaultInstance());
+   set(kKEY_PALETTE_CONTRAST_THRESHOLD,    kVAL_PALETTE_CONTRAST_THRESHOLD);
+   set(kKEY_PALETTE_DIVIDER,               kVAL_PALETTE_DIVIDER);
+   set(kKEY_PALETTE_ERROR,                 IError.defaultInstance());
+   set(kKEY_PALETTE_FCN_AUGMENT_COLOR,     kVAL_PALETTE_FCN_AUGMENT_COLOR);
+   set(kKEY_PALETTE_FCN_GET_CONTRAST_TEXT, kVAL_PALETTE_FCN_GET_CONTRAST_TEXT);
+   set(kKEY_PALETTE_GREY,                  IGreys.defaultInstance());
+   set(kKEY_PALETTE_PRIMARY,               IPrimary.defaultInstance());
+   set(kKEY_PALETTE_PROPS,                 kVAL_PALETTE_PROPS);
+   set(kKEY_PALETTE_SECONDARY,             ISecondary.defaultInstance());
+   set(kKEY_PALETTE_TEXT,                  IText.defaultInstance());
+   set(kKEY_PALETTE_TONAL_OFFSET,          kVAL_PALETTE_TONAL_OFFSET);
+   set(kKEY_PALETTE_TYPE,                  kVAL_PALETTE_TYPE);
 }
 /*------------------------------------------------------------------------------
 
@@ -5668,7 +5843,7 @@ public ICommon getCommon()
 //------------------------------------------------------------------------------
 public int getContrastThreshold()
 {
-   return((Integer)get(kKEY_PALETTE_CONTRAST_THRESHOLD));
+   return(getInt(kKEY_PALETTE_CONTRAST_THRESHOLD));
 }
 /*------------------------------------------------------------------------------
 
@@ -5792,9 +5967,9 @@ public IColors getPrimary()
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public Properties getProps()
+public NativeObject getProps()
 {
-   return((Properties)get(kKEY_PALETTE_PROPS));
+   return((NativeObject)get(kKEY_PALETTE_PROPS));
 }
 /*------------------------------------------------------------------------------
 
@@ -5879,7 +6054,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static class Action extends HashMap<String,Object> implements IAction
+public static class Action extends NativeObject implements IAction
 {
                                        // constants ------------------------- //
                                        // (none)                              //
@@ -5906,12 +6081,12 @@ public static class Action extends HashMap<String,Object> implements IAction
 //------------------------------------------------------------------------------
 public Action()
 {
-   put(kKEY_PALETTE_ACTION_ACTIVE,              kVAL_PALETTE_ACTION_ACTIVE);
-   put(kKEY_PALETTE_ACTION_DISABLED,            kVAL_PALETTE_ACTION_DISABLED);
-   put(kKEY_PALETTE_ACTION_DISABLED_BACKGROUND, kVAL_PALETTE_ACTION_DISABLED_BACKGROUND);
-   put(kKEY_PALETTE_ACTION_HOVER,               kVAL_PALETTE_ACTION_HOVER);
-   put(kKEY_PALETTE_ACTION_HOVER_OPACITY,       kVAL_PALETTE_ACTION_HOVER_OPACITY);
-   put(kKEY_PALETTE_ACTION_SELECTED,            kVAL_PALETTE_ACTION_SELECTED);
+   set(kKEY_PALETTE_ACTION_ACTIVE,              kVAL_PALETTE_ACTION_ACTIVE);
+   set(kKEY_PALETTE_ACTION_DISABLED,            kVAL_PALETTE_ACTION_DISABLED);
+   set(kKEY_PALETTE_ACTION_DISABLED_BACKGROUND, kVAL_PALETTE_ACTION_DISABLED_BACKGROUND);
+   set(kKEY_PALETTE_ACTION_HOVER,               kVAL_PALETTE_ACTION_HOVER);
+   set(kKEY_PALETTE_ACTION_HOVER_OPACITY,       kVAL_PALETTE_ACTION_HOVER_OPACITY);
+   set(kKEY_PALETTE_ACTION_SELECTED,            kVAL_PALETTE_ACTION_SELECTED);
 }
 /*------------------------------------------------------------------------------
 
@@ -6033,7 +6208,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static class Background extends HashMap<String,Object> implements IBackground
+public static class Background extends NativeObject implements IBackground
 {
                                        // constants ------------------------- //
                                        // (none)                              //
@@ -6060,8 +6235,8 @@ public static class Background extends HashMap<String,Object> implements IBackgr
 //------------------------------------------------------------------------------
 public Background()
 {
-   put(kKEY_PALETTE_BACKGROUND_DEFAULT, kVAL_PALETTE_BACKGROUND_DEFAULT);
-   put(kKEY_PALETTE_BACKGROUND_PAPER,   kVAL_PALETTE_BACKGROUND_PAPER);
+   set(kKEY_PALETTE_BACKGROUND_DEFAULT, kVAL_PALETTE_BACKGROUND_DEFAULT);
+   set(kKEY_PALETTE_BACKGROUND_PAPER,   kVAL_PALETTE_BACKGROUND_PAPER);
 }
 /*------------------------------------------------------------------------------
 
@@ -6111,7 +6286,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static class Colors extends HashMap<String,Object> implements IColors
+public static class Colors extends NativeObject implements IColors
 {
                                        // constants ------------------------- //
                                        // (none)                              //
@@ -6223,7 +6398,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static class Common extends HashMap<String,Object> implements ICommon
+public static class Common extends NativeObject implements ICommon
 {
                                        // constants ------------------------- //
                                        // (none)                              //
@@ -6250,8 +6425,8 @@ public static class Common extends HashMap<String,Object> implements ICommon
 //------------------------------------------------------------------------------
 public Common()
 {
-   put(kKEY_PALETTE_COMMON_BLACK, kVAL_PALETTE_COMMON_BLACK);
-   put(kKEY_PALETTE_COMMON_WHITE, kVAL_PALETTE_COMMON_WHITE);
+   set(kKEY_PALETTE_COMMON_BLACK, kVAL_PALETTE_COMMON_BLACK);
+   set(kKEY_PALETTE_COMMON_WHITE, kVAL_PALETTE_COMMON_WHITE);
 }
 /*------------------------------------------------------------------------------
 
@@ -6328,10 +6503,10 @@ public static class Error extends Colors implements IError
 //------------------------------------------------------------------------------
 public Error()
 {
-   put(kKEY_PALETTE_ERROR_LIGHT,         kVAL_PALETTE_ERROR_LIGHT);
-   put(kKEY_PALETTE_ERROR_DARK,          kVAL_PALETTE_ERROR_DARK);
-   put(kKEY_PALETTE_ERROR_MAIN,          kVAL_PALETTE_ERROR_MAIN);
-   put(kKEY_PALETTE_ERROR_CONTRAST_TEXT, kVAL_PALETTE_ERROR_CONTRAST_TEXT);
+   set(kKEY_PALETTE_ERROR_LIGHT,         kVAL_PALETTE_ERROR_LIGHT);
+   set(kKEY_PALETTE_ERROR_DARK,          kVAL_PALETTE_ERROR_DARK);
+   set(kKEY_PALETTE_ERROR_MAIN,          kVAL_PALETTE_ERROR_MAIN);
+   set(kKEY_PALETTE_ERROR_CONTRAST_TEXT, kVAL_PALETTE_ERROR_CONTRAST_TEXT);
 }
 }//====================================// end Error ==========================//
 /*==============================================================================
@@ -6345,7 +6520,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static class Greys extends HashMap<String,Object> implements IGreys
+public static class Greys extends NativeObject implements IGreys
 {
                                        // constants ------------------------- //
                                        // (none)                              //
@@ -6372,20 +6547,20 @@ public static class Greys extends HashMap<String,Object> implements IGreys
 //------------------------------------------------------------------------------
 public Greys()
 {
-   put(kKEY_PALETTE_GREY_50,   kVAL_PALETTE_GREY_50);
-   put(kKEY_PALETTE_GREY_100,  kVAL_PALETTE_GREY_100);
-   put(kKEY_PALETTE_GREY_200,  kVAL_PALETTE_GREY_200);
-   put(kKEY_PALETTE_GREY_300,  kVAL_PALETTE_GREY_300);
-   put(kKEY_PALETTE_GREY_400,  kVAL_PALETTE_GREY_400);
-   put(kKEY_PALETTE_GREY_500,  kVAL_PALETTE_GREY_500);
-   put(kKEY_PALETTE_GREY_600,  kVAL_PALETTE_GREY_600);
-   put(kKEY_PALETTE_GREY_700,  kVAL_PALETTE_GREY_700);
-   put(kKEY_PALETTE_GREY_800,  kVAL_PALETTE_GREY_800);
-   put(kKEY_PALETTE_GREY_900,  kVAL_PALETTE_GREY_900);
-   put(kKEY_PALETTE_GREY_A100, kVAL_PALETTE_GREY_A100);
-   put(kKEY_PALETTE_GREY_A200, kVAL_PALETTE_GREY_A200);
-   put(kKEY_PALETTE_GREY_A400, kVAL_PALETTE_GREY_A400);
-   put(kKEY_PALETTE_GREY_A700, kVAL_PALETTE_GREY_A700);
+   set(kKEY_PALETTE_GREY_50,   kVAL_PALETTE_GREY_50);
+   set(kKEY_PALETTE_GREY_100,  kVAL_PALETTE_GREY_100);
+   set(kKEY_PALETTE_GREY_200,  kVAL_PALETTE_GREY_200);
+   set(kKEY_PALETTE_GREY_300,  kVAL_PALETTE_GREY_300);
+   set(kKEY_PALETTE_GREY_400,  kVAL_PALETTE_GREY_400);
+   set(kKEY_PALETTE_GREY_500,  kVAL_PALETTE_GREY_500);
+   set(kKEY_PALETTE_GREY_600,  kVAL_PALETTE_GREY_600);
+   set(kKEY_PALETTE_GREY_700,  kVAL_PALETTE_GREY_700);
+   set(kKEY_PALETTE_GREY_800,  kVAL_PALETTE_GREY_800);
+   set(kKEY_PALETTE_GREY_900,  kVAL_PALETTE_GREY_900);
+   set(kKEY_PALETTE_GREY_A100, kVAL_PALETTE_GREY_A100);
+   set(kKEY_PALETTE_GREY_A200, kVAL_PALETTE_GREY_A200);
+   set(kKEY_PALETTE_GREY_A400, kVAL_PALETTE_GREY_A400);
+   set(kKEY_PALETTE_GREY_A700, kVAL_PALETTE_GREY_A700);
 }
 /*------------------------------------------------------------------------------
 
@@ -6678,10 +6853,10 @@ public static class Primary extends Colors implements IPrimary
 //------------------------------------------------------------------------------
 public Primary()
 {
-   put(kKEY_PALETTE_PRIMARY_LIGHT,         kVAL_PALETTE_PRIMARY_LIGHT);
-   put(kKEY_PALETTE_PRIMARY_DARK,          kVAL_PALETTE_PRIMARY_DARK);
-   put(kKEY_PALETTE_PRIMARY_MAIN,          kVAL_PALETTE_PRIMARY_MAIN);
-   put(kKEY_PALETTE_PRIMARY_CONTRAST_TEXT, kVAL_PALETTE_PRIMARY_CONTRAST_TEXT);
+   set(kKEY_PALETTE_PRIMARY_LIGHT,         kVAL_PALETTE_PRIMARY_LIGHT);
+   set(kKEY_PALETTE_PRIMARY_DARK,          kVAL_PALETTE_PRIMARY_DARK);
+   set(kKEY_PALETTE_PRIMARY_MAIN,          kVAL_PALETTE_PRIMARY_MAIN);
+   set(kKEY_PALETTE_PRIMARY_CONTRAST_TEXT, kVAL_PALETTE_PRIMARY_CONTRAST_TEXT);
 }
 }//====================================// end Primary ========================//
 /*==============================================================================
@@ -6722,10 +6897,10 @@ public static class Secondary extends Colors implements ISecondary
 //------------------------------------------------------------------------------
 public Secondary()
 {
-   put(kKEY_PALETTE_SECONDARY_LIGHT,         kVAL_PALETTE_SECONDARY_LIGHT);
-   put(kKEY_PALETTE_SECONDARY_DARK,          kVAL_PALETTE_SECONDARY_DARK);
-   put(kKEY_PALETTE_SECONDARY_MAIN,          kVAL_PALETTE_SECONDARY_MAIN);
-   put(kKEY_PALETTE_SECONDARY_CONTRAST_TEXT, kVAL_PALETTE_SECONDARY_CONTRAST_TEXT);
+   set(kKEY_PALETTE_SECONDARY_LIGHT,         kVAL_PALETTE_SECONDARY_LIGHT);
+   set(kKEY_PALETTE_SECONDARY_DARK,          kVAL_PALETTE_SECONDARY_DARK);
+   set(kKEY_PALETTE_SECONDARY_MAIN,          kVAL_PALETTE_SECONDARY_MAIN);
+   set(kKEY_PALETTE_SECONDARY_CONTRAST_TEXT, kVAL_PALETTE_SECONDARY_CONTRAST_TEXT);
 }
 }//====================================// end Secondary ======================//
 /*==============================================================================
@@ -6766,10 +6941,10 @@ public static class Text extends Colors implements IText
 //------------------------------------------------------------------------------
 public Text()
 {
-   put(kKEY_PALETTE_TEXT_DISABLED,  kVAL_PALETTE_TEXT_DISABLED);
-   put(kKEY_PALETTE_TEXT_HINT,      kVAL_PALETTE_TEXT_HINT);
-   put(kKEY_PALETTE_TEXT_PRIMARY,   kVAL_PALETTE_TEXT_PRIMARY);
-   put(kKEY_PALETTE_TEXT_SECONDARY, kVAL_PALETTE_TEXT_SECONDARY);
+   set(kKEY_PALETTE_TEXT_DISABLED,  kVAL_PALETTE_TEXT_DISABLED);
+   set(kKEY_PALETTE_TEXT_HINT,      kVAL_PALETTE_TEXT_HINT);
+   set(kKEY_PALETTE_TEXT_PRIMARY,   kVAL_PALETTE_TEXT_PRIMARY);
+   set(kKEY_PALETTE_TEXT_SECONDARY, kVAL_PALETTE_TEXT_SECONDARY);
 }
 /*------------------------------------------------------------------------------
 
@@ -6856,7 +7031,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-class Shadows extends HashMap<String,Object> implements IShadows
+class Shadows extends NativeObject implements IShadows
 {
                                        // constants ------------------------- //
                                        // (none)                              //
@@ -6883,7 +7058,7 @@ class Shadows extends HashMap<String,Object> implements IShadows
 //------------------------------------------------------------------------------
 public Shadows()
 {
-   put(kKEY_SHADOWS, new ArrayList(Arrays.asList(kSHADOWS_DEFAULT)));
+   set(kKEY_SHADOWS, new ArrayList(Arrays.asList(kSHADOWS_DEFAULT)));
 }
 /*------------------------------------------------------------------------------
 
@@ -6915,7 +7090,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-class Shape extends HashMap<String,Object> implements IShape
+class Shape extends NativeObject implements IShape
 {
                                        // constants ------------------------- //
                                        // (none)                              //
@@ -6942,7 +7117,7 @@ class Shape extends HashMap<String,Object> implements IShape
 //------------------------------------------------------------------------------
 public Shape()
 {
-   put(kKEY_SHAPE_BORDER_RADIUS, kVAL_SHAPE_BORDER_RADIUS);
+   set(kKEY_SHAPE_BORDER_RADIUS, kVAL_SHAPE_BORDER_RADIUS);
 }
 /*------------------------------------------------------------------------------
 
@@ -6960,7 +7135,7 @@ public Shape()
 //------------------------------------------------------------------------------
 public int getBorderRadius()
 {
-   return((Integer)get(kKEY_SHAPE_BORDER_RADIUS));
+   return(getInt(kKEY_SHAPE_BORDER_RADIUS));
 }
 }//====================================// end Shape ==========================//
 /*==============================================================================
@@ -6974,7 +7149,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-class Spacing extends HashMap<String,Object> implements ISpacing
+class Spacing extends NativeObject implements ISpacing
 {
                                        // constants ------------------------- //
                                        // (none)                              //
@@ -7001,7 +7176,7 @@ class Spacing extends HashMap<String,Object> implements ISpacing
 //------------------------------------------------------------------------------
 public Spacing()
 {
-   put(kKEY_SPACING_UNIT, kVAL_SPACING_UNIT);
+   set(kKEY_SPACING_UNIT, kVAL_SPACING_UNIT);
 }
 /*------------------------------------------------------------------------------
 
@@ -7019,7 +7194,7 @@ public Spacing()
 //------------------------------------------------------------------------------
 public int getUnit()
 {
-   return((Integer)get(kKEY_SPACING_UNIT));
+   return(getInt(kKEY_SPACING_UNIT));
 }
 }//====================================// end Spacing ========================//
 /*==============================================================================
@@ -7033,7 +7208,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static class Transitions extends java.util.HashMap<String,Object> implements ITransitions
+public static class Transitions extends NativeObject implements ITransitions
 {
                                        // constants ------------------------- //
                                        // (none)                              //
@@ -7060,11 +7235,11 @@ public static class Transitions extends java.util.HashMap<String,Object> impleme
 //------------------------------------------------------------------------------
 public Transitions()
 {
-   put(kKEY_TRANSITIONS_DURATION,   IDuration.defaultInstance());
-   put(kKEY_TRANSITIONS_EASING,     IEasing.defaultInstance());
-   put(kKEY_TRANSITIONS_FCN_GET_AUTO_HEIGHT_DURATION,
+   set(kKEY_TRANSITIONS_DURATION,   IDuration.defaultInstance());
+   set(kKEY_TRANSITIONS_EASING,     IEasing.defaultInstance());
+   set(kKEY_TRANSITIONS_FCN_GET_AUTO_HEIGHT_DURATION,
                                     kVAL_TRANSITIONS_FCN_GET_AUTO_HEIGHT_DURATION);
-   put(kKEY_TRANSITIONS_FCN_CREATE, kVAL_TRANSITIONS_FCN_CREATE);
+   set(kKEY_TRANSITIONS_FCN_CREATE, kVAL_TRANSITIONS_FCN_CREATE);
 }
 /*------------------------------------------------------------------------------
 
@@ -7149,7 +7324,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static class Duration extends HashMap<String,Object> implements IDuration
+public static class Duration extends NativeObject implements IDuration
 {
                                        // constants ------------------------- //
                                        // (none)                              //
@@ -7176,15 +7351,15 @@ public static class Duration extends HashMap<String,Object> implements IDuration
 //------------------------------------------------------------------------------
 public Duration()
 {
-   put(kKEY_TRANSITIONS_DURATION_COMPLEX,  kVAL_TRANSITIONS_DURATION_COMPLEX);
-   put(kKEY_TRANSITIONS_DURATION_ENTERING_SCREEN,
+   set(kKEY_TRANSITIONS_DURATION_COMPLEX,  kVAL_TRANSITIONS_DURATION_COMPLEX);
+   set(kKEY_TRANSITIONS_DURATION_ENTERING_SCREEN,
                                            kVAL_TRANSITIONS_DURATION_ENTERING_SCREEN);
-   put(kKEY_TRANSITIONS_DURATION_LEAVING_SCREEN,
+   set(kKEY_TRANSITIONS_DURATION_LEAVING_SCREEN,
                                            kVAL_TRANSITIONS_DURATION_LEAVING_SCREEN);
-   put(kKEY_TRANSITIONS_DURATION_SHORT,    kVAL_TRANSITIONS_DURATION_SHORT);
-   put(kKEY_TRANSITIONS_DURATION_SHORTER,  kVAL_TRANSITIONS_DURATION_SHORTER);
-   put(kKEY_TRANSITIONS_DURATION_SHORTEST, kVAL_TRANSITIONS_DURATION_SHORTEST);
-   put(kKEY_TRANSITIONS_DURATION_STANDARD, kVAL_TRANSITIONS_DURATION_STANDARD);
+   set(kKEY_TRANSITIONS_DURATION_SHORT,    kVAL_TRANSITIONS_DURATION_SHORT);
+   set(kKEY_TRANSITIONS_DURATION_SHORTER,  kVAL_TRANSITIONS_DURATION_SHORTER);
+   set(kKEY_TRANSITIONS_DURATION_SHORTEST, kVAL_TRANSITIONS_DURATION_SHORTEST);
+   set(kKEY_TRANSITIONS_DURATION_STANDARD, kVAL_TRANSITIONS_DURATION_STANDARD);
 }
 /*------------------------------------------------------------------------------
 
@@ -7202,7 +7377,7 @@ public Duration()
 //------------------------------------------------------------------------------
 public int getComplex()
 {
-   return((Integer)get(kKEY_TRANSITIONS_DURATION_COMPLEX));
+   return(getInt(kKEY_TRANSITIONS_DURATION_COMPLEX));
 }
 /*------------------------------------------------------------------------------
 
@@ -7220,7 +7395,7 @@ public int getComplex()
 //------------------------------------------------------------------------------
 public int getEnteringScreen()
 {
-   return((Integer)get(kKEY_TRANSITIONS_DURATION_ENTERING_SCREEN));
+   return(getInt(kKEY_TRANSITIONS_DURATION_ENTERING_SCREEN));
 }
 /*------------------------------------------------------------------------------
 
@@ -7238,7 +7413,7 @@ public int getEnteringScreen()
 //------------------------------------------------------------------------------
 public int getLeavingScreen()
 {
-   return((Integer)get(kKEY_TRANSITIONS_DURATION_LEAVING_SCREEN));
+   return(getInt(kKEY_TRANSITIONS_DURATION_LEAVING_SCREEN));
 }
 /*------------------------------------------------------------------------------
 
@@ -7256,7 +7431,7 @@ public int getLeavingScreen()
 //------------------------------------------------------------------------------
 public int getShort()
 {
-   return((Integer)get(kKEY_TRANSITIONS_DURATION_SHORT));
+   return(getInt(kKEY_TRANSITIONS_DURATION_SHORT));
 }
 /*------------------------------------------------------------------------------
 
@@ -7274,7 +7449,7 @@ public int getShort()
 //------------------------------------------------------------------------------
 public int getShorter()
 {
-   return((Integer)get(kKEY_TRANSITIONS_DURATION_SHORTER));
+   return(getInt(kKEY_TRANSITIONS_DURATION_SHORTER));
 }
 /*------------------------------------------------------------------------------
 
@@ -7292,7 +7467,7 @@ public int getShorter()
 //------------------------------------------------------------------------------
 public int getShortest()
 {
-   return((Integer)get(kKEY_TRANSITIONS_DURATION_SHORTEST));
+   return(getInt(kKEY_TRANSITIONS_DURATION_SHORTEST));
 }
 /*------------------------------------------------------------------------------
 
@@ -7310,7 +7485,154 @@ public int getShortest()
 //------------------------------------------------------------------------------
 public int getStandard()
 {
-   return((Integer)get(kKEY_TRANSITIONS_DURATION_STANDARD));
+   return(getInt(kKEY_TRANSITIONS_DURATION_STANDARD));
+}
+/*------------------------------------------------------------------------------
+
+@name       setComplex - set complex
+                                                                              */
+                                                                             /**
+            Set complex.
+
+@return     void
+
+@param      complex     complex
+
+@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public void setComplex(
+   int complex)
+{
+   set(kKEY_TRANSITIONS_DURATION_COMPLEX, complex);
+}
+/*------------------------------------------------------------------------------
+
+@name       setEnteringScreen - Set entering screen
+                                                                              */
+                                                                             /**
+            Set entering screen.
+
+@return     void
+
+@param      enteringScreen    entering screen
+
+@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public void setEnteringScreen(
+   int enteringScreen)
+{
+   set(kKEY_TRANSITIONS_DURATION_ENTERING_SCREEN, enteringScreen);
+}
+/*------------------------------------------------------------------------------
+
+@name       setLeavingScreen - set leaving screen
+                                                                              */
+                                                                             /**
+            Set leaving screen.
+
+@return     void
+
+@param      leavingScreen    leaving screen
+
+@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public void setLeavingScreen(
+   int leavingScreen)
+{
+   set(kKEY_TRANSITIONS_DURATION_LEAVING_SCREEN, leavingScreen);
+}
+/*------------------------------------------------------------------------------
+
+@name       setShort - set short
+                                                                              */
+                                                                             /**
+            Set short.
+
+@return     void
+
+@param      shortVal    short
+
+@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public void setShort(
+   int shortVal)
+{
+   set(kKEY_TRANSITIONS_DURATION_SHORT, shortVal);
+}
+/*------------------------------------------------------------------------------
+
+@name       setShorter - set shorter
+                                                                              */
+                                                                             /**
+            Set shorter.
+
+@return     void
+
+@param      shorter    shorter
+
+@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public void setShorter(
+   int shorter)
+{
+   set(kKEY_TRANSITIONS_DURATION_SHORTER, shorter);
+}
+/*------------------------------------------------------------------------------
+
+@name       setShortest - set shortest
+                                                                              */
+                                                                             /**
+            Set shortest.
+
+@return     void
+
+@param      shortest    shortest
+
+@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public void setShortest(
+   int shortest)
+{
+   set(kKEY_TRANSITIONS_DURATION_SHORTEST, shortest);
+}
+/*------------------------------------------------------------------------------
+
+@name       setStandard - set standard
+                                                                              */
+                                                                             /**
+            Set standard.
+
+@return     standard
+
+@param      standard    standard
+
+@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public void setStandard(
+   int standard)
+{
+   set(kKEY_TRANSITIONS_DURATION_STANDARD, standard);
 }
 }//====================================// end Duration =======================//
 /*==============================================================================
@@ -7324,7 +7646,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static class Easing extends HashMap<String,Object> implements IEasing
+public static class Easing extends NativeObject implements IEasing
 {
                                        // constants ------------------------- //
                                        // (none)                              //
@@ -7351,10 +7673,10 @@ public static class Easing extends HashMap<String,Object> implements IEasing
 //------------------------------------------------------------------------------
 public Easing()
 {
-   put(kKEY_TRANSITIONS_EASE_IN,     kVAL_TRANSITIONS_EASE_IN);
-   put(kKEY_TRANSITIONS_EASE_IN_OUT, kVAL_TRANSITIONS_EASE_IN_OUT);
-   put(kKEY_TRANSITIONS_EASE_OUT,    kVAL_TRANSITIONS_EASE_OUT);
-   put(kKEY_TRANSITIONS_EASE_SHARP,  kVAL_TRANSITIONS_EASE_SHARP);
+   set(kKEY_TRANSITIONS_EASE_IN,     kVAL_TRANSITIONS_EASE_IN);
+   set(kKEY_TRANSITIONS_EASE_IN_OUT, kVAL_TRANSITIONS_EASE_IN_OUT);
+   set(kKEY_TRANSITIONS_EASE_OUT,    kVAL_TRANSITIONS_EASE_OUT);
+   set(kKEY_TRANSITIONS_EASE_SHARP,  kVAL_TRANSITIONS_EASE_SHARP);
 }
 /*------------------------------------------------------------------------------
 
@@ -7441,7 +7763,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static class Typography extends java.util.HashMap<String,Object> implements ITypography
+public static class Typography extends NativeObject implements ITypography
 {
                                        // constants ------------------------- //
                                        // (none)                              //
@@ -7468,38 +7790,38 @@ public static class Typography extends java.util.HashMap<String,Object> implemen
 //------------------------------------------------------------------------------
 public Typography()
 {
-   put(kKEY_TYPOGRAPHY_BODY_1,              IBody1.defaultInstance());
-   put(kKEY_TYPOGRAPHY_BODY_1_NEXT,         IBody1Next.defaultInstance());
-   put(kKEY_TYPOGRAPHY_BODY_2,              IBody2.defaultInstance());
-   put(kKEY_TYPOGRAPHY_BODY_2_NEXT,         IBody2Next.defaultInstance());
-   put(kKEY_TYPOGRAPHY_BUTTON,              IButton.defaultInstance());
-   put(kKEY_TYPOGRAPHY_BUTTON_NEXT,         IButtonNext.defaultInstance());
-   put(kKEY_TYPOGRAPHY_CAPTION,             ICaption.defaultInstance());
-   put(kKEY_TYPOGRAPHY_CAPTION_NEXT,        ICaptionNext.defaultInstance());
-   put(kKEY_TYPOGRAPHY_DISPLAY1,            IDisplay1.defaultInstance());
-   put(kKEY_TYPOGRAPHY_DISPLAY2,            IDisplay2.defaultInstance());
-   put(kKEY_TYPOGRAPHY_DISPLAY3,            IDisplay3.defaultInstance());
-   put(kKEY_TYPOGRAPHY_DISPLAY4,            IDisplay4.defaultInstance());
-   put(kKEY_TYPOGRAPHY_FCN_PX_TO_REM,       kVAL_TYPOGRAPHY_FCN_PX_TO_REM);
-   put(kKEY_TYPOGRAPHY_FCN_ROUND,           kVAL_TYPOGRAPHY_FCN_ROUND);
-   put(kKEY_TYPOGRAPHY_FONT_FAMILY,         kVAL_TYPOGRAPHY_FONT_FAMILY);
-   put(kKEY_TYPOGRAPHY_FONT_SIZE,           kVAL_TYPOGRAPHY_FONT_SIZE);
-   put(kKEY_TYPOGRAPHY_FONT_WEIGHT_LIGHT,   kVAL_TYPOGRAPHY_FONT_WEIGHT_LIGHT);
-   put(kKEY_TYPOGRAPHY_FONT_WEIGHT_MEDIUM,  kVAL_TYPOGRAPHY_FONT_WEIGHT_MEDIUM);
-   put(kKEY_TYPOGRAPHY_FONT_WEIGHT_REGULAR, kVAL_TYPOGRAPHY_FONT_WEIGHT_REGULAR);
-   put(kKEY_TYPOGRAPHY_H1,                  IH1.defaultInstance());
-   put(kKEY_TYPOGRAPHY_H2,                  IH2.defaultInstance());
-   put(kKEY_TYPOGRAPHY_H3,                  IH3.defaultInstance());
-   put(kKEY_TYPOGRAPHY_H4,                  IH4.defaultInstance());
-   put(kKEY_TYPOGRAPHY_H5,                  IH5.defaultInstance());
-   put(kKEY_TYPOGRAPHY_H6,                  IH6.defaultInstance());
-   put(kKEY_TYPOGRAPHY_HEADLINE,            IHeadline.defaultInstance());
-   put(kKEY_TYPOGRAPHY_OVERLINE,            IOverline.defaultInstance());
-   put(kKEY_TYPOGRAPHY_SUBHEADING,          ISubheading.defaultInstance());
-   put(kKEY_TYPOGRAPHY_SUBTITLE_1,          ISubtitle1.defaultInstance());
-   put(kKEY_TYPOGRAPHY_SUBTITLE_2,          ISubtitle2.defaultInstance());
-   put(kKEY_TYPOGRAPHY_TITLE,               ITitle.defaultInstance());
-   put(kKEY_TYPOGRAPHY_USE_NEXT_VARIANTS,   kVAL_TYPOGRAPHY_USE_NEXT_VARIANTS);
+   set(kKEY_TYPOGRAPHY_BODY_1,              IBody1.defaultInstance());
+   set(kKEY_TYPOGRAPHY_BODY_1_NEXT,         IBody1Next.defaultInstance());
+   set(kKEY_TYPOGRAPHY_BODY_2,              IBody2.defaultInstance());
+   set(kKEY_TYPOGRAPHY_BODY_2_NEXT,         IBody2Next.defaultInstance());
+   set(kKEY_TYPOGRAPHY_BUTTON,              IButton.defaultInstance());
+   set(kKEY_TYPOGRAPHY_BUTTON_NEXT,         IButtonNext.defaultInstance());
+   set(kKEY_TYPOGRAPHY_CAPTION,             ICaption.defaultInstance());
+   set(kKEY_TYPOGRAPHY_CAPTION_NEXT,        ICaptionNext.defaultInstance());
+   set(kKEY_TYPOGRAPHY_DISPLAY1,            IDisplay1.defaultInstance());
+   set(kKEY_TYPOGRAPHY_DISPLAY2,            IDisplay2.defaultInstance());
+   set(kKEY_TYPOGRAPHY_DISPLAY3,            IDisplay3.defaultInstance());
+   set(kKEY_TYPOGRAPHY_DISPLAY4,            IDisplay4.defaultInstance());
+   set(kKEY_TYPOGRAPHY_FCN_PX_TO_REM,       kVAL_TYPOGRAPHY_FCN_PX_TO_REM);
+   set(kKEY_TYPOGRAPHY_FCN_ROUND,           kVAL_TYPOGRAPHY_FCN_ROUND);
+   set(kKEY_TYPOGRAPHY_FONT_FAMILY,         kVAL_TYPOGRAPHY_FONT_FAMILY);
+   set(kKEY_TYPOGRAPHY_FONT_SIZE,           kVAL_TYPOGRAPHY_FONT_SIZE);
+   set(kKEY_TYPOGRAPHY_FONT_WEIGHT_LIGHT,   kVAL_TYPOGRAPHY_FONT_WEIGHT_LIGHT);
+   set(kKEY_TYPOGRAPHY_FONT_WEIGHT_MEDIUM,  kVAL_TYPOGRAPHY_FONT_WEIGHT_MEDIUM);
+   set(kKEY_TYPOGRAPHY_FONT_WEIGHT_REGULAR, kVAL_TYPOGRAPHY_FONT_WEIGHT_REGULAR);
+   set(kKEY_TYPOGRAPHY_H1,                  IH1.defaultInstance());
+   set(kKEY_TYPOGRAPHY_H2,                  IH2.defaultInstance());
+   set(kKEY_TYPOGRAPHY_H3,                  IH3.defaultInstance());
+   set(kKEY_TYPOGRAPHY_H4,                  IH4.defaultInstance());
+   set(kKEY_TYPOGRAPHY_H5,                  IH5.defaultInstance());
+   set(kKEY_TYPOGRAPHY_H6,                  IH6.defaultInstance());
+   set(kKEY_TYPOGRAPHY_HEADLINE,            IHeadline.defaultInstance());
+   set(kKEY_TYPOGRAPHY_OVERLINE,            IOverline.defaultInstance());
+   set(kKEY_TYPOGRAPHY_SUBHEADING,          ISubheading.defaultInstance());
+   set(kKEY_TYPOGRAPHY_SUBTITLE_1,          ISubtitle1.defaultInstance());
+   set(kKEY_TYPOGRAPHY_SUBTITLE_2,          ISubtitle2.defaultInstance());
+   set(kKEY_TYPOGRAPHY_TITLE,               ITitle.defaultInstance());
+   set(kKEY_TYPOGRAPHY_USE_NEXT_VARIANTS,   kVAL_TYPOGRAPHY_USE_NEXT_VARIANTS);
 }
 /*------------------------------------------------------------------------------
 
@@ -7805,7 +8127,7 @@ public String getFontSize()
 //------------------------------------------------------------------------------
 public int getFontWeightLight()
 {
-   return((Integer)get(kKEY_TYPOGRAPHY_FONT_WEIGHT_LIGHT));
+   return(getInt(kKEY_TYPOGRAPHY_FONT_WEIGHT_LIGHT));
 }
 /*------------------------------------------------------------------------------
 
@@ -7823,7 +8145,7 @@ public int getFontWeightLight()
 //------------------------------------------------------------------------------
 public int getFontWeightMedium()
 {
-   return((Integer)get(kKEY_TYPOGRAPHY_FONT_WEIGHT_MEDIUM));
+   return(getInt(kKEY_TYPOGRAPHY_FONT_WEIGHT_MEDIUM));
 }
 /*------------------------------------------------------------------------------
 
@@ -7841,7 +8163,7 @@ public int getFontWeightMedium()
 //------------------------------------------------------------------------------
 public int getFontWeightRegular()
 {
-   return((Integer)get(kKEY_TYPOGRAPHY_FONT_WEIGHT_REGULAR));
+   return(getInt(kKEY_TYPOGRAPHY_FONT_WEIGHT_REGULAR));
 }
 /*------------------------------------------------------------------------------
 
@@ -8115,12 +8437,12 @@ public static class Body1 extends TypoLetterSpacing implements IBody1
 //------------------------------------------------------------------------------
 public Body1()
 {
-   put(kKEY_TYPOGRAPHY_BODY_1_COLOR,          kVAL_TYPOGRAPHY_BODY_1_COLOR);
-   put(kKEY_TYPOGRAPHY_BODY_1_FONT_FAMILY,    kVAL_TYPOGRAPHY_BODY_1_FONT_FAMILY);
-   put(kKEY_TYPOGRAPHY_BODY_1_FONT_SIZE,      kVAL_TYPOGRAPHY_BODY_1_FONT_SIZE);
-   put(kKEY_TYPOGRAPHY_BODY_1_FONT_WEIGHT,    kVAL_TYPOGRAPHY_BODY_1_FONT_WEIGHT);
-   put(kKEY_TYPOGRAPHY_BODY_1_LINE_HEIGHT,    kVAL_TYPOGRAPHY_BODY_1_LINE_HEIGHT);
-   put(kKEY_TYPOGRAPHY_BODY_1_LETTER_SPACING, kVAL_TYPOGRAPHY_BODY_1_LETTER_SPACING);
+   set(kKEY_TYPOGRAPHY_BODY_1_COLOR,          kVAL_TYPOGRAPHY_BODY_1_COLOR);
+   set(kKEY_TYPOGRAPHY_BODY_1_FONT_FAMILY,    kVAL_TYPOGRAPHY_BODY_1_FONT_FAMILY);
+   set(kKEY_TYPOGRAPHY_BODY_1_FONT_SIZE,      kVAL_TYPOGRAPHY_BODY_1_FONT_SIZE);
+   set(kKEY_TYPOGRAPHY_BODY_1_FONT_WEIGHT,    kVAL_TYPOGRAPHY_BODY_1_FONT_WEIGHT);
+   set(kKEY_TYPOGRAPHY_BODY_1_LINE_HEIGHT,    kVAL_TYPOGRAPHY_BODY_1_LINE_HEIGHT);
+   set(kKEY_TYPOGRAPHY_BODY_1_LETTER_SPACING, kVAL_TYPOGRAPHY_BODY_1_LETTER_SPACING);
 }
 }//====================================// end Body1 ==========================//
 /*==============================================================================
@@ -8161,12 +8483,12 @@ public static class Body1Next extends TypoLetterSpacing implements IBody1Next
 //------------------------------------------------------------------------------
 public Body1Next()
 {
-   put(kKEY_TYPOGRAPHY_BODY_1_NEXT_COLOR,          kVAL_TYPOGRAPHY_BODY_1_NEXT_COLOR);
-   put(kKEY_TYPOGRAPHY_BODY_1_NEXT_FONT_FAMILY,    kVAL_TYPOGRAPHY_BODY_1_NEXT_FONT_FAMILY);
-   put(kKEY_TYPOGRAPHY_BODY_1_NEXT_FONT_SIZE,      kVAL_TYPOGRAPHY_BODY_1_NEXT_FONT_SIZE);
-   put(kKEY_TYPOGRAPHY_BODY_1_NEXT_FONT_WEIGHT,    kVAL_TYPOGRAPHY_BODY_1_NEXT_FONT_WEIGHT);
-   put(kKEY_TYPOGRAPHY_BODY_1_NEXT_LINE_HEIGHT,    kVAL_TYPOGRAPHY_BODY_1_NEXT_LINE_HEIGHT);
-   put(kKEY_TYPOGRAPHY_BODY_1_NEXT_LETTER_SPACING, kVAL_TYPOGRAPHY_BODY_1_NEXT_LETTER_SPACING);
+   set(kKEY_TYPOGRAPHY_BODY_1_NEXT_COLOR,          kVAL_TYPOGRAPHY_BODY_1_NEXT_COLOR);
+   set(kKEY_TYPOGRAPHY_BODY_1_NEXT_FONT_FAMILY,    kVAL_TYPOGRAPHY_BODY_1_NEXT_FONT_FAMILY);
+   set(kKEY_TYPOGRAPHY_BODY_1_NEXT_FONT_SIZE,      kVAL_TYPOGRAPHY_BODY_1_NEXT_FONT_SIZE);
+   set(kKEY_TYPOGRAPHY_BODY_1_NEXT_FONT_WEIGHT,    kVAL_TYPOGRAPHY_BODY_1_NEXT_FONT_WEIGHT);
+   set(kKEY_TYPOGRAPHY_BODY_1_NEXT_LINE_HEIGHT,    kVAL_TYPOGRAPHY_BODY_1_NEXT_LINE_HEIGHT);
+   set(kKEY_TYPOGRAPHY_BODY_1_NEXT_LETTER_SPACING, kVAL_TYPOGRAPHY_BODY_1_NEXT_LETTER_SPACING);
 }
 }//====================================// end Body1Next ======================//
 /*==============================================================================
@@ -8207,12 +8529,12 @@ public static class Body2 extends TypoLetterSpacing implements IBody2
 //------------------------------------------------------------------------------
 public Body2()
 {
-   put(kKEY_TYPOGRAPHY_BODY_2_COLOR,          kVAL_TYPOGRAPHY_BODY_2_COLOR);
-   put(kKEY_TYPOGRAPHY_BODY_2_FONT_FAMILY,    kVAL_TYPOGRAPHY_BODY_2_FONT_FAMILY);
-   put(kKEY_TYPOGRAPHY_BODY_2_FONT_SIZE,      kVAL_TYPOGRAPHY_BODY_2_FONT_SIZE);
-   put(kKEY_TYPOGRAPHY_BODY_2_FONT_WEIGHT,    kVAL_TYPOGRAPHY_BODY_2_FONT_WEIGHT);
-   put(kKEY_TYPOGRAPHY_BODY_2_LINE_HEIGHT,    kVAL_TYPOGRAPHY_BODY_2_LINE_HEIGHT);
-   put(kKEY_TYPOGRAPHY_BODY_2_LETTER_SPACING, kVAL_TYPOGRAPHY_BODY_2_LETTER_SPACING);
+   set(kKEY_TYPOGRAPHY_BODY_2_COLOR,          kVAL_TYPOGRAPHY_BODY_2_COLOR);
+   set(kKEY_TYPOGRAPHY_BODY_2_FONT_FAMILY,    kVAL_TYPOGRAPHY_BODY_2_FONT_FAMILY);
+   set(kKEY_TYPOGRAPHY_BODY_2_FONT_SIZE,      kVAL_TYPOGRAPHY_BODY_2_FONT_SIZE);
+   set(kKEY_TYPOGRAPHY_BODY_2_FONT_WEIGHT,    kVAL_TYPOGRAPHY_BODY_2_FONT_WEIGHT);
+   set(kKEY_TYPOGRAPHY_BODY_2_LINE_HEIGHT,    kVAL_TYPOGRAPHY_BODY_2_LINE_HEIGHT);
+   set(kKEY_TYPOGRAPHY_BODY_2_LETTER_SPACING, kVAL_TYPOGRAPHY_BODY_2_LETTER_SPACING);
 }
 }//====================================// end Body2 ==========================//
 /*==============================================================================
@@ -8253,12 +8575,12 @@ public static class Body2Next extends TypoLetterSpacing implements IBody2Next
 //------------------------------------------------------------------------------
 public Body2Next()
 {
-   put(kKEY_TYPOGRAPHY_BODY_2_NEXT_COLOR,          kVAL_TYPOGRAPHY_BODY_2_NEXT_COLOR);
-   put(kKEY_TYPOGRAPHY_BODY_2_NEXT_FONT_FAMILY,    kVAL_TYPOGRAPHY_BODY_2_NEXT_FONT_FAMILY);
-   put(kKEY_TYPOGRAPHY_BODY_2_NEXT_FONT_SIZE,      kVAL_TYPOGRAPHY_BODY_2_NEXT_FONT_SIZE);
-   put(kKEY_TYPOGRAPHY_BODY_2_NEXT_FONT_WEIGHT,    kVAL_TYPOGRAPHY_BODY_2_NEXT_FONT_WEIGHT);
-   put(kKEY_TYPOGRAPHY_BODY_2_NEXT_LINE_HEIGHT,    kVAL_TYPOGRAPHY_BODY_2_NEXT_LINE_HEIGHT);
-   put(kKEY_TYPOGRAPHY_BODY_2_NEXT_LETTER_SPACING, kVAL_TYPOGRAPHY_BODY_2_NEXT_LETTER_SPACING);
+   set(kKEY_TYPOGRAPHY_BODY_2_NEXT_COLOR,          kVAL_TYPOGRAPHY_BODY_2_NEXT_COLOR);
+   set(kKEY_TYPOGRAPHY_BODY_2_NEXT_FONT_FAMILY,    kVAL_TYPOGRAPHY_BODY_2_NEXT_FONT_FAMILY);
+   set(kKEY_TYPOGRAPHY_BODY_2_NEXT_FONT_SIZE,      kVAL_TYPOGRAPHY_BODY_2_NEXT_FONT_SIZE);
+   set(kKEY_TYPOGRAPHY_BODY_2_NEXT_FONT_WEIGHT,    kVAL_TYPOGRAPHY_BODY_2_NEXT_FONT_WEIGHT);
+   set(kKEY_TYPOGRAPHY_BODY_2_NEXT_LINE_HEIGHT,    kVAL_TYPOGRAPHY_BODY_2_NEXT_LINE_HEIGHT);
+   set(kKEY_TYPOGRAPHY_BODY_2_NEXT_LETTER_SPACING, kVAL_TYPOGRAPHY_BODY_2_NEXT_LETTER_SPACING);
 }
 }//====================================// end Body2Next ======================//
 /*==============================================================================
@@ -8299,13 +8621,13 @@ public static class Button extends TypoLetterSpacingTextTransform implements IBu
 //------------------------------------------------------------------------------
 public Button()
 {
-   put(kKEY_TYPOGRAPHY_BUTTON_COLOR,          kVAL_TYPOGRAPHY_BUTTON_COLOR);
-   put(kKEY_TYPOGRAPHY_BUTTON_FONT_FAMILY,    kVAL_TYPOGRAPHY_BUTTON_FONT_FAMILY);
-   put(kKEY_TYPOGRAPHY_BUTTON_FONT_SIZE,      kVAL_TYPOGRAPHY_BUTTON_FONT_SIZE);
-   put(kKEY_TYPOGRAPHY_BUTTON_FONT_WEIGHT,    kVAL_TYPOGRAPHY_BUTTON_FONT_WEIGHT);
-   put(kKEY_TYPOGRAPHY_BUTTON_LINE_HEIGHT,    kVAL_TYPOGRAPHY_BUTTON_LINE_HEIGHT);
-   put(kKEY_TYPOGRAPHY_BUTTON_LETTER_SPACING, kVAL_TYPOGRAPHY_BUTTON_LETTER_SPACING);
-   put(kKEY_TYPOGRAPHY_BUTTON_TEXT_TRANSFORM, kVAL_TYPOGRAPHY_BUTTON_TEXT_TRANSFORM);
+   set(kKEY_TYPOGRAPHY_BUTTON_COLOR,          kVAL_TYPOGRAPHY_BUTTON_COLOR);
+   set(kKEY_TYPOGRAPHY_BUTTON_FONT_FAMILY,    kVAL_TYPOGRAPHY_BUTTON_FONT_FAMILY);
+   set(kKEY_TYPOGRAPHY_BUTTON_FONT_SIZE,      kVAL_TYPOGRAPHY_BUTTON_FONT_SIZE);
+   set(kKEY_TYPOGRAPHY_BUTTON_FONT_WEIGHT,    kVAL_TYPOGRAPHY_BUTTON_FONT_WEIGHT);
+   set(kKEY_TYPOGRAPHY_BUTTON_LINE_HEIGHT,    kVAL_TYPOGRAPHY_BUTTON_LINE_HEIGHT);
+   set(kKEY_TYPOGRAPHY_BUTTON_LETTER_SPACING, kVAL_TYPOGRAPHY_BUTTON_LETTER_SPACING);
+   set(kKEY_TYPOGRAPHY_BUTTON_TEXT_TRANSFORM, kVAL_TYPOGRAPHY_BUTTON_TEXT_TRANSFORM);
 }
 }//====================================// end Button =========================//
 /*==============================================================================
@@ -8346,13 +8668,13 @@ public static class ButtonNext extends TypoLetterSpacingTextTransform implements
 //------------------------------------------------------------------------------
 public ButtonNext()
 {
-   put(kKEY_TYPOGRAPHY_BUTTON_NEXT_COLOR,          kVAL_TYPOGRAPHY_BUTTON_NEXT_COLOR);
-   put(kKEY_TYPOGRAPHY_BUTTON_NEXT_FONT_FAMILY,    kVAL_TYPOGRAPHY_BUTTON_NEXT_FONT_FAMILY);
-   put(kKEY_TYPOGRAPHY_BUTTON_NEXT_FONT_SIZE,      kVAL_TYPOGRAPHY_BUTTON_NEXT_FONT_SIZE);
-   put(kKEY_TYPOGRAPHY_BUTTON_NEXT_FONT_WEIGHT,    kVAL_TYPOGRAPHY_BUTTON_NEXT_FONT_WEIGHT);
-   put(kKEY_TYPOGRAPHY_BUTTON_NEXT_LINE_HEIGHT,    kVAL_TYPOGRAPHY_BUTTON_NEXT_LINE_HEIGHT);
-   put(kKEY_TYPOGRAPHY_BUTTON_NEXT_LETTER_SPACING, kVAL_TYPOGRAPHY_BUTTON_NEXT_LETTER_SPACING);
-   put(kKEY_TYPOGRAPHY_BUTTON_NEXT_TEXT_TRANSFORM, kVAL_TYPOGRAPHY_BUTTON_NEXT_TEXT_TRANSFORM);
+   set(kKEY_TYPOGRAPHY_BUTTON_NEXT_COLOR,          kVAL_TYPOGRAPHY_BUTTON_NEXT_COLOR);
+   set(kKEY_TYPOGRAPHY_BUTTON_NEXT_FONT_FAMILY,    kVAL_TYPOGRAPHY_BUTTON_NEXT_FONT_FAMILY);
+   set(kKEY_TYPOGRAPHY_BUTTON_NEXT_FONT_SIZE,      kVAL_TYPOGRAPHY_BUTTON_NEXT_FONT_SIZE);
+   set(kKEY_TYPOGRAPHY_BUTTON_NEXT_FONT_WEIGHT,    kVAL_TYPOGRAPHY_BUTTON_NEXT_FONT_WEIGHT);
+   set(kKEY_TYPOGRAPHY_BUTTON_NEXT_LINE_HEIGHT,    kVAL_TYPOGRAPHY_BUTTON_NEXT_LINE_HEIGHT);
+   set(kKEY_TYPOGRAPHY_BUTTON_NEXT_LETTER_SPACING, kVAL_TYPOGRAPHY_BUTTON_NEXT_LETTER_SPACING);
+   set(kKEY_TYPOGRAPHY_BUTTON_NEXT_TEXT_TRANSFORM, kVAL_TYPOGRAPHY_BUTTON_NEXT_TEXT_TRANSFORM);
 }
 }//====================================// end ButtonNext =====================//
 /*==============================================================================
@@ -8393,12 +8715,12 @@ public static class Caption extends TypoLetterSpacing implements ICaption
 //------------------------------------------------------------------------------
 public Caption()
 {
-   put(kKEY_TYPOGRAPHY_CAPTION_COLOR,          kVAL_TYPOGRAPHY_CAPTION_COLOR);
-   put(kKEY_TYPOGRAPHY_CAPTION_FONT_FAMILY,    kVAL_TYPOGRAPHY_CAPTION_FONT_FAMILY);
-   put(kKEY_TYPOGRAPHY_CAPTION_FONT_SIZE,      kVAL_TYPOGRAPHY_CAPTION_FONT_SIZE);
-   put(kKEY_TYPOGRAPHY_CAPTION_FONT_WEIGHT,    kVAL_TYPOGRAPHY_CAPTION_FONT_WEIGHT);
-   put(kKEY_TYPOGRAPHY_CAPTION_LINE_HEIGHT,    kVAL_TYPOGRAPHY_CAPTION_LINE_HEIGHT);
-   put(kKEY_TYPOGRAPHY_CAPTION_LETTER_SPACING, kVAL_TYPOGRAPHY_CAPTION_LETTER_SPACING);
+   set(kKEY_TYPOGRAPHY_CAPTION_COLOR,          kVAL_TYPOGRAPHY_CAPTION_COLOR);
+   set(kKEY_TYPOGRAPHY_CAPTION_FONT_FAMILY,    kVAL_TYPOGRAPHY_CAPTION_FONT_FAMILY);
+   set(kKEY_TYPOGRAPHY_CAPTION_FONT_SIZE,      kVAL_TYPOGRAPHY_CAPTION_FONT_SIZE);
+   set(kKEY_TYPOGRAPHY_CAPTION_FONT_WEIGHT,    kVAL_TYPOGRAPHY_CAPTION_FONT_WEIGHT);
+   set(kKEY_TYPOGRAPHY_CAPTION_LINE_HEIGHT,    kVAL_TYPOGRAPHY_CAPTION_LINE_HEIGHT);
+   set(kKEY_TYPOGRAPHY_CAPTION_LETTER_SPACING, kVAL_TYPOGRAPHY_CAPTION_LETTER_SPACING);
 }
 }//====================================// end Caption ========================//
 /*==============================================================================
@@ -8439,12 +8761,12 @@ public static class CaptionNext extends TypoLetterSpacing implements ICaptionNex
 //------------------------------------------------------------------------------
 public CaptionNext()
 {
-   put(kKEY_TYPOGRAPHY_CAPTION_NEXT_COLOR,          kVAL_TYPOGRAPHY_CAPTION_NEXT_COLOR);
-   put(kKEY_TYPOGRAPHY_CAPTION_NEXT_FONT_FAMILY,    kVAL_TYPOGRAPHY_CAPTION_NEXT_FONT_FAMILY);
-   put(kKEY_TYPOGRAPHY_CAPTION_NEXT_FONT_SIZE,      kVAL_TYPOGRAPHY_CAPTION_NEXT_FONT_SIZE);
-   put(kKEY_TYPOGRAPHY_CAPTION_NEXT_FONT_WEIGHT,    kVAL_TYPOGRAPHY_CAPTION_NEXT_FONT_WEIGHT);
-   put(kKEY_TYPOGRAPHY_CAPTION_NEXT_LINE_HEIGHT,    kVAL_TYPOGRAPHY_CAPTION_NEXT_LINE_HEIGHT);
-   put(kKEY_TYPOGRAPHY_CAPTION_NEXT_LETTER_SPACING, kVAL_TYPOGRAPHY_CAPTION_NEXT_LETTER_SPACING);
+   set(kKEY_TYPOGRAPHY_CAPTION_NEXT_COLOR,          kVAL_TYPOGRAPHY_CAPTION_NEXT_COLOR);
+   set(kKEY_TYPOGRAPHY_CAPTION_NEXT_FONT_FAMILY,    kVAL_TYPOGRAPHY_CAPTION_NEXT_FONT_FAMILY);
+   set(kKEY_TYPOGRAPHY_CAPTION_NEXT_FONT_SIZE,      kVAL_TYPOGRAPHY_CAPTION_NEXT_FONT_SIZE);
+   set(kKEY_TYPOGRAPHY_CAPTION_NEXT_FONT_WEIGHT,    kVAL_TYPOGRAPHY_CAPTION_NEXT_FONT_WEIGHT);
+   set(kKEY_TYPOGRAPHY_CAPTION_NEXT_LINE_HEIGHT,    kVAL_TYPOGRAPHY_CAPTION_NEXT_LINE_HEIGHT);
+   set(kKEY_TYPOGRAPHY_CAPTION_NEXT_LETTER_SPACING, kVAL_TYPOGRAPHY_CAPTION_NEXT_LETTER_SPACING);
 }
 }//====================================// end CaptionNext ====================//
 /*==============================================================================
@@ -8485,11 +8807,11 @@ public static class Display1 extends TypoBase implements IDisplay1
 //------------------------------------------------------------------------------
 public Display1()
 {
-   put(kKEY_TYPOGRAPHY_DISPLAY1_COLOR,       kVAL_TYPOGRAPHY_DISPLAY1_COLOR);
-   put(kKEY_TYPOGRAPHY_DISPLAY1_FONT_FAMILY, kVAL_TYPOGRAPHY_DISPLAY1_FONT_FAMILY);
-   put(kKEY_TYPOGRAPHY_DISPLAY1_FONT_SIZE,   kVAL_TYPOGRAPHY_DISPLAY1_FONT_SIZE);
-   put(kKEY_TYPOGRAPHY_DISPLAY1_FONT_WEIGHT, kVAL_TYPOGRAPHY_DISPLAY1_FONT_WEIGHT);
-   put(kKEY_TYPOGRAPHY_DISPLAY1_LINE_HEIGHT, kVAL_TYPOGRAPHY_DISPLAY1_LINE_HEIGHT);
+   set(kKEY_TYPOGRAPHY_DISPLAY1_COLOR,       kVAL_TYPOGRAPHY_DISPLAY1_COLOR);
+   set(kKEY_TYPOGRAPHY_DISPLAY1_FONT_FAMILY, kVAL_TYPOGRAPHY_DISPLAY1_FONT_FAMILY);
+   set(kKEY_TYPOGRAPHY_DISPLAY1_FONT_SIZE,   kVAL_TYPOGRAPHY_DISPLAY1_FONT_SIZE);
+   set(kKEY_TYPOGRAPHY_DISPLAY1_FONT_WEIGHT, kVAL_TYPOGRAPHY_DISPLAY1_FONT_WEIGHT);
+   set(kKEY_TYPOGRAPHY_DISPLAY1_LINE_HEIGHT, kVAL_TYPOGRAPHY_DISPLAY1_LINE_HEIGHT);
 }
 }//====================================// end Display1 =======================//
 /*==============================================================================
@@ -8530,12 +8852,12 @@ public static class Display2 extends TypoMarginLeft implements IDisplay2
 //------------------------------------------------------------------------------
 public Display2()
 {
-   put(kKEY_TYPOGRAPHY_DISPLAY2_COLOR,       kVAL_TYPOGRAPHY_DISPLAY2_COLOR);
-   put(kKEY_TYPOGRAPHY_DISPLAY2_FONT_FAMILY, kVAL_TYPOGRAPHY_DISPLAY2_FONT_FAMILY);
-   put(kKEY_TYPOGRAPHY_DISPLAY2_FONT_SIZE,   kVAL_TYPOGRAPHY_DISPLAY2_FONT_SIZE);
-   put(kKEY_TYPOGRAPHY_DISPLAY2_FONT_WEIGHT, kVAL_TYPOGRAPHY_DISPLAY2_FONT_WEIGHT);
-   put(kKEY_TYPOGRAPHY_DISPLAY2_LINE_HEIGHT, kVAL_TYPOGRAPHY_DISPLAY2_LINE_HEIGHT);
-   put(kKEY_TYPOGRAPHY_DISPLAY2_MARGIN_LEFT, kVAL_TYPOGRAPHY_DISPLAY2_MARGIN_LEFT);
+   set(kKEY_TYPOGRAPHY_DISPLAY2_COLOR,       kVAL_TYPOGRAPHY_DISPLAY2_COLOR);
+   set(kKEY_TYPOGRAPHY_DISPLAY2_FONT_FAMILY, kVAL_TYPOGRAPHY_DISPLAY2_FONT_FAMILY);
+   set(kKEY_TYPOGRAPHY_DISPLAY2_FONT_SIZE,   kVAL_TYPOGRAPHY_DISPLAY2_FONT_SIZE);
+   set(kKEY_TYPOGRAPHY_DISPLAY2_FONT_WEIGHT, kVAL_TYPOGRAPHY_DISPLAY2_FONT_WEIGHT);
+   set(kKEY_TYPOGRAPHY_DISPLAY2_LINE_HEIGHT, kVAL_TYPOGRAPHY_DISPLAY2_LINE_HEIGHT);
+   set(kKEY_TYPOGRAPHY_DISPLAY2_MARGIN_LEFT, kVAL_TYPOGRAPHY_DISPLAY2_MARGIN_LEFT);
 }
 }//====================================// end Display2 =======================//
 /*==============================================================================
@@ -8577,13 +8899,13 @@ public static class Display3
 //------------------------------------------------------------------------------
 public Display3()
 {
-   put(kKEY_TYPOGRAPHY_DISPLAY3_COLOR,          kVAL_TYPOGRAPHY_DISPLAY3_COLOR);
-   put(kKEY_TYPOGRAPHY_DISPLAY3_FONT_FAMILY,    kVAL_TYPOGRAPHY_DISPLAY3_FONT_FAMILY);
-   put(kKEY_TYPOGRAPHY_DISPLAY3_FONT_SIZE,      kVAL_TYPOGRAPHY_DISPLAY3_FONT_SIZE);
-   put(kKEY_TYPOGRAPHY_DISPLAY3_FONT_WEIGHT,    kVAL_TYPOGRAPHY_DISPLAY3_FONT_WEIGHT);
-   put(kKEY_TYPOGRAPHY_DISPLAY3_LINE_HEIGHT,    kVAL_TYPOGRAPHY_DISPLAY3_LINE_HEIGHT);
-   put(kKEY_TYPOGRAPHY_DISPLAY3_MARGIN_LEFT,    kVAL_TYPOGRAPHY_DISPLAY3_MARGIN_LEFT);
-   put(kKEY_TYPOGRAPHY_DISPLAY3_LETTER_SPACING, kVAL_TYPOGRAPHY_DISPLAY3_LETTER_SPACING);
+   set(kKEY_TYPOGRAPHY_DISPLAY3_COLOR,          kVAL_TYPOGRAPHY_DISPLAY3_COLOR);
+   set(kKEY_TYPOGRAPHY_DISPLAY3_FONT_FAMILY,    kVAL_TYPOGRAPHY_DISPLAY3_FONT_FAMILY);
+   set(kKEY_TYPOGRAPHY_DISPLAY3_FONT_SIZE,      kVAL_TYPOGRAPHY_DISPLAY3_FONT_SIZE);
+   set(kKEY_TYPOGRAPHY_DISPLAY3_FONT_WEIGHT,    kVAL_TYPOGRAPHY_DISPLAY3_FONT_WEIGHT);
+   set(kKEY_TYPOGRAPHY_DISPLAY3_LINE_HEIGHT,    kVAL_TYPOGRAPHY_DISPLAY3_LINE_HEIGHT);
+   set(kKEY_TYPOGRAPHY_DISPLAY3_MARGIN_LEFT,    kVAL_TYPOGRAPHY_DISPLAY3_MARGIN_LEFT);
+   set(kKEY_TYPOGRAPHY_DISPLAY3_LETTER_SPACING, kVAL_TYPOGRAPHY_DISPLAY3_LETTER_SPACING);
 }
 }//====================================// end Display3 =======================//
 /*==============================================================================
@@ -8625,13 +8947,13 @@ public static class Display4
 //------------------------------------------------------------------------------
 public Display4()
 {
-   put(kKEY_TYPOGRAPHY_DISPLAY4_COLOR,          kVAL_TYPOGRAPHY_DISPLAY4_COLOR);
-   put(kKEY_TYPOGRAPHY_DISPLAY4_FONT_FAMILY,    kVAL_TYPOGRAPHY_DISPLAY4_FONT_FAMILY);
-   put(kKEY_TYPOGRAPHY_DISPLAY4_FONT_SIZE,      kVAL_TYPOGRAPHY_DISPLAY4_FONT_SIZE);
-   put(kKEY_TYPOGRAPHY_DISPLAY4_FONT_WEIGHT,    kVAL_TYPOGRAPHY_DISPLAY4_FONT_WEIGHT);
-   put(kKEY_TYPOGRAPHY_DISPLAY4_LINE_HEIGHT,    kVAL_TYPOGRAPHY_DISPLAY4_LINE_HEIGHT);
-   put(kKEY_TYPOGRAPHY_DISPLAY4_MARGIN_LEFT,    kVAL_TYPOGRAPHY_DISPLAY4_MARGIN_LEFT);
-   put(kKEY_TYPOGRAPHY_DISPLAY4_LETTER_SPACING, kVAL_TYPOGRAPHY_DISPLAY4_LETTER_SPACING);
+   set(kKEY_TYPOGRAPHY_DISPLAY4_COLOR,          kVAL_TYPOGRAPHY_DISPLAY4_COLOR);
+   set(kKEY_TYPOGRAPHY_DISPLAY4_FONT_FAMILY,    kVAL_TYPOGRAPHY_DISPLAY4_FONT_FAMILY);
+   set(kKEY_TYPOGRAPHY_DISPLAY4_FONT_SIZE,      kVAL_TYPOGRAPHY_DISPLAY4_FONT_SIZE);
+   set(kKEY_TYPOGRAPHY_DISPLAY4_FONT_WEIGHT,    kVAL_TYPOGRAPHY_DISPLAY4_FONT_WEIGHT);
+   set(kKEY_TYPOGRAPHY_DISPLAY4_LINE_HEIGHT,    kVAL_TYPOGRAPHY_DISPLAY4_LINE_HEIGHT);
+   set(kKEY_TYPOGRAPHY_DISPLAY4_MARGIN_LEFT,    kVAL_TYPOGRAPHY_DISPLAY4_MARGIN_LEFT);
+   set(kKEY_TYPOGRAPHY_DISPLAY4_LETTER_SPACING, kVAL_TYPOGRAPHY_DISPLAY4_LETTER_SPACING);
 }
 }//====================================// end Display4 =======================//
 /*==============================================================================
@@ -8672,12 +8994,12 @@ public static class H1 extends TypoLetterSpacing implements IH1
 //------------------------------------------------------------------------------
 public H1()
 {
-   put(kKEY_TYPOGRAPHY_H1_COLOR,          kVAL_TYPOGRAPHY_H1_COLOR);
-   put(kKEY_TYPOGRAPHY_H1_FONT_FAMILY,    kVAL_TYPOGRAPHY_H1_FONT_FAMILY);
-   put(kKEY_TYPOGRAPHY_H1_FONT_SIZE,      kVAL_TYPOGRAPHY_H1_FONT_SIZE);
-   put(kKEY_TYPOGRAPHY_H1_FONT_WEIGHT,    kVAL_TYPOGRAPHY_H1_FONT_WEIGHT);
-   put(kKEY_TYPOGRAPHY_H1_LINE_HEIGHT,    kVAL_TYPOGRAPHY_H1_LINE_HEIGHT);
-   put(kKEY_TYPOGRAPHY_H1_LETTER_SPACING, kVAL_TYPOGRAPHY_H1_LETTER_SPACING);
+   set(kKEY_TYPOGRAPHY_H1_COLOR,          kVAL_TYPOGRAPHY_H1_COLOR);
+   set(kKEY_TYPOGRAPHY_H1_FONT_FAMILY,    kVAL_TYPOGRAPHY_H1_FONT_FAMILY);
+   set(kKEY_TYPOGRAPHY_H1_FONT_SIZE,      kVAL_TYPOGRAPHY_H1_FONT_SIZE);
+   set(kKEY_TYPOGRAPHY_H1_FONT_WEIGHT,    kVAL_TYPOGRAPHY_H1_FONT_WEIGHT);
+   set(kKEY_TYPOGRAPHY_H1_LINE_HEIGHT,    kVAL_TYPOGRAPHY_H1_LINE_HEIGHT);
+   set(kKEY_TYPOGRAPHY_H1_LETTER_SPACING, kVAL_TYPOGRAPHY_H1_LETTER_SPACING);
 }
 }//====================================// end H1 =============================//
 /*==============================================================================
@@ -8718,12 +9040,12 @@ public static class H2 extends TypoLetterSpacing implements IH2
 //------------------------------------------------------------------------------
 public H2()
 {
-   put(kKEY_TYPOGRAPHY_H2_COLOR,          kVAL_TYPOGRAPHY_H2_COLOR);
-   put(kKEY_TYPOGRAPHY_H2_FONT_FAMILY,    kVAL_TYPOGRAPHY_H2_FONT_FAMILY);
-   put(kKEY_TYPOGRAPHY_H2_FONT_SIZE,      kVAL_TYPOGRAPHY_H2_FONT_SIZE);
-   put(kKEY_TYPOGRAPHY_H2_FONT_WEIGHT,    kVAL_TYPOGRAPHY_H2_FONT_WEIGHT);
-   put(kKEY_TYPOGRAPHY_H2_LINE_HEIGHT,    kVAL_TYPOGRAPHY_H2_LINE_HEIGHT);
-   put(kKEY_TYPOGRAPHY_H2_LETTER_SPACING, kVAL_TYPOGRAPHY_H2_LETTER_SPACING);
+   set(kKEY_TYPOGRAPHY_H2_COLOR,          kVAL_TYPOGRAPHY_H2_COLOR);
+   set(kKEY_TYPOGRAPHY_H2_FONT_FAMILY,    kVAL_TYPOGRAPHY_H2_FONT_FAMILY);
+   set(kKEY_TYPOGRAPHY_H2_FONT_SIZE,      kVAL_TYPOGRAPHY_H2_FONT_SIZE);
+   set(kKEY_TYPOGRAPHY_H2_FONT_WEIGHT,    kVAL_TYPOGRAPHY_H2_FONT_WEIGHT);
+   set(kKEY_TYPOGRAPHY_H2_LINE_HEIGHT,    kVAL_TYPOGRAPHY_H2_LINE_HEIGHT);
+   set(kKEY_TYPOGRAPHY_H2_LETTER_SPACING, kVAL_TYPOGRAPHY_H2_LETTER_SPACING);
 }
 }//====================================// end H2 =============================//
 /*==============================================================================
@@ -8764,12 +9086,12 @@ public static class H3 extends TypoLetterSpacing implements IH3
 //------------------------------------------------------------------------------
 public H3()
 {
-   put(kKEY_TYPOGRAPHY_H3_COLOR,          kVAL_TYPOGRAPHY_H3_COLOR);
-   put(kKEY_TYPOGRAPHY_H3_FONT_FAMILY,    kVAL_TYPOGRAPHY_H3_FONT_FAMILY);
-   put(kKEY_TYPOGRAPHY_H3_FONT_SIZE,      kVAL_TYPOGRAPHY_H3_FONT_SIZE);
-   put(kKEY_TYPOGRAPHY_H3_FONT_WEIGHT,    kVAL_TYPOGRAPHY_H3_FONT_WEIGHT);
-   put(kKEY_TYPOGRAPHY_H3_LINE_HEIGHT,    kVAL_TYPOGRAPHY_H3_LINE_HEIGHT);
-   put(kKEY_TYPOGRAPHY_H3_LETTER_SPACING, kVAL_TYPOGRAPHY_H3_LETTER_SPACING);
+   set(kKEY_TYPOGRAPHY_H3_COLOR,          kVAL_TYPOGRAPHY_H3_COLOR);
+   set(kKEY_TYPOGRAPHY_H3_FONT_FAMILY,    kVAL_TYPOGRAPHY_H3_FONT_FAMILY);
+   set(kKEY_TYPOGRAPHY_H3_FONT_SIZE,      kVAL_TYPOGRAPHY_H3_FONT_SIZE);
+   set(kKEY_TYPOGRAPHY_H3_FONT_WEIGHT,    kVAL_TYPOGRAPHY_H3_FONT_WEIGHT);
+   set(kKEY_TYPOGRAPHY_H3_LINE_HEIGHT,    kVAL_TYPOGRAPHY_H3_LINE_HEIGHT);
+   set(kKEY_TYPOGRAPHY_H3_LETTER_SPACING, kVAL_TYPOGRAPHY_H3_LETTER_SPACING);
 }
 }//====================================// end H3 =============================//
 /*==============================================================================
@@ -8810,12 +9132,12 @@ public static class H4 extends TypoLetterSpacing implements IH4
 //------------------------------------------------------------------------------
 public H4()
 {
-   put(kKEY_TYPOGRAPHY_H4_COLOR,          kVAL_TYPOGRAPHY_H4_COLOR);
-   put(kKEY_TYPOGRAPHY_H4_FONT_FAMILY,    kVAL_TYPOGRAPHY_H4_FONT_FAMILY);
-   put(kKEY_TYPOGRAPHY_H4_FONT_SIZE,      kVAL_TYPOGRAPHY_H4_FONT_SIZE);
-   put(kKEY_TYPOGRAPHY_H4_FONT_WEIGHT,    kVAL_TYPOGRAPHY_H4_FONT_WEIGHT);
-   put(kKEY_TYPOGRAPHY_H4_LINE_HEIGHT,    kVAL_TYPOGRAPHY_H4_LINE_HEIGHT);
-   put(kKEY_TYPOGRAPHY_H4_LETTER_SPACING, kVAL_TYPOGRAPHY_H4_LETTER_SPACING);
+   set(kKEY_TYPOGRAPHY_H4_COLOR,          kVAL_TYPOGRAPHY_H4_COLOR);
+   set(kKEY_TYPOGRAPHY_H4_FONT_FAMILY,    kVAL_TYPOGRAPHY_H4_FONT_FAMILY);
+   set(kKEY_TYPOGRAPHY_H4_FONT_SIZE,      kVAL_TYPOGRAPHY_H4_FONT_SIZE);
+   set(kKEY_TYPOGRAPHY_H4_FONT_WEIGHT,    kVAL_TYPOGRAPHY_H4_FONT_WEIGHT);
+   set(kKEY_TYPOGRAPHY_H4_LINE_HEIGHT,    kVAL_TYPOGRAPHY_H4_LINE_HEIGHT);
+   set(kKEY_TYPOGRAPHY_H4_LETTER_SPACING, kVAL_TYPOGRAPHY_H4_LETTER_SPACING);
 }
 }//====================================// end H4 =============================//
 /*==============================================================================
@@ -8856,12 +9178,12 @@ public static class H5 extends TypoLetterSpacing implements IH5
 //------------------------------------------------------------------------------
 public H5()
 {
-   put(kKEY_TYPOGRAPHY_H5_COLOR,          kVAL_TYPOGRAPHY_H5_COLOR);
-   put(kKEY_TYPOGRAPHY_H5_FONT_FAMILY,    kVAL_TYPOGRAPHY_H5_FONT_FAMILY);
-   put(kKEY_TYPOGRAPHY_H5_FONT_SIZE,      kVAL_TYPOGRAPHY_H5_FONT_SIZE);
-   put(kKEY_TYPOGRAPHY_H5_FONT_WEIGHT,    kVAL_TYPOGRAPHY_H5_FONT_WEIGHT);
-   put(kKEY_TYPOGRAPHY_H5_LINE_HEIGHT,    kVAL_TYPOGRAPHY_H5_LINE_HEIGHT);
-   put(kKEY_TYPOGRAPHY_H5_LETTER_SPACING, kVAL_TYPOGRAPHY_H5_LETTER_SPACING);
+   set(kKEY_TYPOGRAPHY_H5_COLOR,          kVAL_TYPOGRAPHY_H5_COLOR);
+   set(kKEY_TYPOGRAPHY_H5_FONT_FAMILY,    kVAL_TYPOGRAPHY_H5_FONT_FAMILY);
+   set(kKEY_TYPOGRAPHY_H5_FONT_SIZE,      kVAL_TYPOGRAPHY_H5_FONT_SIZE);
+   set(kKEY_TYPOGRAPHY_H5_FONT_WEIGHT,    kVAL_TYPOGRAPHY_H5_FONT_WEIGHT);
+   set(kKEY_TYPOGRAPHY_H5_LINE_HEIGHT,    kVAL_TYPOGRAPHY_H5_LINE_HEIGHT);
+   set(kKEY_TYPOGRAPHY_H5_LETTER_SPACING, kVAL_TYPOGRAPHY_H5_LETTER_SPACING);
 }
 }//====================================// end H5 =============================//
 /*==============================================================================
@@ -8902,12 +9224,12 @@ public static class H6 extends TypoLetterSpacing implements IH6
 //------------------------------------------------------------------------------
 public H6()
 {
-   put(kKEY_TYPOGRAPHY_H6_COLOR,          kVAL_TYPOGRAPHY_H6_COLOR);
-   put(kKEY_TYPOGRAPHY_H6_FONT_FAMILY,    kVAL_TYPOGRAPHY_H6_FONT_FAMILY);
-   put(kKEY_TYPOGRAPHY_H6_FONT_SIZE,      kVAL_TYPOGRAPHY_H6_FONT_SIZE);
-   put(kKEY_TYPOGRAPHY_H6_FONT_WEIGHT,    kVAL_TYPOGRAPHY_H6_FONT_WEIGHT);
-   put(kKEY_TYPOGRAPHY_H6_LINE_HEIGHT,    kVAL_TYPOGRAPHY_H6_LINE_HEIGHT);
-   put(kKEY_TYPOGRAPHY_H6_LETTER_SPACING, kVAL_TYPOGRAPHY_H6_LETTER_SPACING);
+   set(kKEY_TYPOGRAPHY_H6_COLOR,          kVAL_TYPOGRAPHY_H6_COLOR);
+   set(kKEY_TYPOGRAPHY_H6_FONT_FAMILY,    kVAL_TYPOGRAPHY_H6_FONT_FAMILY);
+   set(kKEY_TYPOGRAPHY_H6_FONT_SIZE,      kVAL_TYPOGRAPHY_H6_FONT_SIZE);
+   set(kKEY_TYPOGRAPHY_H6_FONT_WEIGHT,    kVAL_TYPOGRAPHY_H6_FONT_WEIGHT);
+   set(kKEY_TYPOGRAPHY_H6_LINE_HEIGHT,    kVAL_TYPOGRAPHY_H6_LINE_HEIGHT);
+   set(kKEY_TYPOGRAPHY_H6_LETTER_SPACING, kVAL_TYPOGRAPHY_H6_LETTER_SPACING);
 }
 }//====================================// end H6 =============================//
 /*==============================================================================
@@ -8948,11 +9270,11 @@ public static class Headline extends TypoBase implements IHeadline
 //------------------------------------------------------------------------------
 public Headline()
 {
-   put(kKEY_TYPOGRAPHY_HEADLINE_COLOR,          kVAL_TYPOGRAPHY_HEADLINE_COLOR);
-   put(kKEY_TYPOGRAPHY_HEADLINE_FONT_FAMILY,    kVAL_TYPOGRAPHY_HEADLINE_FONT_FAMILY);
-   put(kKEY_TYPOGRAPHY_HEADLINE_FONT_SIZE,      kVAL_TYPOGRAPHY_HEADLINE_FONT_SIZE);
-   put(kKEY_TYPOGRAPHY_HEADLINE_FONT_WEIGHT,    kVAL_TYPOGRAPHY_HEADLINE_FONT_WEIGHT);
-   put(kKEY_TYPOGRAPHY_HEADLINE_LINE_HEIGHT,    kVAL_TYPOGRAPHY_HEADLINE_LINE_HEIGHT);
+   set(kKEY_TYPOGRAPHY_HEADLINE_COLOR,          kVAL_TYPOGRAPHY_HEADLINE_COLOR);
+   set(kKEY_TYPOGRAPHY_HEADLINE_FONT_FAMILY,    kVAL_TYPOGRAPHY_HEADLINE_FONT_FAMILY);
+   set(kKEY_TYPOGRAPHY_HEADLINE_FONT_SIZE,      kVAL_TYPOGRAPHY_HEADLINE_FONT_SIZE);
+   set(kKEY_TYPOGRAPHY_HEADLINE_FONT_WEIGHT,    kVAL_TYPOGRAPHY_HEADLINE_FONT_WEIGHT);
+   set(kKEY_TYPOGRAPHY_HEADLINE_LINE_HEIGHT,    kVAL_TYPOGRAPHY_HEADLINE_LINE_HEIGHT);
 }
 }//====================================// end Headline =======================//
 /*==============================================================================
@@ -8994,13 +9316,13 @@ public static class Overline
 //------------------------------------------------------------------------------
 public Overline()
 {
-   put(kKEY_TYPOGRAPHY_OVERLINE_COLOR,          kVAL_TYPOGRAPHY_OVERLINE_COLOR);
-   put(kKEY_TYPOGRAPHY_OVERLINE_FONT_FAMILY,    kVAL_TYPOGRAPHY_OVERLINE_FONT_FAMILY);
-   put(kKEY_TYPOGRAPHY_OVERLINE_FONT_SIZE,      kVAL_TYPOGRAPHY_OVERLINE_FONT_SIZE);
-   put(kKEY_TYPOGRAPHY_OVERLINE_FONT_WEIGHT,    kVAL_TYPOGRAPHY_OVERLINE_FONT_WEIGHT);
-   put(kKEY_TYPOGRAPHY_OVERLINE_LINE_HEIGHT,    kVAL_TYPOGRAPHY_OVERLINE_LINE_HEIGHT);
-   put(kKEY_TYPOGRAPHY_OVERLINE_LETTER_SPACING, kVAL_TYPOGRAPHY_OVERLINE_LETTER_SPACING);
-   put(kKEY_TYPOGRAPHY_OVERLINE_TEXT_TRANSFORM, kVAL_TYPOGRAPHY_OVERLINE_TEXT_TRANSFORM);
+   set(kKEY_TYPOGRAPHY_OVERLINE_COLOR,          kVAL_TYPOGRAPHY_OVERLINE_COLOR);
+   set(kKEY_TYPOGRAPHY_OVERLINE_FONT_FAMILY,    kVAL_TYPOGRAPHY_OVERLINE_FONT_FAMILY);
+   set(kKEY_TYPOGRAPHY_OVERLINE_FONT_SIZE,      kVAL_TYPOGRAPHY_OVERLINE_FONT_SIZE);
+   set(kKEY_TYPOGRAPHY_OVERLINE_FONT_WEIGHT,    kVAL_TYPOGRAPHY_OVERLINE_FONT_WEIGHT);
+   set(kKEY_TYPOGRAPHY_OVERLINE_LINE_HEIGHT,    kVAL_TYPOGRAPHY_OVERLINE_LINE_HEIGHT);
+   set(kKEY_TYPOGRAPHY_OVERLINE_LETTER_SPACING, kVAL_TYPOGRAPHY_OVERLINE_LETTER_SPACING);
+   set(kKEY_TYPOGRAPHY_OVERLINE_TEXT_TRANSFORM, kVAL_TYPOGRAPHY_OVERLINE_TEXT_TRANSFORM);
 }
 }//====================================// end Overline =======================//
 /*==============================================================================
@@ -9041,11 +9363,11 @@ public static class Subheading extends TypoBase implements ISubheading
 //------------------------------------------------------------------------------
 public Subheading()
 {
-   put(kKEY_TYPOGRAPHY_SUBHEADING_COLOR,       kVAL_TYPOGRAPHY_SUBHEADING_COLOR);
-   put(kKEY_TYPOGRAPHY_SUBHEADING_FONT_FAMILY, kVAL_TYPOGRAPHY_SUBHEADING_FONT_FAMILY);
-   put(kKEY_TYPOGRAPHY_SUBHEADING_FONT_SIZE,   kVAL_TYPOGRAPHY_SUBHEADING_FONT_SIZE);
-   put(kKEY_TYPOGRAPHY_SUBHEADING_FONT_WEIGHT, kVAL_TYPOGRAPHY_SUBHEADING_FONT_WEIGHT);
-   put(kKEY_TYPOGRAPHY_SUBHEADING_LINE_HEIGHT, kVAL_TYPOGRAPHY_SUBHEADING_LINE_HEIGHT);
+   set(kKEY_TYPOGRAPHY_SUBHEADING_COLOR,       kVAL_TYPOGRAPHY_SUBHEADING_COLOR);
+   set(kKEY_TYPOGRAPHY_SUBHEADING_FONT_FAMILY, kVAL_TYPOGRAPHY_SUBHEADING_FONT_FAMILY);
+   set(kKEY_TYPOGRAPHY_SUBHEADING_FONT_SIZE,   kVAL_TYPOGRAPHY_SUBHEADING_FONT_SIZE);
+   set(kKEY_TYPOGRAPHY_SUBHEADING_FONT_WEIGHT, kVAL_TYPOGRAPHY_SUBHEADING_FONT_WEIGHT);
+   set(kKEY_TYPOGRAPHY_SUBHEADING_LINE_HEIGHT, kVAL_TYPOGRAPHY_SUBHEADING_LINE_HEIGHT);
 }
 }//====================================// end Subheading =====================//
 /*==============================================================================
@@ -9086,12 +9408,12 @@ public static class Subtitle1 extends TypoLetterSpacing implements ISubtitle1
 //------------------------------------------------------------------------------
 public Subtitle1()
 {
-   put(kKEY_TYPOGRAPHY_SUBTITLE_1_COLOR,          kVAL_TYPOGRAPHY_SUBTITLE_1_COLOR);
-   put(kKEY_TYPOGRAPHY_SUBTITLE_1_FONT_FAMILY,    kVAL_TYPOGRAPHY_SUBTITLE_1_FONT_FAMILY);
-   put(kKEY_TYPOGRAPHY_SUBTITLE_1_FONT_SIZE,      kVAL_TYPOGRAPHY_SUBTITLE_1_FONT_SIZE);
-   put(kKEY_TYPOGRAPHY_SUBTITLE_1_FONT_WEIGHT,    kVAL_TYPOGRAPHY_SUBTITLE_1_FONT_WEIGHT);
-   put(kKEY_TYPOGRAPHY_SUBTITLE_1_LINE_HEIGHT,    kVAL_TYPOGRAPHY_SUBTITLE_1_LINE_HEIGHT);
-   put(kKEY_TYPOGRAPHY_SUBTITLE_1_LETTER_SPACING, kVAL_TYPOGRAPHY_SUBTITLE_1_LETTER_SPACING);
+   set(kKEY_TYPOGRAPHY_SUBTITLE_1_COLOR,          kVAL_TYPOGRAPHY_SUBTITLE_1_COLOR);
+   set(kKEY_TYPOGRAPHY_SUBTITLE_1_FONT_FAMILY,    kVAL_TYPOGRAPHY_SUBTITLE_1_FONT_FAMILY);
+   set(kKEY_TYPOGRAPHY_SUBTITLE_1_FONT_SIZE,      kVAL_TYPOGRAPHY_SUBTITLE_1_FONT_SIZE);
+   set(kKEY_TYPOGRAPHY_SUBTITLE_1_FONT_WEIGHT,    kVAL_TYPOGRAPHY_SUBTITLE_1_FONT_WEIGHT);
+   set(kKEY_TYPOGRAPHY_SUBTITLE_1_LINE_HEIGHT,    kVAL_TYPOGRAPHY_SUBTITLE_1_LINE_HEIGHT);
+   set(kKEY_TYPOGRAPHY_SUBTITLE_1_LETTER_SPACING, kVAL_TYPOGRAPHY_SUBTITLE_1_LETTER_SPACING);
 }
 }//====================================// end Subtitle1 ======================//
 /*==============================================================================
@@ -9132,12 +9454,12 @@ public static class Subtitle2 extends TypoLetterSpacing implements ISubtitle2
 //------------------------------------------------------------------------------
 public Subtitle2()
 {
-   put(kKEY_TYPOGRAPHY_SUBTITLE_2_COLOR,          kVAL_TYPOGRAPHY_SUBTITLE_2_COLOR);
-   put(kKEY_TYPOGRAPHY_SUBTITLE_2_FONT_FAMILY,    kVAL_TYPOGRAPHY_SUBTITLE_2_FONT_FAMILY);
-   put(kKEY_TYPOGRAPHY_SUBTITLE_2_FONT_SIZE,      kVAL_TYPOGRAPHY_SUBTITLE_2_FONT_SIZE);
-   put(kKEY_TYPOGRAPHY_SUBTITLE_2_FONT_WEIGHT,    kVAL_TYPOGRAPHY_SUBTITLE_2_FONT_WEIGHT);
-   put(kKEY_TYPOGRAPHY_SUBTITLE_2_LINE_HEIGHT,    kVAL_TYPOGRAPHY_SUBTITLE_2_LINE_HEIGHT);
-   put(kKEY_TYPOGRAPHY_SUBTITLE_2_LETTER_SPACING, kVAL_TYPOGRAPHY_SUBTITLE_2_LETTER_SPACING);
+   set(kKEY_TYPOGRAPHY_SUBTITLE_2_COLOR,          kVAL_TYPOGRAPHY_SUBTITLE_2_COLOR);
+   set(kKEY_TYPOGRAPHY_SUBTITLE_2_FONT_FAMILY,    kVAL_TYPOGRAPHY_SUBTITLE_2_FONT_FAMILY);
+   set(kKEY_TYPOGRAPHY_SUBTITLE_2_FONT_SIZE,      kVAL_TYPOGRAPHY_SUBTITLE_2_FONT_SIZE);
+   set(kKEY_TYPOGRAPHY_SUBTITLE_2_FONT_WEIGHT,    kVAL_TYPOGRAPHY_SUBTITLE_2_FONT_WEIGHT);
+   set(kKEY_TYPOGRAPHY_SUBTITLE_2_LINE_HEIGHT,    kVAL_TYPOGRAPHY_SUBTITLE_2_LINE_HEIGHT);
+   set(kKEY_TYPOGRAPHY_SUBTITLE_2_LETTER_SPACING, kVAL_TYPOGRAPHY_SUBTITLE_2_LETTER_SPACING);
 }
 }//====================================// end Subtitle2 ======================//
 /*==============================================================================
@@ -9178,11 +9500,11 @@ public static class Title extends TypoBase implements ITitle
 //------------------------------------------------------------------------------
 public Title()
 {
-   put(kKEY_TYPOGRAPHY_TITLE_COLOR,       kVAL_TYPOGRAPHY_TITLE_COLOR);
-   put(kKEY_TYPOGRAPHY_TITLE_FONT_FAMILY, kVAL_TYPOGRAPHY_TITLE_FONT_FAMILY);
-   put(kKEY_TYPOGRAPHY_TITLE_FONT_SIZE,   kVAL_TYPOGRAPHY_TITLE_FONT_SIZE);
-   put(kKEY_TYPOGRAPHY_TITLE_FONT_WEIGHT, kVAL_TYPOGRAPHY_TITLE_FONT_WEIGHT);
-   put(kKEY_TYPOGRAPHY_TITLE_LINE_HEIGHT, kVAL_TYPOGRAPHY_TITLE_LINE_HEIGHT);
+   set(kKEY_TYPOGRAPHY_TITLE_COLOR,       kVAL_TYPOGRAPHY_TITLE_COLOR);
+   set(kKEY_TYPOGRAPHY_TITLE_FONT_FAMILY, kVAL_TYPOGRAPHY_TITLE_FONT_FAMILY);
+   set(kKEY_TYPOGRAPHY_TITLE_FONT_SIZE,   kVAL_TYPOGRAPHY_TITLE_FONT_SIZE);
+   set(kKEY_TYPOGRAPHY_TITLE_FONT_WEIGHT, kVAL_TYPOGRAPHY_TITLE_FONT_WEIGHT);
+   set(kKEY_TYPOGRAPHY_TITLE_LINE_HEIGHT, kVAL_TYPOGRAPHY_TITLE_LINE_HEIGHT);
 }
 }//====================================// end Title ==========================//
 /*==============================================================================
@@ -9196,7 +9518,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static class TypoBase extends HashMap<String,Object> implements ITypoBase
+public static class TypoBase extends NativeObject implements ITypoBase
 {
                                        // constants ------------------------- //
                                        // (none)                              //
@@ -9294,7 +9616,7 @@ public String getFontSize()
 //------------------------------------------------------------------------------
 public int getFontWeight()
 {
-   return((Integer)get(kKEY_TYPOGRAPHY_FONT_WEIGHT));
+   return(getInt(kKEY_TYPOGRAPHY_FONT_WEIGHT));
 }
 /*------------------------------------------------------------------------------
 
@@ -9561,7 +9883,7 @@ history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static class ZIndex extends HashMap<String,Object> implements IZIndex
+public static class ZIndex extends NativeObject implements IZIndex
 {
                                        // constants ------------------------- //
 String kKEY_Z_INDEX_MOBILE_APP_BAR  = "appBar";
@@ -9600,12 +9922,12 @@ int    kVAL_Z_INDEX_MOBILE_TOOLTIP  = 1500;
 //------------------------------------------------------------------------------
 public ZIndex()
 {
-   put(kKEY_Z_INDEX_MOBILE_APP_BAR,  kVAL_Z_INDEX_MOBILE_APP_BAR);
-   put(kKEY_Z_INDEX_MOBILE_DRAWER,   kVAL_Z_INDEX_MOBILE_DRAWER);
-   put(kKEY_Z_INDEX_MOBILE_STEPPER,  kVAL_Z_INDEX_MOBILE_STEPPER);
-   put(kKEY_Z_INDEX_MOBILE_MODAL,    kVAL_Z_INDEX_MOBILE_MODAL);
-   put(kKEY_Z_INDEX_MOBILE_SNACKBAR, kVAL_Z_INDEX_MOBILE_SNACKBAR);
-   put(kKEY_Z_INDEX_MOBILE_TOOLTIP,  kVAL_Z_INDEX_MOBILE_TOOLTIP);
+   set(kKEY_Z_INDEX_MOBILE_APP_BAR,  kVAL_Z_INDEX_MOBILE_APP_BAR);
+   set(kKEY_Z_INDEX_MOBILE_DRAWER,   kVAL_Z_INDEX_MOBILE_DRAWER);
+   set(kKEY_Z_INDEX_MOBILE_STEPPER,  kVAL_Z_INDEX_MOBILE_STEPPER);
+   set(kKEY_Z_INDEX_MOBILE_MODAL,    kVAL_Z_INDEX_MOBILE_MODAL);
+   set(kKEY_Z_INDEX_MOBILE_SNACKBAR, kVAL_Z_INDEX_MOBILE_SNACKBAR);
+   set(kKEY_Z_INDEX_MOBILE_TOOLTIP,  kVAL_Z_INDEX_MOBILE_TOOLTIP);
 }
 /*------------------------------------------------------------------------------
 
@@ -9623,7 +9945,7 @@ public ZIndex()
 //------------------------------------------------------------------------------
 public int getAppBar()
 {
-   return((Integer)get(kKEY_Z_INDEX_MOBILE_APP_BAR));
+   return(getInt(kKEY_Z_INDEX_MOBILE_APP_BAR));
 }
 /*------------------------------------------------------------------------------
 
@@ -9641,7 +9963,7 @@ public int getAppBar()
 //------------------------------------------------------------------------------
 public int getDrawer()
 {
-   return((Integer)get(kKEY_Z_INDEX_MOBILE_DRAWER));
+   return(getInt(kKEY_Z_INDEX_MOBILE_DRAWER));
 }
 /*------------------------------------------------------------------------------
 
@@ -9659,7 +9981,7 @@ public int getDrawer()
 //------------------------------------------------------------------------------
 public int getMobileStepper()
 {
-   return((Integer)get(kKEY_Z_INDEX_MOBILE_STEPPER));
+   return(getInt(kKEY_Z_INDEX_MOBILE_STEPPER));
 }
 /*------------------------------------------------------------------------------
 
@@ -9677,7 +9999,7 @@ public int getMobileStepper()
 //------------------------------------------------------------------------------
 public int getModal()
 {
-   return((Integer)get(kKEY_Z_INDEX_MOBILE_MODAL));
+   return(getInt(kKEY_Z_INDEX_MOBILE_MODAL));
 }
 /*------------------------------------------------------------------------------
 
@@ -9695,7 +10017,7 @@ public int getModal()
 //------------------------------------------------------------------------------
 public int getSnackbar()
 {
-   return((Integer)get(kKEY_Z_INDEX_MOBILE_SNACKBAR));
+   return(getInt(kKEY_Z_INDEX_MOBILE_SNACKBAR));
 }
 /*------------------------------------------------------------------------------
 
@@ -9713,7 +10035,7 @@ public int getSnackbar()
 //------------------------------------------------------------------------------
 public int getTooltip()
 {
-   return((Integer)get(kKEY_Z_INDEX_MOBILE_TOOLTIP));
+   return(getInt(kKEY_Z_INDEX_MOBILE_TOOLTIP));
 }
 }//====================================// end ZIndex =========================//
 }//====================================// end IUITheme =======================//

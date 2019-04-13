@@ -47,9 +47,9 @@ public class App extends AppComponentTemplate<Properties>
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public App()
-{
-}
+//public App()
+//{
+//}
 /*------------------------------------------------------------------------------
 
 @name       App - constructor for specified properties

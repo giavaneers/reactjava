@@ -54,7 +54,7 @@ String kKEY_SCRIPTS_COMPRESSED        = "scriptsCompressed";
 String kKEY_SCRIPTS_LOAD_LAZY         = "scriptsLoadLazy";
 String kKEY_TAG_MAP_CUSTOM            = "tagMapCustom";
 String kKEY_TAG_MAP_DEFAULT           = "tagMapDefault";
-String kKEY_THEME                     = "themeDefault";
+String kKEY_THEME                     = "theme";
 
                                        // default values                      //
 Collection<String> kBUNDLE_SCRIPTS_DEFAULT =
@@ -67,17 +67,17 @@ Collection<String> kBUNDLE_SCRIPTS_DEFAULT =
    }};
 
 Collection<String> kGLOBAL_CSS_DEFAULT =
-   Arrays.asList(new String[]
+   new ArrayList(Arrays.asList(new String[]
    {
       "https://fonts.googleapis.com/css?family=Roboto:300,400,500",
       "https://fonts.googleapis.com/icon?family=Material+Icons",
       "index.css",
-   });
+   }));
 Collection<String> kGLOBAL_IMAGES_DEFAULT =
-   Arrays.asList(new String[]
+   new ArrayList(Arrays.asList(new String[]
    {
       "favicon.ico",
-   });
+   }));
 
 String  kKEY_CONFIGURATION_NAME_DEFAULT = "default";
 
@@ -130,7 +130,9 @@ Collection<String> kREQUIRED_PLATFORM_SCRIPTS_DEFAULT =
 boolean kSCRIPTS_COMPRESSED_DEFAULT = true;
 boolean kSCRIPTS_LOAD_LAZY_DEFAULT  = true;
 
-Map<String,Object> kCONFIGURATION_DEFAULT =
+                                       // works at compile time since elements//
+                                       // of kKEY_THEME require js environment//
+Map<String,Object> kCONFIGURATION_DEFAULT_SANS_THEME =
    new HashMap<String,Object>()
    {{
       put(kKEY_BUNDLE_SCRIPTS,            kBUNDLE_SCRIPTS_DEFAULT);
@@ -143,7 +145,6 @@ Map<String,Object> kCONFIGURATION_DEFAULT =
       put(kKEY_REQUIRED_PLATFORM_SCRIPTS, kREQUIRED_PLATFORM_SCRIPTS_DEFAULT);
       put(kKEY_SCRIPTS_COMPRESSED,        kSCRIPTS_COMPRESSED_DEFAULT);
       put(kKEY_SCRIPTS_LOAD_LAZY,         kSCRIPTS_LOAD_LAZY_DEFAULT);
-      put(kKEY_THEME,                    IUITheme.defaultInstance());
    }};
                                        // class variables ------------------- //
 
