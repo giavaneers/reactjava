@@ -17,7 +17,7 @@ import java.util.Set;
 import static org.jsoup.internal.Normalizer.lowerCase;
 
 /**
- * The attributes of an Element.
+ * The attributes of an ReactElement.
  * <p>
  * Attributes are treated as a map: there can be only one value associated with an attribute key/name.
  * </p>

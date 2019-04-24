@@ -64,6 +64,7 @@ import com.google.gwt.typedarrays.shared.ArrayBuffer;
 import com.google.gwt.typedarrays.shared.Uint8Array;
 import io.reactjava.client.core.providers.http.HttpClientBase.JsXMLHttpRequest.IReadyStateChangedHandler;
 import io.reactjava.client.core.providers.http.IHttpResponse.ResponseType;
+import io.reactjava.client.core.react.NativeObject;
 import io.reactjava.client.core.react.Properties;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -112,7 +113,7 @@ public static final List<ResponseType> kRESPONSE_TYPES_SUPPORTED =
                                        // public instance variables --------- //
                                        // (none)                              //
                                        // protected instance variables ------ //
-protected Properties props;            // properties                          //
+protected NativeObject props;            // properties                          //
                                        // private instance variables -------- //
                                        // (none)                              //
 
@@ -156,7 +157,7 @@ public HttpClientBase(
    String url)
 {
    this((Properties)null);
-   getProperties().set(kKEY_URL, url);
+   props = NativeObject.with(props(), kKEY_URL, url);
 }
 /*------------------------------------------------------------------------------
 
@@ -179,20 +180,20 @@ public HttpClientBase(
 public HttpClientBase(
    Properties props)
 {
-   this.props = props;
+   this.props = props != null ? props.toNativeObject() : new NativeObject();
 
    JsXMLHttpRequest xhr = getXHR();
    if (xhr == null)
    {
       xhr = new JsXMLHttpRequest();
       xhr.setOnreadystatechange(new ReadyStateChangeHandler());
-      getProperties().set(kKEY_XHR, xhr);
+      props().set(kKEY_XHR, xhr);
    }
 
-   Object method = getProperties().get(kKEY_METHOD);
+   Object method = props().get(kKEY_METHOD);
    if (method == null)
    {
-      getProperties().set(kKEY_METHOD, kGET);
+      props().set(kKEY_METHOD, kGET);
    }
 }
 /*------------------------------------------------------------------------------
@@ -287,29 +288,7 @@ public String getAllResponseHeaders()
 //------------------------------------------------------------------------------
 public String getMethod()
 {
-   return(getProperties().getString(kKEY_METHOD));
-}
-/*------------------------------------------------------------------------------
-
-@name       getProperties - get properties
-                                                                              */
-                                                                             /**
-            Get properties.
-
-@return     properties
-
-@history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public Properties getProperties()
-{
-   if (props == null)
-   {
-      props = new Properties();
-   }
-   return(props);
+   return(props().getString(kKEY_METHOD));
 }
 /*------------------------------------------------------------------------------
 
@@ -346,7 +325,7 @@ public int getReadyState()
 public IReadyStateChangedListener getReadyStateChangedListener()
 {
    return(
-      (IReadyStateChangedListener)getProperties().get(
+      (IReadyStateChangedListener) props().get(
          kKEY_RDY_STATE_CHANGED_LISTENER));
 }
 /*------------------------------------------------------------------------------
@@ -365,7 +344,7 @@ public IReadyStateChangedListener getReadyStateChangedListener()
 //------------------------------------------------------------------------------
 public String getErrorReason()
 {
-   return(getProperties().getString(kKEY_ERROR_REASON));
+   return(props().getString(kKEY_ERROR_REASON));
 }
 /*------------------------------------------------------------------------------
 
@@ -382,7 +361,7 @@ public String getErrorReason()
 //------------------------------------------------------------------------------
 public APIRequestor getRequestor()
 {
-   return((APIRequestor)getProperties().get(kKEY_REQUESTOR));
+   return((APIRequestor) props().get(kKEY_REQUESTOR));
 }
 /*------------------------------------------------------------------------------
 
@@ -399,7 +378,7 @@ public APIRequestor getRequestor()
 //------------------------------------------------------------------------------
 public Object getRequestToken()
 {
-   return(getProperties().get(kKEY_REQUEST_TOKEN));
+   return(props().get(kKEY_REQUEST_TOKEN));
 }
 /*------------------------------------------------------------------------------
 
@@ -507,7 +486,7 @@ public int getStatus()
 //------------------------------------------------------------------------------
 public String getStatusText()
 {
-   return(getProperties().getString(kKEY_STATUS_TEXT));
+   return(props().getString(kKEY_STATUS_TEXT));
 }
 /*------------------------------------------------------------------------------
 
@@ -525,7 +504,7 @@ public String getStatusText()
 //------------------------------------------------------------------------------
 public boolean getTimeout()
 {
-   return(getProperties().get(kKEY_TIMEOUT) != null);
+   return(props().get(kKEY_TIMEOUT) != null);
 }
 /*------------------------------------------------------------------------------
 
@@ -542,7 +521,7 @@ public boolean getTimeout()
 //------------------------------------------------------------------------------
 public String getURL()
 {
-   return(getProperties().getString(kKEY_URL));
+   return(props().getString(kKEY_URL));
 }
 /*------------------------------------------------------------------------------
 
@@ -559,7 +538,7 @@ public String getURL()
 //------------------------------------------------------------------------------
 public JsXMLHttpRequest getXHR()
 {
-   return((JsXMLHttpRequest)getProperties().get(kKEY_XHR));
+   return((JsXMLHttpRequest) props().get(kKEY_XHR));
 }
 /*------------------------------------------------------------------------------
 
@@ -616,6 +595,28 @@ public HttpClientBase open()
 }
 /*------------------------------------------------------------------------------
 
+@name       props - get properties
+                                                                              */
+                                                                             /**
+            Get properties.
+
+@return     properties
+
+@history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public NativeObject props()
+{
+   if (props == null)
+   {
+      props = new NativeObject();
+   }
+   return(props);
+}
+/*------------------------------------------------------------------------------
+
 @name       send - send the request
                                                                               */
                                                                              /**
@@ -667,7 +668,7 @@ public Object send(
    final Uint8Array data = bytes != null ? bytesToUint8Array(bytes) : null;
    if (getReadyStateChangedListener() == null)
    {
-      getProperties().set(
+      props().set(
          kKEY_RDY_STATE_CHANGED_LISTENER,
          new DefaultReadyStateChangeListener(this));
 
@@ -726,7 +727,7 @@ public Object sendFormData(
 public IHttpClientBase setErrorReason(
    String errorReason)
 {
-   getProperties().set(kKEY_ERROR_REASON, errorReason);
+   props().set(kKEY_ERROR_REASON, errorReason);
    return(this);
 }
 /*------------------------------------------------------------------------------
@@ -747,7 +748,7 @@ public IHttpClientBase setErrorReason(
 public IHttpClientBase setMethod(
    String method)
 {
-   getProperties().set(kKEY_METHOD, method);
+   props().set(kKEY_METHOD, method);
    return(this);
 }
 /*------------------------------------------------------------------------------
@@ -769,7 +770,7 @@ public IHttpClientBase setMethod(
 public IHttpClientBase setReadyStateChangedListener(
    IReadyStateChangedListener readyStateChangedListener)
 {
-   getProperties().set(
+   props().set(
       kKEY_RDY_STATE_CHANGED_LISTENER, readyStateChangedListener);
 
    return(this);
@@ -822,7 +823,7 @@ public IHttpClientBase setRequestHeader(
 public IHttpClientBase setRequestor(
    APIRequestor requestor)
 {
-   getProperties().set(kKEY_REQUESTOR, requestor);
+   props().set(kKEY_REQUESTOR, requestor);
    return(this);
 }
 /*------------------------------------------------------------------------------
@@ -844,7 +845,7 @@ public IHttpClientBase setRequestor(
 public IHttpClientBase setRequestToken(
    Object requestToken)
 {
-   getProperties().set(kKEY_REQUEST_TOKEN, requestToken);
+   props().set(kKEY_REQUEST_TOKEN, requestToken);
    return(this);
 }
 /*------------------------------------------------------------------------------
@@ -887,7 +888,7 @@ public IHttpClientBase setResponseType(
 public IHttpClientBase setStatusText(
    String statusText)
 {
-   getProperties().set(kKEY_STATUS_TEXT, statusText);
+   props().set(kKEY_STATUS_TEXT, statusText);
    return(this);
 }
 /*------------------------------------------------------------------------------
@@ -908,7 +909,7 @@ public IHttpClientBase setStatusText(
 //------------------------------------------------------------------------------
 public IHttpClientBase setTimeout()
 {
-   getProperties().set(kKEY_TIMEOUT, "true");
+   props().set(kKEY_TIMEOUT, "true");
    return(this);
 }
 /*------------------------------------------------------------------------------
@@ -929,7 +930,7 @@ public IHttpClientBase setTimeout()
 public IHttpClientBase setURL(
    String url)
 {
-   getProperties().set(kKEY_URL, url);
+   props().set(kKEY_URL, url);
    return(this);
 }
 /*------------------------------------------------------------------------------

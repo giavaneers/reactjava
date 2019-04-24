@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A HTML Form Element provides ready access to the form fields/controls that are associated with it. It also allows a
+ * A HTML Form ReactElement provides ready access to the form fields/controls that are associated with it. It also allows a
  * form to easily be submitted.
  */
 public class FormElement extends Element {

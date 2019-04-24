@@ -16,8 +16,6 @@ notes:
                                        // package --------------------------- //
 package io.reactjava.client.core.react;
                                        // imports --------------------------- //
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -112,7 +110,7 @@ public ReactCodeGeneratorImplementation()
                                                                               */
 //------------------------------------------------------------------------------
 @JsMethod
-public Element boot(
+public ReactElement boot(
    String className)
 {
    return(

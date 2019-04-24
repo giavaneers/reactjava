@@ -94,6 +94,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Window;
 import elemental2.dom.DomGlobal;
+import elemental2.dom.Element;
 import java.util.Map;
 import java.util.function.Function;
                                        // Router =============================//
@@ -187,10 +188,10 @@ public static Component componentForHash(
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public static Element elementForPath(
+public static ReactElement elementForPath(
    String path)
 {
-   Element element = null;
+   ReactElement element = null;
 
    if (configuration == null)
    {
@@ -304,7 +305,7 @@ public static void push(String path)
 
                                                                               */
 //------------------------------------------------------------------------------
-public static Element render(
+public static ReactElement render(
    IConfiguration configurationNew)
 {
    if (configurationNew != null)
@@ -328,7 +329,7 @@ public static Element render(
 
                                                                               */
 //------------------------------------------------------------------------------
-public static Element render()
+public static ReactElement render()
 {
                                        // path is of the form                 //
                                        // urlPath#routePath]anchorElementId   //
@@ -355,7 +356,7 @@ public static Element render()
    String[] bracketSplits = hash.split("\\]");
    String   path          = bracketSplits[0];
    boolean  bNewElement   = !".".equals(path);
-   Element  element       = bNewElement ? elementForPath(path) : null;
+   ReactElement element       = bNewElement ? elementForPath(path) : null;
 
    if (bNewElement && element == null)
    {
@@ -438,9 +439,7 @@ public static void scrollIntoView(
    {
       timerDsc[1]++;
 
-      elemental2.dom.Element element =
-         DomGlobal.document.getElementById(elementId);
-
+      Element element = DomGlobal.document.getElementById(elementId);
       if (element != null)
       {
          element.scrollIntoView();

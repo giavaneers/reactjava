@@ -1,6 +1,6 @@
 /*==============================================================================
 
-name:       Element - native react element
+name:       ReactElement - native react element
 
 purpose:    Native react element
 
@@ -20,7 +20,7 @@ import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
 
 @JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "Object")
-public class Element
+public class ReactElement
 {
                                        // constants ------------------------- //
                                        // (none)                              //
@@ -34,4 +34,4 @@ public Properties props;               // native properties                   //
                                        // private instance variables -------- //
                                        // (none)                              //
 
-}//====================================// end Element ------------------------//
+}//====================================// end ReactElement ------------------------//

@@ -18,6 +18,7 @@ package io.reactjava.client.core.react;
 import elemental2.core.JsRegExp;
 import elemental2.dom.CSSStyleDeclaration;
 import elemental2.dom.DomGlobal;
+import elemental2.dom.Element;
 import elemental2.dom.ViewCSS;
 import io.reactjava.client.core.react.IUITheme.Mixins.Toolbar;
 import io.reactjava.client.core.react.IUITheme.Palette.Action;
@@ -371,7 +372,7 @@ static String remToPx(
 {
    double remVal = Double.parseDouble(rem.replace("rem","").trim());
 
-   elemental2.dom.Element docElem  = DomGlobal.document.documentElement;
+   Element docElem  = DomGlobal.document.documentElement;
    ViewCSS viewCSS  = Js.<ViewCSS>uncheckedCast(DomGlobal.window);
    CSSStyleDeclaration style    = viewCSS.getComputedStyle(docElem);
    String                 fontSize = style.getPropertyValue("font-size").trim();

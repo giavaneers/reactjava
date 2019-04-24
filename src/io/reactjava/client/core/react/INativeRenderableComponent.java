@@ -62,5 +62,5 @@ public interface INativeRenderableComponent<P extends Properties>
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-Element render(P props);
+ReactElement render(P props);
 }

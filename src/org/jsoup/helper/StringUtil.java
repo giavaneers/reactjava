@@ -119,7 +119,7 @@ public final class StringUtil {
     }
 
     /**
-     * Tests if a code point is "whitespace" as defined by what it looks like. Used for Element.text etc.
+     * Tests if a code point is "whitespace" as defined by what it looks like. Used for ReactElement.text etc.
      * @param c code point to test
      * @return true if code point is whitespace, false otherwise
      */

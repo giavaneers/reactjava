@@ -647,7 +647,7 @@ public abstract class Evaluator {
     }
 
     /**
-     * Evaluator for matching Element (and its descendants) text
+     * Evaluator for matching ReactElement (and its descendants) text
      */
     public static final class ContainsText extends Evaluator {
         private String searchText;
@@ -668,7 +668,7 @@ public abstract class Evaluator {
     }
 
     /**
-     * Evaluator for matching Element (and its descendants) data
+     * Evaluator for matching ReactElement (and its descendants) data
      */
     public static final class ContainsData extends Evaluator {
         private String searchText;
@@ -689,7 +689,7 @@ public abstract class Evaluator {
     }
 
     /**
-     * Evaluator for matching Element's own text
+     * Evaluator for matching ReactElement's own text
      */
     public static final class ContainsOwnText extends Evaluator {
         private String searchText;
@@ -710,7 +710,7 @@ public abstract class Evaluator {
     }
 
     /**
-     * Evaluator for matching Element (and its descendants) text with regex
+     * Evaluator for matching ReactElement (and its descendants) text with regex
      */
     public static final class Matches extends Evaluator {
         private Pattern pattern;
@@ -732,7 +732,7 @@ public abstract class Evaluator {
     }
 
     /**
-     * Evaluator for matching Element's own text with regex
+     * Evaluator for matching ReactElement's own text with regex
      */
     public static final class MatchesOwn extends Evaluator {
         private Pattern pattern;

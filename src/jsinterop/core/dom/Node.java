@@ -66,8 +66,8 @@ public interface Node extends EventTarget {
     /**
      * Getter for the parentElement attribute
      *
-     * @return Returns an Element that is the parent of this node. If the node has no parent, or if that
-     *         parent is not an Element, this property returns null.
+     * @return Returns an ReactElement that is the parent of this node. If the node has no parent, or if that
+     *         parent is not an ReactElement, this property returns null.
      */
     @JsProperty
     Element getParentElement();

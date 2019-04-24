@@ -223,7 +223,7 @@ abstract class Token {
         Tag reset() {
             super.reset();
             attributes = new Attributes();
-            // todo - would prefer these to be null, but need to check Element assertions
+            // todo - would prefer these to be null, but need to check ReactElement assertions
             return this;
         }
 

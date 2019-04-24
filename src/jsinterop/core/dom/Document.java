@@ -46,7 +46,7 @@ public interface Document extends Node, NodeSelector {
      * Returns an object reference to the identified element.
      *
      * @param id A case-sensitive string representing the unique ID of the element
-     * @return A reference to an Element object, or null if an element with the specified ID is not in the
+     * @return A reference to an ReactElement object, or null if an element with the specified ID is not in the
      *         document.
      */
     Element getElementById(String id);
@@ -90,7 +90,7 @@ public interface Document extends Node, NodeSelector {
      * @param tag Is a string that specifies the type of element to be created. The nodeName of the created
      *            element is initialized with the value of tagName. Don't use qualified names (like "html:a")
      *            with this method.
-     * @return The created Element object.
+     * @return The created ReactElement object.
      */
     <T> T createElement(String tag);
 

@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.function.Function;
 import jsinterop.base.Js;
 import jsinterop.core.html.Window;
-
                                        // ReactJava ==========================//
 public class ReactJava
 {
@@ -100,13 +99,13 @@ protected static void addBaseTag()
 
                                                                               */
 //------------------------------------------------------------------------------
-public static Element boot(
+public static ReactElement boot(
    AppComponentTemplate app)
 {
                                        // add base tag to document if required//
    addBaseTag();
 
-   final Element[] renderElement = new Element[1];
+   final ReactElement[] renderElement = new ReactElement[1];
    IConfiguration  configuration = Configuration.sharedInstance();
    initialize(configuration, null, (Object response, Object reqToken) ->
    {
@@ -244,33 +243,33 @@ public static Map<String,String> clearInjectedStylesheets()
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public static <P extends Properties> Element createElement(
+public static <P extends Properties> ReactElement createElement(
    Class          type,
    IConfiguration configuration)
 {
-   Element    element;
+   ReactElement element;
    Properties props     = Properties.with("configuration", configuration);
    String     classname = type.getName();
    Component  component = getComponentFactory(classname).apply(props);
 
    element =
       createElement(
-         getRenderableComponent(component), component.getProperties());
+         getRenderableComponent(component), component.props());
 
    return(element);
 }
 
-public static <P extends Properties> Element createElement(
-   Class type, IConfiguration configuration, Element ...children)
+public static <P extends Properties> ReactElement createElement(
+   Class type, IConfiguration configuration, ReactElement...children)
 {
-   Element    element;
+   ReactElement element;
    Properties props     = Properties.with("configuration", configuration);
    String     classname = type.getName();
    Component  component = getComponentFactory(classname).apply(props);
 
    element =
       createElement(
-         getRenderableComponent(component), component.getProperties(),
+         getRenderableComponent(component), component.props(),
          children);
 
    return(element);
@@ -292,11 +291,11 @@ public static <P extends Properties> Element createElement(
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public static <P extends Properties> Element createElement(
+public static <P extends Properties> ReactElement createElement(
    Component  component)
 {
-   Properties props   = component.getProperties();
-   Element    element = createElement(getRenderableComponent(component), props);
+   Properties props   = component.props();
+   ReactElement element = createElement(getRenderableComponent(component), props);
 
    return(element);
 }
@@ -317,20 +316,20 @@ public static <P extends Properties> Element createElement(
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public static <P extends Properties> Element createElement(
+public static <P extends Properties> ReactElement createElement(
    String type, P props)
 {
-   Element element =
+   ReactElement element =
       Character.isLowerCase(type.charAt(0))
          ? React.createElement(type, props)
          : React.createElement(ReactJavaNative.getType(type), props);
 
    return(element);
 }
-public static <P extends Properties> Element createElement(
+public static <P extends Properties> ReactElement createElement(
    String type, P props, String value)
 {
-   Element element =
+   ReactElement element =
       Character.isLowerCase(type.charAt(0))
          ? React.createElement(type, props, value)
          : React.createElement(
@@ -338,10 +337,10 @@ public static <P extends Properties> Element createElement(
 
    return(element);
 }
-public static <P extends Properties> Element createElement(
-   String type, P props, Element ...children)
+public static <P extends Properties> ReactElement createElement(
+   String type, P props, ReactElement...children)
 {
-   Element element =
+   ReactElement element =
       Character.isLowerCase(type.charAt(0))
          ? React.createElement(type, props, children)
          : React.createElement(
@@ -367,20 +366,20 @@ public static <P extends Properties> Element createElement(
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public static <P extends Properties> Element createElement(
+public static <P extends Properties> ReactElement createElement(
    INativeRenderableComponent<P> type, P props)
 {
    return(React.createElement(type, props));
 }
 
-public static <P extends Properties> Element createElement(
+public static <P extends Properties> ReactElement createElement(
    INativeRenderableComponent<P> type, P props, String value)
 {
    return(React.createElement(type, props, value));
 }
 
-public static <P extends Properties> Element createElement(
-   INativeRenderableComponent<P> type, P props, Element ...children)
+public static <P extends Properties> ReactElement createElement(
+   INativeRenderableComponent<P> type, P props, ReactElement...children)
 {
    return(React.createElement(type, props, children));
 }
@@ -401,14 +400,14 @@ public static <P extends Properties> Element createElement(
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public static <P extends Properties> Element createElement(
+public static <P extends Properties> ReactElement createElement(
    INativeComponentConstructor type, P props)
    throws Exception
 {
    return(React.createElement(type, props));
 }
-public static <P extends Properties> Element createElement(
-   INativeComponentConstructor type, P props, Element ...children)
+public static <P extends Properties> ReactElement createElement(
+   INativeComponentConstructor type, P props, ReactElement...children)
    throws Exception
 {
    return(React.createElement(type, props, children));
@@ -529,10 +528,10 @@ public static Function<Properties,Component> getComponentFactory(
 
                                                                               */
 //------------------------------------------------------------------------------
-public static <P extends Properties> Function<P,Element> getComponentFcn(
+public static <P extends Properties> Function<P, ReactElement> getComponentFcn(
    Component component)
 {
-   Function<P,Element> fcn = component.componentFcn;
+   Function<P, ReactElement> fcn = component.componentFcn;
    if (fcn == null)
    {
       component.render();
@@ -646,9 +645,13 @@ public static <P extends Properties> INativeRenderableComponent getRenderableCom
 {
    return((props) ->
    {
-      Element element = null;
+                                       // assign the private instance variable//
+      Js.asPropertyMap(component).set(
+         "io_reactjava_client_core_react_Component_props", props);
 
-      Function<P,Element> fcn = getComponentFcn(component);
+      ReactElement element = null;
+
+      Function<P, ReactElement> fcn = getComponentFcn(component);
 
       if (fcn != null)
       {

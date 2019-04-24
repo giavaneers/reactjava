@@ -18,6 +18,7 @@ package io.reactjava.client.core.react;
 import com.giavaneers.util.gwt.Logger;
 import elemental2.core.Function;
 import elemental2.dom.DomGlobal;
+import elemental2.dom.Element;
 import elemental2.dom.Node;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,11 +34,11 @@ private static final Logger kLOGGER = Logger.newInstance();
 protected static int        nextId;    // next elementId to be autoassigned   //
                                        // protected instance variables ------ //
 protected StateMgr          stateMgr;  // component state manager             //
-protected java.util.function.Function<Properties,Element>
+protected java.util.function.Function<Properties, ReactElement>
                                        // component function                  //
                             componentFcn;
 protected String            css;       // css                                 //
-protected P                 props;     // component properties                //
+private   P                 props;     // private to approximate immutable    //
 
 /*------------------------------------------------------------------------------
 
@@ -142,10 +143,10 @@ public void componentWillUnmount()
 
                                                                               */
 //------------------------------------------------------------------------------
-public elemental2.dom.Element getDOMElement()
+public Element getDOMElement()
 {
-   String                 elementId = getProperties().getString("id");
-   elemental2.dom.Element element   = DomGlobal.document.getElementById(elementId);
+   String  elementId = props().getString("id");
+   Element element   = DomGlobal.document.getElementById(elementId);
    return(element);
 }
 /*------------------------------------------------------------------------------
@@ -163,16 +164,16 @@ public elemental2.dom.Element getDOMElement()
 
                                                                               */
 //------------------------------------------------------------------------------
-public elemental2.dom.Element getDOMParentElement()
+public Element getDOMParentElement()
 {
-   elemental2.dom.Element parent = null;
-   elemental2.dom.Element element = getDOMElement();
+   Element parent  = null;
+   Element element = getDOMElement();
    if (element != null)
    {
       Node parentNode = getDOMElement().parentNode;
-      if (parentNode instanceof elemental2.dom.Element)
+      if (parentNode instanceof Element)
       {
-         parent = (elemental2.dom.Element)parentNode;
+         parent = (Element)parentNode;
       }
    }
    else
@@ -218,25 +219,6 @@ protected Map<String,Class> getNavRoutes()
 protected static String getNextId()
 {
    return("@" + ++nextId);
-}
-/*------------------------------------------------------------------------------
-
-@name       getProperties - get props
-                                                                              */
-                                                                             /**
-            Get properties.
-
-@return     properties
-
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-
-                                                                              */
-//------------------------------------------------------------------------------
-public P getProperties()
-{
-   return(props);
 }
 /*------------------------------------------------------------------------------
 
@@ -360,20 +342,31 @@ protected StateMgr getStateMgr()
 //------------------------------------------------------------------------------
 public IUITheme getTheme()
 {
-   IUITheme theme = (IUITheme)getProperties().get("theme");
+   IUITheme theme = (IUITheme)props().get("theme");
    if (theme == null)
    {
-      theme = getProperties().getConfiguration().getTheme();
+      theme = props().getConfiguration().getTheme();
       setTheme(theme);
    }
    return(theme);
 }
 /*------------------------------------------------------------------------------
 
-@name       initialize - set properties
+@name       initialize - initialize
                                                                               */
                                                                              /**
-            Set properties.
+            Initialize. This method is invoked in the constructor(P props),
+            so be careful that any referenced instance variables have been
+            initialized. Specifically, in Java, the order for initialization
+            statements is as follows:
+
+               1. static variables and static initializers in order of
+                  appearance in the source.
+
+               2. instance variables and instance initializers in order of
+                  appearance in the source.
+
+               3. constructors.
 
 @return     void
 
@@ -416,9 +409,9 @@ public P initialize(
 //------------------------------------------------------------------------------
 protected void initConfiguration()
 {
-   if (getProperties().getConfiguration() == null)
+   if (props().getConfiguration() == null)
    {
-      getProperties().setConfiguration(Configuration.sharedInstance());
+      props().setConfiguration(Configuration.sharedInstance());
    }
 }
 /*------------------------------------------------------------------------------
@@ -438,6 +431,25 @@ protected void initConfiguration()
 protected void initTheme()
 {
    getTheme();
+}
+/*------------------------------------------------------------------------------
+
+@name       props - get properties
+                                                                              */
+                                                                             /**
+            Get properties.
+
+@return     properties
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public P props()
+{
+   return(props);
 }
 /*------------------------------------------------------------------------------
 
@@ -477,6 +489,32 @@ public void render()
 public void renderCSS()
 {
 };
+/*------------------------------------------------------------------------------
+
+@name       setId - set id
+                                                                              */
+                                                                             /**
+            Set id.
+
+@return     void
+
+@param      id    new id value
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected void setId(
+   String id)
+{
+   if (!id.equals(props.get("id")))
+   {
+                                       // don't know why set() won't work here//
+      props = (P)Properties.with(props, "id", id);
+   }
+}
 /*------------------------------------------------------------------------------
 
 @name       setState - set theme
@@ -535,7 +573,7 @@ public void setState(
 public IUITheme setTheme(
    IUITheme theme)
 {
-   getProperties().set("theme", (theme));
+   props().set("theme", (theme));
    return(theme);
 }
 /*------------------------------------------------------------------------------
@@ -557,7 +595,7 @@ public void update()
 {
    try
    {
-      Element element = ReactJava.createElement(this);
+      ReactElement element = ReactJava.createElement(this);
       if (ReactJava.getIsWebPlatform())
       {
                                        // update any styles                   //

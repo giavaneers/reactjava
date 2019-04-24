@@ -22,16 +22,16 @@ import jsinterop.annotations.JsType;
 public interface NodeSelector {
 
     /**
-     * The method must return the first matching Element node within the subtrees of the context node. If
-     * there is no matching Element, the method must return null.
+     * The method must return the first matching ReactElement node within the subtrees of the context node. If
+     * there is no matching ReactElement, the method must return null.
      *
-     * @param selector The selector used to search for the matching Element
-     * @return The first matching Element node or null if there is no matching Element
+     * @param selector The selector used to search for the matching ReactElement
+     * @return The first matching ReactElement node or null if there is no matching ReactElement
      */
     <T extends Element> T querySelector(String selector);
 
     /**
-     * The method return a NodeList containing all of the matching Element nodes within the subtrees of the
+     * The method return a NodeList containing all of the matching ReactElement nodes within the subtrees of the
      * context node, in document order. If there are no matching nodes, the method must return an empty
      * NodeList.
      *

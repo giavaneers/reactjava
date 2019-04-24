@@ -43,6 +43,6 @@ public class ReactDOM
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public static native <C> Element render(Element element, C container);
+public static native <C> ReactElement render(ReactElement element, C container);
 
 }//====================================// end ReactDOM -----------------------//

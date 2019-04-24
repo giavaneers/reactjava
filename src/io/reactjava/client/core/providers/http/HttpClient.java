@@ -208,7 +208,7 @@ public Observable<HttpResponse> send(
       {
          Subscriber subscriber = observer;
 
-         getProperties().set(
+         props.set(
             kKEY_RDY_STATE_CHANGED_LISTENER,
             new DefaultReadyStateChangeListener(this, subscriber));
 

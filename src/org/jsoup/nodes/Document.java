@@ -99,7 +99,7 @@ public class Document extends Element {
     }
 
     /**
-     Create a new Element, with this document's base uri. Does not make the new element a child of this document.
+     Create a new ReactElement, with this document's base uri. Does not make the new element a child of this document.
      @param tagName element tag name (e.g. {@code a})
      @return new element
      */

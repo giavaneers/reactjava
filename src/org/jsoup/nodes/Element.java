@@ -33,7 +33,7 @@ import static org.jsoup.internal.Normalizer.normalize;
  * A HTML element consists of a tag name, attributes, and child nodes (including text nodes and
  * other elements).
  * 
- * From an Element, you can extract data, traverse the node graph, and manipulate the HTML.
+ * From an ReactElement, you can extract data, traverse the node graph, and manipulate the HTML.
  * 
  * @author Jonathan Hedley, jonathan@hedley.net
  */
@@ -55,7 +55,7 @@ public class Element extends Node {
     }
 
     /**
-     * Create a new, standalone Element. (Standalone in that is has no parent.)
+     * Create a new, standalone ReactElement. (Standalone in that is has no parent.)
      * 
      * @param tag tag of this element
      * @param baseUri the base URI
@@ -73,7 +73,7 @@ public class Element extends Node {
     }
     
     /**
-     * Create a new Element from a tag and a base URI.
+     * Create a new ReactElement from a tag and a base URI.
      * 
      * @param tag element tag
      * @param baseUri the base URI of this element. It is acceptable for the base URI to be an empty
@@ -257,7 +257,7 @@ public class Element extends Node {
     /**
      * Get this element's child elements.
      * <p>
-     * This is effectively a filter on {@link #childNodes()} to get Element nodes.
+     * This is effectively a filter on {@link #childNodes()} to get ReactElement nodes.
      * </p>
      * @return child elements. If this element has no children, returns an empty list.
      * @see #childNodes()
@@ -364,7 +364,7 @@ public class Element extends Node {
     }
 
     /**
-     * Find the first Element that matches the {@link Selector} CSS query, with this element as the starting context.
+     * Find the first ReactElement that matches the {@link Selector} CSS query, with this element as the starting context.
      * <p>This is effectively the same as calling {@code element.select(query).first()}, but is more efficient as query
      * execution stops on the first hit.</p>
      * @param cssQuery cssQuery a {@link Selector} CSS-like query
@@ -570,7 +570,7 @@ public class Element extends Node {
     /**
      * Insert the specified node into the DOM before this node (as a preceding sibling).
      * @param node to add before this element
-     * @return this Element, for chaining
+     * @return this ReactElement, for chaining
      * @see #after(Node)
      */
     @Override

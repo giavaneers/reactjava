@@ -26,7 +26,7 @@ public class XmlDeclaration extends LeafNode {
     /**
      * Create a new XML declaration
      * @param name of declaration
-     * @param baseUri Leaf Nodes don't have base URIs; they inherit from their Element
+     * @param baseUri Leaf Nodes don't have base URIs; they inherit from their ReactElement
      * @param isProcessingInstruction is processing instruction
      * @see org.jsoup.nodes.XmlDeclaration#XmlDeclaration(String, boolean)
      * @deprecated

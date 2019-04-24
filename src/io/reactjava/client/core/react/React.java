@@ -66,14 +66,14 @@ private React()
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public static native <P extends Properties> Element createElement(
+public static native <P extends Properties> ReactElement createElement(
    String type, P props);
 
-public static native <P extends Properties> Element createElement(
+public static native <P extends Properties> ReactElement createElement(
    String type, P props, String value);
 
-public static native <P extends Properties> Element createElement(
-   String type, P props, Element ...children);
+public static native <P extends Properties> ReactElement createElement(
+   String type, P props, ReactElement...children);
 
 /*------------------------------------------------------------------------------
 
@@ -93,14 +93,14 @@ public static native <P extends Properties> Element createElement(
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public static native <P extends Properties> Element createElement(
+public static native <P extends Properties> ReactElement createElement(
    INativeRenderableComponent<P> type, P props);
 
-public static native <P extends Properties> Element createElement(
+public static native <P extends Properties> ReactElement createElement(
    INativeRenderableComponent<P> type, P props, String value);
 
-public static native <P extends Properties> Element createElement(
-   INativeRenderableComponent<P> type, P props, Element ...children);
+public static native <P extends Properties> ReactElement createElement(
+   INativeRenderableComponent<P> type, P props, ReactElement...children);
 
 /*------------------------------------------------------------------------------
 
@@ -120,14 +120,14 @@ public static native <P extends Properties> Element createElement(
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public static native <P extends Properties> Element createElement(
+public static native <P extends Properties> ReactElement createElement(
    INativeComponentConstructor<P> type, P props);
 
-public static native <P extends Properties> Element createElement(
+public static native <P extends Properties> ReactElement createElement(
    INativeComponentConstructor<P> type, P props, String value);
 
-public static native <P extends Properties> Element createElement(
-   INativeComponentConstructor<P> type, P props, Element ...children);
+public static native <P extends Properties> ReactElement createElement(
+   INativeComponentConstructor<P> type, P props, ReactElement...children);
 
 /*------------------------------------------------------------------------------
 

@@ -15,14 +15,16 @@ notes:
                                        // package --------------------------- //
 package io.reactjava.client.core.react;
                                        // imports --------------------------- //
+import elemental2.core.JsObject;
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;
 import jsinterop.base.Js;
 import jsinterop.base.JsForEachCallbackFn;
+import jsinterop.base.JsPropertyMap;
                                        // Properties =========================//
 @JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "Object")
-public class Properties extends NativeObject
+public class Properties extends JsObject
 {
                                        // constants ------------------------- //
                                        // (none)                              //
@@ -54,6 +56,61 @@ public Properties()
 }
 /*------------------------------------------------------------------------------
 
+@name       get - get value of specified property
+                                                                              */
+                                                                             /**
+            Get value of specified property
+
+@return     value of specified property, or null if not found.
+
+@param      propertyName      property name
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+@JsOverlay
+public final Object get(
+   String propertyName)
+{
+   return(Js.asPropertyMap(this).get(propertyName));
+}
+/*------------------------------------------------------------------------------
+
+@name       getBoolean - get boolean value of specified property
+                                                                              */
+                                                                             /**
+            Get boolean value of specified property
+
+@return     boolean value of specified property, or null if not found.
+
+@param      propertyName      property name
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+@JsOverlay
+public final boolean getBoolean(
+   String propertyName)
+{
+   boolean booleanValue;
+
+   Object value = get(propertyName);
+   if (value instanceof String)
+   {
+      booleanValue = "true".equals((String)value);
+   }
+   else
+   {
+      booleanValue = Utilities.getObjectBooleanValueNative(this, propertyName);
+   }
+   return(booleanValue);
+}
+/*------------------------------------------------------------------------------
+
 @name       getChildren - get children property value
                                                                               */
                                                                              /**
@@ -67,7 +124,7 @@ public Properties()
                                                                               */
 //------------------------------------------------------------------------------
 @JsOverlay
-public final Element getChildren()
+public final ReactElement getChildren()
 {
    return(Js.uncheckedCast(get("children")));
 }
@@ -119,6 +176,39 @@ public final IConfiguration getConfiguration()
 }
 /*------------------------------------------------------------------------------
 
+@name       getDouble - get double value of specified property
+                                                                              */
+                                                                             /**
+            Get double value of specified property
+
+@return     double value of specified property, or null if not found.
+
+@param      propertyName      property name
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes      see set() with invocation of Utilties.setObjectIntValueNative()
+                                                                              */
+//------------------------------------------------------------------------------
+@JsOverlay
+public final double getDouble(
+   String propertyName)
+{
+   double doubleValue;
+
+   Object value = get(propertyName);
+   if (value instanceof String)
+   {
+      doubleValue = Double.parseDouble((String)value);
+   }
+   else
+   {
+      doubleValue = Utilities.getObjectDoubleValueNative(this, propertyName);
+   }
+   return(doubleValue);
+}
+/*------------------------------------------------------------------------------
+
 @name       getEventHandler - get event handler value of specified property
                                                                               */
                                                                              /**
@@ -160,6 +250,143 @@ public final Router getHistory()
 }
 /*------------------------------------------------------------------------------
 
+@name       getInt - get int value of specified property
+                                                                              */
+                                                                             /**
+            Get int value of specified property
+
+@return     int value of specified property, or null if not found.
+
+@param      propertyName      property name
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes      see set() with invocation of Utilties.setObjectIntValueNative()
+                                                                              */
+//------------------------------------------------------------------------------
+@JsOverlay
+public final int getInt(
+   String propertyName)
+{
+   int intValue;
+
+   Object value = get(propertyName);
+   if (value instanceof String)
+   {
+      intValue = Integer.parseInt((String)value);
+   }
+   else
+   {
+      intValue = Utilities.getObjectIntValueNative(this, propertyName);
+   }
+   return(intValue);
+}
+/*------------------------------------------------------------------------------
+
+@name       getString - get string value of specified property
+                                                                              */
+                                                                             /**
+            Get string value of specified property
+
+@return     string value of specified property, or null if not found.
+
+@param      propertyName      property name
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+@JsOverlay
+public final String getString(
+   String propertyName)
+{
+   return((String)get(propertyName));
+}
+/*------------------------------------------------------------------------------
+
+@name       remove - remove specified property
+                                                                              */
+                                                                             /**
+            Remove specified property
+
+@return     value of removed property or null if not found.
+
+@param      propertyName      property name
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+@JsOverlay
+public final Object remove(
+   String propertyName)
+{
+   JsPropertyMap<Object> map = Js.asPropertyMap(this);
+   Object value = map.get(propertyName);
+   map.delete(propertyName);
+   return(value);
+}
+/*------------------------------------------------------------------------------
+
+@name       set - set value of specified property
+                                                                              */
+                                                                             /**
+            Set value of specified property
+
+@return     void
+
+@param      propertyName      property name
+@param      value             value of specified property
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+@JsOverlay
+protected final Properties set(
+   String propertyName,
+   Object value)
+{
+   if (value != null)
+   {
+      if (value instanceof Boolean)
+      {
+         boolean val = ((Boolean)value).booleanValue();
+         Js.asPropertyMap(this).set(propertyName, val);
+      }
+      else if (value instanceof Integer)
+      {
+         int val = ((Integer)value).intValue();
+         Js.asPropertyMap(this).set(propertyName, val);
+      }
+      else if (value instanceof Double)
+      {
+         double val = ((Double)value).doubleValue();
+         Js.asPropertyMap(this).set(propertyName, val);
+      }
+      else if (value instanceof Float)
+      {
+         float val = ((Float)value).floatValue();
+         Js.asPropertyMap(this).set(propertyName, val);
+      }
+      else
+      {
+         Js.asPropertyMap(this).set(propertyName, value);
+      }
+                                       // checking...                         //
+      if (get(propertyName) == null)
+      {
+         throw new IllegalStateException("value not written");
+      }
+   }
+
+   return(this);
+}
+/*------------------------------------------------------------------------------
+
 @name       setComponent - set component for these properties
                                                                               */
                                                                              /**
@@ -183,7 +410,7 @@ public final Properties setComponent(
 }
 /*------------------------------------------------------------------------------
 
-@name       setComponent - set application configuration
+@name       setConfiguration - set application configuration
                                                                               */
                                                                              /**
             Set application configuration
@@ -203,6 +430,35 @@ protected final Properties setConfiguration(
 {
    set("configuration", value);
    return(this);
+}
+/*------------------------------------------------------------------------------
+
+@name       toNativeObject - create a representative NativeObject
+                                                                              */
+                                                                             /**
+            Create a representative NativeObject.
+
+@return     a representative NativeObject
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+@JsOverlay
+public final NativeObject toNativeObject()
+{
+   NativeObject        nativeObject = new NativeObject();
+   JsForEachCallbackFn callback     = new JsForEachCallbackFn()
+   {
+      public void onKey(String key)
+      {
+         nativeObject.set(key, get(key));
+      }
+   };
+   Js.asPropertyMap(this).forEach(callback);
+
+   return(nativeObject);
 }
 /*------------------------------------------------------------------------------
 

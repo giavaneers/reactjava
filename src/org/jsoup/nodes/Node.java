@@ -401,7 +401,7 @@ public abstract class Node implements Cloneable {
     }
 
     void nodelistChanged() {
-        // Element overrides this to clear its shadow children elements
+        // ReactElement overrides this to clear its shadow children elements
     }
 
     /**

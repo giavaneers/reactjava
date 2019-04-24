@@ -28,7 +28,7 @@ public abstract class Component<P extends Properties>
                                        // class variables                     //
 protected static int        nextId;    // next elementId to be autoassigned   //
                                        // protected instance variables ------ //
-protected java.util.function.Function<Properties,Element>
+protected java.util.function.Function<Properties,ReactElement>
                                        // component function                  //
                             componentFcn;
 protected String            css;       // css                                 //
@@ -86,7 +86,7 @@ public Component(P props)
 //------------------------------------------------------------------------------
 public Element getDOMElement()
 {
-   String  elementId = getProperties().getString("id");
+   String  elementId = props().getString("id");
    Element element   = DomGlobal.document.getElementById(elementId);
    return(element);
 }
@@ -107,7 +107,7 @@ public Element getDOMElement()
 //------------------------------------------------------------------------------
 public Element getDOMParentElement()
 {
-   Element parent = null;
+   Element parent  = null;
    Element element = getDOMElement();
    if (element != null)
    {
@@ -163,25 +163,6 @@ protected Map<String,Class> getNavRoutes()
 protected static String getNextId()
 {
    return("@" + ++nextId);
-}
-/*------------------------------------------------------------------------------
-
-@name       getProperties - get props
-                                                                              */
-                                                                             /**
-            Get properties.
-
-@return     properties
-
-@history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-
-                                                                              */
-//------------------------------------------------------------------------------
-public P getProperties()
-{
-   return(props);
 }
 /*------------------------------------------------------------------------------
 
@@ -280,11 +261,11 @@ protected String getStateString(
 //------------------------------------------------------------------------------
 public IUITheme getTheme()
 {
-   IUITheme theme = (IUITheme)getProperties().get("theme");
+   IUITheme theme = (IUITheme)props().get("theme");
    if (theme == null)
    {
       theme = IUITheme.defaultInstance();
-      getProperties().set("theme", theme);
+      props().set("theme", theme);
    }
    return(theme);
 }
@@ -307,6 +288,25 @@ public IUITheme getTheme()
 //------------------------------------------------------------------------------
 public P initialize(
    P props)
+{
+   return(props);
+}
+/*------------------------------------------------------------------------------
+
+@name       props - get properties
+                                                                              */
+                                                                             /**
+            Get properties.
+
+@return     properties
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public P props()
 {
    return(props);
 }
@@ -348,25 +348,24 @@ public void renderCSS()
 };
 /*------------------------------------------------------------------------------
 
-@name       setProperties - set properties
+@name       setId - set id
                                                                               */
                                                                              /**
-            Set properties.
+            Set id.
 
 @return     void
 
-@return     props     properties
+@param      id    new id value
 
-@history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
 
                                                                               */
 //------------------------------------------------------------------------------
-protected void setProperties(
-   P props)
+protected void setId(
+   String id)
 {
-   this.props = props;
 }
 /*------------------------------------------------------------------------------
 

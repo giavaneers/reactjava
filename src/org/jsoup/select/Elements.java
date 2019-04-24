@@ -199,7 +199,7 @@ public class Elements extends ArrayList<Element> {
      * Get the combined text of all the matched elements.
      * <p>
      * Note that it is possible to get repeats if the matched elements contain both parent elements and their own
-     * children, as the Element.text() method returns the combined text of a parent and all its children.
+     * children, as the ReactElement.text() method returns the combined text of a parent and all its children.
      * @return string of all text: unescaped and no HTML.
      * @see org.jsoup.nodes.Element#text()
      * @see #eachText()
@@ -215,7 +215,7 @@ public class Elements extends ArrayList<Element> {
     }
 
     /**
-     Test if any matched Element has any text content, that is not just whitespace.
+     Test if any matched ReactElement has any text content, that is not just whitespace.
      @return true if any element has non-blank text content.
      @see org.jsoup.nodes.Element#hasText()
      */
@@ -470,7 +470,7 @@ public class Elements extends ArrayList<Element> {
     /**
      * Get the <i>nth</i> matched element as an Elements object.
      * <p>
-     * See also {@link #get(int)} to retrieve an Element.
+     * See also {@link #get(int)} to retrieve an ReactElement.
      * @param index the (zero-based) index of the element in the list to retain
      * @return Elements containing only the specified element, or, if that element did not exist, an empty list.
      */

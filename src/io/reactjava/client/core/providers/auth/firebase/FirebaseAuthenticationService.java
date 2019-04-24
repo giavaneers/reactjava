@@ -25,6 +25,9 @@ import elemental2.promise.Promise;
 import io.reactjava.client.core.providers.auth.IAuthenticationService;
 import io.reactjava.client.core.providers.auth.firebase
          .FirebaseAuthenticationService.Firebase.Auth;
+import io.reactjava.client.core.react.Configuration;
+import io.reactjava.client.core.react.IConfiguration;
+import io.reactjava.client.core.react.NativeObject;
 import io.reactjava.client.core.react.Properties;
 import io.reactjava.client.core.rxjs.observable.Observable;
 import io.reactjava.client.core.rxjs.observable.Subscriber;
@@ -37,10 +40,10 @@ import jsinterop.annotations.JsType;
 public class FirebaseAuthenticationService implements IAuthenticationService
 {
                                        // class constants --------------------//
-private static final Logger kLOGGER = Logger.newInstance();
+private static final Logger   kLOGGER = Logger.newInstance();
 
-public static final String  kKEY_APP  = "app";
-public static final String  kKEY_AUTH = "auth";
+public static final String    kKEY_APP  = "app";
+public static final String    kKEY_AUTH = "auth";
                                        // class variables ------------------- //
 protected static final String kINJECT_URL =
    "https://www.gstatic.com/firebasejs/4.6.1/firebase.js";
@@ -48,7 +51,7 @@ protected static final String kINJECT_URL =
                                        // public instance variables --------- //
                                        // (none)
                                        // protected instance variables -------//
-protected Properties props;            // properties                          //
+protected NativeObject props;            // properties                          //
                                        // private instance variables -------- //
                                        // (none)                              //
 /*------------------------------------------------------------------------------
@@ -72,7 +75,7 @@ protected Properties props;            // properties                          //
 public FirebaseAuthenticationService(
    Properties props)
 {
-   this.props = props;
+   this.props = props != null ? props.toNativeObject() : new NativeObject();
 }
 /*------------------------------------------------------------------------------
 
@@ -138,11 +141,11 @@ protected Observable configure(
    Observable<Auth> observable = Observable.create((Subscriber<Auth> subscriber) ->
    {
       Utilities.injectScriptOrCSS(
-         getProperties().getConfiguration(), kINJECT_URL, null,
+         getConfiguration(), kINJECT_URL, null,
          (Object response, Object reqToken) ->
          {
-            Properties config =
-               Properties.with(
+            NativeObject config =
+               NativeObject.with(
                   "apiKey",            apiKey,
                   "authDomain",        authDomain,
                   "databaseURL",       databaseURL,
@@ -153,8 +156,8 @@ protected Observable configure(
             Object rsp;
             try
             {
-               getProperties().set(kKEY_APP,  Firebase.initializeApp(config));
-               getProperties().set(kKEY_AUTH, Firebase.auth());
+               props().set(kKEY_APP,  Firebase.initializeApp(config));
+               props().set(kKEY_AUTH, Firebase.auth());
                rsp  = getAuth();
             }
             catch(Exception e)
@@ -245,7 +248,7 @@ public Observable<String> createUserWithEmailAndPassword(
 //------------------------------------------------------------------------------
 public JavaScriptObject getApp()
 {
-   return((JavaScriptObject)getProperties().get(kKEY_APP));
+   return((JavaScriptObject) props().get(kKEY_APP));
 }
 /*------------------------------------------------------------------------------
 
@@ -263,29 +266,32 @@ public JavaScriptObject getApp()
 //------------------------------------------------------------------------------
 public Auth getAuth()
 {
-   return((Auth)getProperties().get(kKEY_AUTH));
+   return((Auth) props().get(kKEY_AUTH));
 }
 /*------------------------------------------------------------------------------
 
-@name       getProperties - get properties
+@name       getConfiguration - get application configuration
                                                                               */
                                                                              /**
-            Get properties.
+            Get application configuration
 
-@return     properties
+@return     application configuration.
 
-@history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public Properties getProperties()
+@SuppressWarnings("unusable-by-js")
+public IConfiguration getConfiguration()
 {
-   if (props == null)
+   IConfiguration configuration = (IConfiguration)props().get("configuration");
+   if (configuration == null)
    {
-      props = new Properties();
+      configuration = Configuration.sharedInstance();
+      props().set("configuration", configuration);
    }
-   return(props);
+   return(configuration);
 }
 /*------------------------------------------------------------------------------
 
@@ -394,6 +400,28 @@ public final static native void initNative(
          $wnd.console.log(err.message);
       }
 }-*/;
+/*------------------------------------------------------------------------------
+
+@name       props - get properties
+                                                                              */
+                                                                             /**
+            Get properties.
+
+@return     properties
+
+@history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public NativeObject props()
+{
+   if (props == null)
+   {
+      props = new NativeObject();
+   }
+   return(props);
+}
 /*------------------------------------------------------------------------------
 
 @name       signInWithEmailAndPassword - sign in with email and password

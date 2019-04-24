@@ -618,7 +618,7 @@ public class HtmlTreeBuilder extends TreeBuilder {
     }
 
     private boolean isSameFormattingElement(Element a, Element b) {
-        // same if: same namespace, tag, and attributes. Element.equals only checks tag, might in future check children
+        // same if: same namespace, tag, and attributes. ReactElement.equals only checks tag, might in future check children
         return a.nodeName().equals(b.nodeName()) &&
                 // a.namespace().equals(b.namespace()) &&
                 a.attributes().equals(b.attributes());

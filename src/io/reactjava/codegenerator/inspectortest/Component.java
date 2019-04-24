@@ -16,9 +16,11 @@ notes:
 package io.reactjava.codegenerator.inspectortest;
                                        // imports --------------------------- //
 import elemental2.dom.DomGlobal;
-import elemental2.dom.Element;
 import elemental2.dom.Node;
+import io.reactjava.client.core.react.INativeEffectHandler;
 import io.reactjava.client.core.react.IUITheme;
+import io.reactjava.client.core.react.React;
+import io.reactjava.client.core.react.ReactElement;
 import java.util.Map;
 import java.util.function.Function;
                                        // Component ==========================//
@@ -29,13 +31,12 @@ public abstract class Component<P extends Properties>
                                        // class variables                     //
 protected static int nextId;
                                        // protected instance variables ------ //
-protected io.reactjava.client.core.react.Element
-                     renderElement;    // element to be rendered              //
-protected Function<Properties,io.reactjava.client.core.react.Element>
-                     componentFcn;     // component function                  //
-protected String     css;              // css                                 //
-protected P          props;            // component properties                //
-protected IUITheme theme;            // theme                               //
+protected ReactElement renderElement;  // element to be rendered              //
+protected Function<Properties, ReactElement>
+                       componentFcn;   // component function                  //
+protected String       css;            // css                                 //
+protected P            props;          // component properties                //
+protected IUITheme     theme;          // theme                               //
 
 /*------------------------------------------------------------------------------
 
@@ -86,10 +87,10 @@ public Component(P props)
 
                                                                               */
 //------------------------------------------------------------------------------
-public Element getDOMElement()
+public elemental2.dom.Element getDOMElement()
 {
-   String  elementId = getProperties().getString("id");
-   Element element   = DomGlobal.document.getElementById(elementId);
+   String                 elementId = props().getString("id");
+   elemental2.dom.Element element   = DomGlobal.document.getElementById(elementId);
    return(element);
 }
 /*------------------------------------------------------------------------------
@@ -107,16 +108,16 @@ public Element getDOMElement()
 
                                                                               */
 //------------------------------------------------------------------------------
-public Element getDOMParentElement()
+public elemental2.dom.Element getDOMParentElement()
 {
-   Element parent = null;
-   Element element = getDOMElement();
+   elemental2.dom.Element parent  = null;
+   elemental2.dom.Element element = getDOMElement();
    if (element != null)
    {
       Node parentNode = getDOMElement().parentNode;
-      if (parentNode instanceof Element)
+      if (parentNode instanceof elemental2.dom.Element)
       {
-         parent = (Element)parentNode;
+         parent = (elemental2.dom.Element)parentNode;
       }
    }
    else
@@ -168,25 +169,6 @@ protected static String getNextId()
 }
 /*------------------------------------------------------------------------------
 
-@name       getProperties - get props
-                                                                              */
-                                                                             /**
-            Get properties.
-
-@return     properties
-
-@history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-
-                                                                              */
-//------------------------------------------------------------------------------
-public P getProperties()
-{
-   return(props);
-}
-/*------------------------------------------------------------------------------
-
 @name       getTheme - get theme
                                                                               */
                                                                              /**
@@ -202,13 +184,32 @@ public P getProperties()
 //------------------------------------------------------------------------------
 public IUITheme getTheme()
 {
-   IUITheme theme = (IUITheme)getProperties().get("theme");
+   IUITheme theme = (IUITheme)props().get("theme");
    if (theme == null)
    {
       theme = IUITheme.defaultInstance();
-      getProperties().set("theme", theme);
+      props().set("theme", theme);
    }
    return(theme);
+}
+/*------------------------------------------------------------------------------
+
+@name       props - get props
+                                                                              */
+                                                                             /**
+            Get properties.
+
+@return     properties
+
+@history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public P props()
+{
+   return(props);
 }
 /*------------------------------------------------------------------------------
 
@@ -248,6 +249,28 @@ public void renderCSS()
 };
 /*------------------------------------------------------------------------------
 
+@name       setId - set id
+                                                                              */
+                                                                             /**
+            Set id.
+
+@return     void
+
+@param      id    new id value
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected void setId(
+   String id)
+{
+   props().set("id", id);
+}
+/*------------------------------------------------------------------------------
+
 @name       initialize - set properties
                                                                               */
                                                                              /**
@@ -285,5 +308,27 @@ protected void setProperties(
 //------------------------------------------------------------------------------
 public void update()
 {
+}
+/*------------------------------------------------------------------------------
+
+@name       useEffect - component side effect handler
+                                                                              */
+                                                                             /**
+            Effect hook handler similar to componentDidMount,
+            componentDidUpdate, and componentWillUnmount combined.
+
+@return     void
+
+@param      effectHandler     function to be invoked on effect
+
+@history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public void useEffect(
+   INativeEffectHandler effectHandler)
+{
+   React.useEffect(effectHandler);
 }
 }//====================================// end Component ----------------------//

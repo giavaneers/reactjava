@@ -15,7 +15,6 @@ notes:
                                        // package --------------------------- //
 package io.reactjava.client.core.react;
                                        // imports --------------------------- //
-import java.util.Collection;
 import java.util.function.Function;
                                        // IReactCodeGenerator ================//
 public interface IReactCodeGenerator
@@ -42,7 +41,7 @@ String kIMPORTED_STYLESHEETS_LIST = "importedStyleSheets.txt";
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-Element boot(String className);
+ReactElement boot(String className);
 
 /*------------------------------------------------------------------------------
 

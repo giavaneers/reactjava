@@ -31,7 +31,7 @@ public Object           type;          // type                                //
 public IConfiguration   configuration; // configuration                       //
 public P                props;         // properties                          //
 public String           value;         // value                               //
-public Element          childrenElem;  // children element                    //
+public ReactElement childrenElem;  // children element                    //
 public List<ElementDsc> children;      // children                            //
                                        // protected instance variables -------//
                                        // (none)                              //
@@ -93,7 +93,7 @@ public static <P extends Properties> ElementDsc create(
    ElementDsc    parent,
    Object        type,
    P             props,
-   Element       childrenElem)
+   ReactElement childrenElem)
 {
    ElementDsc dsc = create(parent, type, props, (ElementDsc[])null);
    dsc.childrenElem = childrenElem;
@@ -135,17 +135,17 @@ public static <P extends Properties> ElementDsc create(
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public static Element createElement(
+public static ReactElement createElement(
    ElementDsc root)
 {
-   List<Element> childList = new ArrayList<Element>();
+   List<ReactElement> childList = new ArrayList<ReactElement>();
    for (ElementDsc childDsc : (List<ElementDsc>)root.children)
    {
       childList.add(createElement(childDsc));
    }
-   Element[] children = childList.toArray(new Element[childList.size()]);
+   ReactElement[] children = childList.toArray(new ReactElement[childList.size()]);
 
-   Element element = null;
+   ReactElement element = null;
    try
    {
       if (root.type instanceof String)
@@ -159,7 +159,7 @@ public static Element createElement(
          {
             if (root.childrenElem != null)
             {
-               children = new Element[]{root.childrenElem};
+               children = new ReactElement[]{root.childrenElem};
             }
             element = ReactJava.createElement(type, root.props, children);
          }
@@ -186,6 +186,11 @@ public static Element createElement(
       {
          INativeComponentConstructor type = (INativeComponentConstructor)root.type;
          element = ReactJava.createElement(type, root.props, children);
+      }
+                                       // ensure an element id                //
+      if (element != null && element.props.getString("id") == null)
+      {
+         throw new IllegalStateException("ReactElement must have an id");
       }
    }
    catch(Exception e)
