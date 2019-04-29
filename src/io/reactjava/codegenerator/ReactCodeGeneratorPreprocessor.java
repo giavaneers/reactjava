@@ -41,8 +41,6 @@ public class ReactCodeGeneratorPreprocessor implements IPreprocessor
                                                                              /**
             Default constructor
 
-@return     An instance of ReactCodeGenerator if successful.
-
 @history    Mon Aug 28, 2017 10:30:00 (Giavaneers - LBM) created
 
 @notes

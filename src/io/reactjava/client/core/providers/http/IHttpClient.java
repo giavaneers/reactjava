@@ -104,9 +104,9 @@ IHttpClient setErrorReason(
                                                                              /**
             Set the specified response type.
 
-@return     null
+@return     http client
 
-@param      responseType      response type
+@param      method      method
 
 @history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
 
@@ -122,9 +122,9 @@ IHttpClient setMethod(
                                                                              /**
             Set the readyStateChanged listener.
 
-@return     void
+@return     this
 
-@param      handler     readyStateChanged listener
+@param      readyStateChangedListener     readyStateChanged listener
 
 @history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
 
@@ -237,9 +237,7 @@ IHttpClient setStatusText(
                                                                              /**
             Set that a timeout occurred.
 
-@return     void
-
-@param      timeout    'true'
+@return     this
 
 @history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
 
@@ -255,9 +253,9 @@ IHttpClient setTimeout();
                                                                              /**
             Set the specified response type.
 
-@return     void
+@return     this
 
-@param      responseType      response type
+@param      url      url
 
 @history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
 

@@ -87,11 +87,7 @@ protected static void addBaseTag()
 
 @return     Observable for boot completion
 
-@params     configuration     dependency injection and other configuration
-                              parameters
-@params     requestToken      request token
-@params     requestor         requestor, cannot use Observable interface here
-                              since reactiveX has not been loaded yet
+@param     app             app
 
 @history    Tue Aug 29, 2017 10:30:00 (Giavaneers - LBM) created
 
@@ -359,7 +355,6 @@ public static <P extends Properties> ReactElement createElement(
 
 @param      type        standard html tag
 @param      props       properties
-@param      children    child elements
 
 @history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -419,7 +414,8 @@ public static <P extends Properties> ReactElement createElement(
                                                                              /**
             Get native component.
 
-@return     native component
+@param      component      component
+@param      bUpdate        iff true, update
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -570,9 +566,7 @@ public static Map<String,String> getInjectedStylesheets()
                                                                              /**
             Convenience method to get whether is web platform.
 
-@return     void
-
-@param      configuration     configuration
+@return     true iff is web platform
 
 @history    Thu Sep 7, 2017 08:46:23 (LBM) created.
 
@@ -722,7 +716,9 @@ public static Function<Properties,IProvider> getProvider(
                                                                              /**
             Initialize.
 
-@return     void
+@param      configuration     configuration
+@param      requestToken      request token
+@param      requestor         requestor
 
 @history    Thu Sep 7, 2017 08:46:23 (LBM) created.
 

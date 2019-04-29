@@ -37,7 +37,9 @@ Class[] postprocessors =
                                                                              /**
             Process specified source.
 
-@return     processed source
+@param      logger                     logger
+@param      compilerContext            compiler context
+@param      precompilationContext      precompilation context
 
 @history    Sun Mar 16, 2014 10:30:00 (Giavaneers - LBM) created.
 
@@ -65,7 +67,9 @@ static void allPostprocessors(
                                                                              /**
             Process specified source.
 
-@return     processed source
+@param      logger                     logger
+@param      compilerContext            compiler context
+@param      precompilationContext      precompilation context
 
 @history    Sun Mar 16, 2014 10:30:00 (Giavaneers - LBM) created.
 

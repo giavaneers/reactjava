@@ -124,8 +124,6 @@ protected NativeObject props;            // properties                          
                                                                              /**
             Default constructor
 
-@return     An instance of HttpClientBase iff successful.
-
 @history    Wed Apr 27, 2016 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -142,11 +140,7 @@ public HttpClientBase()
                                                                              /**
             Constructor
 
-@return     An instance of HttpClientBase iff successful.
-
-@param      method            method
 @param      url               target url
-@param      bAsync            true iff async
 
 @history    Wed Apr 27, 2016 10:30:00 (Giavaneers - LBM) created
 
@@ -166,11 +160,7 @@ public HttpClientBase(
                                                                              /**
             Constructor
 
-@return     An instance of HttpClientBase iff successful.
-
-@param      method            method
-@param      url               target url
-@param      bAsync            true iff async
+@param      props            props
 
 @history    Wed Apr 27, 2016 10:30:00 (Giavaneers - LBM) created
 
@@ -547,10 +537,6 @@ public JsXMLHttpRequest getXHR()
                                                                              /**
             onStateChanged handler
 
-@return     void
-
-@param      request     HttpClientBase
-
 @history    Mon Aug 18, 2013 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -622,7 +608,7 @@ public NativeObject props()
                                                                              /**
             Send the request.
 
-@return     void
+@param      requestor      requestor
 
 @history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
 
@@ -737,9 +723,9 @@ public IHttpClientBase setErrorReason(
                                                                              /**
             Set the specified response type.
 
-@return     void
+@return     http client
 
-@param      responseType      response type
+@param      method      method
 
 @history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
 
@@ -758,9 +744,9 @@ public IHttpClientBase setMethod(
                                                                              /**
             Set the readyStateChanged listener.
 
-@return     void
+@return     http client
 
-@param      handler     readyStateChanged listener
+@param      readyStateChangedListener     readyStateChanged listener
 
 @history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
 
@@ -900,8 +886,6 @@ public IHttpClientBase setStatusText(
 
 @return     this
 
-@param      timeout    'true'
-
 @history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -919,9 +903,9 @@ public IHttpClientBase setTimeout()
                                                                              /**
             Set the specified response type.
 
-@return     void
+@return     this
 
-@param      responseType      response type
+@param      url      url
 
 @history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
 
@@ -1011,7 +995,7 @@ protected boolean               bLoading;
                                                                              /**
             Default constructor
 
-@return     An instance of DefaultReadyStateChangeListener iff successful
+@param      client      http client
 
 @history    Mon Aug 18, 2013 10:30:00 (Giavaneers - LBM) created
 
@@ -1047,10 +1031,6 @@ protected IHttpClientBase getClient()
                                                                               */
                                                                              /**
             onStateChanged handler
-
-@return     void
-
-@param      request     HttpClientBase
 
 @history    Mon Aug 18, 2013 10:30:00 (Giavaneers - LBM) created
 
@@ -1100,8 +1080,6 @@ public void onStateChanged()
                                                                               */
                                                                              /**
             processCompletion handler
-
-@return     void
 
 @history    Mon Aug 18, 2013 10:30:00 (Giavaneers - LBM) created
 
@@ -1195,11 +1173,6 @@ protected void processCompletion()
                                                                              /**
             Signal completion
 
-@return     void
-
-@param      response    response; either a String for responseText or a byte
-                        array for responseData if success, or null if error.
-
 @history    Mon Aug 18, 2013 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -1254,8 +1227,6 @@ public static class JsXMLHttpRequest
                                                                               */
                                                                              /**
             Clear onReadyStateChange handler.
-
-@return     void
 
 @history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
 
@@ -1433,7 +1404,9 @@ public native int getStatus();
                                                                              /**
             Open a connection to the specified method to the url.
 
-@return     void
+@param      method      method
+@param      url         url
+@param      isAsync     true iff asynchronous
 
 @history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
 
@@ -1451,7 +1424,7 @@ public native void open(String method, String url, boolean isAsync);
                                                                              /**
             Send the request.
 
-@return     void
+@param      data     data
 
 @history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
 
@@ -1469,7 +1442,7 @@ public native void send(Object data);
                                                                              /**
             Set onLoad handler.
 
-@return     void
+@param      handler     handler
 
 @history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
 
@@ -1486,7 +1459,7 @@ public native void setOnLoad(JsXMLHttpRequest.IOnLoadHandler handler);
                                                                              /**
             Set onReadyStateChange handler.
 
-@return     void
+@param      handler     handler
 
 @history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
 
@@ -1503,8 +1476,6 @@ public native void setOnreadystatechange(JsXMLHttpRequest.IReadyStateChangedHand
                                                                               */
                                                                              /**
             Set the specified request header.
-
-@return     void
 
 @param      headerName     request header name
 @param      value          request header value
@@ -1524,8 +1495,6 @@ public native void setRequestHeader(String headerName, String value);
                                                                               */
                                                                              /**
             Set the specified response type.
-
-@return     void
 
 @param      responseType      response type
 
@@ -1629,9 +1598,7 @@ public final class ReadyStateChangeHandler implements IReadyStateChangedHandler
                                                                              /**
             onStateChanged handler
 
-@return     void
-
-@param      request     HttpClientBase
+@param      evt     onStateChanged event
 
 @history    Mon Aug 18, 2013 10:30:00 (Giavaneers - LBM) created
 

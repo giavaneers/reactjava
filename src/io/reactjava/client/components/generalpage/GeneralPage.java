@@ -21,7 +21,9 @@ notes:
                                        // package --------------------------- //
 package io.reactjava.client.components.generalpage;
                                        // imports --------------------------- //
+import elemental2.dom.DomGlobal;
 import io.reactjava.client.components.generalpage.ContentPage.ContentDsc;
+import io.reactjava.client.components.generalpage.GeneralAppBar.AppBarDsc;
 import io.reactjava.client.core.react.Component;
 import io.reactjava.client.core.react.IUITheme;
 import io.reactjava.client.core.react.Properties;
@@ -33,8 +35,10 @@ import java.util.function.Consumer;
 public class GeneralPage<P extends Properties> extends Component
 {
                                        // class constants ------------------- //
+public static Properties   manifests;  // manifests map                       //
                                        // property keys                       //
 public static final String kKEY_MANIFEST = "manifest";
+public static final String kKEY_TITLE    = "title";
 
                                        // state variable name                 //
 public static final String kSTATE_ANCHOR = "anchor";
@@ -67,7 +71,9 @@ protected List<ContentDsc> getContent()
 {
    if (content == null)
    {
-      content = ContentDsc.parse(props().getString(kKEY_MANIFEST));
+      content =
+         ContentDsc.parse(
+            manifests.getString(props().getString(kKEY_MANIFEST)));
    }
    return(content);
 }
@@ -77,8 +83,6 @@ protected List<ContentDsc> getContent()
                                                                               */
                                                                              /**
             Initialize.
-
-@return     void
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -92,16 +96,46 @@ public Consumer<Map<String,Object>> openHandler = (Map<String,Object> args) ->
    setState(kSTATE_OPEN, bOpen);
 
    String id = (String)args.get("id");
-   setState(kSTATE_ANCHOR, id != null ? id : "");
+   if (id == null)
+   {
+      setState(kSTATE_ANCHOR, "");
+   }
+   else if (id.startsWith("path:"))
+   {
+      Router.push(id.substring(id.indexOf(':') + 1).trim());
+   }
+   else if (id.startsWith("http:") || id.startsWith("https:"))
+   {
+      DomGlobal.window.open(id, "_blank");
+   }
+   else
+   {
+      setState(kSTATE_ANCHOR, id);
+   }
 };
+/*------------------------------------------------------------------------------
+
+@name       manifests - get manifests
+                                                                              */
+                                                                             /**
+            Get map of manifest key to manifest value.
+
+@history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static Properties manifests()
+{
+   return(manifests);
+}
 /*------------------------------------------------------------------------------
 
 @name       render - render component
                                                                               */
                                                                              /**
             Render component.
-
-@return     void
 
 @history    Thu Feb 14, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -115,10 +149,16 @@ public void render()
 
    boolean          bOpen   = getStateBoolean(kSTATE_OPEN);
    List<ContentDsc> content = getContent();
+   String           title   = props().getString(kKEY_TITLE);
+   if (title == null)
+   {
+      title = "";
+   }
+   AppBarDsc appBarDsc = new AppBarDsc(title, bOpen, openHandler);
 /*--
    <div>
                                        <!-- App Bar --------------------------->
-      <GeneralAppBar open={bOpen} openHandler={openHandler}></GeneralAppBar>
+      <GeneralAppBar appbardsc={appBarDsc}></GeneralAppBar>
       <main class="layout">
                                        <!-- Content --------------------------->
          <ContentPage content={content}></ContentPage>
@@ -144,8 +184,6 @@ public void render()
                                                                               */
                                                                              /**
             Get component css.
-
-@return     void
 
 @history    Thu Feb 14, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -177,5 +215,25 @@ public void renderCSS()
       }
    }
 --*/
+}
+/*------------------------------------------------------------------------------
+
+@name       setManifests - assign manifests
+                                                                              */
+                                                                             /**
+            Assign map of manifest key to manifest value.
+
+@param      manifestsMap      map of manifest key to manifest value
+
+@history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static void setManifests(
+   Properties manifestsMap)
+{
+   manifests = manifestsMap;
 }
 }//====================================// end GeneralPage ====================//

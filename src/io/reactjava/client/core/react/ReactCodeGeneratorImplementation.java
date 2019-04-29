@@ -82,8 +82,6 @@ static
                                                                              /**
             Default constructor
 
-@return     An instance of ReactCodeGeneratorImplementation if successful.
-
 @history    Mon Aug 28, 2017 10:30:00 (Giavaneers - LBM) created
 
 @notes

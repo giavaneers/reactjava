@@ -32,7 +32,11 @@ import java.util.function.Function;
 public class ContentBody extends Component
 {
                                        // class constants ------------------- //
-                                       // protected instance variables -------//
+public static final String kKEY_ALIGN   = "align";
+public static final String kKEY_COLOR   = "color";
+public static final String kKEY_CONTENT = "content";
+public static final String kKEY_VARIANT = "variant";
+
                                        // class variables ------------------- //
                                        // (none)                              //
                                        // public instance variables --------- //
@@ -43,12 +47,37 @@ public class ContentBody extends Component
                                        // (none)                              //
 /*------------------------------------------------------------------------------
 
+@name       getVariant - get variant
+                                                                              */
+                                                                             /**
+            Get variant.
+
+@return     variant
+
+@param      props    properties
+
+@history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected String getVariant(
+   Properties props)
+{
+   String variant = props.getString(kKEY_VARIANT);
+   if (variant == null)
+   {
+      variant = "body";
+   }
+   return(variant);
+}
+/*------------------------------------------------------------------------------
+
 @name       render - render component
                                                                               */
                                                                              /**
             Render component.
-
-@return     void
 
 @history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -58,18 +87,46 @@ public class ContentBody extends Component
 //------------------------------------------------------------------------------
 public void render()
 {
-   Function<Properties, ReactElement> fcn = (props) ->
+   Function<Properties,ReactElement> fcn = (props) ->
    {
+      String keyVariant = "";
+      String valVariant = null;
+      if (props.getString(kKEY_VARIANT) != null)
+      {
+         keyVariant = kKEY_VARIANT;
+         valVariant = props.getString(kKEY_VARIANT);
+      }
+
+      String keyColor = "";
+      String valColor = null;
+      if (props.getString(kKEY_COLOR) != null)
+      {
+         keyColor = kKEY_COLOR;
+         valColor = props.getString(kKEY_COLOR);
+      }
+
+      String keyAlign = "";
+      String valAlign = null;
+      if (props.getString(kKEY_ALIGN) != null)
+      {
+         keyAlign = kKEY_ALIGN;
+         valAlign = props.getString(kKEY_ALIGN);
+      }
+
       ElementDsc root =
          ElementDsc.create(
             null, "Typography",
             Properties.with(
-               "component", "h1", "variant", "body1", "id", getNextId()));
+               "component", "h1",
+               keyVariant,  valVariant,
+               keyColor,    valColor,
+               keyAlign,    valAlign,
+               "id",        getNextId()));
 
-      List<ContentBody.ContentDsc> content =
-         ContentBody.ContentDsc.parse(props.getString("content"));
+      List<ContentBodyDsc> content =
+         ContentBodyDsc.parse(props.getString(kKEY_CONTENT));
 
-      for (ContentBody.ContentDsc dsc : content)
+      for (ContentBodyDsc dsc : content)
       {
          ElementDsc.create(
             root,
@@ -85,7 +142,7 @@ public void render()
 }
 /*==============================================================================
 
-name:       ContentDsc - content descriptor
+name:       ContentBodyDsc - content descriptor
 
 purpose:    Content descriptor
 
@@ -94,7 +151,7 @@ history:    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public static class ContentDsc
+public static class ContentBodyDsc
 {
                                        // constants ------------------------- //
                                        // markup delimiter                    //
@@ -111,62 +168,56 @@ public String       text;              // text                                //
 
 /*------------------------------------------------------------------------------
 
-@name       ContentDsc - default constructor
+@name       ContentBodyDsc - default constructor
                                                                               */
                                                                              /**
             Default constructor
-
-@return     An instance of ContentDsc if successful.
 
 @history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public ContentDsc()
+public ContentBodyDsc()
 {
    this("undefined", null, null);
 }
 /*------------------------------------------------------------------------------
 
-@name       ContentDsc - constructor for specified type and content
+@name       ContentBodyDsc - constructor for specified type and content
                                                                               */
                                                                              /**
             Constructor for specified type and content
 
-@return     An instance of ContentDsc if successful.
-
-@param      type        type
-@param      content     content
+@param      text        text
 
 @history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public ContentDsc(
+public ContentBodyDsc(
    String text)
 {
    this("span", null, text);
 }
 /*------------------------------------------------------------------------------
 
-@name       ContentDsc - constructor for specified type and content
+@name       ContentBodyDsc - constructor for specified type and content
                                                                               */
                                                                              /**
             Constructor for specified type and content
 
-@return     An instance of ContentDsc if successful.
-
-@param      type        type
-@param      content     content
+@param      tag      tag
+@param      atts     atts
+@param      text     text
 
 @history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public ContentDsc(
+public ContentBodyDsc(
    String   tag,
    String[] atts,
    String   text)
@@ -190,7 +241,7 @@ public ContentDsc(
 
                                                                               */
 //------------------------------------------------------------------------------
-public static List<ContentBody.ContentDsc> parse(
+public static List<ContentBodyDsc> parse(
    String raw)
 {
    if (raw == null)
@@ -198,7 +249,7 @@ public static List<ContentBody.ContentDsc> parse(
       throw new IllegalArgumentException("Raw may not be null");
    }
 
-   List<ContentDsc> content = new ArrayList<>();
+   List<ContentBodyDsc> content = new ArrayList<>();
    String[]         parts   = raw.split(kTOKEN_MARKUP);
 
    for (int i = 0; i < parts.length; i++)
@@ -209,7 +260,7 @@ public static List<ContentBody.ContentDsc> parse(
       {
          continue;
       }
-      content.add(bMarkup ? ContentDsc.parseMarkup(part) : new ContentDsc(part));
+      content.add(bMarkup ? ContentBodyDsc.parseMarkup(part) : new ContentBodyDsc(part));
    }
 
    return(content);
@@ -229,7 +280,7 @@ public static List<ContentBody.ContentDsc> parse(
 
                                                                               */
 //------------------------------------------------------------------------------
-public static ContentDsc parseMarkup(
+public static ContentBodyDsc parseMarkup(
    String markup)
 {
    int idxBeg = markup.indexOf('<');
@@ -267,7 +318,7 @@ public static ContentDsc parseMarkup(
 
    String text = idxEnd > 0 ? markup.substring(idxBeg, idxEnd) : null;
 
-   return(new ContentDsc(tag, atts, text));
+   return(new ContentBodyDsc(tag, atts, text));
 }
-}//====================================// end ContentDsc =====================//
+}//====================================// end ContentBodyDsc =================//
 }//====================================// end ContentBody ====================//

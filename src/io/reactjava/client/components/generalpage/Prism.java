@@ -42,8 +42,6 @@ public class Prism extends Component
                                                                              /**
             effect handler.
 
-@return     void
-
 @history    Wed Mar 20, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -64,8 +62,6 @@ public INativeEffectHandler handleEffect = (Object status) ->
                                                                               */
                                                                              /**
             Render markup.
-
-@return     void
 
 @history    Wed Mar 20, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -127,8 +123,6 @@ public static class PrismNative
                                                                              /**
             Default constructor
 
-@return     An instance of PrismNative if successful.
-
 @history    Wed Mar 20, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -143,8 +137,6 @@ private PrismNative()
                                                                               */
                                                                              /**
             Highlight all code elements.
-
-@return     void
 
 @history    Wed Mar 20, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -162,8 +154,6 @@ public static void highlightAll()
                                                                               */
                                                                              /**
             Highlight all code elements.
-
-@return     void
 
 @param      bAsync      iff true, asynchronous
 @param      callback    any callback
@@ -183,8 +173,6 @@ public static native void highlightAll(
                                                                               */
                                                                              /**
             Highlight all code elements of container.
-
-@return     void
 
 @param      container      target container
 
@@ -209,8 +197,6 @@ public static void highlightAllUnder(
                                                                              /**
             Highlight all code elements of container.
 
-@return     void
-
 @param      container      target container
 @param      bAsync         iff true, asynchronous
 @param      callback       any callback
@@ -232,11 +218,7 @@ public static native void highlightAllUnder(
                                                                              /**
             Highlight specified element.
 
-@return     void
-
 @param      element        target element
-@param      bAsync         iff true, asynchronous
-@param      callback       any callback
 
 @history    Wed Mar 20, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -256,9 +238,9 @@ public static void highlightElement(
                                                                              /**
             Highlight specified element.
 
-@return     void
-
 @param      element     target element
+@param      bAsync      target element
+@param      callback    target element
 
 @history    Wed Mar 20, 2019 10:30:00 (Giavaneers - LBM) created
 

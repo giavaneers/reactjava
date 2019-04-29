@@ -40,8 +40,6 @@ public static Collection<String> importedNodeModules = new ArrayList();
                                                                              /**
             AppComponentTemplate for specified properties
 
-@return     An instance of AppComponentTemplate if successful.
-
 @history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -59,8 +57,6 @@ public AppComponentTemplate()
                                                                               */
                                                                              /**
             AppComponentTemplate for specified properties
-
-@return     An instance of AppComponentTemplate if successful.
 
 @history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -113,8 +109,6 @@ protected Map<String,Class> getNavRoutes()
                                                                               */
                                                                              /**
             Standard main routine.
-
-@return     void
 
 @param      args     args[0] - platform specification
 

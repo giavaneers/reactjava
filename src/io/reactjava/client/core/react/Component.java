@@ -47,8 +47,6 @@ private   P                 props;     // private to approximate immutable    //
                                                                              /**
             Default constructor
 
-@return     An instance of Component if successful.
-
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -65,7 +63,7 @@ public Component()
                                                                              /**
             Constructor for specified properties
 
-@return     An instance of Component if successful.
+@param      props    props
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -83,8 +81,6 @@ public Component(P props)
                                                                              /**
             componentDidMount indication. This implementation is null.
 
-@return     void
-
 @history    Fri Mar 8, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -99,8 +95,6 @@ public void componentDidMount()
                                                                               */
                                                                              /**
             componentDidUpdate indication. This implementation is null.
-
-@return     void
 
 @history    Fri Mar 8, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -117,8 +111,6 @@ public void componentDidUpdate()
                                                                               */
                                                                              /**
             componentWillUnmount indication. This implementation is null.
-
-@return     void
 
 @history    Fri Mar 8, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -370,7 +362,7 @@ public IUITheme getTheme()
 
 @return     void
 
-@return     props     properties
+@param      props     properties
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -400,8 +392,6 @@ public P initialize(
                                                                              /**
             Initialize configuration.
 
-@return     void
-
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -420,8 +410,6 @@ protected void initConfiguration()
                                                                               */
                                                                              /**
             Initialize theme.
-
-@return     void
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -458,8 +446,6 @@ public P props()
                                                                              /**
             Render markup.
 
-@return     void
-
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
             Wed Oct 17, 2018 10:30:00 (Giavaneers - LBM) renamed per suggestion
                by Ethan Elshyeb.
@@ -478,8 +464,6 @@ public void render()
                                                                              /**
             Get component css.
 
-@return     void
-
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -495,8 +479,6 @@ public void renderCSS()
                                                                               */
                                                                              /**
             Set id.
-
-@return     void
 
 @param      id    new id value
 
@@ -522,9 +504,8 @@ protected void setId(
                                                                              /**
             Set theme.
 
-@return     theme
-
-@param      new theme
+@param      key      key
+@param      value    value
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -562,7 +543,7 @@ public void setState(
 
 @return     theme
 
-@param      new theme
+@param      theme     theme
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -582,8 +563,6 @@ public IUITheme setTheme(
                                                                               */
                                                                              /**
             Update component render.
-
-@return     void
 
 @history    Tue Aug 29, 2017 10:30:00 (Giavaneers - LBM) created
 
@@ -616,8 +595,6 @@ public void update()
             Effect hook handler similar to componentDidMount,
             componentDidUpdate, and componentWillUnmount combined.
 
-@return     void
-
 @param      effectHandler     function to be invoked on effect
 
 @history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
@@ -640,10 +617,8 @@ public void useEffect(
             value. This ReactJava implementation splits each attribute into a
             separate React state hook.
 
-@return     The specified initial state
-
-
-@param      state       initial state
+@param      key      key
+@param      value    value
 
 @history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -686,8 +661,6 @@ protected Map<String,Function> setters;// map of state variable setters       //
                                                                              /**
             Constructor
 
-@return     An instance of StateMgr if successful.
-
 @history    Mon Aug 28, 2017 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -727,8 +700,6 @@ protected Object getState(
                                                                               */
                                                                              /**
             Set state.
-
-@return     void
 
 @param      key      state variable name
 @param      value    new state variable value
@@ -775,10 +746,8 @@ protected void setState(
             value. This ReactJava implementation splits each attribute into a
             separate React state hook.
 
-@return     The specified initial state
-
-
-@param      state       initial state
+@param      key      state variable name
+@param      value    new state variable value
 
 @history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
 

@@ -414,8 +414,6 @@ public class Breakpoints extends NativeObject implements IBreakpoints
                                                                              /**
             Default constructor
 
-@return     An instance of Breakpoints if successful.
-
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -643,8 +641,6 @@ class DefaultInstance extends NativeObject implements IUITheme
                                                                               */
                                                                              /**
             Default constructor
-
-@return     An instance of DefaultInstance if successful.
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -3038,8 +3034,6 @@ int getStandard();
                                                                              /**
             Set complex.
 
-@return     void
-
 @param      complex     complex
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
@@ -3055,8 +3049,6 @@ void setComplex(int complex);
                                                                               */
                                                                              /**
             Set entering screen.
-
-@return     void
 
 @param      enteringScreen    entering screen
 
@@ -3074,8 +3066,6 @@ void setEnteringScreen(int enteringScreen);
                                                                              /**
             Set leaving screen.
 
-@return     void
-
 @param      leavingScreen    leaving screen
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
@@ -3091,8 +3081,6 @@ void setLeavingScreen(int leavingScreen);
                                                                               */
                                                                              /**
             Set short.
-
-@return     void
 
 @param      shortVal    short
 
@@ -3110,8 +3098,6 @@ void setShort(int shortVal);
                                                                              /**
             Set shorter.
 
-@return     void
-
 @param      shorter    shorter
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
@@ -3128,8 +3114,6 @@ void setShorter(int shorter);
                                                                              /**
             Set shortest.
 
-@return     void
-
 @param      shortest    shortest
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
@@ -3145,8 +3129,6 @@ void setShortest(int shortest);
                                                                               */
                                                                              /**
             Set standard.
-
-@return     standard
 
 @param      standard    standard
 
@@ -5614,8 +5596,6 @@ class Mixins extends NativeObject implements IMixins
                                                                              /**
             Default constructor
 
-@return     An instance of Mixins if successful.
-
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -5689,8 +5669,6 @@ public static class Toolbar extends NativeObject implements IToolbar
                                                                              /**
             Default constructor
 
-@return     An instance of Toolbar if successful.
-
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -5748,8 +5726,6 @@ class Palette extends NativeObject implements IPalette
                                                                               */
                                                                              /**
             Default constructor
-
-@return     An instance of Palette if successful.
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -6073,8 +6049,6 @@ public static class Action extends NativeObject implements IAction
                                                                              /**
             Default constructor
 
-@return     An instance of Action if successful.
-
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -6227,8 +6201,6 @@ public static class Background extends NativeObject implements IBackground
                                                                              /**
             Default constructor
 
-@return     An instance of Background if successful.
-
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -6304,8 +6276,6 @@ public static class Colors extends NativeObject implements IColors
                                                                               */
                                                                              /**
             Default constructor
-
-@return     An instance of Colors if successful.
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -6417,8 +6387,6 @@ public static class Common extends NativeObject implements ICommon
                                                                              /**
             Default constructor
 
-@return     An instance of Common if successful.
-
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -6495,8 +6463,6 @@ public static class Error extends Colors implements IError
                                                                              /**
             Default constructor
 
-@return     An instance of Error if successful.
-
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -6538,8 +6504,6 @@ public static class Greys extends NativeObject implements IGreys
                                                                               */
                                                                              /**
             Default constructor
-
-@return     An instance of Greys if successful.
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -6845,8 +6809,6 @@ public static class Primary extends Colors implements IPrimary
                                                                              /**
             Default constructor
 
-@return     An instance of Primary if successful.
-
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -6889,8 +6851,6 @@ public static class Secondary extends Colors implements ISecondary
                                                                              /**
             Default constructor
 
-@return     An instance of Secondary if successful.
-
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -6932,8 +6892,6 @@ public static class Text extends Colors implements IText
                                                                               */
                                                                              /**
             Default constructor
-
-@return     An instance of Text if successful.
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -7050,8 +7008,6 @@ class Shadows extends NativeObject implements IShadows
                                                                              /**
             Default constructor
 
-@return     An instance of Shadows if successful.
-
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -7108,8 +7064,6 @@ class Shape extends NativeObject implements IShape
                                                                               */
                                                                              /**
             Default constructor
-
-@return     An instance of Shape if successful.
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -7168,8 +7122,6 @@ class Spacing extends NativeObject implements ISpacing
                                                                              /**
             Default constructor
 
-@return     An instance of Spacing if successful.
-
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -7226,8 +7178,6 @@ public static class Transitions extends NativeObject implements ITransitions
                                                                               */
                                                                              /**
             Default constructor
-
-@return     An instance of Transitions if successful.
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -7342,8 +7292,6 @@ public static class Duration extends NativeObject implements IDuration
                                                                               */
                                                                              /**
             Default constructor
-
-@return     An instance of Duration if successful.
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -7495,8 +7443,6 @@ public int getStandard()
                                                                              /**
             Set complex.
 
-@return     void
-
 @param      complex     complex
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
@@ -7515,8 +7461,6 @@ public void setComplex(
                                                                               */
                                                                              /**
             Set entering screen.
-
-@return     void
 
 @param      enteringScreen    entering screen
 
@@ -7537,8 +7481,6 @@ public void setEnteringScreen(
                                                                              /**
             Set leaving screen.
 
-@return     void
-
 @param      leavingScreen    leaving screen
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
@@ -7557,8 +7499,6 @@ public void setLeavingScreen(
                                                                               */
                                                                              /**
             Set short.
-
-@return     void
 
 @param      shortVal    short
 
@@ -7579,8 +7519,6 @@ public void setShort(
                                                                              /**
             Set shorter.
 
-@return     void
-
 @param      shorter    shorter
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
@@ -7600,8 +7538,6 @@ public void setShorter(
                                                                              /**
             Set shortest.
 
-@return     void
-
 @param      shortest    shortest
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
@@ -7620,8 +7556,6 @@ public void setShortest(
                                                                               */
                                                                              /**
             Set standard.
-
-@return     standard
 
 @param      standard    standard
 
@@ -7664,8 +7598,6 @@ public static class Easing extends NativeObject implements IEasing
                                                                               */
                                                                              /**
             Default constructor
-
-@return     An instance of Easing if successful.
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -7781,8 +7713,6 @@ public static class Typography extends NativeObject implements ITypography
                                                                               */
                                                                              /**
             Default constructor
-
-@return     An instance of Typography if successful.
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -8429,8 +8359,6 @@ public static class Body1 extends TypoLetterSpacing implements IBody1
                                                                              /**
             Default constructor
 
-@return     An instance of Body1 if successful.
-
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -8474,8 +8402,6 @@ public static class Body1Next extends TypoLetterSpacing implements IBody1Next
                                                                               */
                                                                              /**
             Default constructor
-
-@return     An instance of Body1Next if successful.
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -8521,8 +8447,6 @@ public static class Body2 extends TypoLetterSpacing implements IBody2
                                                                              /**
             Default constructor
 
-@return     An instance of Body2 if successful.
-
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -8567,8 +8491,6 @@ public static class Body2Next extends TypoLetterSpacing implements IBody2Next
                                                                              /**
             Default constructor
 
-@return     An instance of Body2Next if successful.
-
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -8612,8 +8534,6 @@ public static class Button extends TypoLetterSpacingTextTransform implements IBu
                                                                               */
                                                                              /**
             Default constructor
-
-@return     An instance of Button if successful.
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -8660,8 +8580,6 @@ public static class ButtonNext extends TypoLetterSpacingTextTransform implements
                                                                              /**
             Default constructor
 
-@return     An instance of ButtonNext if successful.
-
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -8707,8 +8625,6 @@ public static class Caption extends TypoLetterSpacing implements ICaption
                                                                              /**
             Default constructor
 
-@return     An instance of Caption if successful.
-
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -8752,8 +8668,6 @@ public static class CaptionNext extends TypoLetterSpacing implements ICaptionNex
                                                                               */
                                                                              /**
             Default constructor
-
-@return     An instance of CaptionNext if successful.
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -8799,8 +8713,6 @@ public static class Display1 extends TypoBase implements IDisplay1
                                                                              /**
             Default constructor
 
-@return     An instance of Display1 if successful.
-
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -8843,8 +8755,6 @@ public static class Display2 extends TypoMarginLeft implements IDisplay2
                                                                               */
                                                                              /**
             Default constructor
-
-@return     An instance of Display2 if successful.
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -8890,8 +8800,6 @@ public static class Display3
                                                                               */
                                                                              /**
             Default constructor
-
-@return     An instance of Display3 if successful.
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -8939,8 +8847,6 @@ public static class Display4
                                                                              /**
             Default constructor
 
-@return     An instance of Display4 if successful.
-
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -8986,8 +8892,6 @@ public static class H1 extends TypoLetterSpacing implements IH1
                                                                              /**
             Default constructor
 
-@return     An instance of H1 if successful.
-
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -9031,8 +8935,6 @@ public static class H2 extends TypoLetterSpacing implements IH2
                                                                               */
                                                                              /**
             Default constructor
-
-@return     An instance of H2 if successful.
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -9078,8 +8980,6 @@ public static class H3 extends TypoLetterSpacing implements IH3
                                                                              /**
             Default constructor
 
-@return     An instance of H3 if successful.
-
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -9123,8 +9023,6 @@ public static class H4 extends TypoLetterSpacing implements IH4
                                                                               */
                                                                              /**
             Default constructor
-
-@return     An instance of H4 if successful.
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -9170,8 +9068,6 @@ public static class H5 extends TypoLetterSpacing implements IH5
                                                                              /**
             Default constructor
 
-@return     An instance of H5 if successful.
-
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -9215,8 +9111,6 @@ public static class H6 extends TypoLetterSpacing implements IH6
                                                                               */
                                                                              /**
             Default constructor
-
-@return     An instance of H6 if successful.
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -9262,8 +9156,6 @@ public static class Headline extends TypoBase implements IHeadline
                                                                              /**
             Default constructor
 
-@return     An instance of Headline if successful.
-
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -9307,8 +9199,6 @@ public static class Overline
                                                                               */
                                                                              /**
             Default constructor
-
-@return     An instance of Overline if successful.
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -9355,8 +9245,6 @@ public static class Subheading extends TypoBase implements ISubheading
                                                                              /**
             Default constructor
 
-@return     An instance of Subheading if successful.
-
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -9399,8 +9287,6 @@ public static class Subtitle1 extends TypoLetterSpacing implements ISubtitle1
                                                                               */
                                                                              /**
             Default constructor
-
-@return     An instance of Subtitle1 if successful.
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -9446,8 +9332,6 @@ public static class Subtitle2 extends TypoLetterSpacing implements ISubtitle2
                                                                              /**
             Default constructor
 
-@return     An instance of Subtitle2 if successful.
-
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -9492,8 +9376,6 @@ public static class Title extends TypoBase implements ITitle
                                                                              /**
             Default constructor
 
-@return     An instance of Title if successful.
-
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -9536,8 +9418,6 @@ public static class TypoBase extends NativeObject implements ITypoBase
                                                                               */
                                                                              /**
             Default constructor
-
-@return     An instance of TypoBase if successful.
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -9667,8 +9547,6 @@ public static class TypoMarginLeft extends TypoBase implements ITypoMarginLeft
                                                                              /**
             Default constructor
 
-@return     An instance of TypoMarginLeft if successful.
-
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -9724,8 +9602,6 @@ public static class TypoLetterSpacing extends TypoBase implements ITypoLetterSpa
                                                                               */
                                                                              /**
             Default constructor
-
-@return     An instance of TypoLetterSpacing if successful.
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -9784,8 +9660,6 @@ public static class TypoMarginLeftLetterSpacing
                                                                              /**
             Default constructor
 
-@return     An instance of TypoMarginLeftLetterSpacing if successful.
-
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -9842,8 +9716,6 @@ public static class TypoLetterSpacingTextTransform
                                                                               */
                                                                              /**
             Default constructor
-
-@return     An instance of TypoLetterSpacingTextTransform if successful.
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -9913,8 +9785,6 @@ int    kVAL_Z_INDEX_MOBILE_TOOLTIP  = 1500;
                                                                               */
                                                                              /**
             Default constructor
-
-@return     An instance of ZIndex if successful.
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 

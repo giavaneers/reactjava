@@ -48,8 +48,6 @@ public class AppComponentTemplate<P extends Properties>
                                                                              /**
             AppComponentTemplate for specified properties
 
-@return     An instance of AppComponentTemplate if successful.
-
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -65,8 +63,6 @@ public AppComponentTemplate()
                                                                               */
                                                                              /**
             AppComponentTemplate for specified properties
-
-@return     An instance of AppComponentTemplate if successful.
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -201,8 +197,6 @@ protected Map<String,Class> getNavRoutes()
                                                                              /**
             Initialize configuration. This implementation is null.
 
-@return     void
-
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -222,8 +216,6 @@ protected void initConfiguration()
                                                                               */
                                                                              /**
             Standard core entry point method.
-
-@return     void
 
 @history    Sun Jan 7, 2016 10:30:00 (Giavaneers - LBM) created
 

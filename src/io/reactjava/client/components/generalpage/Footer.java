@@ -71,8 +71,6 @@ public static final FooterDsc[] kFOOTERS =
                                                                              /**
             Render component.
 
-@return     void
-
 @history    Thu Feb 14, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -118,8 +116,6 @@ public void render()
                                                                               */
                                                                              /**
             Get component css.
-
-@return     void
 
 @history    Thu Feb 14, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -177,8 +173,6 @@ public String[] descriptions;          // descriptions                        //
                                                                              /**
             Default constructor
 
-@return     An instance of FooterDsc if successful.
-
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -193,8 +187,6 @@ public FooterDsc()
                                                                               */
                                                                              /**
             Constructor for specified title and descriptions
-
-@return     An instance of FooterDsc if successful.
 
 @param      title             title
 @param      descriptions      array of descriptions

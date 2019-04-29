@@ -118,10 +118,6 @@ Observable<String> signOut();
                                                                              /**
             Unit test for either the callback or promise interface.
 
-@return     void
-
-@param      bUsePromise    iff true, use promise interface
-
 @history    Sat Oct 21, 2017 10:30:00 (Giavaneers - LBM) created
 
 @notes

@@ -131,7 +131,7 @@ static
 
 @return     void
 
-@param      hash     hash
+@param      descriptor     descriptor
 
 @history    Thu Dec 13, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -236,12 +236,96 @@ public static IConfiguration getConfiguration()
 }
 /*------------------------------------------------------------------------------
 
+@name       getHash - get current location hash
+                                                                              */
+                                                                             /**
+            Get current location hash.
+
+@return     current location hash
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static String getHash()
+{
+                                       // path is of the form                 //
+                                       // urlPath#routePath]anchorElementId   //
+                                       // for example:                        //
+                                       // "HelloWorld.html#HelloPage]top"     //
+   String hash = Window.Location.getHash();
+
+                                       // entry via Router.push() may present //
+                                       // encoding by the browser, for example//
+                                       // '#RoutingReactJava.html#A]top'      //
+                                       // ->'#RoutingReactJava.html%23A%5Btop'//
+   if (hash.startsWith("#"))
+   {
+      hash = hash.substring(1);
+   }
+   hash = hash.replace("%23","#").replace("%5D","]").replace("%7D","}");
+
+   String[] hashSplits = hash.split("#");
+   if (hashSplits.length > 1)
+   {
+      hash = hashSplits[1];
+   }
+   return(hash);
+}
+/*------------------------------------------------------------------------------
+
+@name       getHashAnchorElementId - get anchor element id from current hash
+                                                                              */
+                                                                             /**
+            Get anchor element id from current hash.
+
+@return     anchor element id from current hash or null if none.
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static String getHashAnchorElementId()
+{
+   String   anchorElementId = null;
+   String[] bracketSplits   = getHash().split("\\]");
+   if (bracketSplits.length > 1)
+   {
+      anchorElementId = bracketSplits[1];
+   }
+   return(anchorElementId);
+}
+/*------------------------------------------------------------------------------
+
+@name       getPath - get current location path
+                                                                              */
+                                                                             /**
+            Get current location path.
+
+@return     current location path
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static String getPath()
+{
+   String[] bracketSplits = getHash().split("\\]");
+   String   path          = bracketSplits[0];
+   return(path);
+}
+/*------------------------------------------------------------------------------
+
 @name       goBack - go back one location
                                                                               */
                                                                              /**
             Go back one location.
-
-@return     void
 
 @history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -259,8 +343,6 @@ public static void goBack()
                                                                              /**
             Go forward one location.
 
-@return     void
-
 @history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -276,8 +358,6 @@ public static void goForward()
                                                                               */
                                                                              /**
             Push specified path.
-
-@return     void
 
 @param      path     path
 
@@ -331,38 +411,22 @@ public static ReactElement render(
 //------------------------------------------------------------------------------
 public static ReactElement render()
 {
-                                       // path is of the form                 //
-                                       // urlPath#routePath]anchorElementId   //
-                                       // for example:                        //
-                                       // "HelloWorld.html#HelloPage]top"     //
-   String hash = Window.Location.getHash();
+   String  path        = getPath();
+   boolean bNewElement = !".".equals(path);
 
-                                       // entry via Router.push() may present //
-                                       // encoding by the browser, for example//
-                                       // '#RoutingReactJava.html#A]top'      //
-                                       // ->'#RoutingReactJava.html%23A%5Btop'//
-   if (hash.startsWith("#"))
-   {
-      hash = hash.substring(1);
-   }
-   hash = hash.replace("%23","#").replace("%5D","]");
-
-   String[] hashSplits = hash.split("#");
-   if (hashSplits.length > 1)
-   {
-      hash = hashSplits[1];
-   }
-                                       // split off any anchor elementId      //
-   String[] bracketSplits = hash.split("\\]");
-   String   path          = bracketSplits[0];
-   boolean  bNewElement   = !".".equals(path);
-   ReactElement element       = bNewElement ? elementForPath(path) : null;
-
+   ReactElement element = bNewElement ? elementForPath(path) : null;
    if (bNewElement && element == null)
    {
-      kLOGGER.logError(
-         "Router.render(): no element to render."
-       + " Did you forget to specify a route for hash value \"" + hash + "\"?");
+      kLOGGER.logWarning(
+         "Router.render(): no element to render for hash value "
+       + "\"" + getHash() + "\""
+       + ", using default path");
+
+      element = elementForPath("");
+   }
+   if (bNewElement && element == null)
+   {
+      kLOGGER.logError("Router.render(): no element to render for default path");
    }
    else if (ReactJava.getIsWebPlatform())
    {
@@ -370,10 +434,12 @@ public static ReactElement render()
       {
          ReactDOM.render(element, DomGlobal.document.getElementById("root"));
       }
-      if (bracketSplits.length > 1)
+
+      String anchorElementId = getHashAnchorElementId();
+      if (anchorElementId != null)
       {
                                     // scroll to specified anchor element  //
-         scrollIntoView(bracketSplits[1], 0);
+         scrollIntoView(anchorElementId, 0);
       }
       else
       {
@@ -394,8 +460,6 @@ public static ReactElement render()
                                                                               */
                                                                              /**
             Replace with specified path.
-
-@return     void
 
 @param      path     path
 
@@ -418,8 +482,6 @@ public static void replace(String path)
             waits up to 1 second for the specified element to be found in the
             DOM. If it finds it, it scrolls to make the specified element
             visible.
-
-@return     void
 
 @param      elementId      element id
 @param      vOffset        vertical offset, for example: '10px'

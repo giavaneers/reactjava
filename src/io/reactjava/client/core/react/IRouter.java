@@ -63,6 +63,8 @@ static Map<String,Object> descriptorForHash(
 
          if (!hashToken.equals(pathToken))
          {
+            hashToken = hashToken.replace("}","/");
+
             if (pathToken.startsWith(":"))
             {
                String key = pathToken.substring(1).trim();
@@ -114,8 +116,6 @@ static Map<String,Object> descriptorForHash(
                                                                               */
                                                                              /**
             Standard main routine.
-
-@return     void
 
 @param      args     args[0] - platform specification
 

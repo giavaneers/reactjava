@@ -45,8 +45,6 @@ protected IUITheme     theme;          // theme                               //
                                                                              /**
             Default constructor
 
-@return     An instance of Component if successful.
-
 @history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -61,8 +59,6 @@ public Component()
                                                                               */
                                                                              /**
             Constructor for specified properties
-
-@return     An instance of Component if successful.
 
 @history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -218,8 +214,6 @@ public P props()
                                                                              /**
             Render markup.
 
-@return     void
-
 @history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -236,8 +230,6 @@ public void render()
                                                                              /**
             Get component css.
 
-@return     void
-
 @history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -253,8 +245,6 @@ public void renderCSS()
                                                                               */
                                                                              /**
             Set id.
-
-@return     void
 
 @param      id    new id value
 
@@ -276,9 +266,7 @@ protected void setId(
                                                                              /**
             Set properties.
 
-@return     void
-
-@return     props     properties
+@param      props     properties
 
 @history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -298,8 +286,6 @@ protected void setProperties(
                                                                              /**
             Update component render.
 
-@return     void
-
 @history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -316,8 +302,6 @@ public void update()
                                                                              /**
             Effect hook handler similar to componentDidMount,
             componentDidUpdate, and componentWillUnmount combined.
-
-@return     void
 
 @param      effectHandler     function to be invoked on effect
 

@@ -67,8 +67,6 @@ protected List<String> getImportedNodeModules()
                                                                              /**
             Render component.
 
-@return     void
-
 @history    Thu Feb 14, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes

@@ -64,7 +64,9 @@ public static final String[] kPROXIES =
                                                                              /**
             Get imported node modules.
 
-@return     collection of node module names
+@param      classpath         classpath
+@param      appClassnames     app classname
+@param      logger            logger
 
 @history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -161,8 +163,9 @@ public static String getCompileClasspath()
 
 @return     collection of node module names to be imported by the target app.
 
-@param      appClasses     map of JClassType by simple classname for each of
-                           the custom classes of the target app.
+@param      appClassname      app classname
+@param      appTypes          app types
+@param      logger            logger
 
 @history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -217,7 +220,8 @@ public static Collection<String> getImportedModules(
 
 @return     collection of node module names
 
-@param      collection of node module names
+@param      appClassnames     app classnames
+@param      logger            logger
 
 @history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -283,8 +287,6 @@ public static Collection<String> getImportedModules(
                                                                               */
                                                                              /**
             Standard main routine.
-
-@return     void
 
 @param      args     args[0] - platform specification
 

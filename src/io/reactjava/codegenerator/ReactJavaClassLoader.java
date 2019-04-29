@@ -39,7 +39,8 @@ public class ReactJavaClassLoader extends URLClassLoader
                                                                              /**
             Create a new ReactJavaClassLoader instance. 
 
-@return     An instance of ReactJavaClassLoader if successful. 
+@param      urls     urls
+@param      parent   parent class loader
 
 @history    Mon Jan 08, 2019 10:30:00 (Giavaneers - LBM) created.
 

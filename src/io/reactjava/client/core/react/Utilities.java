@@ -64,8 +64,6 @@ protected static List<String>       injectedRsrcURLs;
                                                                              /**
             Default constructor
 
-@return     An instance of Utilities if successful.
-
 @history    Mon Aug 28, 2017 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -230,7 +228,7 @@ public static void createScriptByPath(
 
 @return     compressed device data record from byte array representation .
 
-@param      bytes     compressed byte array
+@param      compressed     compressed byte array
 
 @history    Mon May 09, 2016 08:46:23 (LBM) created.
 
@@ -288,7 +286,7 @@ public static byte[] fromInflaterFiltered(
 
 @return     compressed device data record from byte array representation .
 
-@param      bytes     compressed byte array
+@param      compressed     compressed byte array
 
 @history    Mon May 09, 2016 08:46:23 (LBM) created.
 
@@ -440,11 +438,10 @@ public static List<String> getInjectedRsrcURLs()
                                                                              /**
             Get primitive boolean property value
 
-@return     void
+@return     boolean value
 
 @param      properties     properties instance
 @param      key            property name
-@param      value          primitive int property value
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -464,11 +461,10 @@ public static native boolean getObjectBooleanValueNative(
                                                                              /**
             Get primitive double property value
 
-@return     void
+@return     primitive double property value
 
 @param      properties     properties instance
 @param      key            property name
-@param      value          primitive double property value
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -488,11 +484,10 @@ public static native double getObjectDoubleValueNative(
                                                                              /**
             Get primitive int property value
 
-@return     void
+@return     primitive int property value
 
 @param      properties     properties instance
 @param      key            property name
-@param      value          primitive int property value
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -512,10 +507,7 @@ public static native int getObjectIntValueNative(
                                                                              /**
             Standard core entry point method.
 
-@return     void
-
-@param      requestToken      client request token
-@param      requestor         client requestor
+@param      url      url
 
 @history    Sun Jan 7, 2016 10:30:00 (Giavaneers - LBM) created
 
@@ -534,10 +526,9 @@ public static void injectCSS(
                                                                              /**
             Standard core entry point method.
 
-@return     void
-
-@param      requestToken      client request token
-@param      requestor         client requestor
+@param      linkURL      linkURL
+@param      rel            rel
+@param      type         type
 
 @history    Sun Jan 7, 2016 10:30:00 (Giavaneers - LBM) created
 
@@ -580,8 +571,6 @@ public static void injectLink(
                                                                               */
                                                                              /**
             Inject lazily loaded compressed resource into the top window.
-
-@return     void
 
 @param      rsrcURL        resource url
 @param      callback       callback
@@ -659,9 +648,8 @@ public static void injectResourceLoadLazyCompressed(
                                                                              /**
             Inject script packaged as a resource into the top window.
 
-@return     void
-
 @param      scriptURL      script url
+@param      bCompress      true iff should compress
 @param      callback       callback
 
 @history    Sun Jan 7, 2016 10:30:00 (Giavaneers - LBM) created
@@ -710,8 +698,6 @@ public static void injectScriptAsResource(
                                                                              /**
             Inject lazily loaded compressed script into the top window.
 
-@return     void
-
 @param      scriptURL      script url
 @param      callback       callback
 
@@ -732,8 +718,6 @@ public static void injectScriptLoadLazyCompressed(
                                                                               */
                                                                              /**
             Inject lazily loaded uncompressed script into the top window.
-
-@return     void
 
 @param      scriptURL      script url
 @param      callback       callback
@@ -770,8 +754,8 @@ public static void injectScriptLoadLazyUncompressed(
                                                                              /**
             Standard core entry point method.
 
-@return     void
-
+@param      configuration     configuration
+@param      scriptURL         script url
 @param      requestToken      client request token
 @param      requestor         client requestor
 
@@ -797,8 +781,6 @@ public static void injectScriptOrCSS(
                                                                               */
                                                                              /**
             Inject preloaded script into the top window.
-
-@return     void
 
 @param      scriptURL      script url
 @param      callback       callback
@@ -832,11 +814,11 @@ public static void injectScriptPreloaded(
                                                                              /**
             Inject the specified scripts and css into the top window.
 
-@return     void
-
-@params     configuration     dependency injection and other configuration
+@param      configuration     dependency injection and other configuration
                               parameters
-@param      subscriber        subscriber on completion
+@param      injectCustom      custom inject
+@param      requestToken      client request token
+@param      requestor         client requestor
 
 @history    Sun Jan 7, 2016 10:30:00 (Giavaneers - LBM) created
 

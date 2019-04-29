@@ -366,9 +366,7 @@ protected static GoogleCloudStorageManagerBase gcsManager;
                                                                              /**
             Ensure package.json contains specified platform.
 
-@return     void
-
-@params     platform    platform specification
+@param      platform    platform specification
 
 @history    Sat Aug 11, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -518,8 +516,6 @@ public static File browserifyInitialize(
             Generate the enhanced core-codeserver.jar from the existing, adding
             the reactjava.jar contents.
 
-@return     void
-
 @history    Sun Dec 23, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -572,8 +568,6 @@ public static void buildGWTCodeServerJar()
                                                                              /**
             Generate the enhanced core-dev.jar from the existing, adding the
             reactjava.jar contents.
-
-@return     void
 
 @history    Sun Dec 23, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -646,8 +640,6 @@ public static void buildGWTDevJar()
                                                                              /**
             Generate reactjava.jar
 
-@return     void
-
 @history    Sun Dec 23, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -711,8 +703,6 @@ public static void buildReactJavaJar()
                                                                              /**
             Generate reactjava.jar and the enhanced core-dev.jar
 
-@return     void
-
 @history    Sun Dec 23, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -729,8 +719,6 @@ public static void buildRelease()
                                                                               */
                                                                              /**
             Delete output directory to clean.
-
-@return     void
 
 @history    Sat Aug 11, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -782,9 +770,8 @@ public static File copyGWTReleaseViaGCS(
                                                                              /**
             Copy project template.
 
-@return     new project folder
-
-@param      projectName    new project name
+@param      url    url
+@param      dst    dst
 
 @history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -817,9 +804,10 @@ private static void copyFile(
                                                                              /**
             Copy project template.
 
-@return     new project folder
-
-@param      projectName    new project name
+@param      src                  src path
+@param      dst                  dst path
+@param      bDeleteExisting      iff true, delete existing
+@param      replaceMap           replacement map
 
 @history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -881,11 +869,11 @@ private static void copyFile(
                                                                              /**
             Copy files from src to dst
 
-@return     void
-
-@param      src      src file or directory
-@param      dst      dst file or directory
-@param      filter   if non-null, list of file ancestors to be copied
+@param      srcPath              src path
+@param      dstPath              dst path
+@param      filter               if non-null, file ancestors to be copied
+@param      bDeleteExisting      iff true, delete existing
+@param      replaceMap           replacement map
 
 @history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -983,7 +971,8 @@ public static File copyNativeProjectSupport(
 
 @return     new project folder
 
-@param      projectName    new project name
+@param      projectDir     new project directory
+@param      bUpdate        iff true, update
 
 @history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -1066,7 +1055,8 @@ public static File copyProjectTemplate(
 
 @return     project directory
 
-@param      projectDir     project directory
+@param      dstDir     destination directory
+@param      version    version
 
 @history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -1282,7 +1272,7 @@ public static File createLocalTempFile(
                                                                              /**
             Standard main routine
 
-@return     void
+@param      projectDir     project directory
 
 @history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -1321,9 +1311,7 @@ public static void createReactJavaProjectNativeSupport(
                                                                              /**
             Copy project template.
 
-@return     new project folder
-
-@param      projectName    new project name
+@param      targetDir    target directory
 
 @history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -1355,8 +1343,6 @@ public static void deleteDirectory(
                                                                              /**
             Delete contents of the core and jetty cache files in the java temp
             directory to ensure the js files are rebuilt.
-
-@return     void
 
 @history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -1426,8 +1412,6 @@ public static void deleteTempGWTCache()
                                                                               */
                                                                              /**
             Do specified operation.
-
-@return     void
 
 @param      argsList    args list
 
@@ -1588,9 +1572,10 @@ public static void doOp(
                                                                              /**
             Initialize node and npm if not already.
 
-@return     new project folder
+@return     completion code
 
-@param      projectName    new project name
+@param      commands       commands
+@param      workingDir     working directory
 
 @history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -1610,9 +1595,11 @@ public static int exec(
                                                                              /**
             Initialize node and npm if not already.
 
-@return     new project folder
+@return     completion code
 
-@param      projectName    new project name
+@param      commands       commands
+@param      workingDir     working directory
+@param      container      container
 
 @history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -1633,9 +1620,11 @@ public static int exec(
                                                                              /**
             Initialize node and npm if not already.
 
-@return     new project folder
+@return     completion code
 
-@param      projectName    new project name
+@param      commands       commands
+@param      workingDir     working directory
+@param      newPath        new path
 
 @history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -1656,9 +1645,12 @@ public static int exec(
                                                                              /**
             Initialize node and npm if not already.
 
-@return     new project folder
+@return     completion code
 
-@param      projectName    new project name
+@param      args           args
+@param      workingDir     working directory
+@param      container      container
+@param      newPath        new path
 
 @history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -1726,7 +1718,7 @@ public static int exec(
 
 @return     new project folder
 
-@param      projectName    new project name
+@param      src    src
 
 @history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -1804,11 +1796,7 @@ public static GoogleCloudStorageManagerBase gcsManager()
             Generate library from core compiler output. Only invoked for
             ReactJava Native.
 
-@return     void
-
-@params     artifactDir  artiface directory, for example:
-                         "/Users/brianm/working/IdeaProjects/JsInteropExample/"
-                         "out/artifacts/JsInteropExample_war_exploded"
+@return     gwt library directory
 
 @history    Sat Aug 11, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -1914,7 +1902,7 @@ public static File generateGWTLibrary()
 
 @return     file as string.
 
-@param      path     file path.
+@param      file     file
 
 @history    Mon May 19, 2014 18:00:00 (LBM) created.
 
@@ -1936,7 +1924,7 @@ public static String getFileAsString(
 
 @return     file bytes.
 
-@param      path     file path.
+@param      file     file
 
 @history    Mon May 19, 2014 18:00:00 (LBM) created.
 
@@ -1951,14 +1939,14 @@ public static byte[] getFileBytes(
 }
 /*------------------------------------------------------------------------------
 
-@name       getFileBytes - get file bytes
+@name       getFileType - get file type
                                                                               */
                                                                              /**
-            Get file bytes.
+            Get file type.
 
-@return     file bytes.
+@return     file type.
 
-@param      path     file path.
+@param      file     file
 
 @history    Mon May 19, 2014 18:00:00 (LBM) created.
 
@@ -2036,7 +2024,7 @@ public static boolean getGWTInstalled()
 
 @return     input stream bytes.
 
-@param      in    input stream
+@param      url    url
 
 @history    Mon May 19, 2014 18:00:00 (LBM) created.
 
@@ -2141,9 +2129,7 @@ public static boolean getIsValidJavaIdentifier(
                                                                              /**
             Get lastest jar and relaunch.
 
-@return     void
-
-@param      projectPath    project path
+@param      argsList    args
 
 @history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -2175,8 +2161,6 @@ public static void getLatestJarAndRelaunch(
             Update bash files to support local node installation.
 
 @return     local node path or null if not found
-
-@param      projectName    new project name
 
 @history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -2494,7 +2478,7 @@ public static String getURLAsString(
 
 @return     new project folder
 
-@param      projectName    new project name
+@param      projectDir    new project directory
 
 @history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -2538,10 +2522,9 @@ public static File gwtInitialize(
                                                                              /**
             Create jar of target files to specified output jar.
 
-@return     void
-
 @param      jarFile     output jar
 @param      targets     array of target files
+@param      entries     array of entries
 @param      manifest    jar file manifest
 
 @history    Fri Nov 6, 2003 04:35:52 (Giavaneers - LBM) created.
@@ -2595,11 +2578,9 @@ public static void jarFiles(
                                                                              /**
             Create jar of target files to specified output jar.
 
-@return     void
-
 @param      jarFile     output jar
 @param      targets     array of target files
-@param      manifest    jar file manifest
+@param      entries     jar file entries
 
 @history    Fri Nov 6, 2003 04:35:52 (Giavaneers - LBM) created.
 
@@ -2812,7 +2793,7 @@ public static List<File> listDescendantFiles(
 
 @return     new project folder
 
-@param      projectName    new project name
+@param      projectDir    new project directory
 
 @history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -2891,7 +2872,8 @@ public static File localNodeBashUpdate(
 
 @return     new project folder
 
-@param      projectName    new project name
+@param      sBashProfile   bash profile
+@param      entry          entry
 
 @history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -2953,8 +2935,6 @@ protected static String localNodeBashUpdateEntry(
 
                create-reactjava-app -version 0.1.1810191229 update MyNewProject
 
-
-@return     void
 
 @param      args     args[0] - platform specification
 
@@ -3029,7 +3009,7 @@ public static File moveNativeProjectSupport(
 
 @return     new project folder
 
-@param      projectName    new project name
+@param      projectDir    new project directory
 
 @history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -3137,8 +3117,6 @@ public static File nodeInitialize(
                                                                              /**
             Publish core sdk with enhanced core-dev.jar.
 
-@return     void
-
 @history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -3188,8 +3166,6 @@ public static void publishGWTSDK()
 
                3. Publish the jar to the "releases/latest" directory, renaming
                   the jar file to simply "reactjava.jar".
-
-@return     void
 
 @history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -3265,7 +3241,7 @@ public static void publishJar()
 
 @return     new project folder
 
-@param      projectName    new project name
+@param      projectDir    new project directory
 
 @history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -3273,7 +3249,7 @@ public static void publishJar()
                                                                               */
 //------------------------------------------------------------------------------
 public static File reactAndReactDomInitialize(
-   File   projectDir)
+   File     projectDir)
 {
    String   sHome    = System.getProperty("user.home");
    File     home     = new File(sHome);
@@ -3365,7 +3341,7 @@ public static File reactiveXInitialize(
 
 @return     new project folder
 
-@param      projectName    new project name
+@param      projectDir    new project directory
 
 @history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -3396,7 +3372,7 @@ public static File reactJavaDirInitialize(
 
 @return     new project folder
 
-@param      projectName    new project name
+@param      projectDir    new project directory
 
 @history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -3452,7 +3428,7 @@ public static File reactNativeInitialize(
 
 @return     temporary react native project dir
 
-@param      projectName    new project name
+@param      projectDir    new project directory
 
 @history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -3512,7 +3488,7 @@ public static File reactNativeProjectInitialize(
 
 @return     new project folder
 
-@param      projectName    new project name
+@param      projectDir    new project directory
 
 @history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -3605,8 +3581,6 @@ public static File reactNativeUpdateLaunchPage(
 
 @return     project directory
 
-@param      projectDir  project directory
-
 @history    Sat Nov 17, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -3643,8 +3617,6 @@ public static File shadowToSrc()
             Copy src directory to shadow directory.
 
 @return     project directory
-
-@param      projectDir  project directory
 
 @history    Sat Nov 17, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -3703,8 +3675,6 @@ public static String toOSPath(
                                                                              /**
             Touch a source file to force project rebuild.
 
-@return     void
-
 @history    Sat Aug 11, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -3726,8 +3696,6 @@ public static void touchJavaSource()
                                                                               */
                                                                              /**
             Update the jar manifest.
-
-@return     void
 
 @history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -3761,8 +3729,6 @@ public static void updateJarManifest()
             executed as part of a build ant post process task so the output
             is written to the out/production directory.
 
-@return     void
-
 @history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -3791,7 +3757,9 @@ public static void updateProjectTemplateResource()
                                                                              /**
             Standard main routine
 
-@return     void
+@param      projectDir     project directory
+@param      version        version
+@param      bUpdate        iff true, update
 
 @history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -3859,8 +3827,8 @@ public static void updateReactJavaCore(
 
 @return     void
 
-@params     dst         destination file
-@params     content     content
+@param     dst         destination file
+@param     content     content
 
 @history    Sat Aug 11, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -3944,9 +3912,7 @@ public static boolean zipExtractFile(
                                                                              /**
             Extract all files from zip file.
 
-@return     true iff successful
-
-@param      zipFile           output zip file
+@param      inZip             zip input stream
 @param      outputDirectory   output directory
 
 @history    Fri Nov 6, 2003 04:35:52 (Giavaneers - LBM) created.
@@ -4048,10 +4014,8 @@ public static boolean zipExtractFiles(
                                                                              /**
             Extract all files from zip file.
 
-@return     true iff successful
-
-@param      zipFile           output zip file
-@param      outputDirectory   output directory
+@param      srcDir      source directory
+@param      dst         dst directory
 
 @history    Fri Nov 6, 2003 04:35:52 (Giavaneers - LBM) created.
 
@@ -4116,22 +4080,22 @@ public static void zipDirectory(
 //
 //   return(bundleScript);
 //}
-/*------------------------------------------------------------------------------
-
-@name       generateIndexJs - generate index js file
-                                                                              */
-                                                                             /**
-            Generate index js file to the "out/build/src" directory
-
-@return     void
-
-@params     reactNativeDir    react native build directory
-
-@history    Sat Aug 11, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
+///*------------------------------------------------------------------------------
+//
+//@name       generateIndexJs - generate index js file
+//                                                                              */
+//                                                                             /**
+//            Generate index js file to the "out/build/src" directory
+//
+//@return     void
+//
+//@param     reactNativeDir    react native build directory
+//
+//@history    Sat Aug 11, 2018 10:30:00 (Giavaneers - LBM) created
+//
+//@notes
+//                                                                              */
+////------------------------------------------------------------------------------
 //public static void generateIndexJs(
 //   File   gwtLibrary)
 //   throws Exception
@@ -4149,7 +4113,7 @@ public static void zipDirectory(
 //
 //@return     void
 //
-//@params     reactNativeDir    react native build directory
+//@param     reactNativeDir    react native build directory
 //
 //@history    Sat Aug 11, 2018 10:30:00 (Giavaneers - LBM) created
 //
@@ -4174,7 +4138,7 @@ public static void zipDirectory(
 //
 //@return     void
 //
-//@params     artifactDir    artifact directory
+//@param     artifactDir    artifact directory
 //
 //@history    Sat Aug 11, 2018 10:30:00 (Giavaneers - LBM) created
 //
@@ -4224,8 +4188,6 @@ protected String[]    container;       // result container                    //
                                                                              /**
             Constructor for specified input stream and result container
 
-@return     An instance of InputStreamStringBuilder if successful.
-
 @param      in             input stream
 @param      container      result container
 
@@ -4252,8 +4214,6 @@ public InputStreamStringBuilder(
                                                                               */
                                                                              /**
             Runnable standard run() method
-
-@return     void
 
 @history    Mon Aug 28, 2017 10:30:00 (Giavaneers - LBM) created
 

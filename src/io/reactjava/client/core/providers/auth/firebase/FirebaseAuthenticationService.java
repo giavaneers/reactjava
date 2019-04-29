@@ -61,11 +61,7 @@ protected NativeObject props;            // properties                          
                                                                              /**
             Constructor
 
-@return     An instance of FirebaseAuthenticationService iff successful.
-
-@param      method            method
-@param      url               target url
-@param      bAsync            true iff async
+@param      props    props
 
 @history    Wed Apr 27, 2016 10:30:00 (Giavaneers - LBM) created
 
@@ -300,7 +296,7 @@ public IConfiguration getConfiguration()
                                                                              /**
             Get the Auth service for the default app
 
-@return     Auth service for the default app
+@param      defaultAuth    default authentication provider
 
 @history    Sat Oct 21, 2017 10:30:00 (Giavaneers - LBM) created
 
@@ -510,10 +506,6 @@ public Observable<String> signOut()
                                                                              /**
             Unit test for either the callback or promise interface.
 
-@return     true iff successful
-
-@param      bUsePromise    iff true, use promise interface
-
 @history    Sat Oct 21, 2017 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -598,9 +590,7 @@ public static native Auth auth() throws Exception;
                                                                              /**
             Iinitialize app
 
-@return     void
-
-@param      subscription      subscription
+@param      config      configuration
 
 @history    Sat Oct 21, 2017 10:30:00 (Giavaneers - LBM) created
 

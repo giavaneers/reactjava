@@ -55,7 +55,7 @@ public interface INativeRenderableComponent<P extends Properties>
 
 @return     a single ReactJava element, or null if no rendering is desired.
 
-@param      properties      properties for this component
+@param      props      properties for this component
 
 @history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
 

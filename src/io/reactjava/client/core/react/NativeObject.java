@@ -43,8 +43,6 @@ public class NativeObject extends JsObject
                                                                              /**
             Default constructor
 
-@return     An instance of NativeObject if successful.
-
 @history    Mon Aug 28, 2017 10:30:00 (Giavaneers - LBM) created
 
 @notes

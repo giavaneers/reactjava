@@ -65,7 +65,8 @@ Map<String,String> dependenciesPrevious = new HashMap<String,String>();
                                                                              /**
             fast channel copy.
 
-@return     void
+@param      in    input stream
+@param      out   output stream
 
 @history    Sun Mar 16, 2014 10:30:00 (Giavaneers - LBM) created.
 
@@ -86,7 +87,9 @@ static void fastChannelCopy(
                                                                              /**
             fast channel copy.
 
-@return     void
+@param      in       input stream
+@param      out      output stream
+@param      length   number of bytes
 
 @history    Sun Mar 16, 2014 10:30:00 (Giavaneers - LBM) created.
 
@@ -308,7 +311,9 @@ static Set<String> getDependenciesSetPrevious()
 
 @return     library component for specified filename
 
-@param      tagName     library component filename
+@param      parent      parent
+@param      filename    filename
+@param      logger      logger
 
 @history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -1006,7 +1011,6 @@ static boolean getPlatformIsWeb(
 @return     project directory with specified name.
 
 @param      name           project directory name.
-@param      rootPath       path at which to start search.
 @param      logger         logger.
 
 @history    Mon May 19, 2014 18:00:00 (LBM) created.
@@ -1030,7 +1034,7 @@ static File getProjectDirectory(
 @return     project directory with specified name.
 
 @param      name           project directory name.
-@param      rootPath       path at which to start search.
+@param      path           path at which to start search.
 @param      logger         logger.
 
 @history    Mon May 19, 2014 18:00:00 (LBM) created.
@@ -1230,8 +1234,6 @@ static IPlatform initPlatform(
                                                                               */
                                                                              /**
             Standard main routine.
-
-@return     void
 
 @param      args     args[0] - platform specification
 

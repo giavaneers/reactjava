@@ -70,8 +70,6 @@ private static final Logger kLOGGER = Logger.newInstance();
                                                                              /**
             Default constructor
 
-@return     An instance of HttpClient iff successful.
-
 @history    Fri Nov 09, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -276,9 +274,9 @@ public IHttpClient setErrorReason(
                                                                              /**
             Set the specified response type.
 
-@return     void
+@return     http client
 
-@param      responseType      response type
+@param      method      method
 
 @history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
 
@@ -297,9 +295,9 @@ public IHttpClient setMethod(
                                                                              /**
             Set the readyStateChanged listener.
 
-@return     void
+@return     http client
 
-@param      handler     readyStateChanged listener
+@param      readyStateChangedListener     readyStateChanged listener
 
 @history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
 
@@ -430,9 +428,7 @@ public IHttpClient setStatusText(
                                                                              /**
             Set that a timeout occurred.
 
-@return     this
-
-@param      timeout    'true'
+@return     http client
 
 @history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
 
@@ -451,9 +447,9 @@ public IHttpClient setTimeout()
                                                                              /**
             Set the specified response type.
 
-@return     void
+@return     http client
 
-@param      responseType      response type
+@param      url      url
 
 @history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
 
@@ -495,8 +491,6 @@ protected final Subscriber subscriber;// subscriber                           //
                                                                              /**
             Default constructor
 
-@return     An instance of DefaultReadyStateChangeListener iff successful
-
 @history    Mon Aug 18, 2013 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -515,10 +509,6 @@ public DefaultReadyStateChangeListener(
                                                                               */
                                                                              /**
             Signal completion
-
-@return     void
-
-@param      response    response,
 
 @history    Mon Aug 18, 2013 10:30:00 (Giavaneers - LBM) created
 

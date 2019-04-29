@@ -57,8 +57,6 @@ public static final String[] kMENU_LIST =
             Cell onClick event handler as a public instance variable, accessible
             via 'this' in markup.
 
-@return     void
-
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -81,8 +79,6 @@ public INativeEventHandler clickHandler = (Event e) ->
                                                                              /**
             Render component.
 
-@return     void
-
 @history    Thu Feb 14, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -103,18 +99,32 @@ public void render()
 --*/
             if (content != null)
             {
-               for (ContentDsc dsc : content)
+               for (int iDsc = 0; iDsc < content.size(); iDsc++)
                {
+                  ContentDsc dsc = content.get(iDsc);
+
                   if (dsc.type != ContentDsc.kTYPE_TITLE
-                        && dsc.type != ContentDsc.kTYPE_CAPTION)
+                        && dsc.type != ContentDsc.kTYPE_CAPTION
+                        && dsc.type != ContentDsc.kTYPE_REFERENCE)
                   {
                      continue;
+                  }
+                  if (ContentDsc.kTYPE_REFERENCE == dsc.type)
+                  {
+                     if (iDsc > 0 && content.get(iDsc - 1).type != dsc.type)
+                     {
+                     /*-- <@material-ui.core.Divider /> --*/
+                     }
                   }
 /*--              <@material-ui.core.ListItem
                      button key={dsc.text} id={dsc.id} onClick={clickHandler}>
                      <@material-ui.core.ListItemText primary={dsc.text} />
                   </@material-ui.core.ListItem>
 --*/
+                  if (ContentDsc.kTYPE_REFERENCE == dsc.type)
+                  {
+                     /*-- <@material-ui.core.Divider /> --*/
+                  }
                }
             }
             else
@@ -153,8 +163,6 @@ public void render()
                                                                               */
                                                                              /**
             Get component css.
-
-@return     void
 
 @history    Thu Feb 14, 2019 10:30:00 (Giavaneers - LBM) created
 

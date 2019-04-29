@@ -36,8 +36,6 @@ public class Properties extends HashMap
                                                                              /**
             Default constructor
 
-@return     An instance of Properties if successful.
-
 @history    Mon Aug 28, 2017 10:30:00 (Giavaneers - LBM) created
 
 @notes

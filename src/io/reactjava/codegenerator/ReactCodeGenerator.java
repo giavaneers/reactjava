@@ -141,8 +141,6 @@ public static final String kBOOT_JS =
                                                                              /**
             Default constructor
 
-@return     An instance of ReactCodeGenerator if successful.
-
 @history    Mon Aug 28, 2017 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -231,9 +229,10 @@ protected void addImportedNodeModuleStylesheet(
                                                                              /**
             copy css file to artifact.
 
-@return     void
-
-@param      filePath      image name
+@param      src               src
+@param      configuration     configuration
+@param      context           context
+@param      logger            logger
 
 @history    Mon May 19, 2014 18:00:00 (LBM) created.
 
@@ -264,9 +263,10 @@ public static void copyCSSFileToArtifact(
                                                                              /**
             copy css rsrc to artifact.
 
-@return     void
-
-@param      rsrcPath      image name
+@param      rsrcPath          rsrcPath
+@param      configuration     configuration
+@param      context           context
+@param      logger            logger
 
 @history    Mon May 19, 2014 18:00:00 (LBM) created.
 
@@ -292,9 +292,10 @@ public static void copyCSSResourceToArtifact(
                                                                              /**
             copy image rsrc to artifact.
 
-@return     void
-
-@param      rsrcPath      image name
+@param      rsrcPath          rsrcPath
+@param      configuration     configuration
+@param      context           context
+@param      logger            logger
 
 @history    Mon May 19, 2014 18:00:00 (LBM) created.
 
@@ -325,9 +326,9 @@ public static void copyImageResourceToArtifact(
             Platform and app scripts generated separately to reduce build time
             since platform will not change and app may or may not change
 
-@return     void
-
-@param      rsrcPath      script name
+@param      configuration     configuration
+@param      context           context
+@param      logger            logger
 
 @history    Mon May 19, 2014 18:00:00 (LBM) created.
 
@@ -368,9 +369,9 @@ public static void copyBundleScriptToArtifact(
                                                                              /**
             Copy platform scripts to artifact.
 
-@return     void
-
-@param      rsrcPath      script name
+@param      configuration     configuration
+@param      context           context
+@param      logger            logger
 
 @history    Mon May 19, 2014 18:00:00 (LBM) created.
 
@@ -404,7 +405,9 @@ public static void copyPlatformScriptsToArtifact(
                                                                              /**
             Copy appropriate scripts
 
-@return     composer
+@param      configuration     configuration
+@param      context           context
+@param      logger            logger
 
 @history    Mon May 19, 2014 18:00:00 (LBM) created.
 
@@ -511,9 +514,10 @@ protected static void copyResources(
                                                                              /**
             copy script rsrc to artifact.
 
-@return     void
-
-@param      rsrcPath      script name
+@param      rsrcPath          rsrcPath
+@param      configuration     configuration
+@param      context           context
+@param      logger            logger
 
 @history    Mon May 19, 2014 18:00:00 (LBM) created.
 
@@ -549,10 +553,11 @@ public static void copyResourceToArtifact(
                                                                              /**
             copy script rsrc to artifact.
 
-@return     void
-
 @param      rsrcPaths      one or more script paths in preferred order separated
                            by commas
+@param      configuration  configuration
+@param      context        context
+@param      logger         logger
 
 @history    Mon May 19, 2014 18:00:00 (LBM) created.
 
@@ -630,10 +635,11 @@ public static void copyScriptResourceToArtifact(
                                                                              /**
             copy stream to artifact.
 
-@return     void
-
-@param      in          source stream
-@param      dstPath     destination path
+@param      in              source stream
+@param      dstPath           destination path
+@param      configuration     configuration
+@param      context           context
+@param      logger            logger
 
 @history    Mon May 19, 2014 18:00:00 (LBM) created.
 
@@ -657,10 +663,12 @@ public static void copyStreamToArtifact(
                                                                              /**
             copy stream to artifact.
 
-@return     void
-
-@param      in          source stream
-@param      dstPath     destination path
+@param      in                source stream
+@param      dstPath           destination path
+@param      configuration     configuration
+@param      context           context
+@param      logger            logger
+@param      bCompressForce    iff true, force compression
 
 @history    Mon May 19, 2014 18:00:00 (LBM) created.
 
@@ -755,9 +763,7 @@ public static void copyStreamToArtifact(
 
 @return     inject script file
 
-@param      bPlatform      platform and app scripts generated separately to
-                           reduce build time since platform will not change
-                           and app may or may not change
+@param      logger      logger
 
 @history    Thu Sep 7, 2017 08:46:23 (LBM) created.
 
@@ -830,9 +836,7 @@ public static String generateInjectScript(
 
 @return     browserify inject script file
 
-@param      bPlatform      platform and app scripts generated separately to
-                           reduce build time since platform will not change
-                           and app may or may not change
+@param      logger      logger
 
 @history    Thu Sep 7, 2017 08:46:23 (LBM) created.
 
@@ -1011,8 +1015,8 @@ public static String getAppClassname(
 
 @return     application type
 
-@param      providersAndComponents     classes map
-@param      logger                     logger
+@param      components     components
+@param      logger         logger
 
 @history    Sat Aug 11, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -1098,7 +1102,8 @@ public static JType getAppType(
 
 @return     The configuration.
 
-@param      components     map of component type by classname
+@param      context     context
+@param      logger     logger
 
 @history    Mon May 19, 2014 18:00:00 (LBM) created.
 
@@ -1153,8 +1158,11 @@ public static boolean getDependenciesChanged()
             Get any imported node modules from the application class
             implementation, adding them to the dependencies set.
 
-@param      providersAndComponents     map of component type by classname
-@param      logger                     logger
+@return     imported node mosules
+
+@param      typesMap          map of component type by classname
+@param      configuration     configuration
+@param      logger            logger
 
 @history    Sun Dec 02, 2018 18:00:00 (LBM) created.
 
@@ -1277,8 +1285,6 @@ public static boolean injectScriptAppDirty(
                                                                              /**
             Standard main routine.
 
-@return     void
-
 @param      args     args[0] - platform specification
 
 @history    Sat Aug 11, 2018 10:30:00 (Giavaneers - LBM) created
@@ -1362,9 +1368,10 @@ public static TreeLogger newFileLogger(
             Filter all classes visible to GWT client side and return only those
             marked as an Injectable.
 
-@return     void
+@return     map of classname by class type
 
-@param      type     class type
+@param      oracle     oracle
+@param      logger     logger
 
 @history    Thu Sep 7, 2017 08:46:23 (LBM) created.
 
@@ -1630,7 +1637,9 @@ protected Map<String,Boolean> parseConstructors(
                                                                              /**
             Process specified source.
 
-@return     processed source
+@param      logger                  logger
+@param      compilerContext         compiler context
+@param      precompilationContext   precompilation context
 
 @history    Sun Mar 16, 2014 10:30:00 (Giavaneers - LBM) created.
 
@@ -1677,7 +1686,7 @@ public void process(
                                                                              /**
             Save current dependencies.
 
-@return     void
+@param      logger      logger
 
 @history    Sun Mar 16, 2014 10:30:00 (Giavaneers - LBM) created.
 
@@ -1709,8 +1718,6 @@ public void saveCurrentDependencies(
                                                                               */
                                                                              /**
             Set platform. This method is for development and test purposes.
-
-@return     void.
 
 @param      os    platform os
 
@@ -1750,7 +1757,7 @@ public static void setPlatform(
 
 @return     byte array representation of compressed device data record.
 
-@param      deviceData     device data record
+@param      uncompressed     uncompressed bytes
 
 @history    Fri May 20, 2016 10:30:00 (Giavaneers - LBM) created.
 
@@ -1820,7 +1827,7 @@ public static class Configuration
                                                                              /**
             Default constructor
 
-@return     An instance of Configuration if successful.
+@param      logger      logger
 
 @history    Mon Aug 28, 2017 10:30:00 (Giavaneers - LBM) created
 
@@ -2378,7 +2385,8 @@ public io.reactjava.client.core.react.IConfiguration setProductionMode(
 
 @return     this
 
-@param      bProductionMode      iff true, production mode; otherwise debug mode
+@param      interfaceClassname   interface classname
+@param      providerClassname    provider classname
 
 @history    Thu Sep 7, 2017 08:46:23 (LBM) created.
 
@@ -2449,7 +2457,7 @@ public io.reactjava.client.core.react.IConfiguration setScriptsLoadLazy(
             For example, in the React configuration, there exists an entry
             for the tag "div" whose entry is "View".
 
-@return     tag map
+@param      tagMap      tag map
 
 @history    Thu Sep 7, 2017 08:46:23 (LBM) created.
 
@@ -2535,8 +2543,6 @@ public static class Properties extends HashMap
                                                                               */
                                                                              /**
             Default constructor
-
-@return     An instance of Properties if successful.
 
 @history    Mon Aug 28, 2017 10:30:00 (Giavaneers - LBM) created
 
@@ -2668,8 +2674,6 @@ public String getString(
                                                                               */
                                                                              /**
             Set value of specified property
-
-@return     void
 
 @param      propertyName      property name
 @param      value             value of specified property

@@ -32,6 +32,7 @@ import java.util.function.Consumer;
 public class GeneralAppBar extends Component
 {
                                        // class constants ------------------- //
+public static final String   kPROPERTY_KEY_APP_BAR_DSC        = "appbardsc";
 public static final String   kPROPERTY_KEY_0PEN               = "open";
 public static final String   kPROPERTY_KEY_0PEN_HANDLER       = "openHandler";
 
@@ -59,7 +60,7 @@ public static final String kGITHUB_URL = "https://github.com/giavaneers";
                                        // public instance variables --------- //
                                        // (none)                              //
                                        // protected instance variables -------//
-                                       // (none)                              //
+protected AppBarDsc appBarDsc;         // app bar descriptor                  //
                                        // private instance variables -------- //
                                        // (none)                              //
 /*------------------------------------------------------------------------------
@@ -69,8 +70,6 @@ public static final String kGITHUB_URL = "https://github.com/giavaneers";
                                                                              /**
             onClick event handler as a public instance variable, accessible in
             markup.
-
-@return     void
 
 @history    Thu Feb 14, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -102,7 +101,7 @@ public INativeEventHandler clickHandler = (Event e) ->
       }
       case kAPP_BAR_BUTTON_TEXT_MENU_BUTTON:
       {
-         ((Consumer)props().get(kPROPERTY_KEY_0PEN_HANDLER)).accept(
+         getAppBarDsc().openHandler.accept(
             new HashMap<String,Object>()
             {{
                put("bOpen", true);
@@ -121,12 +120,33 @@ public INativeEventHandler clickHandler = (Event e) ->
 };
 /*------------------------------------------------------------------------------
 
+@name       getAppBarDsc - get app bar descriptor
+                                                                              */
+                                                                             /**
+            Get app bar descriptor.
+
+@return     app bar descriptor
+
+@history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected AppBarDsc getAppBarDsc()
+{
+   if (appBarDsc == null)
+   {
+      appBarDsc = (AppBarDsc)props().get(kPROPERTY_KEY_APP_BAR_DSC);
+   }
+   return(appBarDsc);
+}
+/*------------------------------------------------------------------------------
+
 @name       render - render component
                                                                               */
                                                                              /**
             Render component.
-
-@return     void
 
 @history    Thu Feb 14, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -136,10 +156,10 @@ public INativeEventHandler clickHandler = (Event e) ->
 //------------------------------------------------------------------------------
 public void render()
 {
-   boolean bOpen = props().getBoolean(kPROPERTY_KEY_0PEN);
+   AppBarDsc dsc = (AppBarDsc)props().get(kPROPERTY_KEY_APP_BAR_DSC);
 /*--
    <@material-ui.core.AppBar position="fixed" color="default" class="appBar">
-      <@material-ui.core.Toolbar disableGutters={!bOpen}>
+      <@material-ui.core.Toolbar disableGutters={!dsc.bOpen}>
          <@material-ui.core.IconButton
             color="inherit"
             id={kAPP_BAR_BUTTON_TEXT_MENU_BUTTON}
@@ -150,9 +170,9 @@ public void render()
          </@material-ui.core.IconButton>
          <@material-ui.core.Typography
             variant="h6" color="inherit" noWrap class="toolbarTitle"
-            id={kAPP_BAR_BUTTON_TEXT_REACTJAVA}
+            id={dsc.title}
             onClick={clickHandler}>
-            {kAPP_BAR_BUTTON_TEXT_REACTJAVA}
+            {dsc.title}
          </@material-ui.core.Typography>
 --*/
       for (String text : kAPP_BAR_BUTTON_TEXT)
@@ -181,8 +201,6 @@ public void render()
                                                                               */
                                                                              /**
             Get component css.
-
-@return     void
 
 @history    Thu Feb 14, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -220,4 +238,54 @@ public void renderCSS()
    }
 --*/
 }
+/*==============================================================================
+
+name:       AppBarDsc - app bar descriptor
+
+purpose:    App bar descriptor
+
+history:    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
+
+notes:
+
+==============================================================================*/
+public static class AppBarDsc
+{
+                                       // constants ------------------------- //
+                                       // (none)                              //
+                                       // class variables ------------------- //
+                                       // (none)                              //
+                                       // public instance variables --------- //
+public String           title;         // title                               //
+public boolean          bOpen;         // side drawer open or not             //
+public Consumer         openHandler;   // image                               //
+                                       // protected instance variables ------ //
+                                       // (none)                              //
+
+/*------------------------------------------------------------------------------
+
+@name       AppBarDsc - constructor for specified image, push values, and sections
+                                                                              */
+                                                                             /**
+            Constructor for specified image, push values, and sections.
+
+@param      title        title
+@param      bOpen        true iff side drawer is open
+@param      openHandler  any open handler
+
+@history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public AppBarDsc(
+   String       title,
+   boolean      bOpen,
+   Consumer     openHandler)
+{
+   this.title       = title;
+   this.bOpen       = bOpen;
+   this.openHandler = openHandler;
+}
+}//====================================// end AppBarDsc ======================//
 }//====================================// end GeneralAppBar ==================//

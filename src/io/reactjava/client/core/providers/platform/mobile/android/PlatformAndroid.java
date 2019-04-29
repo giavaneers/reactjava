@@ -35,12 +35,6 @@ public class PlatformAndroid extends AbstractMobilePlatform
                                                                              /**
             Constructor
 
-@return     An instance of PlatformAndroid iff successful.
-
-@param      method            method
-@param      url               target url
-@param      bAsync            true iff async
-
 @history    Wed Apr 27, 2016 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -57,11 +51,7 @@ public PlatformAndroid()
                                                                              /**
             Constructor
 
-@return     An instance of PlatformAndroid iff successful.
-
-@param      method            method
-@param      url               target url
-@param      bAsync            true iff async
+@param      props            props
 
 @history    Wed Apr 27, 2016 10:30:00 (Giavaneers - LBM) created
 

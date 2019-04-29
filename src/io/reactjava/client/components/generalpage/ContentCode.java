@@ -44,8 +44,6 @@ public class ContentCode extends Component
                                                                              /**
             Render component.
 
-@return     void
-
 @history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -68,8 +66,6 @@ public void render()
                                                                               */
                                                                              /**
             Get component css.
-
-@return     void
 
 @history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
 

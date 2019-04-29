@@ -90,8 +90,6 @@ static byte[] allPreprocessors(
 @param      components     components identified by preprocessors
 @param      logger         compiler logger
 
-@throws     processed source
-
 @history    Sun Mar 16, 2014 10:30:00 (Giavaneers - LBM) created.
 
 @notes

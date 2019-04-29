@@ -39,8 +39,6 @@ public class React
                                                                              /**
             Default constructor
 
-@return     An instance of React if successful.
-
 @history    Mon Aug 28, 2017 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -86,7 +84,6 @@ public static native <P extends Properties> ReactElement createElement(
 
 @param      type        standard html tag
 @param      props       properties
-@param      children    child elements
 
 @history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -113,7 +110,6 @@ public static native <P extends Properties> ReactElement createElement(
 
 @param      type        standard html tag
 @param      props       properties
-@param      children    child elements
 
 @history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -158,7 +154,7 @@ public static native void useEffect(
 @return     Properties instance containing the following attributes:
 
 
-@param      state       initial state
+@param      value       initial state
 
 @history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
 

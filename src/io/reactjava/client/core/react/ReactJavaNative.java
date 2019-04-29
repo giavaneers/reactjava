@@ -38,8 +38,6 @@ public class ReactJavaNative
                                                                              /**
             Default constructor
 
-@return     An instance of ReactJavaNative if successful.
-
 @history    Mon Aug 28, 2017 10:30:00 (Giavaneers - LBM) created
 
 @notes

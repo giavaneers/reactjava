@@ -190,7 +190,8 @@ String[] kFILTER_UNSUPPORTED =
 
 @return     file as string with newline characters.
 
-@param      path     file path.
+@param      file     file
+@param      logger   logger
 
 @history    Mon May 19, 2014 18:00:00 (LBM) created.
 
@@ -227,7 +228,8 @@ public static String getFileAsJavaString(
 
 @return     file as string.
 
-@param      path     file path.
+@param      file     file
+@param      logger   logger
 
 @history    Mon May 19, 2014 18:00:00 (LBM) created.
 
@@ -251,7 +253,8 @@ public static String getFileAsString(
 
 @return     file bytes.
 
-@param      path     file path.
+@param      file     file
+@param      logger   logger
 
 @history    Mon May 19, 2014 18:00:00 (LBM) created.
 

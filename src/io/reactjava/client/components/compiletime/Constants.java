@@ -1,10 +1,10 @@
 /*==============================================================================
 
-name:       ContentImage.java
+name:       Constants.java
 
-purpose:    Content image.
+purpose:    Compile time Constants.
 
-history:    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
+history:    Thu Feb 14, 2019 10:30:00 (Giavaneers - LBM) created
 
 notes:
 
@@ -19,18 +19,17 @@ notes:
 
 ==============================================================================*/
                                        // package --------------------------- //
-package io.reactjava.client.components.generalpage;
+package io.reactjava.client.components.compiletime;
                                        // imports --------------------------- //
 import io.reactjava.client.core.react.Component;
-import io.reactjava.client.core.react.IUITheme;
-
-                                       // ContentImage =======================//
-public class ContentImage extends Component
+import io.reactjava.client.core.react.Properties;
+                                          // Constants =======================//
+public class Constants extends Component
 {
                                        // class constants ------------------- //
-                                       // protected instance variables -------//
-                                       // class variables ------------------- //
                                        // (none)                              //
+                                       // class variables ------------------- //
+public static Properties constants;    // constants                           //
                                        // public instance variables --------- //
                                        // (none)                              //
                                        // protected instance variables -------//
@@ -44,42 +43,13 @@ public class ContentImage extends Component
                                                                              /**
             Render component.
 
-@history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
+@history    Thu Feb 14, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
-
                                                                               */
 //------------------------------------------------------------------------------
 public void render()
 {
-/*--
-   <img src={props().getString("content")} class="contentImage"></img>
---*/
+   constants = props();
 }
-/*------------------------------------------------------------------------------
-
-@name       renderCSS - get component css
-                                                                              */
-                                                                             /**
-            Get component css.
-
-@history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public void renderCSS()
-{
-   String unit   = "" + getTheme().getSpacing().getUnit() + "px";
-   String unit3X = IUITheme.cssLengthScale(unit, 3);
-/*--
-   .contentImage
-   {
-      width:         inherit;
-      max-width:     inherit;
-      margin-top:    {unit3X};
-      margin-bottom: {unit3X};
-   }
---*/
-}
-}//====================================// end ContentImage ===================//
+}//====================================// end Constants ===================//

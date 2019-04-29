@@ -43,8 +43,6 @@ public class Properties extends JsObject
                                                                              /**
             Default constructor
 
-@return     An instance of Properties if successful.
-
 @history    Mon Aug 28, 2017 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -136,8 +134,6 @@ public final ReactElement getChildren()
             Get component of these properties
 
 @return     value of component, or null if not found.
-
-@param      propertyName      property name
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -352,6 +348,8 @@ protected final Properties set(
 {
    if (value != null)
    {
+                                       // this structure to allow assignment  //
+                                       // of primitive values...              //
       if (value instanceof Boolean)
       {
          boolean val = ((Boolean)value).booleanValue();
@@ -394,7 +392,7 @@ protected final Properties set(
 
 @return     void
 
-@param      component      component for these properties
+@param      value      component for these properties
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 

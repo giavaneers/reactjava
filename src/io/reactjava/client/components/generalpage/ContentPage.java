@@ -24,9 +24,10 @@ package io.reactjava.client.components.generalpage;
                                        // imports --------------------------- //
 import io.reactjava.client.core.react.Component;
 import io.reactjava.client.core.react.IUITheme;
+import io.reactjava.jsx.JSXTransform;
 import java.util.ArrayList;
 import java.util.List;
-                                       // ContentPage =====================//
+                                       // ContentPage ========================//
 public class ContentPage extends Component
 {
                                        // class constants ------------------- //
@@ -75,8 +76,6 @@ protected List<ContentDsc> getContent()
                                                                               */
                                                                              /**
             Render component.
-
-@return     void
 
 @history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -133,8 +132,6 @@ public void render()
                                                                              /**
             Get component css.
 
-@return     void
-
 @history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -155,7 +152,7 @@ public void renderCSS()
 }
 /*==============================================================================
 
-name:       ContentDsc - content descriptor
+name:       ContentBodyDsc - content descriptor
 
 purpose:    Content descriptor
 
@@ -168,19 +165,21 @@ public static class ContentDsc
 {
                                        // constants ------------------------- //
                                        // type                                //
-public static final int    kTYPE_BODY    = 1;
-public static final int    kTYPE_CAPTION = 2;
-public static final int    kTYPE_CODE    = 3;
-public static final int    kTYPE_IMAGE   = 4;
-public static final int    kTYPE_TITLE   = 5;
+public static final int    kTYPE_BODY      = 1;
+public static final int    kTYPE_CAPTION   = 2;
+public static final int    kTYPE_CODE      = 3;
+public static final int    kTYPE_IMAGE     = 4;
+public static final int    kTYPE_TITLE     = 5;
+public static final int    kTYPE_REFERENCE = 6;
 
                                        // tokens                              //
-public static final String kTOKEN_BODY    = ".body";
-public static final String kTOKEN_CAPTION = ".caption";
-public static final String kTOKEN_CODE    = ".code";
-public static final String kTOKEN_END     = ".end";
-public static final String kTOKEN_IMAGE   = ".image";
-public static final String kTOKEN_TITLE   = ".title";
+public static final String kTOKEN_BODY      = ".body";
+public static final String kTOKEN_CAPTION   = ".caption";
+public static final String kTOKEN_CODE      = ".code";
+public static final String kTOKEN_END       = ".end";
+public static final String kTOKEN_IMAGE     = ".image";
+public static final String kTOKEN_TITLE     = ".title";
+public static final String kTOKEN_REFERENCE = ".reference";
 
                                        // class variables ------------------- //
                                        // (none)                              //
@@ -193,12 +192,10 @@ public String id;                      // elementId                           //
 
 /*------------------------------------------------------------------------------
 
-@name       ContentDsc - default constructor
+@name       ContentBodyDsc - default constructor
                                                                               */
                                                                              /**
             Default constructor
-
-@return     An instance of ContentDsc if successful.
 
 @history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -211,15 +208,13 @@ public ContentDsc()
 }
 /*------------------------------------------------------------------------------
 
-@name       ContentDsc - constructor for specified type and content
+@name       ContentBodyDsc - constructor for specified type and content
                                                                               */
                                                                              /**
             Constructor for specified type and content
 
-@return     An instance of ContentDsc if successful.
-
 @param      type        type
-@param      content     content
+@param      text        text
 
 @history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -235,7 +230,39 @@ public ContentDsc(
 
    if (text != null && text.length() > 0)
    {
-      this.id = Integer.toString(text.hashCode());
+      if (kTYPE_REFERENCE == type)
+      {
+                                       // example:                            //
+                                       // <a href="path">Getting Started</a>  //
+         int idxBeg = text.indexOf('"', text.indexOf("href"));
+         if (idxBeg < 0)
+         {
+            throw new IllegalStateException("format for reference unknown");
+         }
+         int idxEnd = text.indexOf('"', idxBeg + 1);
+         if (idxEnd < 0)
+         {
+            throw new IllegalStateException("format for reference unknown");
+         }
+         this.id = text.substring(idxBeg + 1, idxEnd).trim();
+
+         idxBeg = text.indexOf('>', idxEnd);
+         if (idxBeg < 0)
+         {
+            throw new IllegalStateException("format for reference unknown");
+         }
+         idxEnd = text.indexOf('<', idxBeg);
+         if (idxEnd < 0)
+         {
+            throw new IllegalStateException("format for reference unknown");
+         }
+
+         this.text = text.substring(idxBeg + 1, idxEnd).trim();
+      }
+      else
+      {
+         this.id = Integer.toString(text.hashCode());
+      }
    }
 }
 /*------------------------------------------------------------------------------
@@ -290,6 +317,11 @@ public static List<ContentDsc> parse(
          type    = kTYPE_IMAGE;
          idxBeg += kTOKEN_IMAGE.length();
       }
+      else if (chase.startsWith(kTOKEN_REFERENCE))
+      {
+         type    = kTYPE_REFERENCE;
+         idxBeg += kTOKEN_REFERENCE.length();
+      }
       else if (chase.startsWith(kTOKEN_TITLE))
       {
          type    = kTYPE_TITLE;
@@ -313,5 +345,5 @@ public static List<ContentDsc> parse(
 
    return(content);
 }
-}//====================================// end ContentDsc =====================//
-}//====================================// end ContentPage =================//
+}//====================================// end ContentBodyDsc =====================//
+}//====================================// end ContentPage ====================//

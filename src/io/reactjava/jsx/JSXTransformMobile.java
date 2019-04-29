@@ -35,8 +35,6 @@ public class JSXTransformMobile extends JSXTransform
                                                                              /**
             Default constructor
 
-@return     An instance of JSXTransformMobile if successful.
-
 @history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes

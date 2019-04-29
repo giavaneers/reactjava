@@ -157,7 +157,7 @@ Map<String,Object> kCONFIGURATION_DEFAULT_SANS_THEME =
 
 @return     Observable for boot completion
 
-@params     app      application component template
+@param     app      application component template
 
 @history    Tue Aug 29, 2017 10:30:00 (Giavaneers - LBM) created
 
@@ -723,7 +723,8 @@ IConfiguration setProductionMode(boolean bProdMode);
 
 @return     this
 
-@param      bProductionMode      iff true, production mode; otherwise debug mode
+@param      interfaceClassname      interface classname
+@param      providerClassname       provider classname
 
 @history    Thu Sep 7, 2017 08:46:23 (LBM) created.
 
@@ -766,7 +767,7 @@ IConfiguration setScriptsLoadLazy(boolean bScriptsLoadLazy);
             for the tag "div" whose entry is
             "node_modules.react-native.Libraries.Components.View".
 
-@return     tag map
+@param      tagMap      tag map
 
 @history    Thu Sep 7, 2017 08:46:23 (LBM) created.
 

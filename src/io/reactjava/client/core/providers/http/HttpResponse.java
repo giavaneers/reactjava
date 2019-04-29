@@ -42,9 +42,7 @@ protected IHttpClientBase client;      // associated httpClient               //
                                                                              /**
             Constructor for specified HttpClient
 
-@return     An instance of HttpResponse iff successful.
-
-@param      httpClient     http client
+@param      client     http client
 
 @history    Fri Nov 09, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -243,7 +241,7 @@ public ResponseType getType()
 
 @return     this
 
-@param      httpClient     http client
+@param      client     http client
 
 @history    Fri Nov 09, 2018 10:30:00 (Giavaneers - LBM) created
 

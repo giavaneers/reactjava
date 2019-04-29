@@ -285,7 +285,7 @@ IHttpClientBase open();
                                                                              /**
             Send the request.
 
-@return     void
+@param      requestor      requestor
 
 @history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
 
@@ -356,9 +356,9 @@ IHttpClientBase setErrorReason(
                                                                              /**
             Set the specified response type.
 
-@return     null
+@return     this
 
-@param      responseType      response type
+@param      method      method
 
 @history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
 
@@ -374,9 +374,9 @@ IHttpClientBase setMethod(
                                                                              /**
             Set the readyStateChanged listener.
 
-@return     void
+@return     this
 
-@param      handler     readyStateChanged listener
+@param      readyStateChangedListener     readyStateChanged listener
 
 @history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
 
@@ -489,9 +489,7 @@ IHttpClientBase setStatusText(
                                                                              /**
             Set that a timeout occurred.
 
-@return     void
-
-@param      timeout    'true'
+@return     this
 
 @history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
 
@@ -507,9 +505,9 @@ IHttpClientBase setTimeout();
                                                                              /**
             Set the specified response type.
 
-@return     void
+@return     this
 
-@param      responseType      response type
+@param      url      url
 
 @history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
 

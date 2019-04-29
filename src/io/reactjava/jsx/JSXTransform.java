@@ -125,8 +125,6 @@ static
                                                                              /**
             Default constructor
 
-@return     An instance of JSXTransform if successful.
-
 @history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -286,7 +284,11 @@ public boolean filter(
 
 @return     markup with replaced component tag names
 
-@return     markup      original markup
+@param      classname            classname
+@param      src                  src
+@param      markupDsc            markupDsc
+@param      parsedMethodBody     parsedMethodBody
+@param      logger               logger
 
 @history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -406,8 +408,6 @@ public String generateStyleSource(
                                                                              /**
             Parse component from specified content.
 
-@return     void
-
 @param      classname      candidate classname
 @param      content        candidate source
 @param      components     components identified by at least this preprocessor
@@ -451,8 +451,6 @@ public void getComponent(
                                                                              /**
             Parse components from map of candidates.
 
-@return     void
-
 @param      candidates     component and provider candidates noted by compiler
 @param      components     components identified by at least this preprocessor
 @param      logger         compiler logger
@@ -489,7 +487,7 @@ public void getComponents(
 
 @return     list of unique component tags
 
-@return     markup      original markup
+@param      markup      original markup
 
 @history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -548,7 +546,7 @@ public static List<String> getComponentTags(
 
 @return     odered set of specified tag names
 
-@return     tags     unordered set of tag names
+@param      tags     unordered set of tag names
 
 @history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -613,7 +611,6 @@ protected static List<String> getComponentTagsOrdered(
 @return     current string buffer from specified list
 
 @param      bufs     string buffer
-@param      components     components map
 
 @history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -801,7 +798,7 @@ public static List<MarkupDsc> getMethodMarkupDscs(
 
 @return     sequence of unique java literal expressions in the specified markup
 
-@return     markup      original markup
+@param      markup      original markup
 
 @history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -905,8 +902,6 @@ protected static Map<String,String> getTagsMap()
                                                                               */
                                                                              /**
             SElement handler.
-
-@return     void
 
 @history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -1099,8 +1094,6 @@ public boolean handleElementFinish(
                                                                              /**
             SElement handler.
 
-@return     void
-
 @history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -1281,7 +1274,7 @@ public Node handleText(
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public String handleTextFromTextResource(
+public static String handleTextFromTextResource(
    String     textResource,
    TreeLogger logger)
 {
@@ -1335,39 +1328,41 @@ public String handleTextFromTextResource(
 
 @return     text from the specified URL, or iff not a url, the specified text.
 
-@param      possibleURL    text or url
+@param      url      text or url
+@param      logger   any logger
 
 @history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public String handleTextFromURL(
-   String     text,
+public static String handleTextFromURL(
+   String     url,
    TreeLogger logger)
 {
-   int idx = text.indexOf("://");
+   String text = url;
+   int    idx  = url.indexOf("://");
    if (idx > 0)
    {
       try
       {
-         switch(text.substring(0, idx))
+         switch(url.substring(0, idx))
          {
             case "http":
             case "htts":
             {
-               text = IJSXTransform.getURLAsString(text, logger);
+               text = IJSXTransform.getURLAsString(url, logger);
                break;
             }
             case "text":
             {
-               text = handleTextFromTextResource(text, logger);
+               text = handleTextFromTextResource(url, logger);
             }
          }
       }
       catch(Exception e)
       {
-         text = "Error reading " + text;
+         text = "Error reading " + url;
       }
    }
 
@@ -1379,8 +1374,6 @@ public String handleTextFromURL(
                                                                               */
                                                                              /**
             Indent one tab.
-
-@return     void
 
 @history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -1400,8 +1393,6 @@ public void indent()
                                                                               */
                                                                              /**
             Standard main method. This implementation is null.
-
-@return     void
 
 @history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -1497,8 +1488,6 @@ public static String normalizeParsed(
                                                                               */
                                                                              /**
             IOutdent one tab.
-
-@return     void
 
 @history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -1651,8 +1640,6 @@ public String parse(
                                                                               */
                                                                              /**
             Parse specified markup.
-
-@return     stack value
 
 @history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -2083,7 +2070,7 @@ public String parseMarkup(
 
 @return     parsed
 
-@return     raw      unparsed
+@param      raw      unparsed
 
 @history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -2106,7 +2093,7 @@ public static String parsePropertyReferences(
 
 @return     parsed
 
-@return     raw      unparsed
+@param      raw      unparsed
 
 @history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -2207,7 +2194,7 @@ public static String pretty(
 @param      classname      classname to be processed
 @param      contentBytes   cantent to be processed
 @param      encoding       cantent encoding
-@param      candidates     component and provider candidates noted by compiler
+@param      candidatesNew  component and provider candidates noted by compiler
 @param      components     components identified by preprocessors
 @param      logger         compiler logger
 
@@ -2500,7 +2487,7 @@ public static String resolveCSS(
 
 @return     markup with replaced component tag names
 
-@return     tagName     possible replacement for original tag
+@param      tagName     possible replacement for original tag
 
 @history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -2519,8 +2506,6 @@ public static String resolveTagName(
                                                                               */
                                                                              /**
             Set platform. This method is for development and test purposes.
-
-@return     void.
 
 @param      os    platform os
 
@@ -3583,8 +3568,6 @@ public static boolean unitTest(
                                                                              /**
             Output indent.
 
-@return     void
-
 @history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -3602,8 +3585,6 @@ public void write(
                                                                               */
                                                                              /**
             Output java block.
-
-@return     void
 
 @history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -3627,8 +3608,6 @@ public void writeJavaBlock(
                                                                               */
                                                                              /**
             Output indent.
-
-@return     void
 
 @history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -3672,8 +3651,6 @@ public int     idxEnd;                 // end index                           //
                                                                               */
                                                                              /**
             Default constructor
-
-@return     An instance of MarkupDsc if successful.
 
 @history    Mon Aug 28, 2017 10:30:00 (Giavaneers - LBM) created
 
