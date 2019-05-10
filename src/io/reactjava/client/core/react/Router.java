@@ -92,6 +92,7 @@ package io.reactjava.client.core.react;
 import com.giavaneers.util.gwt.Logger;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.Element;
@@ -102,6 +103,8 @@ public class Router implements IRouter
 {
                                        // constants ------------------------- //
 private static final Logger kLOGGER = Logger.newInstance();
+                                       // default path                        //
+public static final String  kPATH_DEFAULT   = "";
                                        // class variables ------------------- //
                                        // configuration                       //
 protected static IConfiguration configuration;
@@ -157,6 +160,8 @@ public static Component componentForHash(
             props.set(key, properties.get(key));
          }
       }
+                                       // for debugging...                    //
+      Map<String,Function> factoryMap = ReactJava.getComponentFactoryMap();
 
       Function<Properties,Component> factory =
          ReactJava.getComponentFactory(classname);
@@ -430,25 +435,43 @@ public static ReactElement render()
    }
    else if (ReactJava.getIsWebPlatform())
    {
-      if (element != null)
+      try
       {
-         ReactDOM.render(element, DomGlobal.document.getElementById("root"));
-      }
+         if (element != null)
+         {
+            ReactDOM.render(element, DomGlobal.document.getElementById("root"));
+         }
 
-      String anchorElementId = getHashAnchorElementId();
-      if (anchorElementId != null)
-      {
+         String anchorElementId = getHashAnchorElementId();
+         if (anchorElementId != null)
+         {
                                     // scroll to specified anchor element  //
-         scrollIntoView(anchorElementId, 0);
+            scrollIntoView(anchorElementId, 0);
+         }
+         else
+         {
+                                       // some browsers will leave the scroll //
+                                       // bar unchanged when switching to a   //
+                                       // new path, so if an anchor element   //
+                                       // is not specified along with the     //
+                                       // path, scroll to the top             //
+            DomGlobal.window.scrollTo(0, 0);
+         }
       }
-      else
+      catch(Throwable t)
       {
-                                    // some browsers will leave the scroll //
-                                    // bar unchanged when switching to a   //
-                                    // new path, so if an anchor element   //
-                                    // is not specified along with the     //
-                                    // path, scroll to the top             //
-         DomGlobal.window.scrollTo(0, 0);
+         kLOGGER.logError("Router.render(): " + t);
+         if (!path.equals(kPATH_DEFAULT))
+         {
+                                       // error recovery: push default path   //
+            new Timer()
+            {
+               public void run()
+               {
+                  Router.push(kPATH_DEFAULT);
+               }
+            }.schedule(0);
+         }
       }
    }
 

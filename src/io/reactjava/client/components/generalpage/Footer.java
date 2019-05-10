@@ -21,6 +21,7 @@ notes:
                                        // package --------------------------- //
 package io.reactjava.client.components.generalpage;
                                        // imports --------------------------- //
+import io.reactjava.client.components.generalpage.Descriptors.FooterDsc;
 import io.reactjava.client.core.react.Component;
 import io.reactjava.client.core.react.IUITheme;
 
@@ -107,6 +108,13 @@ public void render()
       }
 /*--
       </@material-ui.core.Grid>
+      <@material-ui.core.Grid container spacing={32} justify="space-evenly">
+         <@material-ui.core.Typography
+            class="footerCredit" color="textSecondary" gutterBottom>
+            Website created with React and
+            <a href="http://www.reactjava.io" target="_blank">ReactJava</a>
+         </@material-ui.core.Typography>
+      </@material-ui.core.Grid>
    </footer>
 --*/
 }
@@ -135,6 +143,10 @@ public void renderCSS()
       margin-top: {unitX8};
       padding:    {unitX6};
    }
+   .footerCredit
+   {
+      margin-top: {unitX3}
+   }
    .layout
    {
       margin-left:  {unitX3};
@@ -143,65 +155,4 @@ public void renderCSS()
    }
 --*/
 }
-/*==============================================================================
-
-name:       FooterDsc - footer descriptor
-
-purpose:    Footer descriptor
-
-history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
-
-notes:
-
-==============================================================================*/
-public static class FooterDsc
-{
-                                       // constants ------------------------- //
-                                       // (none)                              //
-                                       // class variables ------------------- //
-                                       // (none)                              //
-                                       // public instance variables --------- //
-public String   title;                 // title                               //
-public String[] descriptions;          // descriptions                        //
-                                       // protected instance variables ------ //
-                                       // (none)                              //
-
-/*------------------------------------------------------------------------------
-
-@name       FooterDsc - default constructor
-                                                                              */
-                                                                             /**
-            Default constructor
-
-@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public FooterDsc()
-{
-}
-/*------------------------------------------------------------------------------
-
-@name       FooterDsc - constructor for specified title and descriptions
-                                                                              */
-                                                                             /**
-            Constructor for specified title and descriptions
-
-@param      title             title
-@param      descriptions      array of descriptions
-
-@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public FooterDsc(
-   String   title,
-   String[] descriptions)
-{
-   this.title         = title;
-   this.descriptions  = descriptions;
-}
-}//====================================// end FooterDsc ======================//
 }//====================================// end Footer =========================//

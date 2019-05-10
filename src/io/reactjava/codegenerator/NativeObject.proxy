@@ -49,6 +49,27 @@ public NativeObject()
 }
 /*------------------------------------------------------------------------------
 
+@name       get - get value of specified property
+                                                                              */
+                                                                             /**
+            Get value of specified property
+
+@return     value of specified property, or null if not found.
+
+@param      propertyName      property name
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public final Object get(
+   String propertyName)
+{
+   return(null);
+}
+/*------------------------------------------------------------------------------
+
 @name       getBoolean - get boolean value of specified property
                                                                               */
                                                                              /**
@@ -166,6 +187,27 @@ public final String getString(
 }
 /*------------------------------------------------------------------------------
 
+@name       remove - remove specified property
+                                                                              */
+                                                                             /**
+            Remove specified property
+
+@return     value of removed property or null if not found.
+
+@param      propertyName      property name
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public final Object remove(
+   String propertyName)
+{
+   return(null);
+}
+/*------------------------------------------------------------------------------
+
 @name       set - set value of specified property
                                                                               */
                                                                              /**
@@ -185,7 +227,6 @@ public final NativeObject set(
    String propertyName,
    Object value)
 {
-   put(propertyName, value);
    return(this);
 }
 /*------------------------------------------------------------------------------

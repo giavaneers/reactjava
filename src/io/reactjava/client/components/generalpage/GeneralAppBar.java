@@ -21,46 +21,31 @@ notes:
                                        // package --------------------------- //
 package io.reactjava.client.components.generalpage;
                                        // imports --------------------------- //
-import elemental2.dom.DomGlobal;
 import elemental2.dom.Element;
 import elemental2.dom.Event;
+import io.reactjava.client.components.generalpage.Descriptors.AppBarDsc;
+import io.reactjava.client.components.generalpage.Descriptors.ButtonDsc;
 import io.reactjava.client.core.react.Component;
 import io.reactjava.client.core.react.INativeEventHandler;
 import java.util.HashMap;
-import java.util.function.Consumer;
+import java.util.Map;
                                        // GeneralAppBar ======================//
 public class GeneralAppBar extends Component
 {
                                        // class constants ------------------- //
-public static final String   kPROPERTY_KEY_APP_BAR_DSC        = "appbardsc";
-public static final String   kPROPERTY_KEY_0PEN               = "open";
-public static final String   kPROPERTY_KEY_0PEN_HANDLER       = "openHandler";
-
-public static final String   kAPP_BAR_BUTTON_TEXT_COMMUNITY   = "Community";
-public static final String   kAPP_BAR_BUTTON_TEXT_DOCS        = "Docs";
-public static final String   kAPP_BAR_BUTTON_TEXT_GITHUB      = "GitHub";
-public static final String   kAPP_BAR_BUTTON_TEXT_LOGIN       = "Login";
-public static final String   kAPP_BAR_BUTTON_TEXT_MENU_BUTTON = "MenuButton";
-public static final String   kAPP_BAR_BUTTON_TEXT_REACTJAVA   = "ReactJava";
-public static final String   kAPP_BAR_BUTTON_TEXT_TUTORIAL    = "Tutorial";
-public static final String[] kAPP_BAR_BUTTON_TEXT =
-{
-                                       // order of appearance                 //
-   kAPP_BAR_BUTTON_TEXT_DOCS,
-   kAPP_BAR_BUTTON_TEXT_TUTORIAL,
-   kAPP_BAR_BUTTON_TEXT_COMMUNITY,
-   kAPP_BAR_BUTTON_TEXT_GITHUB,
-   kAPP_BAR_BUTTON_TEXT_LOGIN
-};
-
-public static final String kGITHUB_URL = "https://github.com/giavaneers";
+public static final String kPROPERTY_KEY_APP_BAR_DSC  = "appbardsc";
+public static final String kAPP_BAR_BUTTON_TEXT_LOGIN = "Login";
+public static final String kAPP_BAR_BUTTON_TEXT_MENU  = "MenuButton";
 
                                        // class variables ------------------- //
                                        // (none)                              //
                                        // public instance variables --------- //
                                        // (none)                              //
                                        // protected instance variables -------//
-protected AppBarDsc appBarDsc;         // app bar descriptor                  //
+protected AppBarDsc          appBarDsc;// app bar descriptor                  //
+protected Map<String,String> buttonMap;// map of button url by text           //
+                                       // has menu button                     //
+protected Boolean            bMenuButton;
                                        // private instance variables -------- //
                                        // (none)                              //
 /*------------------------------------------------------------------------------
@@ -78,44 +63,19 @@ protected AppBarDsc appBarDsc;         // app bar descriptor                  //
 //------------------------------------------------------------------------------
 public INativeEventHandler clickHandler = (Event e) ->
 {
+   AppBarDsc dsc = getAppBarDsc();
+   if (dsc.openHandler != null)
+   {
                                        // the element handling the click      //
                                        // (not necessarily the root target)   //
-   switch(((Element)e.currentTarget).getAttribute("id"))
-   {
-      case kAPP_BAR_BUTTON_TEXT_COMMUNITY:
-      {
-         break;
-      }
-      case kAPP_BAR_BUTTON_TEXT_DOCS:
-      {
-         break;
-      }
-      case kAPP_BAR_BUTTON_TEXT_GITHUB:
-      {
-         DomGlobal.window.open(kGITHUB_URL, "_blank");
-         break;
-      }
-      case kAPP_BAR_BUTTON_TEXT_LOGIN:
-      {
-         break;
-      }
-      case kAPP_BAR_BUTTON_TEXT_MENU_BUTTON:
-      {
-         getAppBarDsc().openHandler.accept(
-            new HashMap<String,Object>()
-            {{
-               put("bOpen", true);
-            }});
-         break;
-      }
-      case kAPP_BAR_BUTTON_TEXT_REACTJAVA:
-      {
-         break;
-      }
-      case kAPP_BAR_BUTTON_TEXT_TUTORIAL:
-      {
-         break;
-      }
+      String id = ((Element)e.currentTarget).getAttribute("id");
+      dsc.openHandler.accept(
+         new HashMap<String,Object>()
+         {{
+            put("id",    id);
+            put("url",   getButtonMap().get(id));
+            put("bOpen", kAPP_BAR_BUTTON_TEXT_MENU.equals(id));
+         }});
    }
 };
 /*------------------------------------------------------------------------------
@@ -143,6 +103,33 @@ protected AppBarDsc getAppBarDsc()
 }
 /*------------------------------------------------------------------------------
 
+@name       getButtonMap - get map of button url by text
+                                                                              */
+                                                                             /**
+            Get map of button url by text.
+
+@return     map of button url by text
+
+@history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected Map<String,String> getButtonMap()
+{
+   if (buttonMap == null)
+   {
+      buttonMap = new HashMap<>();
+      for (ButtonDsc dsc : getAppBarDsc().buttonDscs)
+      {
+         buttonMap.put(dsc.text, dsc.url);
+      }
+   }
+   return(buttonMap);
+}
+/*------------------------------------------------------------------------------
+
 @name       render - render component
                                                                               */
                                                                              /**
@@ -151,45 +138,51 @@ protected AppBarDsc getAppBarDsc()
 @history    Thu Feb 14, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
-
                                                                               */
 //------------------------------------------------------------------------------
 public void render()
 {
-   AppBarDsc dsc = (AppBarDsc)props().get(kPROPERTY_KEY_APP_BAR_DSC);
 /*--
    <@material-ui.core.AppBar position="fixed" color="default" class="appBar">
-      <@material-ui.core.Toolbar disableGutters={!dsc.bOpen}>
+      <@material-ui.core.Toolbar
+         disableGutters={getAppBarDsc().bOpen ? true : null}>
+--*/
+   if (getAppBarDsc().bMenuButton)
+   {
+/*--
          <@material-ui.core.IconButton
             color="inherit"
-            id={kAPP_BAR_BUTTON_TEXT_MENU_BUTTON}
+            id={kAPP_BAR_BUTTON_TEXT_MENU}
             onClick={clickHandler}
             class="menuButton"
          >
             <@material-ui.icons.Menu />
          </@material-ui.core.IconButton>
+--*/
+   }
+/*--
          <@material-ui.core.Typography
             variant="h6" color="inherit" noWrap class="toolbarTitle"
-            id={dsc.title}
+            id={getAppBarDsc().title}
             onClick={clickHandler}>
-            {dsc.title}
+            {getAppBarDsc().title}
          </@material-ui.core.Typography>
 --*/
-      for (String text : kAPP_BAR_BUTTON_TEXT)
-      {
-         String color =
-            kAPP_BAR_BUTTON_TEXT_LOGIN.equals(text) ? "primary" : null;
+   for (ButtonDsc buttonDsc : getAppBarDsc().buttonDscs)
+   {
+      String color =
+         kAPP_BAR_BUTTON_TEXT_LOGIN.equals(buttonDsc.text) ? "primary" : null;
 
-         String variant =
-            kAPP_BAR_BUTTON_TEXT_LOGIN.equals(text) ? "outlined" : null;
+      String variant =
+         kAPP_BAR_BUTTON_TEXT_LOGIN.equals(buttonDsc.text) ? "outlined" : null;
 /*--
                                        <!-- each App Bar  button -------------->
-         <@material-ui.core.Button id={text} onClick={clickHandler}
+         <@material-ui.core.Button id={buttonDsc.text} onClick={clickHandler}
             color={color} variant={variant}>
-            {text}
+            {buttonDsc.text}
          </@material-ui.core.Button>
 --*/
-         }
+   }
 /*--
       </@material-ui.core.Toolbar>
    </@material-ui.core.AppBar>
@@ -238,54 +231,4 @@ public void renderCSS()
    }
 --*/
 }
-/*==============================================================================
-
-name:       AppBarDsc - app bar descriptor
-
-purpose:    App bar descriptor
-
-history:    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
-
-notes:
-
-==============================================================================*/
-public static class AppBarDsc
-{
-                                       // constants ------------------------- //
-                                       // (none)                              //
-                                       // class variables ------------------- //
-                                       // (none)                              //
-                                       // public instance variables --------- //
-public String           title;         // title                               //
-public boolean          bOpen;         // side drawer open or not             //
-public Consumer         openHandler;   // image                               //
-                                       // protected instance variables ------ //
-                                       // (none)                              //
-
-/*------------------------------------------------------------------------------
-
-@name       AppBarDsc - constructor for specified image, push values, and sections
-                                                                              */
-                                                                             /**
-            Constructor for specified image, push values, and sections.
-
-@param      title        title
-@param      bOpen        true iff side drawer is open
-@param      openHandler  any open handler
-
-@history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public AppBarDsc(
-   String       title,
-   boolean      bOpen,
-   Consumer     openHandler)
-{
-   this.title       = title;
-   this.bOpen       = bOpen;
-   this.openHandler = openHandler;
-}
-}//====================================// end AppBarDsc ======================//
 }//====================================// end GeneralAppBar ==================//

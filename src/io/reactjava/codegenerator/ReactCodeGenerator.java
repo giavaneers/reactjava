@@ -38,6 +38,7 @@ import io.reactjava.client.core.react.IReactCodeGenerator;
 import io.reactjava.client.core.react.IUITheme;
 import io.reactjava.client.core.react.Utilities;
 import io.reactjava.client.core.resources.javascript.IJavascriptResources;
+import io.reactjava.codegenerator.JavascriptBundler.InputStreamStringBuilder;
 import io.reactjava.jsx.IConfiguration;
 import io.reactjava.jsx.IJSXTransform;
 import java.io.ByteArrayInputStream;
@@ -49,6 +50,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.ProcessBuilder.Redirect;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -348,7 +350,7 @@ public static void copyBundleScriptToArtifact(
 
    if (injectScriptAppDirty(logger))
    {
-      String injectScript = generateInjectScript(logger);
+      String injectScript = generateInjectScript(configuration, logger);
       in = new ByteArrayInputStream(injectScript.getBytes("UTF-8"));
    }
    else
@@ -811,15 +813,16 @@ public static void copyStreamToArtifact(
                                                                               */
 //------------------------------------------------------------------------------
 public static String generateInjectScript(
-   TreeLogger logger)
-   throws     Exception
+   IConfiguration configuration,
+   TreeLogger     logger)
+   throws         Exception
 {
    if (logger != null)
    {
       logger.log(TreeLogger.Type.INFO, "generateInjectScript(): entered");
    }
 
-   String injectScript = generateInjectScriptBrowserify(logger);
+   String injectScript = generateInjectScriptBrowserify(configuration, logger);
 
    if (logger != null)
    {
@@ -860,15 +863,17 @@ public static String generateInjectScript(
                                                                               */
 //------------------------------------------------------------------------------
 public static String generateInjectScriptBrowserify(
-   TreeLogger logger)
-   throws     Exception
+   IConfiguration configuration,
+   TreeLogger     logger)
+   throws         Exception
 {
    long entry = System.currentTimeMillis();
 
    logger.log(
       logger.INFO, "generateInjectScriptBrowserify(): entered");
 
-   File projectDir = IConfiguration.getProjectDirectory(null, logger);
+   boolean bProductionMode = configuration.getProductionMode();
+   File    projectDir      = IConfiguration.getProjectDirectory(null, logger);
 
                                        // RxJs is currently restricted        //
                                        // to version 5.5.11 since             //
@@ -887,10 +892,10 @@ public static String generateInjectScriptBrowserify(
       "module.exports = "
     + "{React:React, Fragment:React.Fragment, ReactDOM:ReactDOM, Rx:Rx, getType:_getType";
 
-   script += "const React    = require('react');\n";
-   script += "const ReactDOM = require('react-dom');\n";
-   script += "const Rx       = require('rxjs');\n";
-   script += "const _getType = function(type){return module.exports[type]};\n";
+   script += "var React    = require('react');\n";
+   script += "var ReactDOM = require('react-dom');\n";
+   script += "var Rx       = require('rxjs');\n";
+   script += "var _getType = function(type){return module.exports[type]};\n";
 
    logger.log(
       logger.INFO,
@@ -900,14 +905,15 @@ public static String generateInjectScriptBrowserify(
    for (String module : IConfiguration.getDependenciesSet())
    {
       logger.log(
-         logger.INFO, "generateInjectScriptBrowserify adding module=" + module);
+         logger.INFO,
+         "generateInjectScriptBrowserify(): adding module=" + module);
 
                                        // get the require string              //
                                        // and the export target               //
       String item       = module.substring(module.lastIndexOf('.') + 1);
              item       = IConfiguration.toReactAttributeName(item);
       String require    = module.replace(".","/");
-      String requireAdd = "const " + item + " = require('" + require + "');\n";
+      String requireAdd = "var " + item + " = require('" + require + "');\n";
       String target     = item + ".default || " + item + "." + item;
       String exportAdd  = ", " + item + ":" + target;
 
@@ -919,7 +925,7 @@ public static String generateInjectScriptBrowserify(
    script += export;
 
    logger.log(
-      logger.INFO, "generateInjectScriptBrowserify main.js=\n" + script);
+      logger.INFO, "generateInjectScriptBrowserify(): main.js=\n" + script);
 
                                        // the current working directory is not//
                                        // necessarily the project directory   //
@@ -934,41 +940,106 @@ public static String generateInjectScriptBrowserify(
    IConfiguration.fastChannelCopy(in, out, in.available());
    out.flush();
    out.close();
-
-   // ex: node_modules/.bin/browserify main.js -o appbundle.js -s ReactJava
-
                                        // create app bundle with browserify   //
-   String bundleName = "appbundle.js";
-   String namespace  = "ReactJava";
-   String browserify = ".bin/browserify" + (IConfiguration.getOSWindows() ? ".cmd" : "");
-   String executable =
+   String bundleName       = "appbundle.js";
+   File   injectScriptFile = new File(projectDir, bundleName);
+   String prettyName       = "appbundle.pretty.js";
+   File   prettyScriptFile = new File(projectDir, prettyName);
+
+   if (injectScriptFile.exists())
+   {
+      injectScriptFile.delete();
+   }
+   if (prettyScriptFile.exists())
+   {
+      prettyScriptFile.delete();
+   }
+
+   for (int iOp = 0, iOpMax = bProductionMode ? 2 : 1; iOp < iOpMax; iOp++)
+   {
+      List<String> commands = new ArrayList<>();
+      if (iOp == 0)
+      {
+         // ex: node_modules/.bin/browserify main.js -s ReactJava -o appbundle.js
+
+         String namespace  = "ReactJava";
+         String browserify =
+            ".bin/browserify" + (IConfiguration.getOSWindows() ? ".cmd" : "");
+
+         String executable =
              new File(IConfiguration.getNodeModulesDir(logger), browserify)
-              .getAbsolutePath();
+                .getAbsolutePath();
 
-   String[] commands ={executable, "main.js", "-o", bundleName,"-s", namespace};
-   String   command  = "";
-   for (String token : commands)
-   {
-      command += token + " ";
+         commands.add(executable);
+         commands.add("main.js");
+         commands.add("-s");
+         commands.add(namespace);
+         commands.add("-o");
+         commands.add(bundleName);
+      }
+      else
+      {
+                                       // rename inject file                  //
+         injectScriptFile.renameTo(prettyScriptFile);
+         injectScriptFile = new File(projectDir, bundleName);
+
+         // ex: node_modules/.bin/uglifyjs "appbundle.pretty.js" -cm -o appbundle.js
+         String uglify =
+            ".bin/uglifyjs" + (IConfiguration.getOSWindows() ? ".cmd" : "");
+
+         String executable =
+             new File(IConfiguration.getNodeModulesDir(logger), uglify)
+                .getAbsolutePath();
+
+         commands.add(executable);
+         commands.add(prettyName);
+         commands.add("-cm");
+         commands.add("-o");
+         commands.add(bundleName);
+      }
+
+      String command = "";
+      for (String token : commands)
+      {
+         command += token + " ";
+      }
+
+      logger.log(
+         logger.INFO,
+         "generateInjectScriptBrowserify(): \nwd=" + projectDir.getAbsolutePath()
+       + "\ncommand=" + command + "\n");
+
+      long           start = System.currentTimeMillis();
+      ProcessBuilder pb    = new ProcessBuilder(commands).directory(projectDir);
+      Process        p     = pb.start();
+      int            cc    = p.waitFor();
+
+      logger.log(
+         logger.INFO,
+         "generateInjectScriptBrowserify(): completed in "
+       + (System.currentTimeMillis() - start) + " ms.");
+
+      if (cc != 0)
+      {
+         String msg =
+            "Process returned an error. Did you forget to install any of "
+          + "react, react-dom, or rxjs@5.5.11? (please note version of rxjs)";
+
+         logger.log(logger.ERROR, "generateInjectScriptBrowserify(): " + msg);
+         throw new IllegalStateException(msg);
+      }
+      if (!injectScriptFile.exists())
+      {
+         throw new IllegalStateException("Inject file was not generated");
+      }
    }
 
-   logger.log(
-      logger.DEBUG, "generateInjectScriptBrowserify command=" + command);
-
-   ProcessBuilder pb = new ProcessBuilder(commands).directory(projectDir);
-   Process process   = pb.start();
-   if (process.waitFor() != 0)
-   {
-      throw new IllegalStateException(
-         "Browserify returned an error. Did you forget to install any of "
-       + "react, react-dom, or rxjs@5.5.11? (please note version of rxjs)");
-   }
-
-   File injectScriptFile = new File(projectDir, bundleName);
    String injectScript = IJSXTransform.getFileAsString(injectScriptFile, logger);
-
+   logger.log(
+      logger.INFO,
+      "generateInjectScriptBrowserify(): injectScriopt length="
+         + injectScript.length());
    //main.delete();
-   //injectScriptFile.delete();
 
    logger.log(
       logger.INFO,
@@ -1853,6 +1924,12 @@ public Configuration(
             : IPlatform.kPLATFORM_IOS.equals(os)
                ? PlatformIOS.class.getName()
                : PlatformAndroid.class.getName());
+   }
+
+   String productionMode = System.getProperty("productionMode");
+   if (productionMode != null)
+   {
+      setProductionMode("true".equals(productionMode.toLowerCase()));
    }
 }
 /*------------------------------------------------------------------------------

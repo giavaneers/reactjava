@@ -15,6 +15,7 @@ notes:
                                        // package --------------------------- //
 package io.reactjava.client.core.react;
                                        // imports --------------------------- //
+import java.util.Map;
 import java.util.function.Function;
                                        // IReactCodeGenerator ================//
 public interface IReactCodeGenerator
@@ -59,6 +60,22 @@ ReactElement boot(String className);
 //------------------------------------------------------------------------------
 Function getFactory(
    String classname);
+
+/*------------------------------------------------------------------------------
+
+@name       getFactoryMap - get factory map
+                                                                              */
+                                                                             /**
+            Get factory map.
+
+@return     factory map
+
+@history    Tue May 15, 2017 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public Map<String,Function> getFactoryMap();
 
 /*------------------------------------------------------------------------------
 

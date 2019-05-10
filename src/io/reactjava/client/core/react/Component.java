@@ -31,14 +31,20 @@ public static final boolean kSRCCFG_USE_STATE_HOOK = false;
 private static final Logger kLOGGER = Logger.newInstance();
 
                                        // class variables                     //
-protected static int        nextId;    // next elementId to be autoassigned   //
+protected static int nextId;           // next elementId to be autoassigned   //
                                        // protected instance variables ------ //
-protected StateMgr          stateMgr;  // component state manager             //
+protected StateMgr   stateMgr;         // component state manager             //
 protected java.util.function.Function<Properties, ReactElement>
-                                       // component function                  //
-                            componentFcn;
-protected String            css;       // css                                 //
-private   P                 props;     // private to approximate immutable    //
+                     componentFcn;     // component function                  //
+protected String     css;              // css                                 //
+                                       // private to approximate immutable    //
+                                       // renamed from 'props' to avoid       //
+                                       // minified confusion with react       //
+                                       // 'props'; note, this instance        //
+                                       // variable should appear last - see   //
+                                       // ReactJava.                          //
+                                       // getNativeComponentPropertiesFieldname()//
+private   P          componentProperties;
 
 /*------------------------------------------------------------------------------
 
@@ -63,62 +69,16 @@ public Component()
                                                                              /**
             Constructor for specified properties
 
-@param      props    props
+@param      initialProps      initial properties
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public Component(P props)
+public Component(P initialProps)
 {
-   initialize(props);
-}
-/*------------------------------------------------------------------------------
-
-@name       componentDidMount - componentDidMount indication
-                                                                              */
-                                                                             /**
-            componentDidMount indication. This implementation is null.
-
-@history    Fri Mar 8, 2019 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public void componentDidMount()
-{
-}
-/*------------------------------------------------------------------------------
-
-@name       componentDidUpdate - componentDidUpdate indication
-                                                                              */
-                                                                             /**
-            componentDidUpdate indication. This implementation is null.
-
-@history    Fri Mar 8, 2019 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public void componentDidUpdate()
-{
-}
-
-/*------------------------------------------------------------------------------
-
-@name       componentWillUnmount - componentWillUnmount indication
-                                                                              */
-                                                                             /**
-            componentWillUnmount indication. This implementation is null.
-
-@history    Fri Mar 8, 2019 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public void componentWillUnmount()
-{
+   initialize(initialProps);
 }
 /*------------------------------------------------------------------------------
 
@@ -276,26 +236,6 @@ protected int getStateInt(
 }
 /*------------------------------------------------------------------------------
 
-@name       getStateString - get state string value
-                                                                              */
-                                                                             /**
-            Get state string value.
-
-@return     state string value
-
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-
-                                                                              */
-//------------------------------------------------------------------------------
-protected String getStateString(
-   String key)
-{
-   return((String)getState(key));
-}
-/*------------------------------------------------------------------------------
-
 @name       getStateMgr - get state manager
                                                                               */
                                                                              /**
@@ -316,6 +256,26 @@ protected StateMgr getStateMgr()
       stateMgr = new StateMgr();
    }
    return(stateMgr);
+}
+/*------------------------------------------------------------------------------
+
+@name       getStateString - get state string value
+                                                                              */
+                                                                             /**
+            Get state string value.
+
+@return     state string value
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected String getStateString(
+   String key)
+{
+   return((String)getState(key));
 }
 /*------------------------------------------------------------------------------
 
@@ -347,7 +307,7 @@ public IUITheme getTheme()
 @name       initialize - initialize
                                                                               */
                                                                              /**
-            Initialize. This method is invoked in the constructor(P props),
+            Initialize. This method is invoked in the constructor(P componentProperties),
             so be careful that any referenced instance variables have been
             initialized. Specifically, in Java, the order for initialization
             statements is as follows:
@@ -362,7 +322,7 @@ public IUITheme getTheme()
 
 @return     void
 
-@param      props     properties
+@param      initialProps      initial properties
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -371,10 +331,12 @@ public IUITheme getTheme()
                                                                               */
 //------------------------------------------------------------------------------
 public P initialize(
-   P props)
+   P initialProps)
 {
-   this.props = props != null ? props : (P)new Properties();
-   this.props.setComponent(this);
+   this.componentProperties =
+      initialProps != null ? initialProps : (P)new Properties();
+
+   this.componentProperties.setComponent(this);
 
    initConfiguration();
    initTheme();
@@ -383,7 +345,7 @@ public P initialize(
    {
       ReactJava.ensureComponentStyles(this, false);
    }
-   return(this.props);
+   return(this.componentProperties);
 }
 /*------------------------------------------------------------------------------
 
@@ -437,7 +399,7 @@ protected void initTheme()
 //------------------------------------------------------------------------------
 public P props()
 {
-   return(props);
+   return(componentProperties);
 }
 /*------------------------------------------------------------------------------
 
@@ -491,10 +453,10 @@ public void renderCSS()
 protected void setId(
    String id)
 {
-   if (!id.equals(props.get("id")))
+   if (!id.equals(componentProperties.get("id")))
    {
                                        // don't know why set() won't work here//
-      props = (P)Properties.with(props, "id", id);
+      componentProperties = (P)Properties.with(componentProperties, "id", id);
    }
 }
 /*------------------------------------------------------------------------------

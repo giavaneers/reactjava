@@ -25,6 +25,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import jsinterop.base.Js;
+import jsinterop.base.JsForEachCallbackFn;
+import jsinterop.base.JsPropertyMap;
 import jsinterop.core.html.Window;
                                        // ReactJava ==========================//
 public class ReactJava
@@ -43,6 +45,11 @@ protected static IReactCodeGenerator generator;
 
                                        // map of stylesheet by component class//
 protected static Map<String,String>  injectedStylesheets;
+
+                                       // component properties native         //
+                                       // fieldname which changes with degree //
+                                       // of minification                     //
+protected static String              nativeComponentPropertiesFieldname;
 
                                        // private instance variables -------- //
                                        // (none)                              //
@@ -509,6 +516,24 @@ public static Function<Properties,Component> getComponentFactory(
 }
 /*------------------------------------------------------------------------------
 
+@name       getComponentFactoryMap - get component factory map
+                                                                              */
+                                                                             /**
+            Get component factory map.
+
+@return     component factory map
+
+@history    Thu Sep 7, 2017 08:46:23 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static Map<String,Function> getComponentFactoryMap()
+{
+   return(getCodeGenerator().getFactoryMap());
+}
+/*------------------------------------------------------------------------------
+
 @name       getComponentFcn - get component function for specified component
                                                                               */
                                                                              /**
@@ -582,6 +607,54 @@ public static boolean getIsWebPlatform()
 }
 /*------------------------------------------------------------------------------
 
+@name       getNativeComponentPropertiesFieldname - get native fieldname
+                                                                              */
+                                                                             /**
+            Get native componentProperties fieldname.
+
+            By investigation:
+
+               1. is the first item for which the callback is invoked.
+               2. detailed   -> "io_reactjava_client_core_react_Component"
+                                "_componentProperties"
+               3. pretty     -> "componentProperties"
+               4. obfuscated -> "g"
+
+@return     native componentProperties fieldname
+
+@param      componentMap      component as JsPropertyMap
+
+@history    Thu Sep 7, 2017 08:46:23 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static String getNativeComponentPropertiesFieldname(
+   JsPropertyMap<Object> componentMap)
+{
+   if (nativeComponentPropertiesFieldname == null)
+   {
+      JsForEachCallbackFn callback = new JsForEachCallbackFn()
+      {
+         public void onKey(String key)
+         {
+            if (nativeComponentPropertiesFieldname == null)
+            {
+                                       // since the instance variable is last //
+                                       // in the source, it is first here...  //
+               nativeComponentPropertiesFieldname = key;
+
+               kLOGGER.logInfo(
+                  "ReactJava.getNativeComponentPropertiesFieldname(): =" + key);
+            }
+         }
+      };
+      componentMap.forEach(callback);
+   }
+   return(nativeComponentPropertiesFieldname);
+}
+/*------------------------------------------------------------------------------
+
 @name       getPlatformProvider - get platform provider
                                                                               */
                                                                              /**
@@ -597,62 +670,6 @@ public static boolean getIsWebPlatform()
 public static String getPlatformProvider()
 {
    return(getCodeGenerator().getPlatformProvider());
-}
-/*------------------------------------------------------------------------------
-
-@name       getRenderableComponent - get native component for specified component
-                                                                              */
-                                                                             /**
-            Get native component.
-
-@return     native component
-
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-
-                                                                              */
-//------------------------------------------------------------------------------
-public static <P extends Properties> INativeRenderableComponent getRenderableComponent(
-   String classname)
-{
-   Component component = getComponentFactory(classname).apply(new Properties());
-   return(getRenderableComponent(component));
-}
-/*------------------------------------------------------------------------------
-
-@name       getRenderableComponent - get native component for specified component
-                                                                              */
-                                                                             /**
-            Get native component.
-
-@return     native component
-
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-
-                                                                              */
-//------------------------------------------------------------------------------
-public static <P extends Properties> INativeRenderableComponent getRenderableComponent(
-   Component component)
-{
-   return((props) ->
-   {
-                                       // assign the private instance variable//
-      Js.asPropertyMap(component).set(
-         "io_reactjava_client_core_react_Component_props", props);
-
-      ReactElement element = null;
-
-      Function<P, ReactElement> fcn = getComponentFcn(component);
-
-      if (fcn != null)
-      {
-         element = fcn.apply((P)props);
-      }
-      return(element);
-   });
 }
 /*------------------------------------------------------------------------------
 
@@ -708,6 +725,61 @@ public static Function<Properties,IProvider> getProvider(
       (Function<Properties,IProvider>)getCodeGenerator().getFactory(classname);
 
    return(factory);
+}
+/*------------------------------------------------------------------------------
+
+@name       getRenderableComponent - get native component for specified component
+                                                                              */
+                                                                             /**
+            Get native component.
+
+@return     native component
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static <P extends Properties> INativeRenderableComponent getRenderableComponent(
+   String classname)
+{
+   Component component = getComponentFactory(classname).apply(new Properties());
+   return(getRenderableComponent(component));
+}
+/*------------------------------------------------------------------------------
+
+@name       getRenderableComponent - get native component for specified component
+                                                                              */
+                                                                             /**
+            Get native component.
+
+@return     native component
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static <P extends Properties> INativeRenderableComponent getRenderableComponent(
+   Component component)
+{
+   return((props) ->
+   {
+                                       // assign the private instance variable//
+      JsPropertyMap<Object> map = Js.asPropertyMap(component);
+      map.set(getNativeComponentPropertiesFieldname(map), props);
+
+      ReactElement element = null;
+
+      Function<P, ReactElement> fcn = getComponentFcn(component);
+      if (fcn != null)
+      {
+         element = fcn.apply((P)props);
+      }
+      return(element);
+   });
 }
 /*------------------------------------------------------------------------------
 

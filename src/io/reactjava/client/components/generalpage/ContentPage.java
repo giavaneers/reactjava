@@ -24,7 +24,7 @@ package io.reactjava.client.components.generalpage;
                                        // imports --------------------------- //
 import io.reactjava.client.core.react.Component;
 import io.reactjava.client.core.react.IUITheme;
-import io.reactjava.jsx.JSXTransform;
+import io.reactjava.client.core.react.Properties;
 import java.util.ArrayList;
 import java.util.List;
                                        // ContentPage ========================//
@@ -32,15 +32,14 @@ public class ContentPage extends Component
 {
                                        // class constants ------------------- //
                                        // property keys                       //
-public static final String kKEY_CONTENT  = "content";
-public static final String kKEY_MANIFEST = "manifest";
+public static final String  kKEY_CONTENT  = "content";
 
                                        // class variables ------------------- //
                                        // (none)                              //
                                        // public instance variables --------- //
                                        // (none)                              //
                                        // protected instance variables -------//
-protected List<ContentDsc> content;    // array of content descriptors        //
+protected List<ContentDsc>  content;   // array of content descriptors        //
                                        // private instance variables -------- //
                                        // (none)                              //
 /*------------------------------------------------------------------------------
@@ -65,7 +64,7 @@ protected List<ContentDsc> getContent()
       content = (List<ContentDsc>)props().get(kKEY_CONTENT);
       if (content == null)
       {
-         content = ContentDsc.parse(props().getString(kKEY_MANIFEST));
+         content = ContentDsc.parse(props().getString(kKEY_CONTENT));
       }
    }
    return(content);
@@ -182,11 +181,11 @@ public static final String kTOKEN_TITLE     = ".title";
 public static final String kTOKEN_REFERENCE = ".reference";
 
                                        // class variables ------------------- //
-                                       // (none)                              //
+public static Properties   manifests;  // getManifests map                       //
                                        // public instance variables --------- //
-public int    type;                    // type                                //
-public String text;                    // content                             //
-public String id;                      // elementId                           //
+public int                 type;       // type                                //
+public String              text;       // content                             //
+public String              id;         // elementId                           //
                                        // protected instance variables ------ //
                                        // (none)                              //
 

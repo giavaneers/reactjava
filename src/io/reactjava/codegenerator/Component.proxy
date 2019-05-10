@@ -32,7 +32,8 @@ protected java.util.function.Function<Properties,ReactElement>
                                        // component function                  //
                             componentFcn;
 protected String            css;       // css                                 //
-protected P                 props;     // component properties                //
+                                        // component properties                //
+protected P                 componentProperties;
 protected IUITheme          theme;     // theme                               //
 
 /*------------------------------------------------------------------------------
@@ -66,7 +67,7 @@ public Component()
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public Component(P props)
+public Component(P initialProps)
 {
 }
 /*------------------------------------------------------------------------------
@@ -226,6 +227,25 @@ protected int getStateInt(
 }
 /*------------------------------------------------------------------------------
 
+@name       getStateMgr - get state manager
+                                                                              */
+                                                                             /**
+            Get state manager.
+
+@return     state manager
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected StateMgr getStateMgr()
+{
+   return(null);
+}
+/*------------------------------------------------------------------------------
+
 @name       getStateString - get state string value
                                                                               */
                                                                              /**
@@ -287,9 +307,39 @@ public IUITheme getTheme()
                                                                               */
 //------------------------------------------------------------------------------
 public P initialize(
-   P props)
+   P initialProps)
 {
-   return(props);
+   return(initialProps);
+}
+/*------------------------------------------------------------------------------
+
+@name       initConfiguration - initialize configuration
+                                                                              */
+                                                                             /**
+            Initialize configuration.
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected void initConfiguration()
+{
+}
+/*------------------------------------------------------------------------------
+
+@name       initTheme - initialize theme
+                                                                              */
+                                                                             /**
+            Initialize theme.
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected void initTheme()
+{
 }
 /*------------------------------------------------------------------------------
 
@@ -308,7 +358,7 @@ public P initialize(
 //------------------------------------------------------------------------------
 public P props()
 {
-   return(props);
+   return(componentProperties);
 }
 /*------------------------------------------------------------------------------
 
@@ -475,4 +525,106 @@ public void useState(
    Object value)
 {
 }
+/*==============================================================================
+
+name:       StateMgr - properties
+
+purpose:    JsInterop definition for access to javascript onLoad handler
+
+history:    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
+
+notes:
+
+==============================================================================*/
+public class StateMgr
+{
+                                       // constants ------------------------- //
+                                       // (none)                              //
+                                       // class variables ------------------- //
+                                       // (none)                              //
+                                       // public instance variables --------- //
+                                       // (none)                              //
+                                       // protected instance variables ------ //
+                                       // (none)                              //
+
+/*------------------------------------------------------------------------------
+
+@name       StateMgr - constructor
+                                                                              */
+                                                                             /**
+            Constructor
+
+@history    Mon Aug 28, 2017 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public StateMgr()
+{
+}
+/*------------------------------------------------------------------------------
+
+@name       getState - get state element value
+                                                                              */
+                                                                             /**
+            Get state element value.
+
+@return     state element value
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected Object getState(
+   String key)
+{
+   return(null);
+}
+/*------------------------------------------------------------------------------
+
+@name       setState - set state
+                                                                              */
+                                                                             /**
+            Set state.
+
+@param      key      state variable name
+@param      value    new state variable value
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected void setState(
+   String key,
+   Object value)
+{
+}
+/*------------------------------------------------------------------------------
+
+@name       useState - initialize state variables
+                                                                              */
+                                                                             /**
+            Initialize state variables. Each attribute of the specified
+            ComponentState contains a name (key) and an associated initial
+            value. This ReactJava implementation splits each attribute into a
+            separate React state hook.
+
+@param      key      state variable name
+@param      value    new state variable value
+
+@history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected void useState(
+   String key,
+   Object value)
+{
+}
+}//====================================// end StateMgr =======================//
 }//====================================// end Component ----------------------//

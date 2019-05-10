@@ -82,7 +82,6 @@ public INativeEventHandler clickHandler = (Event e) ->
 @history    Thu Feb 14, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
-      <div tabIndex={0} role="button" onClick={clickHandler}>
                                                                               */
 //------------------------------------------------------------------------------
 public void render()

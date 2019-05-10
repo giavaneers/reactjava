@@ -502,6 +502,54 @@ public static native int getObjectIntValueNative(
 }-*/;
 /*------------------------------------------------------------------------------
 
+@name       getURLAsString - get specified url as string
+                                                                              */
+                                                                             /**
+            Get specified url as string.
+
+@param      url         specified url
+@param      callback    completion callback
+
+@history    Mon May 19, 2014 18:00:00 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static void getURLAsString(
+   String                     url,
+   Callback<String,Exception> callback)
+{
+   APIRequestor requestor = (Object rsp, Object token) ->
+   {
+      IHttpResponse response = (IHttpResponse)rsp;
+      Throwable     error    = response.getError();
+      if (error != null)
+      {
+         callback.onFailure(new Exception(error));
+      }
+      else
+      {
+         try
+         {
+            byte[] bytes = response.getBytes();
+            callback.onSuccess(new String(bytes, "UTF-8"));
+         }
+         catch(Exception e)
+         {
+            callback.onFailure(e);
+         }
+      }
+   };
+                                       // read the url using a requestor      //
+                                       // instead of an Observable since Rx   //
+                                       // may not yet have been loaded        //
+   new HttpClientBase(url)
+      .setResponseType(ResponseType.kARRAYBUFFER)
+      .setRequestToken(url)
+      .send(requestor);
+}
+/*------------------------------------------------------------------------------
+
 @name       injectCSS - inject the specified script into the top window
                                                                               */
                                                                              /**

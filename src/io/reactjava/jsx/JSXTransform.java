@@ -3404,7 +3404,7 @@ public static boolean unitTest(
                            null);
                      content = src;
                   }
-                  else if (true)
+                  else if (false)
                   {
                      classname  = "io.reactjava.client.components.generalpage.ContentCaption";
                      src =
@@ -3413,6 +3413,58 @@ public static boolean unitTest(
                               "/Users/brianm/working/IdeaProjects/ReactJava/"
                             + "ReactJava/src/"
                             + "io/reactjava/client/components/generalpage/ContentCaption.java"),
+                           null);
+                     content = src;
+                  }
+                  else if (false)
+                  {
+                     classname  = "io.reactjava.client.components.generalpage.GeneralAppBar";
+                     src =
+                        IJSXTransform.getFileAsString(
+                           new File(
+                              "/Users/brianm/working/IdeaProjects/ReactJava/"
+                            + "ReactJava/src/"
+                            + "io/reactjava/client/components/generalpage/GeneralAppBar.java"),
+                           null);
+                     content = src;
+                  }
+                  else if (true)
+                  {
+                     components.put(
+                        "ContentBody",
+                        "io.reactjava.client.components.generalpage.ContentBody");
+                     components.put(
+                        "ContentCaption",
+                        "io.reactjava.client.components.generalpage.ContentCaption");
+                     components.put(
+                        "ContentCode",
+                        "io.reactjava.client.components.generalpage.ContentCode");
+                     components.put(
+                        "ContentImage",
+                        "io.reactjava.client.components.generalpage.ContentImage");
+                     components.put(
+                        "ContentPage",
+                        "io.reactjava.client.components.generalpage.ContentPage");
+                     components.put(
+                        "ContentTitle",
+                        "io.reactjava.client.components.generalpage.ContentTitle");
+                     components.put(
+                        "Footer",
+                        "io.reactjava.client.components.generalpage.Footer");
+                     components.put(
+                        "GeneralAppBar",
+                        "io.reactjava.client.components.generalpage.GeneralAppBar");
+                     components.put(
+                        "SideDrawer",
+                        "io.reactjava.client.components.generalpage.SideDrawer");
+
+                     classname  = "platformswebsite.general.LandingPage";
+                     src =
+                        IJSXTransform.getFileAsString(
+                           new File(
+                              "/Users/brianm/working/IdeaProjects/ReactJava/"
+                            + "PlatformsWebsite/src/"
+                            + "platformswebsite/general/LandingPage.java"),
                            null);
                      content = src;
                   }

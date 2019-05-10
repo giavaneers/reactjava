@@ -23,11 +23,13 @@ package io.reactjava.client.components.generalpage;
                                        // imports --------------------------- //
 import elemental2.dom.DomGlobal;
 import io.reactjava.client.components.generalpage.ContentPage.ContentDsc;
-import io.reactjava.client.components.generalpage.GeneralAppBar.AppBarDsc;
+import io.reactjava.client.components.generalpage.Descriptors.AppBarDsc;
+import io.reactjava.client.components.generalpage.Descriptors.PageDsc;
 import io.reactjava.client.core.react.Component;
 import io.reactjava.client.core.react.IUITheme;
 import io.reactjava.client.core.react.Properties;
 import io.reactjava.client.core.react.Router;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -35,10 +37,9 @@ import java.util.function.Consumer;
 public class GeneralPage<P extends Properties> extends Component
 {
                                        // class constants ------------------- //
-public static Properties   manifests;  // manifests map                       //
                                        // property keys                       //
+public static final String kKEY_PAGE_DSC = "pagedsc";
 public static final String kKEY_MANIFEST = "manifest";
-public static final String kKEY_TITLE    = "title";
 
                                        // state variable name                 //
 public static final String kSTATE_ANCHOR = "anchor";
@@ -47,11 +48,41 @@ public static final String kSTATE_OPEN   = "open";
                                        // class variables ------------------- //
                                        // (none)                              //
                                        // public instance variables --------- //
-                                       // (none)                              //
                                        // protected instance variables -------//
 protected List<ContentDsc> content;    // array of content descriptors        //
+protected AppBarDsc        appBarDsc;  // app bar descriptor                  //
+protected PageDsc          pageDsc;    // page descriptor                     //
                                        // private instance variables -------- //
                                        // (none)                              //
+/*------------------------------------------------------------------------------
+
+@name       getAppBarDsc - get app bar descriptor
+                                                                              */
+                                                                             /**
+            Get app bar descriptor.
+
+@return     app bar descriptor
+
+@history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected AppBarDsc getAppBarDsc()
+{
+   if (appBarDsc == null)
+   {
+      appBarDsc =
+         new AppBarDsc(
+            getPageDsc().title,
+            getPageDsc().bMenuButton,
+            getPageDsc().appBarButtons,
+            getStateBoolean(kSTATE_OPEN),
+            openHandler);
+   }
+   return(appBarDsc);
+}
 /*------------------------------------------------------------------------------
 
 @name       getContent - get content
@@ -71,18 +102,39 @@ protected List<ContentDsc> getContent()
 {
    if (content == null)
    {
-      content =
-         ContentDsc.parse(
-            manifests.getString(props().getString(kKEY_MANIFEST)));
+      content = ContentDsc.parse(props().getString(kKEY_MANIFEST));
    }
    return(content);
 }
 /*------------------------------------------------------------------------------
 
-@name       openHandler - initialize
+@name       getImportedNodeModules - get imported node modules
                                                                               */
                                                                              /**
-            Initialize.
+            Get imported node modules.
+
+@return     list of node module names.
+
+@history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static List<String> getImportedNodeModules()
+{
+   return(Arrays.asList(
+      "prismjs.components.prism-core",
+      "prismjs.components.prism-clike",
+      "prismjs.components.prism-java",
+      "prismjs.themes.prism-okaidia.css"
+   ));
+}
+/*------------------------------------------------------------------------------
+
+@name       openHandler - open handler
+                                                                              */
+                                                                             /**
+            Open handler.
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -95,7 +147,8 @@ public Consumer<Map<String,Object>> openHandler = (Map<String,Object> args) ->
    boolean bOpen = (Boolean)args.get("bOpen");
    setState(kSTATE_OPEN, bOpen);
 
-   String id = (String)args.get("id");
+   String url = (String)args.get("url");
+   String id  = url != null ? url : (String)args.get("id");
    if (id == null)
    {
       setState(kSTATE_ANCHOR, "");
@@ -106,6 +159,12 @@ public Consumer<Map<String,Object>> openHandler = (Map<String,Object> args) ->
    }
    else if (id.startsWith("http:") || id.startsWith("https:"))
    {
+                                       // absolute reference                  //
+      DomGlobal.window.open(id, "_blank");
+   }
+   else if (id.startsWith("/"))
+   {
+                                       // relative reference                  //
       DomGlobal.window.open(id, "_blank");
    }
    else
@@ -115,10 +174,12 @@ public Consumer<Map<String,Object>> openHandler = (Map<String,Object> args) ->
 };
 /*------------------------------------------------------------------------------
 
-@name       manifests - get manifests
+@name       getPageDsc - get page descriptor
                                                                               */
                                                                              /**
-            Get map of manifest key to manifest value.
+            Get page descriptor.
+
+@return     page descriptor
 
 @history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -126,9 +187,13 @@ public Consumer<Map<String,Object>> openHandler = (Map<String,Object> args) ->
 
                                                                               */
 //------------------------------------------------------------------------------
-public static Properties manifests()
+protected PageDsc getPageDsc()
 {
-   return(manifests);
+   if (pageDsc == null)
+   {
+      pageDsc = (PageDsc)props().get(kKEY_PAGE_DSC);
+   }
+   return(pageDsc);
 }
 /*------------------------------------------------------------------------------
 
@@ -146,27 +211,21 @@ public void render()
 {
    useState(kSTATE_ANCHOR, "");
    useState(kSTATE_OPEN,   false);
-
-   boolean          bOpen   = getStateBoolean(kSTATE_OPEN);
-   List<ContentDsc> content = getContent();
-   String           title   = props().getString(kKEY_TITLE);
-   if (title == null)
-   {
-      title = "";
-   }
-   AppBarDsc appBarDsc = new AppBarDsc(title, bOpen, openHandler);
 /*--
    <div>
                                        <!-- App Bar --------------------------->
-      <GeneralAppBar appbardsc={appBarDsc}></GeneralAppBar>
+      <GeneralAppBar appbardsc={getAppBarDsc()}></GeneralAppBar>
       <main class="layout">
                                        <!-- Content --------------------------->
-         <ContentPage content={content}></ContentPage>
+         <ContentPage content={getContent()}></ContentPage>
       </main>
                                        <!-- Footer ---------------------------->
       <Footer />
                                        <!-- Side Drawer ----------------------->
-      <SideDrawer open={bOpen} openhandler={openHandler} content={content}>
+      <SideDrawer
+         open={getStateBoolean(kSTATE_OPEN)}
+         openhandler={openHandler}
+         content={getContent()}>
       </SideDrawer>
    </div>
 --*/
@@ -215,25 +274,5 @@ public void renderCSS()
       }
    }
 --*/
-}
-/*------------------------------------------------------------------------------
-
-@name       setManifests - assign manifests
-                                                                              */
-                                                                             /**
-            Assign map of manifest key to manifest value.
-
-@param      manifestsMap      map of manifest key to manifest value
-
-@history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
-
-@notes
-
-                                                                              */
-//------------------------------------------------------------------------------
-public static void setManifests(
-   Properties manifestsMap)
-{
-   manifests = manifestsMap;
 }
 }//====================================// end GeneralPage ====================//

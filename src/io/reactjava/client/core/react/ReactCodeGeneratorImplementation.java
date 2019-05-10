@@ -125,6 +125,8 @@ public ReactElement boot(
 
 @return     factory for specified classname
 
+@param      classname      specified classname
+
 @history    Tue May 15, 2017 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -134,6 +136,24 @@ public Function getFactory(
    String classname)
 {
    return(kFACTORY_MAP.get(classname));
+}
+/*------------------------------------------------------------------------------
+
+@name       getFactoryMap - get factory map
+                                                                              */
+                                                                             /**
+            Get factory map.
+
+@return     factory map
+
+@history    Tue May 15, 2017 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public Map<String,Function> getFactoryMap()
+{
+   return(kFACTORY_MAP);
 }
 /*------------------------------------------------------------------------------
 

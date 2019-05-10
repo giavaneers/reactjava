@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
                                        // Configuration ======================//
-public class Configuration extends Properties implements IConfiguration
+public class Configuration extends NativeObject implements IConfiguration
 {
                                        // constants ------------------------- //
                                        // (none)                              //

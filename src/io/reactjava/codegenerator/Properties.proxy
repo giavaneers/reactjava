@@ -48,6 +48,27 @@ public Properties()
 }
 /*------------------------------------------------------------------------------
 
+@name       get - get value of specified property
+                                                                              */
+                                                                             /**
+            Get value of specified property
+
+@return     value of specified property, or null if not found.
+
+@param      propertyName      property name
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public final Object get(
+   String propertyName)
+{
+   return(null);
+}
+/*------------------------------------------------------------------------------
+
 @name       getBoolean - get boolean value of specified property
                                                                               */
                                                                              /**
@@ -77,6 +98,120 @@ public final boolean getBoolean(
       booleanValue = (Boolean)value;
    }
    return(booleanValue);
+}
+/*------------------------------------------------------------------------------
+
+@name       getChildren - get children property value
+                                                                              */
+                                                                             /**
+            Get children property value
+
+@return     property value, or null if not found.
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public final ReactElement getChildren()
+{
+   return(null);
+}
+/*------------------------------------------------------------------------------
+
+@name       getComponent - get component of these properties
+                                                                              */
+                                                                             /**
+            Get component of these properties
+
+@return     value of component, or null if not found.
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public final Component getComponent()
+{
+   return(null);
+}
+/*------------------------------------------------------------------------------
+
+@name       getConfiguration - get application configuration
+                                                                              */
+                                                                             /**
+            Get application configuration
+
+@return     application configuration.
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public final IConfiguration getConfiguration()
+{
+   return(null);
+}
+/*------------------------------------------------------------------------------
+
+@name       getDouble - get double value of specified property
+                                                                              */
+                                                                             /**
+            Get double value of specified property
+
+@return     double value of specified property, or null if not found.
+
+@param      propertyName      property name
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes      see set() with invocation of Utilties.setObjectIntValueNative()
+                                                                              */
+//------------------------------------------------------------------------------
+public final double getDouble(
+   String propertyName)
+{
+   return(0);
+}
+/*------------------------------------------------------------------------------
+
+@name       getEventHandler - get event handler value of specified property
+                                                                              */
+                                                                             /**
+            Get event handler  value of specified property
+
+@return     event handler  value of specified property, or null if not found.
+
+@param      propertyName      property name
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public final INativeEventHandler getEventHandler(
+   String propertyName)
+{
+   return(null);
+}
+/*------------------------------------------------------------------------------
+
+@name       getHistory - get history property value
+                                                                              */
+                                                                             /**
+            Get history property value
+
+@return     history value, or null if not found.
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public final Router getHistory()
+{
+   return(null);
 }
 /*------------------------------------------------------------------------------
 
@@ -134,6 +269,27 @@ public final String getString(
 }
 /*------------------------------------------------------------------------------
 
+@name       remove - remove specified property
+                                                                              */
+                                                                             /**
+            Remove specified property
+
+@return     value of removed property or null if not found.
+
+@param      propertyName      property name
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public final Object remove(
+   String propertyName)
+{
+   return(null);
+}
+/*------------------------------------------------------------------------------
+
 @name       set - set value of specified property
                                                                               */
                                                                              /**
@@ -155,6 +311,67 @@ public final Properties set(
 {
    put(propertyName, value);
    return(this);
+}
+/*------------------------------------------------------------------------------
+
+@name       setComponent - set component for these properties
+                                                                              */
+                                                                             /**
+            Set component for these properties
+
+@return     void
+
+@param      value      component for these properties
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public final Properties setComponent(
+   Component value)
+{
+   set("component", value);
+   return(this);
+}
+/*------------------------------------------------------------------------------
+
+@name       setConfiguration - set application configuration
+                                                                              */
+                                                                             /**
+            Set application configuration
+
+@return     void
+
+@param      value    application configuration
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected final Properties setConfiguration(
+   IConfiguration value)
+{
+   return(this);
+}
+/*------------------------------------------------------------------------------
+
+@name       toNativeObject - create a representative NativeObject
+                                                                              */
+                                                                             /**
+            Create a representative NativeObject.
+
+@return     a representative NativeObject
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public final NativeObject toNativeObject()
+{
+   return(null);
 }
 /*------------------------------------------------------------------------------
 
