@@ -44,8 +44,6 @@ public static final String kAPP_BAR_BUTTON_TEXT_MENU  = "MenuButton";
                                        // protected instance variables -------//
 protected AppBarDsc          appBarDsc;// app bar descriptor                  //
 protected Map<String,String> buttonMap;// map of button url by text           //
-                                       // has menu button                     //
-protected Boolean            bMenuButton;
                                        // private instance variables -------- //
                                        // (none)                              //
 /*------------------------------------------------------------------------------
@@ -68,12 +66,14 @@ public INativeEventHandler clickHandler = (Event e) ->
    {
                                        // the element handling the click      //
                                        // (not necessarily the root target)   //
-      String id = ((Element)e.currentTarget).getAttribute("id");
+      String id  = ((Element)e.currentTarget).getAttribute("id");
+      String url = getButtonMap().get(id);
+
       dsc.openHandler.accept(
          new HashMap<String,Object>()
          {{
             put("id",    id);
-            put("url",   getButtonMap().get(id));
+            put("url",   url);
             put("bOpen", kAPP_BAR_BUTTON_TEXT_MENU.equals(id));
          }});
    }
@@ -125,6 +125,12 @@ protected Map<String,String> getButtonMap()
       {
          buttonMap.put(dsc.text, dsc.url);
       }
+      String title = getAppBarDsc().title;
+      if (buttonMap.get(title) == null)
+      {
+                                       // handle the title                    //
+         buttonMap.put(title, "path:");
+      }
    }
    return(buttonMap);
 }
@@ -161,12 +167,15 @@ public void render()
 --*/
    }
 /*--
-         <@material-ui.core.Typography
-            variant="h6" color="inherit" noWrap class="toolbarTitle"
+         <div
             id={getAppBarDsc().title}
-            onClick={clickHandler}>
-            {getAppBarDsc().title}
-         </@material-ui.core.Typography>
+            onClick={clickHandler}
+            class="toolbarTitle"
+         >
+            <@material-ui.core.Typography variant="h6" color="inherit" noWrap>
+               {getAppBarDsc().title}
+            </@material-ui.core.Typography>
+         </div>
 --*/
    for (ButtonDsc buttonDsc : getAppBarDsc().buttonDscs)
    {
