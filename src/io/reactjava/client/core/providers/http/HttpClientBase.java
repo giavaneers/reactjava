@@ -63,6 +63,7 @@ import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.typedarrays.shared.ArrayBuffer;
 import com.google.gwt.typedarrays.shared.Uint8Array;
 import io.reactjava.client.core.providers.http.HttpClientBase.JsXMLHttpRequest.IReadyStateChangedHandler;
+import io.reactjava.client.core.providers.http.IHttpClientBase.IReadyStateChangedListener;
 import io.reactjava.client.core.providers.http.IHttpResponse.ResponseType;
 import io.reactjava.client.core.react.NativeObject;
 import io.reactjava.client.core.react.Properties;
@@ -658,17 +659,13 @@ public Object send(
          kKEY_RDY_STATE_CHANGED_LISTENER,
          new DefaultReadyStateChangeListener(this));
 
-      if (false)
-      {
-         kLOGGER.logInfo(
-            "HttpClientBase.send(): assigning readyStateChangedListener="
-           + getReadyStateChangedListener());
-      }
+      //kLOGGER.logInfo(
+      //   "HttpClientBase.send(): assigning readyStateChangedListener="
+      //  + getReadyStateChangedListener());
    }
-   if (false)
-   {
-      kLOGGER.logInfo("HttpClientBase.send(): xhr.send() on APIRequestor.");
-   }
+
+   //kLOGGER.logInfo("HttpClientBase.send(): xhr.send() on APIRequestor.");
+
    getXHR().send(data);
 
    return(null);
@@ -1049,22 +1046,16 @@ public void onStateChanged()
                                        // refine the start time               //
          startTime = System.currentTimeMillis();
 
-         if (false)
-         {
-            kLOGGER.logInfo(
-               "HttpClientBase.DefaultReadyStateChangeListener."
-             + "onReadyStateChange(): response data loading");
-         }
+         //kLOGGER.logInfo(
+         //   "HttpClientBase.DefaultReadyStateChangeListener."
+         // + "onReadyStateChange(): response data loading");
       }
    }
    else if (kDONE == readyState)
    {
-      if (false)
-      {
-         kLOGGER.logInfo(
-            "HttpClientBase.DefaultReadyStateChangeListener."
-          + "onReadyStateChange(): response data loaded");
-      }
+      //kLOGGER.logInfo(
+      //   "HttpClientBase.DefaultReadyStateChangeListener."
+      // + "onReadyStateChange(): response data loaded");
 
       processCompletion();
 

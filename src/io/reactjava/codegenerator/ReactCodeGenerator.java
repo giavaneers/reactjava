@@ -38,9 +38,9 @@ import io.reactjava.client.core.react.IReactCodeGenerator;
 import io.reactjava.client.core.react.IUITheme;
 import io.reactjava.client.core.react.Utilities;
 import io.reactjava.client.core.resources.javascript.IJavascriptResources;
-import io.reactjava.codegenerator.JavascriptBundler.InputStreamStringBuilder;
 import io.reactjava.jsx.IConfiguration;
 import io.reactjava.jsx.IJSXTransform;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -50,7 +50,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.ProcessBuilder.Redirect;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -60,18 +59,23 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.zip.Deflater;
                                        // ReactCodeGenerator =================//
 public class ReactCodeGenerator implements IPostprocessor
 {
                                        // class constants --------------------//
-public static final String kGENERATOR_PACKAGE_NAME =
+public static final boolean kSRCCFG_TREE_SHAKE  = false;
+public static final boolean kSRCCFG_USE_REQUIRE = true;
+
+public static final String  kGENERATOR_PACKAGE_NAME =
    "io.reactjava.client.generated";
 
-public static final String kGENERATOR_SIMPLE_CLASSNAME =
+public static final String  kGENERATOR_SIMPLE_CLASSNAME =
    "ReactCodeGeneratorImplementation";
 
-public static final String kRSRC_BASE_PATH =
+public static final String  kRSRC_BASE_PATH =
    "io/reactjava/client/core/resources/";
 
 public static final List<String> kFILTER_ALL_TYPES  =
@@ -93,6 +97,14 @@ public static final List<String> kFILTER_APP_TYPES  =
    new ArrayList<String>()
    {{
       add("io.reactjava.client.core");
+      add("io.reactjava.codegenerator");
+      add("io.reactjava.jsx");
+   }};
+
+public static final List<String> kFILTER_RX_TYPES  =
+   new ArrayList<String>()
+   {{
+      add("io.reactjava.client.core.resources");
       add("io.reactjava.codegenerator");
       add("io.reactjava.jsx");
    }};
@@ -867,18 +879,18 @@ public static String generateInjectScriptBrowserify(
    TreeLogger     logger)
    throws         Exception
 {
-   long entry = System.currentTimeMillis();
-
-   logger.log(
-      logger.INFO, "generateInjectScriptBrowserify(): entered");
-
+   long    entry           = System.currentTimeMillis();
    boolean bProductionMode = configuration.getProductionMode();
    File    projectDir      = IConfiguration.getProjectDirectory(null, logger);
 
-                                       // RxJs is currently restricted        //
-                                       // to version 5.5.11 since             //
-                                       // the current jsinterop support       //
-                                       // (com.github.timofeevda.core.rxjs)    //
+   logger.log(
+      logger.INFO,
+      "generateInjectScriptBrowserify(): entered, productionMode="
+         + bProductionMode);
+                                       // RxJs is currently restricted to     //
+                                       // version 5.5.11 (npm i rxjs@5.5.11)  //
+                                       // since the current jsinterop support //
+                                       // (com.github.timofeevda.core.rxjs)   //
                                        // is at that version; the support is  //
                                        // now available for version 6 so      //
                                        // update both when time is available..//
@@ -886,15 +898,26 @@ public static String generateInjectScriptBrowserify(
                                        // support package have been changed   //
                                        // for compatibility with the ReactJava//
                                        // bundle namespace = "Rx"             //
-                                       //    -> namespace = "ReactJava.Rx"    //
+                                       //    -> namespace = "ReactJava"    //
    String script = "";
    String export =
       "module.exports = "
-    + "{React:React, Fragment:React.Fragment, ReactDOM:ReactDOM, Rx:Rx, getType:_getType";
+    //+ "{React:React, Fragment:React.Fragment, ReactDOM:ReactDOM, Rx:Rx, getType:_getType";
+    + "{React:React, Fragment:React.Fragment, ReactDOM:ReactDOM, getType:_getType";
 
-   script += "var React    = require('react');\n";
-   script += "var ReactDOM = require('react-dom');\n";
-   script += "var Rx       = require('rxjs');\n";
+   if (kSRCCFG_USE_REQUIRE)
+   {
+      script += "var React    = require('react');\n";
+      script += "var ReactDOM = require('react-dom');\n";
+      //script += "var Rx       = require('rxjs');\n";
+   }
+   else
+   {
+      script += "import React    from 'react';\n";
+      script += "import ReactDOM from 'react-dom';\n";
+      //script += "import Rx       from 'rxjs';\n";
+   }
+
    script += "var _getType = function(type){return module.exports[type]};\n";
 
    logger.log(
@@ -910,14 +933,24 @@ public static String generateInjectScriptBrowserify(
 
                                        // get the require string              //
                                        // and the export target               //
-      String item       = module.substring(module.lastIndexOf('.') + 1);
-             item       = IConfiguration.toReactAttributeName(item);
-      String require    = module.replace(".","/");
-      String requireAdd = "var " + item + " = require('" + require + "');\n";
-      String target     = item + ".default || " + item + "." + item;
-      String exportAdd  = ", " + item + ":" + target;
+      String item   = module.substring(module.lastIndexOf('.') + 1);
+             item   = IConfiguration.toReactAttributeName(item);
+      String source = module.replace(".","/");
 
-      script += requireAdd;
+      String scriptAdd;
+      if (kSRCCFG_USE_REQUIRE)
+      {
+         scriptAdd = "var " + item + " = require('" + source + "');\n";
+      }
+      else
+      {
+         scriptAdd = "import " + item + " from '" + source + "';\n";
+      }
+
+      String target    = item + ".default || " + item + "." + item;
+      String exportAdd = ", " + item + ":" + target;
+
+      script += scriptAdd;
       export += exportAdd;
    }
 
@@ -955,82 +988,118 @@ public static String generateInjectScriptBrowserify(
       prettyScriptFile.delete();
    }
 
-   for (int iOp = 0, iOpMax = bProductionMode ? 2 : 1; iOp < iOpMax; iOp++)
+   for (int iOp = 0; iOp < 2; iOp++)
    {
-      List<String> commands = new ArrayList<>();
-      if (iOp == 0)
+      Map<String,String> environment = new HashMap<>();
+      List<String>       commands    = new ArrayList<>();
+      switch(iOp)
       {
-         // ex: node_modules/.bin/browserify main.js -s ReactJava -o appbundle.js
+         case 0:
+         {
+            // ex: node_modules/.bin/browserify main.js -s ReactJava -o appbundle.js
 
-         String namespace  = "ReactJava";
-         String browserify =
-            ".bin/browserify" + (IConfiguration.getOSWindows() ? ".cmd" : "");
+            String namespace  = "ReactJava";
+            String browserify =
+               ".bin/browserify" + (IConfiguration.getOSWindows() ? ".cmd" : "");
 
-         String executable =
-             new File(IConfiguration.getNodeModulesDir(logger), browserify)
-                .getAbsolutePath();
+            String executable =
+                new File(IConfiguration.getNodeModulesDir(logger), browserify)
+                   .getAbsolutePath();
 
-         commands.add(executable);
-         commands.add("main.js");
-         commands.add("-s");
-         commands.add(namespace);
-         commands.add("-o");
-         commands.add(bundleName);
-      }
-      else
-      {
+            commands.add(executable);
+
+            if (kSRCCFG_TREE_SHAKE)
+            {
+                                       // tree shake                          //
+               commands.add("-p");
+               commands.add("common-shakeify");
+            }
+
+            commands.add("main.js");
+            commands.add("-s");
+            commands.add(namespace);
+
+            if (bProductionMode)
+            {
+               environment.put("NODE_ENV", "production");
+
+                                       // envify                              //
+               commands.add("-t");
+               commands.add("envify");
+            }
+
+            commands.add("-o");
+            commands.add(bundleName);
+            break;
+         }
+         case 1:
+         {
+            if (!bProductionMode)
+            {
+               break;
+            }
                                        // rename inject file                  //
-         injectScriptFile.renameTo(prettyScriptFile);
-         injectScriptFile = new File(projectDir, bundleName);
+            injectScriptFile.renameTo(prettyScriptFile);
+            injectScriptFile = new File(projectDir, bundleName);
 
-         // ex: node_modules/.bin/uglifyjs "appbundle.pretty.js" -cm -o appbundle.js
-         String uglify =
-            ".bin/uglifyjs" + (IConfiguration.getOSWindows() ? ".cmd" : "");
+            // ex: node_modules/.bin/uglifyjs "appbundle.pretty.js" -cm -o appbundle.js
+            String uglify =
+               ".bin/uglifyjs" + (IConfiguration.getOSWindows() ? ".cmd" : "");
 
-         String executable =
-             new File(IConfiguration.getNodeModulesDir(logger), uglify)
-                .getAbsolutePath();
+            String executable =
+                new File(IConfiguration.getNodeModulesDir(logger), uglify)
+                   .getAbsolutePath();
 
-         commands.add(executable);
-         commands.add(prettyName);
-         commands.add("-cm");
-         commands.add("-o");
-         commands.add(bundleName);
+            commands.add(executable);
+            commands.add(prettyName);
+            commands.add("-cm");
+            commands.add("-o");
+            commands.add(bundleName);
+            break;
+         }
       }
 
-      String command = "";
-      for (String token : commands)
+      if (commands.size() > 0)
       {
-         command += token + " ";
-      }
+         String command = "";
+         for (String token : commands)
+         {
+            command += token + " ";
+         }
 
-      logger.log(
-         logger.INFO,
-         "generateInjectScriptBrowserify(): \nwd=" + projectDir.getAbsolutePath()
-       + "\ncommand=" + command + "\n");
+         logger.log(
+            logger.INFO,
+            "generateInjectScriptBrowserify(): \nwd=" + projectDir.getAbsolutePath()
+          + "\ncommand=" + command + "\n");
 
-      long           start = System.currentTimeMillis();
-      ProcessBuilder pb    = new ProcessBuilder(commands).directory(projectDir);
-      Process        p     = pb.start();
-      int            cc    = p.waitFor();
+         long           start = System.currentTimeMillis();
+         ProcessBuilder pb    = new ProcessBuilder(commands).directory(projectDir);
+         if (environment.size() > 0)
+         {
+            pb.environment().putAll(environment);
+         }
 
-      logger.log(
-         logger.INFO,
-         "generateInjectScriptBrowserify(): completed in "
-       + (System.currentTimeMillis() - start) + " ms.");
+         Process p  = pb.start();
+         int     cc = p.waitFor();
 
-      if (cc != 0)
-      {
-         String msg =
-            "Process returned an error. Did you forget to install any of "
-          + "react, react-dom, or rxjs@5.5.11? (please note version of rxjs)";
+         logger.log(
+            logger.INFO,
+            "generateInjectScriptBrowserify(): completed in "
+          + (System.currentTimeMillis() - start) + " ms.");
 
-         logger.log(logger.ERROR, "generateInjectScriptBrowserify(): " + msg);
-         throw new IllegalStateException(msg);
-      }
-      if (!injectScriptFile.exists())
-      {
-         throw new IllegalStateException("Inject file was not generated");
+         if (cc != 0)
+         {
+            String msg =
+               "Process returned an error. Did you forget to install any of "
+             + "react, react-dom, or rxjs@5.5.11? (please note version of rxjs)";
+
+            logger.log(logger.ERROR, "generateInjectScriptBrowserify(): " + msg);
+            throw new IllegalStateException(msg);
+         }
+         if (!injectScriptFile.exists())
+         {
+            throw new IllegalStateException("Inject file was not generated");
+         }
       }
    }
 
@@ -1316,6 +1385,82 @@ protected Collection<String> getImportedNodeModules(
 }
 /*------------------------------------------------------------------------------
 
+@name       getReactJavaJar - get any reactjava jar file
+                                                                              */
+                                                                             /**
+            Get any reactjava jar file
+
+@return     reactjava jar file or null if not found.
+
+@param      logger         logger
+
+@history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public JarFile getReactJavaJar(
+   TreeLogger logger)
+   throws     Exception
+{
+   JarFile reactJavaJar = null;
+   File    libDir       = IConfiguration.getWarLibraryDir(logger);
+   if (libDir != null)
+   {
+      File candidate = new File(libDir, "reactjava.jar");
+      if (candidate.exists())
+      {
+         reactJavaJar = new JarFile(candidate);
+      }
+   }
+   return(reactJavaJar);
+}
+/*------------------------------------------------------------------------------
+
+@name       getSourceForClassname - get source for classname
+                                                                              */
+                                                                             /**
+            Get source as string for classname.
+
+@param      classname      classname
+@param      logger         logger
+
+@history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public String getSourceForClassname(
+   String     classname,
+   TreeLogger logger)
+   throws     Exception
+{
+   String  src = null;
+   JarFile jar;
+                                       // try project source directory        //
+   File   srcDir  = IConfiguration.getProjectDirectory("src", null);
+   String srcPath = classname.replace(".","/") + ".java";
+   File   srcFile = new File(srcDir, srcPath);
+   if (srcFile.exists())
+   {
+      src = IJSXTransform.getFileAsString(srcFile, logger);
+   }
+   else if ((jar = getReactJavaJar(logger)) != null)
+   {
+                                       // try source in reactjava.jar         //
+      JarEntry entry = jar.getJarEntry(srcPath);
+      if (entry != null)
+      {
+         src =
+            IJSXTransform.getInputStreamAsString(
+               jar.getInputStream(entry), logger);
+      }
+   }
+
+   return(src);
+}
+/*------------------------------------------------------------------------------
+
 @name       injectScriptAppDirty - test if app inject script dirty
                                                                               */
                                                                              /**
@@ -1381,6 +1526,12 @@ public static void main(
          File src = IConfiguration.getProjectDirectory("src", null);
          src = src;
       }
+      else if ("parseReactiveXInvocations".toLowerCase().equals(opcodeLC))
+      {
+         new ReactCodeGenerator().parseReactiveXInvocations(
+            "io.reactjava.client.core.providers.http.HttpClient",
+            newFileLogger(null, 0));
+      }
       else
       {
          throw new IllegalArgumentException(args[0]);
@@ -1409,11 +1560,14 @@ public static TreeLogger newFileLogger(
    TreeLogger logger,
    long       nanoTime)
 {
-   if (logger instanceof AbstractTreeLogger)
+   if (logger == null || logger instanceof AbstractTreeLogger)
    {
       try
       {
-         Type maxDetail = ((AbstractTreeLogger)logger).getMaxDetail();
+         Type maxDetail =
+            logger == null
+               ? TreeLogger.ALL : ((AbstractTreeLogger)logger).getMaxDetail();
+
          File logFile   =
             new File(
                IConfiguration.getProjectDirectory(null, logger),
@@ -1450,9 +1604,10 @@ public static TreeLogger newFileLogger(
                                                                               */
 //------------------------------------------------------------------------------
 protected Map<String,Map<String,JClassType>> parseClasses(
-   TypeOracle oracle,
-   TreeLogger logger)
-   throws     Exception
+   TypeOracle     oracle,
+   IConfiguration configuration,
+   TreeLogger     logger)
+   throws         Exception
 {
    logger.log(TreeLogger.Type.INFO, "parseClasses(): entered");
 
@@ -1478,6 +1633,9 @@ protected Map<String,Map<String,JClassType>> parseClasses(
    for (JClassType classType : types)
    {
       String classname = classType.getQualifiedSourceName();
+
+      //logger.log(TreeLogger.Type.INFO, "parseClasses(): parsing " + classname);
+
       if (propertiesClassname.equals(classname))
       {
          propertiesType = classType;
@@ -1523,33 +1681,48 @@ protected Map<String,Map<String,JClassType>> parseClasses(
          continue;
       }
 
-      boolean bFiltered = false;
+      boolean bFilteredAll = false;
       for (String filter : kFILTER_ALL_TYPES)
       {
          if (classname.startsWith(filter))
          {
-            bFiltered = true;
+            bFilteredAll = true;
             break;
          }
       }
-      if (!bFiltered)
+      if (!bFilteredAll)
       {
          allTypes.put(classType.getSimpleSourceName(), classType);
 
                                        // further filter to check for custom  //
                                        // app types                           //
-         bFiltered = false;
+         boolean bFilteredApp = false;
          for (String filter : kFILTER_APP_TYPES)
          {
             if (classname.startsWith(filter))
             {
-               bFiltered = true;
+               bFilteredApp = true;
                break;
             }
          }
-         if (!bFiltered)
+         if (!bFilteredApp)
          {
             appTypes.put(classType.getSimpleSourceName(), classType);
+         }
+                                       // further filter to check for         //
+                                       // reactive-x types                    //
+         boolean bFilteredRx = false;
+         for (String filter : kFILTER_RX_TYPES)
+         {
+            if (classname.startsWith(filter))
+            {
+               bFilteredRx = true;
+               break;
+            }
+         }
+         if (!bFilteredRx)
+         {
+            parseReactiveXInvocations(classname, logger);
          }
       }
    }
@@ -1703,6 +1876,76 @@ protected Map<String,Boolean> parseConstructors(
 }
 /*------------------------------------------------------------------------------
 
+@name       parseReactiveXInvocations - parse any ReactiveX invocations
+                                                                              */
+                                                                             /**
+            Parse any ReactiveX invocations to determine which Rx scripts need
+            to be imported.
+
+@param      classname      classname
+@param      logger         logger
+
+@history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public void parseReactiveXInvocations(
+   String     classname,
+   TreeLogger logger)
+   throws     Exception
+{
+   String src = getSourceForClassname(classname, logger);
+   if (src == null)
+   {
+      logger.log(
+         Type.INFO,
+         "ReactCodeGenerator.parseReactiveXInvocations(): "
+       + "cannot find source for " + classname
+       + ". If its an inner class, it may be included in another source file");
+   }
+   else
+   {
+      String token = "io.reactjava.client.core.rxjs.";
+      char[] delim = {'(','\n','\t',' ',';'};
+
+      for (int iBeg = 0, iEnd = 0, iMax = src.length(); iBeg < iMax; iBeg= iEnd)
+      {
+         iBeg = src.indexOf(token, iEnd);
+         if (iBeg < 0)
+         {
+            break;
+         }
+         iBeg += token.length();
+         iEnd  = Integer.MAX_VALUE;
+         for (char chase : delim)
+         {
+            int idx = src.indexOf(chase, iBeg);
+            if (idx >= 0 && idx < iEnd)
+            {
+               iEnd = idx;
+            }
+         }
+         if (iEnd ==  Integer.MAX_VALUE)
+         {
+            throw new IllegalStateException("Invocation target unterminated");
+         }
+
+         String target = src.substring(iBeg, iEnd);
+                target = target.substring(target.lastIndexOf('.') + 1);
+                target = "rxjs." + target;
+
+         addImportedNodeModuleJavascript(target, logger);
+
+         logger.log(
+            Type.INFO,
+            "ReactCodeGenerator.parseReactiveXInvocations(): found " + target
+          + " in " + classname);
+      }
+   }
+}
+/*------------------------------------------------------------------------------
+
 @name       process - process specified source
                                                                               */
                                                                              /**
@@ -1733,14 +1976,14 @@ public void process(
    GeneratorContext context =
       precompilationContext.getRebindPermutationOracle().getGeneratorContext();
 
-   Map<String,Map<String,JClassType>> providersAndComponents =
-      parseClasses(context.getTypeOracle(), logger);
-
    IConfiguration configuration = getConfiguration(context, logger);
+
+   Map<String,Map<String,JClassType>> providersAndComponents =
+      parseClasses(context.getTypeOracle(), configuration, logger);
 
    getImportedNodeModules(providersAndComponents, configuration, logger);
 
-                                 // copy all scripts and css to artifact   //
+                                       // copy all scripts and css to artifact//
    copyResources(configuration, context, logger);
 
    saveCurrentDependencies(logger);

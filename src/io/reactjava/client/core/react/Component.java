@@ -595,6 +595,49 @@ public void useState(
 }
 /*==============================================================================
 
+name:       CompileTime - compile time utilities
+
+purpose:    Compile time utilities
+
+history:    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
+
+notes:
+
+==============================================================================*/
+public static class CompileTime
+{
+                                       // constants ------------------------- //
+                                       // (none)                              //
+                                       // class variables ------------------- //
+                                       // (none)                              //
+                                       // public instance variables --------- //
+                                       // (none)                              //
+                                       // protected instance variables ------ //
+                                       // (none)                              //
+
+/*------------------------------------------------------------------------------
+
+@name       resolve - resolve a string value at compile time
+                                                                              */
+                                                                             /**
+            Resolve a string value at compile time. This implementation is null.
+
+@return     string value resolved at compile time
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static String resolve(
+   String key)
+{
+   return(key);
+}
+}//====================================// end CompileTime ====================//
+/*==============================================================================
+
 name:       StateMgr - properties
 
 purpose:    JsInterop definition for access to javascript onLoad handler

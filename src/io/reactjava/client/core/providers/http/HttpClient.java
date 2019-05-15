@@ -199,7 +199,8 @@ public Observable<HttpResponse> send()
 public Observable<HttpResponse> send(
    byte[] bytes)
 {
-   kLOGGER.logInfo("HttpClient.send(): waiting for subscribe.");
+   //kLOGGER.logInfo("HttpClient.send(): waiting for subscribe.");
+
    Observable<HttpResponse> observable = Observable.create(observer ->
    {
       if (getReadyStateChangedListener() == null)
@@ -210,12 +211,9 @@ public Observable<HttpResponse> send(
             kKEY_RDY_STATE_CHANGED_LISTENER,
             new DefaultReadyStateChangeListener(this, subscriber));
 
-         if (false)
-         {
-            kLOGGER.logInfo(
-               "HttpClient.send(): assigned readyStateChangedListener="
-              + getReadyStateChangedListener());
-         }
+            //kLOGGER.logInfo(
+            //   "HttpClient.send(): assigned readyStateChangedListener="
+            //  + getReadyStateChangedListener());
       }
 
       super.send(bytes);
@@ -528,12 +526,9 @@ protected void signalCompletion()
    }
    else
    {
-      if (false)
-      {
-         kLOGGER.logInfo(
-            "HttpClient.DefaultReadyStateChangeListener.processSuccess(): "
-          + "responding byte[] to subscriber");
-      }
+      //kLOGGER.logInfo(
+      //   "HttpClient.DefaultReadyStateChangeListener.processSuccess(): "
+      // + "responding byte[] to subscriber");
 
       subscriber.next(response);
       subscriber.complete();

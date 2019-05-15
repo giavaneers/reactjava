@@ -28,7 +28,7 @@ import io.reactjava.client.core.rxjs.subscription.Subscription;
  * @author dtimofeev since 20.12.2016.
  * @param <T>
  */
-@JsType(isNative = true, namespace = "ReactJava.Rx")
+@JsType(isNative = true, namespace = "ReactJava")
 public class Subscriber<T> extends Subscription {
     
     public native void error(Object object);

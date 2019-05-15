@@ -28,7 +28,7 @@ import io.reactjava.client.core.rxjs.subscription.Subscription;
  *
  * @author dtimofeev since 21.12.2016.
  */
-@JsType(namespace = "ReactJava.Rx", isNative = true)
+@JsType(namespace = "ReactJava", isNative = true)
 public class ConnectableObservable<T> extends Observable<T> {
 
     public native Subscription connect();

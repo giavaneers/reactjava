@@ -27,7 +27,7 @@ import jsinterop.annotations.JsType;
 /**
  * @author dtimofeev since 21.12.2016.
  */
-@JsType(namespace = "ReactJava.Rx", isNative = true)
+@JsType(namespace = "ReactJava", isNative = true)
 public class Scheduler {
     @JsProperty
     public static Scheduler async;

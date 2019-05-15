@@ -547,16 +547,7 @@ static File getLibraryDir(
    File libraryDir = new File(projectDir, "lib");
    if (!libraryDir.exists() || !libraryDir.isDirectory())
    {
-      File parent = new File(projectDir, "war");
-      if (parent == null)
-      {
-         parent = new File(projectDir, "web");
-      }
-      if (parent != null)
-      {
-         libraryDir =
-            getProjectDirectory("lib", parent.getAbsolutePath(), logger);
-      }
+      libraryDir = getWarLibraryDir(logger);
    }
    return(libraryDir);
 }
@@ -681,7 +672,8 @@ static String getNodeModuleCSS(
 
 @return     node module javascript path specified module name
 
-@param      nodeModule     node module name
+@param      module      node module name
+@param      logger      any logger
 
 @history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -1108,11 +1100,13 @@ static File getProjectDirectory(
 
             projectDir = dir;
 
-           logger.log(
-              logger.DEBUG,
-              "jsx.IConfiguration.getProjectDirectory(): project directory="
-               + dir.getAbsolutePath());
-
+            if (logger != null)
+            {
+               logger.log(
+                  logger.DEBUG,
+                  "jsx.IConfiguration.getProjectDirectory(): project directory="
+                  + dir.getAbsolutePath());
+            }
             break;
          }
          if (projectDir == null)
@@ -1131,6 +1125,37 @@ static File getProjectDirectory(
       }
    }
    return(projectDir);
+}
+/*------------------------------------------------------------------------------
+
+@name       getWarLibraryDir - get war library directory
+                                                                              */
+                                                                             /**
+            Get war library directory.
+
+@return     war library directory
+
+@history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+static File getWarLibraryDir(
+   TreeLogger logger)
+{
+   File libraryDir = null;
+   File projectDir = getProjectDirectory(null, logger);
+   File parent     = new File(projectDir, "war");
+   if (parent == null)
+   {
+      parent = new File(projectDir, "web");
+   }
+   if (parent != null)
+   {
+      libraryDir =
+         getProjectDirectory("lib", parent.getAbsolutePath(), logger);
+   }
+   return(libraryDir);
 }
 /*------------------------------------------------------------------------------
 

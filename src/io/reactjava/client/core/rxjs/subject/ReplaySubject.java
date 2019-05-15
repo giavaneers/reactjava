@@ -26,6 +26,6 @@ import jsinterop.annotations.JsType;
 /**
  * @author dtimofeev since 21.12.2016.
  */
-@JsType(isNative = true, namespace = "ReactJava.Rx")
+@JsType(isNative = true, namespace = "ReactJava")
 public class ReplaySubject<T> extends Subject<T> {
 }

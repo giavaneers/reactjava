@@ -29,7 +29,7 @@ import jsinterop.annotations.JsType;
 /**
  * @author dtimofeev since 20.12.2016.
  */
-@JsType(isNative = true, namespace = "ReactJava.Rx")
+@JsType(isNative = true, namespace = "ReactJava")
 public class Subscription implements ISubscription {
 
     @JsConstructor

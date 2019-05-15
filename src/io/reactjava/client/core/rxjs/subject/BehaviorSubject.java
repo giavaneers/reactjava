@@ -28,7 +28,7 @@ import jsinterop.annotations.JsType;
  * @author dtimofeev since 21.12.2016.
  * @param <T>
  */
-@JsType(isNative = true, namespace = "ReactJava.Rx")
+@JsType(isNative = true, namespace = "ReactJava")
 public class BehaviorSubject<T> extends Subject<T> {
 
     @JsConstructor

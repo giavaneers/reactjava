@@ -52,13 +52,24 @@ static void allPostprocessors(
    PrecompilationContext precompilationContext)
    throws                Exception
 {
-   logger.log(logger.DEBUG, "IPostprocessor.allPostprocessors(): entered");
-   for (Class postprocessor : postprocessors)
+   try
    {
-      ((IPostprocessor)postprocessor.newInstance()).process(
-         logger, compilerContext, precompilationContext);
+      logger.log(logger.DEBUG, "IPostprocessor.allPostprocessors(): entered");
+      for (Class postprocessor : postprocessors)
+      {
+         ((IPostprocessor)postprocessor.newInstance()).process(
+            logger, compilerContext, precompilationContext);
+      }
    }
-   logger.log(logger.DEBUG, "IPostprocessor.allPostprocessors(): exiting");
+   catch(Exception e)
+   {
+      logger.log(logger.ERROR, "IPostprocessor.allPostprocessors()", e);
+      throw e;
+   }
+   finally
+   {
+      logger.log(logger.DEBUG, "IPostprocessor.allPostprocessors(): exiting");
+   }
 }
 /*------------------------------------------------------------------------------
 

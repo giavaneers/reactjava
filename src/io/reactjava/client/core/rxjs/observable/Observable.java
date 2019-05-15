@@ -43,7 +43,7 @@ import jsinterop.annotations.JsType;
  * @param <T>
  * @author dtimofeev since 20.12.2016.
  */
-@JsType(namespace = "ReactJava.Rx", isNative = true)
+@JsType(namespace = "ReactJava", isNative = true)
 @SuppressWarnings("unused")
 public class Observable<T> {
 

@@ -1557,6 +1557,7 @@ public String parse(
 {
    String parsed = parseMarkup(classname, src, components, logger);
           parsed = parseCSS(parsed, logger);
+          parsed = parseCompileTimeDirectives(parsed, logger);
 
    return(parsed);
 }
@@ -1702,6 +1703,72 @@ public static String parseAnyTagAttributeValue(
          parsed =
             value.replace(tag, createElement).replace("<","").replace("/>","");
       }
+   }
+
+   return(parsed);
+}
+/*------------------------------------------------------------------------------
+
+@name       parseCompileTimeDirectives - parse any compile time directives
+                                                                              */
+                                                                             /**
+            Parse any compile time directives.
+
+@return     parsed source with any compile time directives processed.
+
+@history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public String parseCompileTimeDirectives(
+   String     src,
+   TreeLogger logger)
+{
+   String parsed = "";
+   String key;
+   String resolved;
+   String unresolved;
+
+   for (int idxBeg = 0, idxEnd = 0; idxBeg < src.length(); idxBeg = idxEnd)
+   {
+      key    = "CompileTime.resolve(";
+      idxBeg = src.indexOf(key, idxEnd);
+      if (idxBeg < 0)
+      {
+         parsed += src.substring(idxEnd);
+         break;
+      }
+
+      parsed += src.substring(idxEnd, idxBeg);
+
+      idxEnd = src.indexOf(')', idxBeg + key.length());
+      if (idxEnd < 0)
+      {
+         throw new IllegalStateException(
+            "Compile time directive parenthesis mismatch");
+      }
+
+      unresolved = src.substring(idxBeg + key.length(), idxEnd++).trim();
+
+                                       // unwrap from enclosing "             //
+      if (!unresolved.startsWith("\"") || !unresolved.endsWith("\""))
+      {
+         throw new IllegalArgumentException("Argument mus be a string");
+      }
+
+      unresolved = unresolved.substring(1, unresolved.length() - 1).trim();
+      resolved   = handleTextFromURL(unresolved, logger);
+      resolved   =
+         resolved.substring(
+            kJAVA_STRING_BEG.length(),
+            resolved.length() - kJAVA_STRING_END.length());
+
+                                       // escape any double quotes and wrap   //
+                                       // in double quotes                    //
+      resolved = resolved.replaceAll("\"","\\\\\"");
+      resolved = "\"" + resolved + "\"";
+      parsed  += resolved;
    }
 
    return(parsed);
@@ -3428,7 +3495,7 @@ public static boolean unitTest(
                            null);
                      content = src;
                   }
-                  else if (true)
+                  else if (false)
                   {
                      components.put(
                         "ContentBody",
@@ -3465,6 +3532,26 @@ public static boolean unitTest(
                               "/Users/brianm/working/IdeaProjects/ReactJava/"
                             + "PlatformsWebsite/src/"
                             + "platformswebsite/general/LandingPage.java"),
+                           null);
+                     content = src;
+                  }
+                  else if (true)
+                  {
+                     components.put(
+                        "GeneralPage",
+                        "io.reactjava.client.components.generalpage.GeneralPage");
+
+                     components.put(
+                        "LandingPage",
+                        "com.giavaneers.web.platformswebsite.general.LandingPage");
+
+                     classname = "com.giavaneers.web.platformswebsite.general.AppBase";
+                     src =
+                        IJSXTransform.getFileAsString(
+                           new File(
+                              "/Users/brianm/working/IdeaProjects/ReactJava/"
+                            + "PlatformsWebsite/src/"
+                            + "com/giavaneers/web/platformswebsite/general/AppBase.java"),
                            null);
                      content = src;
                   }

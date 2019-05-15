@@ -30,7 +30,7 @@ import jsinterop.annotations.JsType;
  * @param <K>
  * @param <T>
  */
-@JsType(namespace = "ReactJava.Rx", isNative = true)
+@JsType(namespace = "ReactJava", isNative = true)
 public class GroupedObservable<K, T> extends Observable<T> {
     @JsProperty
     public K key;

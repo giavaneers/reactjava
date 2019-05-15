@@ -29,7 +29,7 @@ import jsinterop.annotations.JsType;
  * @author dtimofeev since 21.12.2016.
  * @param <T>
  */
-@JsType(isNative = true, namespace = "ReactJava.Rx")
+@JsType(isNative = true, namespace = "ReactJava")
 public class Subject<T> extends Observable<T> implements Observer<T> {
     @Override
     public native void error(Object error);

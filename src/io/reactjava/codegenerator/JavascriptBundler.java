@@ -3319,7 +3319,7 @@ public static File reactiveXInitialize(
                                        // support package have been changed   //
                                        // for compatibility with the ReactJava//
                                        // bundle namespace = "Rx"             //
-                                       //    -> namespace = "ReactJava.Rx"    //
+                                       //    -> namespace = "ReactJava"    //
 
       System.out.println("Installing/updating rxjs package...");
       args = new String[]{"npm install rxjs@5.5.11 --loglevel=error"};
