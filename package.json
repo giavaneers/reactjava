@@ -15,7 +15,8 @@
     "react-dom": "^16.8.4",
     "react-native": "^0.59.8",
     "rxjs": "^5.5.11",
-    "uglify-js": "^3.5.11"
+    "uglify-js": "^3.5.11",
+    "uglifyjs": "^2.4.11"
   },
   "devDependencies": {
     "babel-jest": "^24.5.0",

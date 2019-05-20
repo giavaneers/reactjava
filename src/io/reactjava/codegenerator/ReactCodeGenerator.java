@@ -998,14 +998,40 @@ public static String generateInjectScriptBrowserify(
          {
             // ex: node_modules/.bin/browserify main.js -s ReactJava -o appbundle.js
 
+            String envify =
+               ".bin/envify" + (IConfiguration.getOSWindows() ? ".cmd" : "");
+
+            File executableFile =
+               new File(IConfiguration.getNodeModulesDir(logger), envify);
+
+            if (!executableFile.exists())
+            {
+               String msg =
+                  "Cannot find executable. "
+                + "Did you forget to install envify? (npm i envify)";
+
+               logger.log(logger.ERROR, "generateInjectScriptBrowserify(): " + msg);
+               throw new IllegalStateException(msg);
+            }
+
             String namespace  = "ReactJava";
             String browserify =
                ".bin/browserify" + (IConfiguration.getOSWindows() ? ".cmd" : "");
 
-            String executable =
-                new File(IConfiguration.getNodeModulesDir(logger), browserify)
-                   .getAbsolutePath();
+            executableFile =
+               new File(IConfiguration.getNodeModulesDir(logger), browserify);
 
+            if (!executableFile.exists())
+            {
+               String msg =
+                  "Cannot find executable. "
+                + "Did you forget to install browserify? (npm i browserify)";
+
+               logger.log(logger.ERROR, "generateInjectScriptBrowserify(): " + msg);
+               throw new IllegalStateException(msg);
+            }
+
+            String executable = executableFile.getAbsolutePath();
             commands.add(executable);
 
             if (kSRCCFG_TREE_SHAKE)
@@ -1046,9 +1072,20 @@ public static String generateInjectScriptBrowserify(
             String uglify =
                ".bin/uglifyjs" + (IConfiguration.getOSWindows() ? ".cmd" : "");
 
-            String executable =
-                new File(IConfiguration.getNodeModulesDir(logger), uglify)
-                   .getAbsolutePath();
+            File executableFile =
+               new File(IConfiguration.getNodeModulesDir(logger), uglify);
+
+            if (!executableFile.exists())
+            {
+               String msg =
+                  "Cannot find executable. "
+                + "Did you forget to install uglifyjs? (npm i uglifyjs)";
+
+               logger.log(logger.ERROR, "generateInjectScriptBrowserify(): " + msg);
+               throw new IllegalStateException(msg);
+            }
+
+            String executable = executableFile.getAbsolutePath();
 
             commands.add(executable);
             commands.add(prettyName);
@@ -1106,7 +1143,7 @@ public static String generateInjectScriptBrowserify(
    String injectScript = IJSXTransform.getFileAsString(injectScriptFile, logger);
    logger.log(
       logger.INFO,
-      "generateInjectScriptBrowserify(): injectScriopt length="
+      "generateInjectScriptBrowserify(): injectScript length="
          + injectScript.length());
    //main.delete();
 

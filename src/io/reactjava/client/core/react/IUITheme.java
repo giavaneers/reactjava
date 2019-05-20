@@ -385,6 +385,28 @@ static String remToPx(
 
    return(Double.toString(pxVal) + "px");
 }
+/*------------------------------------------------------------------------------
+
+@name       toPx - convert specified numeric value to equivalent pixel string
+                                                                              */
+                                                                             /**
+            Convert specified numeric value to equivalent pixel string.
+
+@return     equivalent px value with trailing units, 'px'.
+
+@param      num      numeric value.
+
+@history    Mon Feb 29, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+static String toPx(
+   Number num)
+{
+   return(Double.toString(num.doubleValue()) + "px");
+}
 /*==============================================================================
 
 name:       Breakpoints - breakpoints
