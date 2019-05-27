@@ -17,26 +17,39 @@ package io.reactjava.client.core.react;
                                        // imports --------------------------- //
 import com.giavaneers.util.gwt.Logger;
 import elemental2.core.Function;
+import elemental2.core.JsArray;
+import elemental2.core.JsObject;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.Element;
+import elemental2.dom.HTMLElement;
 import elemental2.dom.Node;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-                                       // Component ==========================//
+import java.util.function.Consumer;
+import jsinterop.base.JsArrayLike;
+
+// Component ==========================//
 public abstract class Component<P extends Properties>
 {
                                        // class constants --------------------//
-public static final boolean kSRCCFG_USE_STATE_HOOK = false;
+public static final boolean kSRCCFG_USE_STATE_HOOK = true;
 
 private static final Logger kLOGGER = Logger.newInstance();
 
                                        // class variables                     //
-protected static int nextId;           // next elementId to be autoassigned   //
+protected static int   nextId;         // next elementId to be autoassigned   //
+private   static Map<String,Component> // map of component by id              //
+                       componentById;
                                        // protected instance variables ------ //
-protected StateMgr   stateMgr;         // component state manager             //
+protected StateMgr     stateMgr;       // component state manager             //
 protected java.util.function.Function<Properties, ReactElement>
-                     componentFcn;     // component function                  //
-protected String     css;              // css                                 //
+                       componentFcn;   // component function                  //
+protected ReactElement reactElement;   // react element                       //
+protected String       css;            // css                                 //
+                                       // list of injected styleIds           //
+protected List<String> injectedStyleIds;
                                        // private to approximate immutable    //
                                        // renamed from 'props' to avoid       //
                                        // minified confusion with react       //
@@ -44,7 +57,7 @@ protected String     css;              // css                                 //
                                        // variable should appear last - see   //
                                        // ReactJava.                          //
                                        // getNativeComponentPropertiesFieldname()//
-private   P          componentProperties;
+private   P            componentProperties;
 
 /*------------------------------------------------------------------------------
 
@@ -79,6 +92,97 @@ public Component()
 public Component(P initialProps)
 {
    initialize(initialProps);
+}
+/*------------------------------------------------------------------------------
+
+@name       cssSelectorForId - get css selector for specified elementId
+                                                                              */
+                                                                             /**
+            Get css selector for specified elementId.
+
+@return     css selector for specified elementId
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected String cssSelectorForId()
+{
+   return("#" + props().get("id"));
+}
+/*------------------------------------------------------------------------------
+
+@name       forceUpdate - force component update
+                                                                              */
+                                                                             /**
+            Force component update.
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public void forceUpdate()
+{
+   reactElement.forceUpdate();
+}
+/*------------------------------------------------------------------------------
+
+@name       forElement - get component for specified element
+                                                                              */
+                                                                             /**
+            Get component for specified element.
+
+@return     component for specified element
+
+@param      element     specified element
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static Component forElement(
+   Element element)
+{
+   if (!(element instanceof HTMLElement))
+   {
+      throw new IllegalStateException("Expected instance of HTMLElement");
+   }
+
+   HTMLElement htmlElement = (HTMLElement)element;
+
+   Component component =
+      htmlElement.id != null ? getComponentById().get(htmlElement.id) : null;
+
+   return(component);
+}
+/*------------------------------------------------------------------------------
+
+@name       getComponentById - get map of component by id
+                                                                              */
+                                                                             /**
+            Get map of component by id.
+
+@return     map of component by id
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+private static Map<String,Component> getComponentById()
+{
+   if (componentById == null)
+   {
+      componentById = new HashMap<>();
+   }
+   return(componentById);
 }
 /*------------------------------------------------------------------------------
 
@@ -137,6 +241,28 @@ public Element getDOMParentElement()
 }
 /*------------------------------------------------------------------------------
 
+@name       getInjectedStyles - get list of injected styleIds
+                                                                              */
+                                                                             /**
+            Set list of injected styleIds.
+
+@return     list of injected styleIds
+
+@history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected List<String> getInjectedStyles()
+{
+   if (injectedStyleIds == null)
+   {
+      injectedStyleIds = new ArrayList<>();
+   }
+   return(injectedStyleIds);
+}
+/*------------------------------------------------------------------------------
+
 @name       getNavRoutes - get routes for component
                                                                               */
                                                                              /**
@@ -170,7 +296,7 @@ protected Map<String,Class> getNavRoutes()
 //------------------------------------------------------------------------------
 protected static String getNextId()
 {
-   return("@" + ++nextId);
+   return("rjAuto" + ++nextId);
 }
 /*------------------------------------------------------------------------------
 
@@ -279,6 +405,35 @@ protected String getStateString(
 }
 /*------------------------------------------------------------------------------
 
+@name       getStyleId - get styleId for specified component and properties
+                                                                              */
+                                                                             /**
+            Get styleId for specified component and properties
+
+@return     styleId, or null if props id is null.
+
+@param      component      target component
+@param      props          may or may not be equal to component.props()
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected String getStyleId()
+{
+   String styleId = null;
+   String id      = props().getString("id");
+   if (id != null)
+   {
+      styleId = id + "_" + getClass().getSimpleName();
+   }
+
+   return(styleId);
+}
+/*------------------------------------------------------------------------------
+
 @name       getTheme - get theme
                                                                               */
                                                                              /**
@@ -320,7 +475,7 @@ public IUITheme getTheme()
 
                3. constructors.
 
-@return     void
+@return     component properties
 
 @param      initialProps      initial properties
 
@@ -338,13 +493,15 @@ public P initialize(
 
    this.componentProperties.setComponent(this);
 
+   String id = this.componentProperties.getString("id");
+   if (id != null)
+   {
+      getComponentById().put(id, this);
+   }
+
    initConfiguration();
    initTheme();
 
-   if (ReactJava.getIsWebPlatform())
-   {
-      ReactJava.ensureComponentStyles(this, false);
-   }
    return(this.componentProperties);
 }
 /*------------------------------------------------------------------------------
@@ -424,7 +581,7 @@ public void render()
 @name       renderCSS - get component css
                                                                               */
                                                                              /**
-            Get component css.
+            Get component css. Invoked before render().
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -435,6 +592,27 @@ public void render()
 public void renderCSS()
 {
 };
+/*------------------------------------------------------------------------------
+
+@name       removeAnyStylesheet - remove any injected stylesheet
+                                                                              */
+                                                                             /**
+            Remove any injected stylesheet.
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected void removeAnyStylesheet()
+{
+   Element previous = DomGlobal.document.getElementById(getStyleId());
+   if (previous != null)
+   {
+      previous.remove();
+   }
+}
 /*------------------------------------------------------------------------------
 
 @name       setId - set id
@@ -453,10 +631,17 @@ public void renderCSS()
 protected void setId(
    String id)
 {
-   if (!id.equals(componentProperties.get("id")))
+   String current = componentProperties.getString("id");
+   if (!id.equals(current))
    {
+      if (current != null)
+      {
+         getComponentById().remove(current);
+
+      }
                                        // don't know why set() won't work here//
       componentProperties = (P)Properties.with(componentProperties, "id", id);
+      getComponentById().put(id, this);
    }
 }
 /*------------------------------------------------------------------------------
@@ -486,14 +671,6 @@ public void setState(
       // render to the children, which has taken a while to debug
       // unsuccessfully, so for now force an update instead...
       getStateMgr().setState(key, value);
-   }
-   else
-   {
-      if (!value.equals(getState(key)))
-      {
-         getStateMgr().state.put(key, value);
-         update();
-      }
    }
 }
 /*------------------------------------------------------------------------------
@@ -534,20 +711,21 @@ public IUITheme setTheme(
 //------------------------------------------------------------------------------
 public void update()
 {
-   try
-   {
-      ReactElement element = ReactJava.createElement(this);
-      if (ReactJava.getIsWebPlatform())
-      {
-                                       // update any styles                   //
-         ReactJava.ensureComponentStyles(this, true);
-         ReactDOM.render(element, getDOMParentElement());
-      }
-   }
-   catch(Exception e)
-   {
-      kLOGGER.logError(e);
-   }
+   //try
+   //{
+   //   ReactElement element = ReactJava.createElement(this);
+   //   if (ReactJava.getIsWebPlatform())
+   //   {
+   //                                    // update any styles                   //
+   //      ReactJava.ensureComponentStyles(this, props());
+   //      ReactDOM.unstable_renderSubtreeIntoContainer(
+   //         null, element, getDOMParentElement());
+   //   }
+   //}
+   //catch(Exception e)
+   //{
+   //   kLOGGER.logError(e);
+   //}
 }
 /*------------------------------------------------------------------------------
 
@@ -647,7 +825,7 @@ history:    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
 notes:
 
 ==============================================================================*/
-public class StateMgr
+public static class StateMgr
 {
                                        // constants ------------------------- //
                                        // (none)                              //
@@ -656,8 +834,8 @@ public class StateMgr
                                        // public instance variables --------- //
                                        // (none)                              //
                                        // protected instance variables ------ //
-protected Map<String,Object>   state;  // map of state variable setters       //
-protected Map<String,Function> setters;// map of state variable setters       //
+                                       // map of state variables              //
+protected Map<String,JsArrayLike> state;
 
 /*------------------------------------------------------------------------------
 
@@ -692,12 +870,7 @@ public StateMgr()
 protected Object getState(
    String key)
 {
-   Object value = null;
-   if (state != null)
-   {
-      value = state.get(key);
-   }
-   return(value);
+   return(state != null ? state.get(key).getAt(0) : null);
 }
 /*------------------------------------------------------------------------------
 
@@ -719,34 +892,42 @@ protected void setState(
    String key,
    Object value)
 {
-   if (!value.equals(getState(key)))
+   JsArrayLike stateVariable = state.get(key);
+   if (stateVariable == null)
    {
-      Function setter = setters.get(key);
-      if (setter == null)
-      {
-         throw new IllegalStateException(
-            "useState() with key=" + key + " must be invoked before setState()");
-      }
-
-      if (kSRCCFG_USE_STATE_HOOK)
-      {
-         // see issue #37
-         // setter.apply(value) does not currently propogate the render
-         // to the children, which has taken a while to debug unsuccessfully, so
-         // for now, in the calling Component setState() method,
-         // force an update instead...
-
-         state.put(key, value);
-         setter.apply(value);
-      }
+      throw new IllegalStateException(
+         "useState() with key=" + key + " must be invoked before setState()");
    }
+
+   setStateNative(stateVariable, value);
 }
 /*------------------------------------------------------------------------------
 
-@name       useState - initialize state variables
+@name       setStateNative - set state native
                                                                               */
                                                                              /**
-            Initialize state variables. Each attribute of the specified
+            Set state native. Invokes the setter with the specified next
+            state value.
+
+@param      stateVariable     state variable
+@param      value             new state variable value
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public native void setStateNative(JsArrayLike stateVariable, Object value)
+/*-{
+   stateVariable[1](value);
+}-*/;
+/*------------------------------------------------------------------------------
+
+@name       useState - initialize state variable
+                                                                              */
+                                                                             /**
+            Initialize state variable. Each attribute of the specified
             ComponentState contains a name (key) and an associated initial
             value. This ReactJava implementation splits each attribute into a
             separate React state hook.
@@ -765,15 +946,11 @@ protected void useState(
 {
    if (state == null)
    {
-                                       // lazy instantiation                  //
-      state   = new HashMap<>();
-      setters = new HashMap<>();
+      state = new HashMap<>();
    }
-   if (state.get(key) == null)
-   {
-      state.put(key, value);
-      setters.put(key, (Function)React.useState(value).slice()[1]);
-   }
+                                       // React.useState() invocation may not //
+                                       // be in a conditional                 //
+   state.put(key, React.useState(value));
 }
 }//====================================// end StateMgr =======================//
 }//====================================// end Component ----------------------//

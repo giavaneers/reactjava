@@ -18,7 +18,6 @@ package io.reactjava.client.core.react;
 import elemental2.core.JsArray;
 import jsinterop.annotations.JsType;
                                        // React ==============================//
-// namespace = IConfiguration.kSRCCFG_BUNDLE_SCRIPT ? "ReactJava" : JsPackage.GLOBAL
 @JsType(isNative = true, namespace = "ReactJava")
 public class React
 {

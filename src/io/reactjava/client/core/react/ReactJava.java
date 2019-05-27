@@ -17,11 +17,13 @@ package io.reactjava.client.core.react;
                                        // imports --------------------------- //
 import com.giavaneers.util.gwt.APIRequestor;
 import com.giavaneers.util.gwt.Logger;
-import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.StyleElement;
-import com.google.gwt.user.client.Timer;
+import elemental2.dom.DomGlobal;
+import elemental2.dom.Element;
+import elemental2.dom.HTMLBodyElement;
+import elemental2.dom.HTMLStyleElement;
 import io.reactjava.client.core.providers.platform.web.PlatformWeb;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import jsinterop.base.Js;
@@ -40,6 +42,7 @@ public static final  String kSTYLES  = "styles";
                                        // class variables ------------------- //
                                        // whether initialized                 //
 protected static boolean             bInitialized;
+
                                        // core compiler preprocessor          //
 protected static IReactCodeGenerator generator;
 
@@ -129,14 +132,13 @@ public static ReactElement boot(
          }
          if (getIsWebPlatform())
          {
-            new Timer()
-            {
+            DomGlobal.setTimeout(
+               (e) ->
+               {
                                        // currently in the last inject http   //
                                        // request completion handler, so to   //
                                        // make debugging easier, do the       //
                                        // initial render on a new task...     //
-               public void run()
-               {
                   try
                   {
                      Router.render(configuration);
@@ -145,8 +147,7 @@ public static ReactElement boot(
                   {
                      kLOGGER.logError(t);
                   }
-               }
-            }.schedule(0);
+               }, 0, configuration);
          }
          else
          {
@@ -177,7 +178,7 @@ public static Map<String,String> clearInjectedStylesheets()
    Map<String,String> stylesheets = getInjectedStylesheets();
    for (String styleId : stylesheets.values())
    {
-      Document.get().getElementById(styleId).removeFromParent();
+      DomGlobal.document.getElementById(styleId).remove();
    }
 
    stylesheets.clear();
@@ -297,7 +298,7 @@ public static <P extends Properties> ReactElement createElement(
 public static <P extends Properties> ReactElement createElement(
    Component  component)
 {
-   Properties props   = component.props();
+   Properties   props   = component.props();
    ReactElement element = createElement(getRenderableComponent(component), props);
 
    return(element);
@@ -431,11 +432,10 @@ public static <P extends Properties> ReactElement createElement(
                                                                               */
 //------------------------------------------------------------------------------
 public static void ensureComponentStyles(
-   Component component,
-   boolean   bUpdate)
+   Component component)
 {
-   String classname = component.getClass().getName();
-   if (bUpdate || getInjectedStylesheets().get(classname) == null)
+   String styleId = component.getStyleId();
+   if (styleId != null && ReactJava.getIsWebPlatform())
    {
                                        // inject the stylesheet at the start  //
                                        // of the body (OK as of a later HTML5 //
@@ -443,26 +443,34 @@ public static void ensureComponentStyles(
                                        // than those of material-ui, for      //
                                        // example, which are placed at the    //
                                        // bottom of the head
-      String styles = null;
+      String cssSave = component.css;
       component.renderCSS();
-      if (component.css != null && component.css.length() > 0)
+                                       // check if the css has changed        //
+      boolean bCSSChanged =
+         (component.css != null && cssSave == null)
+            || (component.css == null && cssSave != null)
+            || (component.css != null && !component.css.equals(cssSave));
+
+      if (bCSSChanged)
       {
-         styles = component.css;
-      }
-      if (styles != null)
-      {
-         String styleId = styleIdFromClassname(classname);
-         if (bUpdate)
+         if (component.css != null)
          {
-            Document.get().getElementById(styleId).removeFromParent();
+                                       // inject current                      //
+            HTMLStyleElement style =
+               (HTMLStyleElement)DomGlobal.document.createElement("style");
+
+            kLOGGER.logInfo(
+               "ReactJava.ensureComponentStyles(): injecting styleId=" + styleId);
+
+            style.id          = styleId;
+            style.textContent = component.css;
+
+            HTMLBodyElement body = DomGlobal.document.body;
+            body.insertBefore(style, body.firstElementChild);
+
+            component.getInjectedStyles().add(styleId);
+            getInjectedStylesheets().put(styleId, styleId);
          }
-
-         StyleElement style = Document.get().createStyleElement();
-         style.setId(styleId);
-         style.setInnerText(styles);
-         Document.get().getBody().insertFirst(style);
-
-         getInjectedStylesheets().put(classname, styleId);
       }
    }
 }
@@ -580,7 +588,7 @@ public static Map<String,String> getInjectedStylesheets()
 {
    if (injectedStylesheets == null)
    {
-      injectedStylesheets = new HashMap<String,String>();
+      injectedStylesheets = new HashMap<>();
    }
    return(injectedStylesheets);
 }
@@ -771,14 +779,19 @@ public static <P extends Properties> INativeRenderableComponent getRenderableCom
       JsPropertyMap<Object> map = Js.asPropertyMap(component);
       map.set(getNativeComponentPropertiesFieldname(map), props);
 
-      ReactElement element = null;
-
-      Function<P, ReactElement> fcn = getComponentFcn(component);
+      Function<P,ReactElement> fcn = getComponentFcn(component);
       if (fcn != null)
       {
-         element = fcn.apply((P)props);
+                                       // remove any injected styles          //
+         removeComponentStyles(component);
+
+                                       // invoke the component function       //
+         component.reactElement = fcn.apply((P)props);
+
+                                       // update any styles                   //
+         ensureComponentStyles(component);
       }
-      return(element);
+      return(component.reactElement);
    });
 }
 /*------------------------------------------------------------------------------
@@ -845,24 +858,42 @@ public static boolean initialized()
 }
 /*------------------------------------------------------------------------------
 
-@name       styleIdFromClassname - style element id from component classname
+@name       removeComponentStyles - remove any injected styles for the component
                                                                               */
                                                                              /**
-            Get style element id from component classname.
+            Remove any injected styles for the specified component.
 
-@return     style element id from component classname
+@param      component      component
 
-@param      classname      component classname
-
-@history    Sat Dec 15, 2018 10:30:00 (Giavaneers - LBM) created
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
 
                                                                               */
 //------------------------------------------------------------------------------
-public static String styleIdFromClassname(
-   String classname)
+public static void removeComponentStyles(
+   Component component)
 {
-   return("style_" + classname.replace(".","_"));
+   if (ReactJava.getIsWebPlatform())
+   {
+      List<String> componentStyles = component.getInjectedStyles();
+      for (String styleId : componentStyles)
+      {
+         Element style = DomGlobal.document.getElementById(styleId);
+         if (style != null)
+         {
+            kLOGGER.logInfo(
+               "ReactJava.removeComponentStyles(): removing styleId=" + styleId);
+
+            style.remove();
+         }
+         else
+         {
+            kLOGGER.logInfo(
+               "ReactJava.removeComponentStyles(): cannot find styleId=" + styleId);
+         }
+      }
+      componentStyles.clear();
+   }
 }
 }//====================================// end ReactJava ======================//

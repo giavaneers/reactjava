@@ -72,6 +72,26 @@ public Component(P initialProps)
 }
 /*------------------------------------------------------------------------------
 
+@name       forElement - get state element value
+                                                                              */
+                                                                             /**
+            Get state element value.
+
+@return     state element value
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static Component forElement(
+   Element element)
+{
+   return(null);
+}
+/*------------------------------------------------------------------------------
+
 @name       getDOMElement - get dom element
                                                                               */
                                                                              /**

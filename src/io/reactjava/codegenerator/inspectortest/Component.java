@@ -16,11 +16,13 @@ notes:
 package io.reactjava.codegenerator.inspectortest;
                                        // imports --------------------------- //
 import elemental2.dom.DomGlobal;
+import elemental2.dom.Element;
 import elemental2.dom.Node;
 import io.reactjava.client.core.react.INativeEffectHandler;
 import io.reactjava.client.core.react.IUITheme;
 import io.reactjava.client.core.react.React;
 import io.reactjava.client.core.react.ReactElement;
+import io.reactjava.client.core.react.ReactJava;
 import java.util.Map;
 import java.util.function.Function;
                                        // Component ==========================//
@@ -67,6 +69,26 @@ public Component()
 //------------------------------------------------------------------------------
 public Component(P props)
 {
+}
+/*------------------------------------------------------------------------------
+
+@name       forElement - get state element value
+                                                                              */
+                                                                             /**
+            Get state element value.
+
+@return     state element value
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static io.reactjava.client.core.react.Component forElement(
+   Element element)
+{
+   return(null);
 }
 /*------------------------------------------------------------------------------
 

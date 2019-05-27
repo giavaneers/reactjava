@@ -212,6 +212,34 @@ protected void initConfiguration()
 }
 /*------------------------------------------------------------------------------
 
+@name       initialize - initialize
+                                                                              */
+                                                                             /**
+            Initialize. This override of the default assigns an id which isn't
+            otherwise done for an app.
+
+@return     component properties
+
+@param      initialProps      initial properties
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public P initialize(
+   P initialProps)
+{
+   P props = super.initialize(initialProps);
+   if (props.getString("id") == null)
+   {
+      setId(getNextId());
+   }
+   return(props);
+}
+/*------------------------------------------------------------------------------
+
 @name       onModuleLoad - standard core entry point method
                                                                               */
                                                                              /**

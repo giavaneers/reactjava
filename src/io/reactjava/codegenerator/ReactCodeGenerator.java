@@ -36,6 +36,7 @@ import io.reactjava.client.core.react.INativeEventHandler;
 import io.reactjava.client.core.react.IProvider;
 import io.reactjava.client.core.react.IReactCodeGenerator;
 import io.reactjava.client.core.react.IUITheme;
+import io.reactjava.client.core.react.React;
 import io.reactjava.client.core.react.Utilities;
 import io.reactjava.client.core.resources.javascript.IJavascriptResources;
 import io.reactjava.jsx.IConfiguration;
@@ -856,6 +857,16 @@ public static String generateInjectScript(
 @history    Thu Sep 7, 2017 08:46:23 (LBM) created.
 
 @notes
+            Note: requires the following node modules be installed:
+
+               npm i browserify
+               npm i envify
+               npm i uglify
+
+            and if kSRCCFG_TREE_SHAKE
+
+               npm i common-shakeify
+
             Example command line which generates a UMD bundle for the supplied
             export name (ReactJava). This bundle works with other module
             systems and sets the name given as a window global if no module
@@ -901,14 +912,17 @@ public static String generateInjectScriptBrowserify(
                                        //    -> namespace = "ReactJava"    //
    String script = "";
    String export =
-      "module.exports = "
-    //+ "{React:React, Fragment:React.Fragment, ReactDOM:ReactDOM, Rx:Rx, getType:_getType";
-    + "{React:React, Fragment:React.Fragment, ReactDOM:ReactDOM, getType:_getType";
+      "module.exports = \n{\n"
+    + "   React:React,\n"
+    + "   ReactComponent:React.Component,\n"
+    + "   Fragment:React.Fragment,\n"
+    + "   ReactDOM:ReactDOM,\n"
+    + "   getType:_getType";
 
    if (kSRCCFG_USE_REQUIRE)
    {
-      script += "var React    = require('react');\n";
-      script += "var ReactDOM = require('react-dom');\n";
+      script += "var React            = require('react');\n";
+      script += "var ReactDOM         = require('react-dom');\n";
       //script += "var Rx       = require('rxjs');\n";
    }
    else
@@ -948,7 +962,7 @@ public static String generateInjectScriptBrowserify(
       }
 
       String target    = item + ".default || " + item + "." + item;
-      String exportAdd = ", " + item + ":" + target;
+      String exportAdd = ",\n   " + item + ":" + target;
 
       script += scriptAdd;
       export += exportAdd;

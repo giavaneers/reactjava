@@ -11,6 +11,7 @@
     "@material-ui/icons": "^3.0.2",
     "browserify": "^16.2.3",
     "common-shakeify": "^0.6.0",
+    "create-react-class": "^15.6.3",
     "react": "^16.8.4",
     "react-dom": "^16.8.4",
     "react-native": "^0.59.8",

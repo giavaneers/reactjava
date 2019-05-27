@@ -100,11 +100,11 @@ public static final String kREACT_JAVA_DOWNLOAD_URL_CONTAINER_URL =
    kREACT_JAVA_RELEASES_LATEST_DOWNLOAD_URL + "latestReactJavaRelease.txt";
 
 public static final String kREACT_JAVA_GWT_RELEASE_NAME =
-   "core-2.8.2.zip";
+   "gwt-2.8.2.zip";
 
 public static final String kREACT_JAVA_DOWNLOAD_GWT_RELEASE_URL =
    kREACT_JAVA_RELEASE_DOWNLOAD_BUCKET_URL
-      + "releases/core/" + kREACT_JAVA_GWT_RELEASE_NAME;
+      + "releases/gwt/" + kREACT_JAVA_GWT_RELEASE_NAME;
 
 public static final String kDOWNLOAD_URL_INTELLIJ_HELLOWORLD_PROJECT_TEMPLATE =
    kREACT_JAVA_RELEASE_DOWNLOAD_BUCKET_URL
@@ -475,7 +475,7 @@ public static void assignPlatform(
 @name       browserifyInitialize - install browserify module
                                                                               */
                                                                              /**
-            Install browserify module.
+            Install browserify modules.
 
 @return     new project folder
 
@@ -495,13 +495,47 @@ public static File browserifyInitialize(
    String   nodePath = getLocalNodePath();
    String[] args;
 
+   if (kSRCCFG_NODE_MODULES_IN_PROJECT || getNpmPackageOutOfDate("common-shakeify"))
+   {
+      System.out.println("Installing/updating common-shakeify package...");
+      args = new String[]{"npm install common-shakeify --loglevel=error"};
+      if (exec(args, wd, nodePath) != 0)
+      {
+         throw new IllegalStateException("common-shakeify was not installed");
+      }
+      System.out.println("Done");
+   }
+   if (kSRCCFG_NODE_MODULES_IN_PROJECT || getNpmPackageOutOfDate("envify"))
+   {
+      System.out.println("Installing/updating envify package...");
+      args = new String[]{"npm install envify --loglevel=error"};
+      if (exec(args, wd, nodePath) != 0)
+      {
+         throw new IllegalStateException("envify was not installed");
+      }
+      System.out.println("Done");
+   }
    if (kSRCCFG_NODE_MODULES_IN_PROJECT || getNpmPackageOutOfDate("browserify"))
    {
+                                       // should have been updated by         //
+                                       // common-shakeify above               //
       System.out.println("Installing/updating browserify package...");
       args = new String[]{"npm install browserify --loglevel=error"};
       if (exec(args, wd, nodePath) != 0)
       {
          throw new IllegalStateException("browserify was not installed");
+      }
+      System.out.println("Done");
+   }
+   if (kSRCCFG_NODE_MODULES_IN_PROJECT || getNpmPackageOutOfDate("uglify-js"))
+   {
+                                       // should have been updated by         //
+                                       // browserify above                    //
+      System.out.println("Installing/updating uglify-js package...");
+      args = new String[]{"npm install uglify-js --loglevel=error"};
+      if (exec(args, wd, nodePath) != 0)
+      {
+         throw new IllegalStateException("uglify-js was not installed");
       }
       System.out.println("Done");
    }
@@ -1424,10 +1458,11 @@ public static void doOp(
    List<String> argsList)
    throws       Exception
 {
-   File   currentDir = new File(System.getProperty("user.dir"));
-   String opcode     = null;
-   String version    = null;
-   String path       = null;
+   File    currentDir   = new File(System.getProperty("user.dir"));
+   String  opcode       = null;
+   String  version      = null;
+   String  path         = null;
+   boolean bReactNative = false;
 
    for (int i = 0; i < argsList.size(); i++)
    {
@@ -1458,6 +1493,10 @@ public static void doOp(
          path   =
             argsList.size() >= i + 1
                ? argsList.get(++i) : currentDir.getAbsolutePath();
+      }
+      else if ("-reactnative".equals(arg))
+      {
+         bReactNative = true;
       }
       else if ("-version".equals(arg))
       {
@@ -1490,77 +1529,96 @@ public static void doOp(
    System.out.println(
       "projectDir=" + (path != null ? path : currentDir.getAbsolutePath()));
 
-   if ("buildgwtdevjar".equals(opcode))
+   switch(opcode)
    {
-      buildGWTDevJar();
-   }
-   else if ("buildrelease".equals(opcode))
-   {
-      buildRelease();
-   }
-   else if ("creategwtlibrary".equals(opcode))
-   {
-      generateGWTLibrary();
-   }
-   else if ("deletetempgwtcache".equals(opcode))
-   {
-      deleteTempGWTCache();
-   }
-   //else if ("jsxtransform".equals(opcode))
-   //{
-   //   jsxTransform(path);
-   //}
-   else if ("shadowtosrc".equals(opcode))
-   {
-      shadowToSrc();
-   }
-   else if ("srctoshadow".equals(opcode))
-   {
-      srcToShadow();
-   }
-   else if ("updatejarmanifest".equals(opcode))
-   {
-      updateJarManifest();
-   }
-   else if ("updateprojecttemplateresource".equals(opcode))
-   {
-      updateProjectTemplateResource();
-   }
-   else if ("platformweb".equals(opcode) || "platformios".equals(opcode))
-   {
-      assignPlatform(opcode);
-   }
-   else if ("publishgwtsdk".equals(opcode))
-   {
-      publishGWTSDK();
-   }
-   else if ("publishjar".equals(opcode))
-   {
-      publishJar();
-   }
-   else if ("createproject".equals(opcode) || "update".equals(opcode))
-   {
-      boolean bCreate = "createproject".equals(opcode);
-      File projectDir =
-         bCreate
-            ? (path == null
-               ? new File(currentDir, "MyProject")
-               : path.startsWith(File.separator)
-                  ? new File(path) : new File(currentDir, path))
-            : path == null ? currentDir : new File(path);
-
-      if (!getIsValidJavaIdentifier(projectDir.getName()))
+      case "buildgwtdevjar":
       {
-         throw new IllegalArgumentException(
-            "Project name must be a valid java identifier "
-          + "(see https://docs.oracle.com/cd/E19798-01/821-1841/bnbuk/index.html)");
+         buildGWTDevJar();
+         break;
       }
+      case "buildrelease":
+      {
+         buildRelease();
+         break;
+      }
+      case "creategwtlibrary":
+      {
+         generateGWTLibrary();
+         break;
+      }
+      case "deletetempgwtcache":
+      {
+         deleteTempGWTCache();
+         break;
+      }
+      //case "jsxtransform":
+      //{
+      //   jsxTransform(path);
+      //   break;
+      //}
+      case "shadowtosrc":
+      {
+         shadowToSrc();
+         break;
+      }
+      case "srctoshadow":
+      {
+         srcToShadow();
+         break;
+      }
+      case "updatejarmanifest":
+      {
+         updateJarManifest();
+         break;
+      }
+      case "updateprojecttemplateresource":
+      {
+         updateProjectTemplateResource();
+         break;
+      }
+      case "platformweb":
+      case "platformios":
+      {
+         assignPlatform(opcode);
+         break;
+      }
+      case "publishgwtsdk":
+      {
+         publishGWTSDK();
+         break;
+      }
+      case "publishjar":
+      {
+         publishJar();
+         break;
+      }
+      case "createproject":
+      case "update":
+      {
+         boolean bCreate = "createproject".equals(opcode);
+         File projectDir =
+            bCreate
+               ? (path == null
+                  ? new File(currentDir, "MyProject")
+                  : path.startsWith(File.separator)
+                     ? new File(path) : new File(currentDir, path))
+               : path == null ? currentDir : new File(path);
 
-      updateReactJavaCore(projectDir, version, "update".equals(opcode));
-   }
-   else
-   {
-      throw new IllegalArgumentException(opcode);
+         if (!getIsValidJavaIdentifier(projectDir.getName()))
+         {
+            throw new IllegalArgumentException(
+               "Project name must be a valid java identifier "
+             + "(see https://docs.oracle.com/cd/E19798-01/821-1841/bnbuk/index.html)");
+         }
+
+         updateReactJavaCore(
+            projectDir, version, bReactNative, "update".equals(opcode));
+         break;
+      }
+      default:
+      {
+         throw new IllegalArgumentException(opcode);
+      }
    }
    System.out.println("nanoTime=" + System.nanoTime());
    System.out.println("duration=" + ((System.nanoTime() - start) / 1000000L));
@@ -1983,13 +2041,13 @@ public static boolean getGWTInstalled()
    throws IOException
 {
    System.out.println(
-      "Checking whether the latest version of core is installed...");
+      "Checking whether the latest version of gwt is installed...");
 
    boolean bInstalled = false;
    String  msg        = "GWT is not installed.";
 
    File home = new File(System.getProperty("user.home"));
-   File gwt  = new File(home, toOSPath(".reactjava/core/core-2.8.2"));
+   File gwt  = new File(home, toOSPath(".reactjava/gwt/gwt-2.8.2"));
    if (gwt.exists())
    {
       msg = "The GWT installation is out of date.";
@@ -2493,16 +2551,16 @@ public static File gwtInitialize(
    {
       String sHome  = System.getProperty("user.home");
       File   home   = new File(sHome);
-      File   gwtDir = new File(home, toOSPath(".reactjava/core"));
-      File   gwt    = new File(gwtDir, "core-2.8.2");
+      File   gwtDir = new File(home, toOSPath(".reactjava/gwt"));
+      File   gwt    = new File(gwtDir, "gwt-2.8.2");
 
       gwt.mkdirs();
                                        // download release from cloud storage //
       System.out.println(
-         "\nDownloading core release (this may take a few minutes)...");
+         "\nDownloading gwt release (this may take a few minutes)...");
       File src = copyGWTReleaseViaGCS(gwtDir);
 
-      System.out.println("\nInstalling core...");
+      System.out.println("\nInstalling gwt...");
       zipExtractFiles(src, gwtDir);
                                        // delete the release zip file         //
       src.delete();
@@ -2923,15 +2981,20 @@ protected static String localNodeBashUpdateEntry(
 
                create-reactjava-app MyNewProject
 
-            2. Create new project with version 0.1.1810191229
+            2. Create new project with the latest version
+               and include React Native support
+
+               create-reactjava-app -reactnative MyNewProject
+
+            3. Create new project with version 0.1.1810191229
 
                create-reactjava-app -version 0.1.1810191229 MyNewProject
 
-            3. Update project with the latest version
+            4. Update project with the latest version
 
                create-reactjava-app update MyNewProject
 
-            4. Update project with version 0.1.1810191229
+            5. Update project with version 0.1.1810191229
 
                create-reactjava-app -version 0.1.1810191229 update MyNewProject
 
@@ -2967,6 +3030,54 @@ public static void main(
    {
       e.printStackTrace();
    }
+}
+/*------------------------------------------------------------------------------
+
+@name       materialUIInitialize - install material-ui modules
+                                                                              */
+                                                                             /**
+            Install material-ui modules.
+
+@return     new project folder
+
+@param      projectDir    new project directory
+
+@history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static File materialUIInitialize(
+   File     projectDir)
+{
+   String   sHome    = System.getProperty("user.home");
+   File     home     = new File(sHome);
+   File     wd       = kSRCCFG_NODE_MODULES_IN_PROJECT ? projectDir : home;
+   String   nodePath = getLocalNodePath();
+   String[] args;
+
+   if (kSRCCFG_NODE_MODULES_IN_PROJECT || getNpmPackageOutOfDate("@material-ui/core"))
+   {
+      System.out.println("Installing/updating @material-ui/core package...");
+      args = new String[]{"npm install @material-ui/core --loglevel=error"};
+      if (exec(args, wd, nodePath) != 0)
+      {
+         throw new IllegalStateException("@material-ui/core was not installed");
+      }
+      System.out.println("Done");
+   }
+   if (kSRCCFG_NODE_MODULES_IN_PROJECT || getNpmPackageOutOfDate("@material-ui/icons"))
+   {
+      System.out.println("Installing/updating @material-ui/icons package...");
+      args = new String[]{"npm install @material-ui/icons --loglevel=error"};
+      if (exec(args, wd, nodePath) != 0)
+      {
+         throw new IllegalStateException("@material-ui/icons was not installed");
+      }
+      System.out.println("Done");
+   }
+
+   return(projectDir);
 }
 /*------------------------------------------------------------------------------
 
@@ -3769,6 +3880,7 @@ public static void updateProjectTemplateResource()
 public static void updateReactJavaCore(
    File    projectDir,
    String  version,
+   boolean bReactNative,
    boolean bUpdate)
    throws  Exception
 {
@@ -3803,12 +3915,18 @@ public static void updateReactJavaCore(
    browserifyInitialize(projectDir);
                                        // initialize/update reactiveX         //
    reactiveXInitialize(projectDir);
+                                       // initialize/update material-ui/core  //
+   materialUIInitialize(projectDir);
+
+   if (bReactNative)
+   {
                                        // initialize react native modules now //
                                        // so project run configurations iOS   //
                                        // and android will be able to         //
                                        // reference react-native-cli and not  //
                                        // indicate an error                   //
-   reactNativeInitialize(projectDir);
+      reactNativeInitialize(projectDir);
+   }
                                        // initialize/update core support       //
    gwtInitialize(projectDir);
                                        // delete any temp directory           //

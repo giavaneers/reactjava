@@ -45,4 +45,20 @@ public class ReactDOM
 //------------------------------------------------------------------------------
 public static native <C> ReactElement render(ReactElement element, C container);
 
+/*------------------------------------------------------------------------------
+
+@name       render - standard render method
+                                                                              */
+                                                                             /**
+            Standard render method.
+
+@return     void
+
+@history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static native <C> ReactElement unstable_renderSubtreeIntoContainer(Object parentComponent, ReactElement element, C container);
+
 }//====================================// end ReactDOM -----------------------//

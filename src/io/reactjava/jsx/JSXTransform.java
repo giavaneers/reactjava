@@ -3535,7 +3535,7 @@ public static boolean unitTest(
                            null);
                      content = src;
                   }
-                  else if (true)
+                  else if (false)
                   {
                      components.put(
                         "GeneralPage",
@@ -3568,6 +3568,18 @@ public static boolean unitTest(
                               "/Users/brianm/working/IdeaProjects/ReactJava/"
                             + "ReactJavaExamples/src/"
                             + "io/reactjava/client/examples/displaycode/App.java"),
+                           null);
+                     content = src;
+                  }
+                  else if (true)
+                  {
+                     classname  = "io.reactjava.client.examples.threebythree.state.Square";
+                     src =
+                        IJSXTransform.getFileAsString(
+                           new File(
+                              "/Users/brianm/working/IdeaProjects/ReactJava/"
+                            + "ReactJavaExamples/src/"
+                            + "io/reactjava/client/examples/threebythree/state/Square.java"),
                            null);
                      content = src;
                   }

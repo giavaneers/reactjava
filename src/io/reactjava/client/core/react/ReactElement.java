@@ -34,4 +34,18 @@ public Properties props;               // native properties                   //
                                        // private instance variables -------- //
                                        // (none)                              //
 
+/*------------------------------------------------------------------------------
+
+@name       forceUpdate - force update on component tree
+                                                                              */
+                                                                             /**
+            Force update on component tree.
+
+@history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static native void forceUpdate();
+
 }//====================================// end ReactElement ------------------------//
