@@ -12,6 +12,7 @@
     "browserify": "^16.2.3",
     "common-shakeify": "^0.6.0",
     "create-react-class": "^15.6.3",
+    "jdeploy": "^1.0.21",
     "react": "^16.8.4",
     "react-dom": "^16.8.4",
     "react-native": "^0.59.8",

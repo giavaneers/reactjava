@@ -19,6 +19,7 @@ package io.reactjava.jsx;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.dev.util.log.PrintWriterTreeLogger;
 import io.reactjava.client.core.providers.platform.IPlatform;
+import io.reactjava.client.core.react.Component;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -78,7 +79,8 @@ public static final String kINLINE_HDR =
  + "java.util.Stack<io.reactjava.client.core.react.ElementDsc> parents="
  + "new java.util.Stack<>();"
  + "io.reactjava.client.core.react.ElementDsc root = null;"
- + "io.reactjava.client.core.react.ElementDsc elem;";
+ + "io.reactjava.client.core.react.ElementDsc elem;"
+ + "useState(\"" + Component.kFORCE_UPDATE_KEY + "\",0);";
 
 public static final String kMARKUP_JAVABLOCK_PLACEHOLDER =
    "<!-- javablock -->";
@@ -3573,13 +3575,13 @@ public static boolean unitTest(
                   }
                   else if (true)
                   {
-                     classname  = "io.reactjava.client.examples.threebythree.state.Square";
+                     classname  = "io.reactjava.client.examples.threebythree.state.SquareByRenderCSS";
                      src =
                         IJSXTransform.getFileAsString(
                            new File(
                               "/Users/brianm/working/IdeaProjects/ReactJava/"
                             + "ReactJavaExamples/src/"
-                            + "io/reactjava/client/examples/threebythree/state/Square.java"),
+                            + "io/reactjava/client/examples/threebythree/state/SquareByRenderCSS.java"),
                            null);
                      content = src;
                   }

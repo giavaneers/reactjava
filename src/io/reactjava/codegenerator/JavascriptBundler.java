@@ -126,6 +126,7 @@ public static final String kREACT_JAVA_JAR_NAME =
 public static final List<String> kNO_RELAUNCH =
    new ArrayList<String>()
    {{
+      add("buildgwtcodeserverjar");
       add("buildgwtdevjar");
       add("buildrelease");
       add("creategwtlibrary");
@@ -550,6 +551,9 @@ public static File browserifyInitialize(
             Generate the enhanced core-codeserver.jar from the existing, adding
             the reactjava.jar contents.
 
+            NOTE! The codeserver jar is currently not modified from the gwt
+            standard release!
+
 @history    Sun Dec 23, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -560,38 +564,38 @@ public static void buildGWTCodeServerJar()
 {
    System.out.println("JavascriptBundler.buildGWTCodeServerJar(): entered");
 
-   File   projectDir = new File(System.getProperty("user.dir"));
-   String baseSrc    = "src/";
-   String baseCls    = "out/artifacts/ReactJava_war_exploded/WEB-INF/classes/";
-
-   String[] javaEntries =
-   {
-      "com/google/gwt/dev/codeserver/CodeServer",
-   };
-   String[] classEntries =
-   {
-      "com/google/gwt/dev/codeserver/CodeServer",
-   };
-
-   List<Path>   targets = new ArrayList<>();
-   List<String> entries = new ArrayList<>();
-
-   for (int i = 0; i < javaEntries.length; i++)
-   {
-      targets.add(
-        new File(projectDir, baseSrc + javaEntries[i] + ".java").toPath());
-      entries.add(javaEntries[i] + ".java");
-   }
-   for (int i = 0; i < classEntries.length; i++)
-   {
-      targets.add(
-         new File(projectDir, baseCls + classEntries[i] + ".class").toPath());
-      entries.add(classEntries[i] + ".class");
-   }
-
-   jarUpdate(
-      new File("/Users/brianm/.reactjava/core/core-2.8.2/core-codeserver.jar"),
-      targets, entries);
+   //File   projectDir = new File(System.getProperty("user.dir"));
+   //String baseSrc    = "src/";
+   //String baseCls    = "out/artifacts/ReactJava_war_exploded/WEB-INF/classes/";
+   //
+   //String[] javaEntries =
+   //{
+   //   "com/google/gwt/dev/codeserver/CodeServer",
+   //};
+   //String[] classEntries =
+   //{
+   //   "com/google/gwt/dev/codeserver/CodeServer",
+   //};
+   //
+   //List<Path>   targets = new ArrayList<>();
+   //List<String> entries = new ArrayList<>();
+   //
+   //for (int i = 0; i < javaEntries.length; i++)
+   //{
+   //   targets.add(
+   //     new File(projectDir, baseSrc + javaEntries[i] + ".java").toPath());
+   //   entries.add(javaEntries[i] + ".java");
+   //}
+   //for (int i = 0; i < classEntries.length; i++)
+   //{
+   //   targets.add(
+   //      new File(projectDir, baseCls + classEntries[i] + ".class").toPath());
+   //   entries.add(classEntries[i] + ".class");
+   //}
+   //
+   //jarUpdate(
+   //   new File("/Users/brianm/.reactjava/gwt/gwt-2.8.2/gwt-codeserver.jar"),
+   //   targets, entries);
 
    System.out.println("JavascriptBundler.buildGWTCodeServerJar(): exiting");
 }
@@ -1531,6 +1535,11 @@ public static void doOp(
 
    switch(opcode)
    {
+      case "buildgwtcodeserverjar":
+      {
+         buildGWTCodeServerJar();
+         break;
+      }
       case "buildgwtdevjar":
       {
          buildGWTDevJar();

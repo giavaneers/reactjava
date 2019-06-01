@@ -72,6 +72,22 @@ public Component(P props)
 }
 /*------------------------------------------------------------------------------
 
+@name       forceUpdate - force component update
+                                                                              */
+                                                                             /**
+            Force component update.
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public void forceUpdate()
+{
+}
+/*------------------------------------------------------------------------------
+
 @name       forElement - get state element value
                                                                               */
                                                                              /**
@@ -300,22 +316,6 @@ protected void setProperties(
    P props)
 {
    this.props = props;
-}
-/*------------------------------------------------------------------------------
-
-@name       update - update component render
-                                                                              */
-                                                                             /**
-            Update component render.
-
-@history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-
-                                                                              */
-//------------------------------------------------------------------------------
-public void update()
-{
 }
 /*------------------------------------------------------------------------------
 

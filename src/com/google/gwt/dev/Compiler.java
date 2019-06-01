@@ -110,10 +110,6 @@ public class Compiler {
             position, relaunch with the same classpath modified to reorder
             reactjava.jar to the first position.
 
-@return     true iff relaunched
-
-@param      args     launch arguments
-
 @history    Sun Jan 06, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -158,7 +154,7 @@ public static void loadReactJavaOverrides()
       {
          JarEntry entry    = (JarEntry)jarEntries.nextElement();
          String   override = entry.getName().replace("/",".");
-         if (override.startsWith("com.google.core.dev.")
+         if (override.startsWith("com.google.gwt.dev.")
                && override.endsWith(".class"))
          {
             override = override.replace(".class", "");
@@ -275,7 +271,7 @@ public static boolean modifyClasspathAndAndRelaunch(
     {
        System.exit(0);
     }
-    //com.google.core.dev.Compiler.loadReactJavaOverrides();
+    //com.google.gwt.dev.Compiler.loadReactJavaOverrides();
 /*LBM-END*/
     Memory.initialize();
     if (System.getProperty("core.jjs.dumpAst") != null) {

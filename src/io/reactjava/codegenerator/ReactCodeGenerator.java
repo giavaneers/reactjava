@@ -475,15 +475,20 @@ protected static void copyResources(
                rsrcStylesheet, configuration, context, logger);
          }
       }
-      if (imported.length() > 0)
+      if (imported.length() == 0)
       {
-                                       // copy the list to the distribution   //
-         copyStreamToArtifact(
-            new ByteArrayInputStream(imported.getBytes("UTF-8")),
-            "css/" + IReactCodeGenerator.kIMPORTED_STYLESHEETS_LIST,
-            configuration, context, logger);
+         logger.log(
+            TreeLogger.Type.INFO,
+            "copyResources(): making empty imported stylesheets list");
 
+         imported = " ";
       }
+                                       // copy the list to the distribution   //
+      copyStreamToArtifact(
+         new ByteArrayInputStream(imported.getBytes("UTF-8")),
+         "css/" + IReactCodeGenerator.kIMPORTED_STYLESHEETS_LIST,
+         configuration, context, logger);
+
       logger.log(TreeLogger.Type.INFO, "copyResources(): done copying css");
    }
    if (!IJavascriptResources.kSRCCFG_SCRIPTS_AS_RESOURCES && bLoadLazy)
@@ -921,8 +926,8 @@ public static String generateInjectScriptBrowserify(
 
    if (kSRCCFG_USE_REQUIRE)
    {
-      script += "var React            = require('react');\n";
-      script += "var ReactDOM         = require('react-dom');\n";
+      script += "var React    = require('react');\n";
+      script += "var ReactDOM = require('react-dom');\n";
       //script += "var Rx       = require('rxjs');\n";
    }
    else

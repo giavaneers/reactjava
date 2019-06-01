@@ -1083,42 +1083,47 @@ protected void processCompletion()
                                        // capture any statusText              //
    getClient().setStatusText(xhr.getStatusText());
 
-   boolean bErr = kSTATUS_CODES_SUCCESS.get(xhr.getStatus()) == null;
+   boolean bErr = false;
+                                       // verify response type is supported   //
+   ResponseType responseType = ResponseType.fromString(xhr.getResponseType());
+   if (!kRESPONSE_TYPES_SUPPORTED.contains(responseType))
+   {
+      String msg =
+         "HttpClient.DefaultReadyStateChangeListener.processCompletion(): "
+       + "response type not supported: " + responseType;
+
+      kLOGGER.logError(msg);
+      getClient().setErrorReason(msg);
+      bErr = true;
+   }
    if (!bErr)
    {
-                                       // process success ------------------- //
-                                       // verify response type is supported   //
-      ResponseType responseType = ResponseType.fromString(xhr.getResponseType());
-      if (!kRESPONSE_TYPES_SUPPORTED.contains(responseType))
-      {
-         String msg =
-            "HttpClient.DefaultReadyStateChangeListener.processCompletion(): "
-          + "response type not supported: " + responseType;
-
-         kLOGGER.logError(msg);
-         getClient().setErrorReason(msg);
-      }
+      bErr = kSTATUS_CODES_SUCCESS.get(xhr.getStatus()) == null;
    }
-   else
+   if (bErr)
    {
                                        // process error --------------------- //
-      String statusText = getClient().getStatusText();
-      if (statusText == null || statusText.length() == 0)
+      String statusText = null;
+      if (responseType != ResponseType.kARRAYBUFFER)
       {
-         if (getClient().getTimeout())
+         statusText = getClient().getStatusText();
+         if (statusText == null || statusText.length() == 0)
          {
-            statusText = "Timeout without response";
-         }
-         else
-         {
-            statusText = "Request status = " + xhr.getStatus();
-         }
+            if (getClient().getTimeout())
+            {
+               statusText = "Timeout without response";
+            }
+            else
+            {
+               statusText = "Request status = " + xhr.getStatus();
+            }
 
-         getClient().setStatusText(statusText);
+            getClient().setStatusText(statusText);
+         }
       }
                                        // get any reason available            //
       String reason = getClient().getErrorReason();
-      if (reason == null)
+      if (reason == null && responseType != ResponseType.kARRAYBUFFER)
       {
          try
          {

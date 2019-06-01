@@ -55,7 +55,7 @@ public class CodeServer {
   public static void main(String[] args) throws Exception {
 
 /*LBM-START*/
-    //if (com.google.core.dev.Compiler.modifyClasspathAndAndRelaunch(args, true))
+    //if (com.google.gwt.dev.Compiler.modifyClasspathAndAndRelaunch(args, true))
     //{
     //   System.exit(0);
     //}

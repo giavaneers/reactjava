@@ -383,9 +383,23 @@ public static List<String> getImportedStylesheets(
             importedStylesheets = new ArrayList<>();
             if (error == null)
             {
-               importedStylesheets.addAll(
-                  Arrays.asList(
-                     new String(response.getBytes(), "UTF-8").split(",")));
+               String stylesheets = null;
+               byte[] rspBytes    = response.getBytes();
+               if (rspBytes != null && rspBytes.length > 0)
+               {
+                  stylesheets = new String(rspBytes, "UTF-8").trim();
+               }
+               if (stylesheets != null && stylesheets.length() > 0)
+               {
+                  importedStylesheets.addAll(
+                     Arrays.asList(stylesheets.split(",")));
+               }
+               else
+               {
+                  kLOGGER.logInfo(
+                     "Utilities.getImportedStylesheets(): "
+                   + "no list of external stylesheets found");
+               }
             }
 
             callback.onSuccess(null);
@@ -401,7 +415,11 @@ public static List<String> getImportedStylesheets(
             + getArtifactReactJavaDirectoryName()
             + "/css/" + IReactCodeGenerator.kIMPORTED_STYLESHEETS_LIST;
 
-                                       // read the remote list of stylesheets //
+                                       // read any remote list of stylesheets //
+      kLOGGER.logInfo(
+         "Utilities.getImportedStylesheets(): "
+       + "checking for any list of external stylesheets");
+
       new HttpClientBase(cssListURL)
          .setResponseType(ResponseType.kARRAYBUFFER)
          .send(requestorLocal);

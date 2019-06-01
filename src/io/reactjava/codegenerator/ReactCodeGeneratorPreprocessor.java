@@ -119,12 +119,18 @@ public byte[] process(
          mapEntries += entry;
       }
 
+      String platformProviderClassname =
+         "io.reactjava.client.core.providers.platform.web.PlatformWeb";
+
       content =
          content
          .replace("%componentEntries%", mapEntries)
-         .replace(
-            "%platformProviderClassname%",
-            "io.reactjava.client.core.providers.platform.web.PlatformWeb");
+         .replace( "%platformProviderClassname%", platformProviderClassname);
+
+      logger.log(
+         logger.INFO,
+         "ReactCodeGeneratorPreprocessor.process(): "
+       + "assigned platform provider classname=" + platformProviderClassname);
 
       logger.log(
          logger.DEBUG,
