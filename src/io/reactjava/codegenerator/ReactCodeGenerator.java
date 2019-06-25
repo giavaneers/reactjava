@@ -23,6 +23,7 @@ import com.google.gwt.core.ext.typeinfo.JConstructor;
 import com.google.gwt.core.ext.typeinfo.JType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.dev.CompilerContext;
+import com.google.gwt.dev.cfg.ModuleDef;
 import com.google.gwt.dev.jjs.PrecompilationContext;
 import com.google.gwt.dev.util.log.AbstractTreeLogger;
 import com.google.gwt.dev.util.log.PrintWriterTreeLogger;
@@ -36,18 +37,19 @@ import io.reactjava.client.core.react.INativeEventHandler;
 import io.reactjava.client.core.react.IProvider;
 import io.reactjava.client.core.react.IReactCodeGenerator;
 import io.reactjava.client.core.react.IUITheme;
-import io.reactjava.client.core.react.React;
+import io.reactjava.client.core.react.SEOInfo;
+import io.reactjava.client.core.react.SEOInfo.SEOPageInfo;
 import io.reactjava.client.core.react.Utilities;
 import io.reactjava.client.core.resources.javascript.IJavascriptResources;
 import io.reactjava.jsx.IConfiguration;
 import io.reactjava.jsx.IJSXTransform;
-import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -113,6 +115,9 @@ public static final List<String> kFILTER_RX_TYPES  =
 public static final String kBOOT_JS_FILENAME =
    "Boot.js";
 
+public static final String kDEPLOY_PATH_PROPERTY_NAME =
+   "reactjava.deploypath";
+
 public static final String kKEY_ALL_TYPES  = "allTypes";
 public static final String kKEY_APP_TYPES  = "appTypes";
 public static final String kKEY_COMPONENTS = "components";
@@ -140,6 +145,40 @@ public static final String kBOOT_JS =
  + "      return(element);\n"
  + "   }\n"
  + "}\n";
+
+public static final String kREDIRECT_HTML =
+   "<!DOCTYPE html>\n"
+ + "<html lang='en'>\n"
+ + "<head>\n"
+ + "   <script type='text/javascript'>\n"
+ + "                                   // avoids leaving the orig in history  //\n"
+ + "      window.location.replace(\n"
+ + "         window.location.href.replace(\n"
+ + "            '%redirectName%.html',\n"
+ + "            '%defaultName%.html#%hash%'));\n"
+ + "   </script>\n"
+ + "</head>\n"
+ + "<body></body>\n"
+ + "</html>\n";
+
+public static final String kSITEMAP_HDR =
+   "<?xml version='1.0' encoding='UTF-8'?>\n"
+ + "<urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>\n";
+
+public static final String kSITEMAP_ITEM =
+   "   <url>\n"
+ + "      <loc>%itemPath%</loc>\n"
+ + "      <changefreq>daily</changefreq>\n"
+ + "   </url>\n";
+
+public static final String kSITEMAP_FTR =
+   "</urlset>\n";
+
+public static final String kROBOTS_TXT =
+   "User-agent: *\n"
+ + "Disallow:\n"
+ + "Sitemap: %deployPath%/%moduleName%Sitemap.xml\n";
+
                                        // class variables ------------------- //
                                        // none                                //
                                        // public instance variables --------- //
@@ -239,6 +278,53 @@ protected void addImportedNodeModuleStylesheet(
 }
 /*------------------------------------------------------------------------------
 
+@name       copyBundleScriptToArtifact - copy library scripts to artifact
+                                                                              */
+                                                                             /**
+            Copy library scripts to artifact: "reactjavaplatform.js" and
+            "reactjavaapp.js".
+
+            Platform and app scripts generated separately to reduce build time
+            since platform will not change and app may or may not change
+
+@param      configuration     configuration
+@param      context           context
+@param      logger            logger
+
+@history    Mon May 19, 2014 18:00:00 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static void copyBundleScriptToArtifact(
+   IConfiguration   configuration,
+   GeneratorContext context,
+   TreeLogger       logger)
+   throws           Exception
+{
+   logger.log(TreeLogger.Type.INFO, "copyBundleScriptToArtifact(): entered");
+
+   Boolean bCompressForce = null;
+   InputStream in;
+
+   if (injectScriptAppDirty(logger))
+   {
+      String injectScript = generateInjectScript(configuration, logger);
+      in = new ByteArrayInputStream(injectScript.getBytes("UTF-8"));
+   }
+   else
+   {
+      in = new FileInputStream(io.reactjava.jsx.IConfiguration.getInjectScript(logger));
+      bCompressForce = false;
+   }
+
+   String path = "javascript/reactjavaapp.js";
+   copyStreamToArtifact(in, path, configuration, context, logger, bCompressForce);
+
+   logger.log(TreeLogger.Type.INFO, "copyBundleScriptToArtifact(): exiting");
+}
+/*------------------------------------------------------------------------------
+
 @name       copyCSSFileToArtifact - copy css file to artifact
                                                                               */
                                                                              /**
@@ -302,6 +388,43 @@ public static void copyCSSResourceToArtifact(
 }
 /*------------------------------------------------------------------------------
 
+@name       copyHTMLContentToWAR - copy html content to artifact
+                                                                              */
+                                                                             /**
+            Copy html content to artifact.
+
+@param      filename    filename
+@param      content     content
+@param      logger      logger
+
+@history    Mon May 19, 2014 18:00:00 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static void copyHTMLContentToWAR(
+   String           filename,
+   String           content,
+   TreeLogger       logger)
+   throws           Exception
+{
+   logger.log(TreeLogger.Type.INFO, "copyHTMLContentToWAR(): "+ filename);
+
+   File warDir   = IConfiguration.getWarDir(logger);
+   File htmlFile = new File(warDir, filename);
+
+   try (OutputStream out = new FileOutputStream(htmlFile))
+   {
+      try (InputStream in = new ByteArrayInputStream(content.getBytes("UTF-8")))
+      {
+         IConfiguration.fastChannelCopy(in, out, content.length());
+      }
+   }
+
+   logger.log(TreeLogger.Type.INFO, "copyHTMLContentToWAR(): exiting");
+}
+/*------------------------------------------------------------------------------
+
 @name       copyImageResourceToArtifact - copy image rsrc to artifact
                                                                               */
                                                                              /**
@@ -329,53 +452,6 @@ public static void copyImageResourceToArtifact(
       copyResourceToArtifact(
          "images/" + rsrcPath, configuration, context, logger);
    }
-}
-/*------------------------------------------------------------------------------
-
-@name       copyBundleScriptToArtifact - copy library scripts to artifact
-                                                                              */
-                                                                             /**
-            Copy library scripts to artifact: "reactjavaplatform.js" and
-            "reactjavaapp.js".
-
-            Platform and app scripts generated separately to reduce build time
-            since platform will not change and app may or may not change
-
-@param      configuration     configuration
-@param      context           context
-@param      logger            logger
-
-@history    Mon May 19, 2014 18:00:00 (LBM) created.
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public static void copyBundleScriptToArtifact(
-   IConfiguration   configuration,
-   GeneratorContext context,
-   TreeLogger       logger)
-   throws           Exception
-{
-   logger.log(TreeLogger.Type.INFO, "copyBundleScriptToArtifact(): entered");
-
-   Boolean bCompressForce = null;
-   InputStream in;
-
-   if (injectScriptAppDirty(logger))
-   {
-      String injectScript = generateInjectScript(configuration, logger);
-      in = new ByteArrayInputStream(injectScript.getBytes("UTF-8"));
-   }
-   else
-   {
-      in = new FileInputStream(io.reactjava.jsx.IConfiguration.getInjectScript(logger));
-      bCompressForce = false;
-   }
-
-   String path = "javascript/reactjavaapp.js";
-   copyStreamToArtifact(in, path, configuration, context, logger, bCompressForce);
-
-   logger.log(TreeLogger.Type.INFO, "copyBundleScriptToArtifact(): exiting");
 }
 /*------------------------------------------------------------------------------
 
@@ -568,6 +644,47 @@ public static void copyResourceToArtifact(
 }
 /*------------------------------------------------------------------------------
 
+@name       copyRobotsContentToWAR - copy robot.txt content to artifact
+                                                                              */
+                                                                             /**
+            Copy robots.txt content to artifact.
+
+@param      deployPath   deploy path
+@param      moduleName   module name
+@param      logger      logger
+
+@history    Sun Jun 16, 2019 18:00:00 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected void copyRobotsContentToWAR(
+   String     deployPath,
+   String     moduleName,
+   TreeLogger logger)
+   throws     Exception
+{
+   logger.log(TreeLogger.Type.INFO, "copyRobotsContentToWAR(): entered");
+
+   File warDir     = IConfiguration.getWarDir(logger);
+   File robotsFile = new File(warDir, "robots.txt");
+   String content  =
+      kROBOTS_TXT
+         .replace("%deployPath%", deployPath)
+         .replace("%moduleName%", moduleName);
+
+   try (OutputStream out = new FileOutputStream(robotsFile))
+   {
+      try (InputStream in = new ByteArrayInputStream(content.getBytes("UTF-8")))
+      {
+         IConfiguration.fastChannelCopy(in, out, content.length());
+      }
+   }
+
+   logger.log(TreeLogger.Type.INFO, "copyRobotsContentToWAR(): exiting");
+}
+/*------------------------------------------------------------------------------
+
 @name       copyScriptResourceToArtifact - copy script rsrc to artifact
                                                                               */
                                                                              /**
@@ -650,12 +767,48 @@ public static void copyScriptResourceToArtifact(
 }
 /*------------------------------------------------------------------------------
 
+@name       copySitemapContentToWAR - copy sitemap content to artifact
+                                                                              */
+                                                                             /**
+            Copy sitemap content to artifact.
+
+@param      content     sitemap content
+@param      logger      logger
+
+@history    Sun Jun 16, 2019 18:00:00 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected void copySitemapContentToWAR(
+   String     moduleName,
+   String     content,
+   TreeLogger logger)
+   throws     Exception
+{
+   logger.log(TreeLogger.Type.INFO, "copySitemapContentToWAR(): entered");
+
+   File warDir      = IConfiguration.getWarDir(logger);
+   File sitemapFile = new File(warDir, moduleName + "Sitemap.xml");
+
+   try (OutputStream out = new FileOutputStream(sitemapFile))
+   {
+      try (InputStream in = new ByteArrayInputStream(content.getBytes("UTF-8")))
+      {
+         IConfiguration.fastChannelCopy(in, out, content.length());
+      }
+   }
+
+   logger.log(TreeLogger.Type.INFO, "copySitemapContentToWAR(): exiting");
+}
+/*------------------------------------------------------------------------------
+
 @name       copyStreamToArtifact - copy stream to artifact
                                                                               */
                                                                              /**
             copy stream to artifact.
 
-@param      in              source stream
+@param      in                source stream
 @param      dstPath           destination path
 @param      configuration     configuration
 @param      context           context
@@ -704,7 +857,8 @@ public static void copyStreamToArtifact(
    Boolean          bCompressForce)
    throws           Exception
 {
-   logger.log(TreeLogger.Type.INFO, "copyStreamToArtifact(): entered for " + dstPath);
+   logger.log(
+      TreeLogger.Type.INFO, "copyStreamToArtifact(): entered for " + dstPath);
 
    if (in == null)
    {
@@ -1175,6 +1329,80 @@ public static String generateInjectScriptBrowserify(
 }
 /*------------------------------------------------------------------------------
 
+@name       generateHashRedirect - generate redirect for specified hash
+                                                                              */
+                                                                             /**
+            Generate redirect for specified hash.
+
+@param      defaultName    default page name
+@param      pageHash       page hash
+@param      logger         logger
+
+@history    Sun Jun 16, 2019 18:00:00 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected void generateHashRedirect(
+   String     defaultName,
+   String     pageHash,
+   TreeLogger logger)
+   throws     Exception
+{
+   if (pageHash != null && pageHash.length() > 0)
+   {
+      String pageHashCap =
+         pageHash.substring(0,1).toUpperCase() + pageHash.substring(1);
+
+      String redirectName = defaultName + pageHashCap;
+
+      String content =
+         kREDIRECT_HTML
+            .replace("%redirectName%", redirectName)
+            .replace("%defaultName%",  defaultName)
+            .replace("%hash%",         pageHash);
+
+      copyHTMLContentToWAR(redirectName + ".html", content, logger);
+   }
+}
+/*------------------------------------------------------------------------------
+
+@name       generateSitemapItem - generate sitemap
+                                                                              */
+                                                                             /**
+            Generate sitemap.
+
+@param      moduleName     module name
+@param      content        sitemap content
+@param      deployPath     deploy path
+@param      pageHash       page hash
+@param      logger         logger
+
+@history    Sun Jun 16, 2019 18:00:00 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected String generateSitemapItem(
+   String     moduleName,
+   String     content,
+   String     deployPath,
+   String     pageHash,
+   TreeLogger logger)
+   throws     Exception
+{
+   String pageHashCap =
+      pageHash.length() > 0
+         ? pageHash.substring(0,1).toUpperCase() + pageHash.substring(1)
+         : pageHash;
+
+   String itemPath = deployPath + "/" + moduleName + pageHashCap + ".html";
+
+   content += kSITEMAP_ITEM.replace("%itemPath%", itemPath);
+   return(content);
+}
+/*------------------------------------------------------------------------------
+
 @name       getAppClassname - get application classname
                                                                               */
                                                                              /**
@@ -1348,96 +1576,54 @@ public static boolean getDependenciesChanged()
 }
 /*------------------------------------------------------------------------------
 
-@name       getImportedNodeModules - get imported node mosules
+@name       getHTMLFilenameForModule - get html filename for module
                                                                               */
                                                                              /**
-            Get any imported node modules from the application class
-            implementation, adding them to the dependencies set.
+            Get html filename for module.
 
-@return     imported node mosules
+@return     html filename for module
 
-@param      typesMap          map of component type by classname
-@param      configuration     configuration
-@param      logger            logger
+@param      moduleName     module name
+@param      logger         logger
 
-@history    Sun Dec 02, 2018 18:00:00 (LBM) created.
+@history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-protected Collection<String> getImportedNodeModules(
-   Map<String,Map<String,JClassType>> typesMap,
-   IConfiguration                     configuration,
-   TreeLogger                         logger)
-   throws                             Exception
+public String getHTMLFilenameForModule(
+   String     moduleName,
+   TreeLogger logger)
+   throws     Exception
 {
-   Collection<String>     importedModules = new ArrayList<>();
-   Map<String,JClassType> components      = typesMap.get(kKEY_COMPONENTS);
-
-   JType  appType      = getAppType(components, logger);
-   String appClassname = getAppClassname(appType, logger);
-
-   if (appClassname != null
-         && !appClassname.equals(AppComponentTemplate.class.getName()))
-   {
-      logger.log(
-         TreeLogger.INFO,
-         "getImportedNodeModules(): checking for " + appClassname);
-
-                                       // get the component imported modules  //
-      Map<String,JClassType> appTypes = typesMap.get(kKEY_APP_TYPES);
-
-      importedModules =
-         AppComponentInspector.getImportedModules(
-            appClassname, appTypes, logger);
-
-      if (importedModules.size() == 0)
+   String htmlFilename = null;
+   File[] htmlFiles =
+      IConfiguration.getWarDir(logger).listFiles(new FilenameFilter()
       {
-         logger.log(
-            TreeLogger.INFO,
-            "getImportedNodeModules(): no imported node modules specified");
-      }
-      else
-      {
-         for (String moduleSpecifier : importedModules)
+         public boolean accept(
+            File   dir,
+            String name)
          {
-                                       // find whether looking for javascript //
-                                       // or css or both                      //
-            String[] splits  = moduleSpecifier.split(":");
-            String   module  = splits[0];
-            boolean  bScript = module.endsWith(".js");
-            boolean  bStyle  = module.endsWith(".css");
-
-            if (!bScript && !bStyle)
-            {
-               for (int iSplit = 1; iSplit < splits.length; iSplit++)
-               {
-                  String split = splits[iSplit].trim().toLowerCase();
-                  if ("javascript".equals(split))
-                  {
-                     bScript = true;
-                  }
-                  else if ("css".equals(split))
-                  {
-                     bStyle = true;
-                  }
-               }
-            }
-
-            bScript |= bStyle == false;
-            if (bScript)
-            {
-               addImportedNodeModuleJavascript(module, logger);
-            }
-            if (bStyle)
-            {
-               addImportedNodeModuleStylesheet(module, configuration, logger);
-            }
+            return name.endsWith(".html");
          }
+      });
+
+   String token = moduleName + ".nocache.js";
+   for (File htmlFile : htmlFiles)
+   {
+      if (JavascriptBundler.getFileAsString(htmlFile).contains(token))
+      {
+         htmlFilename = htmlFile.getName();
+         break;
       }
    }
+   if (htmlFilename == null)
+   {
+      throw new IllegalStateException(
+         "HTML file for module " + moduleName + " not found");
+   }
 
-   return(importedModules);
+   return(htmlFilename);
 }
 /*------------------------------------------------------------------------------
 
@@ -1514,6 +1700,224 @@ public String getSourceForClassname(
    }
 
    return(src);
+}
+/*------------------------------------------------------------------------------
+
+@name       handleImportedNodeModules - add imported node modules
+                                                                              */
+                                                                             /**
+            Add imported node modules.
+
+@param      importedModules   imported node modules
+@param      configuration     configuration
+@param      logger            logger
+
+@history    Sun Dec 02, 2018 18:00:00 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected void handleImportedNodeModules(
+   Collection<String> importedModules,
+   IConfiguration     configuration,
+   TreeLogger         logger)
+   throws             Exception
+{
+   if (importedModules.size() == 0)
+   {
+      logger.log(
+         TreeLogger.INFO,
+         "handleImportedNodeModules(): no imported node modules specified");
+   }
+   else
+   {
+      for (String moduleSpecifier : importedModules)
+      {
+                                       // find whether looking for javascript //
+                                       // or css or both                      //
+         String[] splits  = moduleSpecifier.split(":");
+         String   module  = splits[0];
+         boolean  bScript = module.endsWith(".js");
+         boolean  bStyle  = module.endsWith(".css");
+
+         if (!bScript && !bStyle)
+         {
+            for (int iSplit = 1; iSplit < splits.length; iSplit++)
+            {
+               String split = splits[iSplit].trim().toLowerCase();
+               if ("javascript".equals(split))
+               {
+                  bScript = true;
+               }
+               else if ("css".equals(split))
+               {
+                  bStyle = true;
+               }
+            }
+         }
+
+         bScript |= bStyle == false;
+         if (bScript)
+         {
+            addImportedNodeModuleJavascript(module, logger);
+         }
+         if (bStyle)
+         {
+            addImportedNodeModuleStylesheet(module, configuration, logger);
+         }
+      }
+   }
+}
+/*------------------------------------------------------------------------------
+
+@name       handleImportedNodeModulesAndSEO - get imported node modules
+                                                                              */
+                                                                             /**
+            Get any imported node modules from the application class
+            implementation, adding them to the dependencies set, as well as any
+            page hashes.
+
+@param      typesMap          map of component type by classname
+@param      configuration     configuration
+@param      module            module
+@param      logger            logger
+
+@history    Sun Dec 02, 2018 18:00:00 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected void handleImportedNodeModulesAndSEO(
+   Map<String,Map<String,JClassType>> typesMap,
+   ModuleDef                          module,
+   IConfiguration                     configuration,
+   TreeLogger                         logger)
+   throws                             Exception
+{
+   Collection<String>     importedModules = new ArrayList<>();
+   Map<String,JClassType> components      = typesMap.get(kKEY_COMPONENTS);
+
+   JType  appType      = getAppType(components, logger);
+   String appClassname = getAppClassname(appType, logger);
+
+   if (appClassname != null
+         && !appClassname.equals(AppComponentTemplate.class.getName()))
+   {
+      logger.log(
+         TreeLogger.INFO,
+         "handleImportedNodeModulesAndSEO(): checking for " + appClassname);
+
+                                       // get the component imported modules  //
+      Map<String,JClassType> appTypes = typesMap.get(kKEY_APP_TYPES);
+
+      String importedModulesAndSEO =
+         AppComponentInspector.getImportedModulesAndSEO(
+            appClassname, appTypes, logger).trim();
+
+      logger.log(
+         TreeLogger.INFO,
+         "handleImportedNodeModulesAndSEO(): result=" + importedModulesAndSEO);
+
+                                       // remove wrapping brackets            //
+      importedModulesAndSEO = importedModulesAndSEO.substring(1);
+      importedModulesAndSEO =
+         importedModulesAndSEO.substring(0, importedModulesAndSEO.length() - 1);
+
+      logger.log(
+         TreeLogger.INFO,
+         "handleImportedNodeModulesAndSEO(): unwrapped=" + importedModulesAndSEO);
+
+                                       // separate the imported modules from  //
+                                       // the page info                       //
+      String  sSEOInfo = "";
+      boolean bSEO     = false;
+      for (String entry : importedModulesAndSEO.split(","))
+      {
+         entry = entry.trim();
+         if (!bSEO && "$".equals(entry))
+         {
+            bSEO = true;
+            continue;
+         }
+         else if (!bSEO)
+         {
+            importedModules.add(entry);
+         }
+         else
+         {
+            sSEOInfo += entry;
+         }
+      }
+
+      handleImportedNodeModules(importedModules, configuration, logger);
+
+      logger.log(
+         TreeLogger.INFO,
+         "handleImportedNodeModulesAndSEO(): sSEOInfo=" + sSEOInfo);
+
+      handleSEOInfo(new SEOInfo(sSEOInfo), module, logger);
+   }
+}
+/*------------------------------------------------------------------------------
+
+@name       handleSEOInfo - handle page hashes
+                                                                              */
+                                                                             /**
+            Handle collection of app page hashes for SEO support.Creates a
+            redirect target for each hash, along with an associated sitemap.
+
+@param      seoInfo        seo info
+@param      module         module
+@param      logger         logger
+
+@history    Sun Dec 02, 2018 18:00:00 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected void handleSEOInfo(
+   SEOInfo     seoInfo,
+   ModuleDef   module,
+   TreeLogger  logger)
+   throws      Exception
+{
+   if (seoInfo == null)
+   {
+      logger.log(TreeLogger.INFO, "handleSEOInfo(): no SEO requested");
+   }
+   else if (seoInfo.pageInfos.size() == 0)
+   {
+      logger.log(TreeLogger.INFO, "handleSEOInfo(): no page infos specified");
+   }
+   else
+   {
+      String sitemapContent  = kSITEMAP_HDR;
+      String defaultHTMLName = getHTMLFilenameForModule(module.getName(),logger);
+             defaultHTMLName =
+               defaultHTMLName.substring(0, defaultHTMLName.length() - 5);
+
+      String deployPath = seoInfo.deployPath;
+
+      logger.log(
+         TreeLogger.INFO,
+         "handleSEOInfo(): "
+       + "deployPath=" + deployPath + ", htmlName=" + defaultHTMLName);
+
+      for (SEOPageInfo pageInfo : seoInfo.pageInfos)
+      {
+         String pageHash = pageInfo.pageHash;
+
+         generateHashRedirect(defaultHTMLName, pageHash, logger);
+
+         sitemapContent =
+            generateSitemapItem(
+               defaultHTMLName, sitemapContent, deployPath, pageHash, logger);
+      }
+
+      sitemapContent += kSITEMAP_FTR;
+      copySitemapContentToWAR(defaultHTMLName, sitemapContent, logger);
+      copyRobotsContentToWAR(deployPath, defaultHTMLName, logger);
+   }
 }
 /*------------------------------------------------------------------------------
 
@@ -2029,6 +2433,8 @@ public void process(
    logger.log(logger.INFO, "nanoTime=" + start);
    logger.log(logger.DEBUG, "process(): entered");
 
+   ModuleDef module = compilerContext.getModule();
+
    GeneratorContext context =
       precompilationContext.getRebindPermutationOracle().getGeneratorContext();
 
@@ -2037,12 +2443,13 @@ public void process(
    Map<String,Map<String,JClassType>> providersAndComponents =
       parseClasses(context.getTypeOracle(), configuration, logger);
 
-   getImportedNodeModules(providersAndComponents, configuration, logger);
-
                                        // copy all scripts and css to artifact//
    copyResources(configuration, context, logger);
 
    saveCurrentDependencies(logger);
+
+   handleImportedNodeModulesAndSEO(
+      providersAndComponents, module, configuration, logger);
 
    logger.log(logger.INFO, "nanoTime=" + System.nanoTime());
    logger.log(

@@ -15,15 +15,16 @@ purpose:    App component template.
 history:    Mon Aug 28, 2017 10:30:00 (Giavaneers - LBM) created
 
 notes:
-                           COPYRIGHT (c) BY GIAVANEERS, INC.
-            This source code is licensed under the MIT license found in the
-                LICENSE file in the root directory of this source tree.
+                        COPYRIGHT (c) BY GIAVANEERS, INC.
+         This source code is licensed under the MIT license found in the
+             LICENSE file in the root directory of this source tree.
 
 ==============================================================================*/
                                        // package --------------------------- //
 package io.reactjava.client.core.react;
                                        // imports --------------------------- //
 import com.google.gwt.core.client.EntryPoint;
+import io.reactjava.client.core.react.SEOInfo.SEOPageInfo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -78,7 +79,8 @@ public AppComponentTemplate(P props)
 @name       getImportedNodeModules - get imported node modules
                                                                               */
                                                                              /**
-            Get imported node modules.
+            Get imported node modules. This method is typically invoked at
+            compile time.
 
 @return     ordered list of node module names of the folowing forms:
 
@@ -174,6 +176,28 @@ protected String getConfigurationName()
 }
 /*------------------------------------------------------------------------------
 
+@name       getSEOInfo - get seo information
+                                                                              */
+                                                                             /**
+            Get SEO info. This method is typically invoked at compile time.
+
+            The intention is to provide a title, description, and base url for
+            the app deployment in order to create a redirect target for each
+            hash, along with an associated sitemap.
+
+@return     SEOInfo string
+
+@history    Sun Jun 16, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected SEOInfo getSEOInfo()
+{
+   return(null);
+}
+/*------------------------------------------------------------------------------
+
 @name       getNavRoutes - get routes for application
                                                                               */
                                                                              /**
@@ -260,5 +284,46 @@ public void onModuleLoad()
                                        // the code generator class cannot be  //
                                        // found as a javascript global...     //
    //ReactJava.bootNative(getClass().getName());
+}
+/*------------------------------------------------------------------------------
+
+@name       render - render markup
+                                                                              */
+                                                                             /**
+            Render markup. This implementation adds SEO support in the form of
+            specific title and description head entries if specified by an
+            app SEOInfo instance.
+
+@history    Thu Jun 20, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public void render()
+{
+   SEOInfo seoInfo = getSEOInfo();
+   if (seoInfo != null && seoInfo.pageInfos != null)
+   {
+      String pageHash = Router.getPath();
+      for (SEOPageInfo pageInfo : seoInfo.pageInfos)
+      {
+         if (pageHash != null && pageHash.equals(pageInfo.pageHash))
+         {
+                                       // assign the page title               //
+            ReactJava.setHead(
+               NativeObject.with("type", "title", "text", pageInfo.title));
+
+                                       // assign the page description         //
+            ReactJava.setHead(
+               NativeObject.with(
+                  "type",   "meta",
+                  "name",   "description",
+                  "content", pageInfo.description));
+
+            break;
+         }
+      }
+   }
 }
 }//====================================// end AppComponentTemplate ---------- //

@@ -270,7 +270,8 @@ protected List<String> getInjectedStyles()
 @name       getNavRoutes - get routes for component
                                                                               */
                                                                              /**
-            Get component map of component classname by route path.
+            Get component map of component classname by route path. This method
+            is invoked at compile time.
 
 @return     void
 
@@ -463,6 +464,24 @@ public IUITheme getTheme()
 @name       initialize - initialize
                                                                               */
                                                                              /**
+            Initialize. This method is invoked in the constructor prior to
+            initial rendering. This is the initialize method typically
+            overridden by subclasses.
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected void initialize()
+{
+}
+/*------------------------------------------------------------------------------
+
+@name       initialize - initialize
+                                                                              */
+                                                                             /**
             Initialize. This method is invoked in the constructor(P componentProperties),
             so be careful that any referenced instance variables have been
             initialized. Specifically, in Java, the order for initialization
@@ -475,6 +494,9 @@ public IUITheme getTheme()
                   appearance in the source.
 
                3. constructors.
+
+            This method is public so it can be invoked by the JSX component
+            function.
 
 @return     component properties
 
@@ -502,6 +524,12 @@ public P initialize(
 
    initConfiguration();
    initTheme();
+
+   if (initialProps != null)
+   {
+                                       // allow a subclass to override        //
+      initialize();
+   }
 
    return(this.componentProperties);
 }
@@ -555,7 +583,7 @@ protected void initTheme()
 
                                                                               */
 //------------------------------------------------------------------------------
-public P props()
+protected P props()
 {
    return(componentProperties);
 }
@@ -576,7 +604,7 @@ public P props()
 //------------------------------------------------------------------------------
 public void render()
 {
-};
+}
 /*------------------------------------------------------------------------------
 
 @name       renderCSS - get component css
@@ -592,7 +620,7 @@ public void render()
 //------------------------------------------------------------------------------
 public void renderCSS()
 {
-};
+}
 /*------------------------------------------------------------------------------
 
 @name       removeAnyStylesheet - remove any injected stylesheet
@@ -691,7 +719,7 @@ public void setState(
 
                                                                               */
 //------------------------------------------------------------------------------
-public IUITheme setTheme(
+protected IUITheme setTheme(
    IUITheme theme)
 {
    props().set("theme", (theme));
@@ -712,7 +740,7 @@ public IUITheme setTheme(
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public void useEffect(
+protected void useEffect(
    INativeEffectHandler effectHandler)
 {
    React.useEffect(effectHandler);
@@ -735,7 +763,7 @@ public void useEffect(
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public void useState(
+protected void useState(
    String key,
    Object value)
 {

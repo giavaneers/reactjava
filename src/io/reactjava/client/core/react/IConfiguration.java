@@ -80,8 +80,7 @@ Collection<String> kGLOBAL_IMAGES_DEFAULT =
    }));
 
 String  kKEY_CONFIGURATION_NAME_DEFAULT = "default";
-
-boolean kPRODUCTION_MODE_DEFAULT  = false;
+boolean kPRODUCTION_MODE_DEFAULT        = false;
 
 String  kNODE_MODULES_DIR = "$NODE_MODULES_DIR$/";
 

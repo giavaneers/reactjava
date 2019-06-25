@@ -183,6 +183,11 @@ static File getArtifactDir(
          }
       }
    }
+   else
+   {
+      throw new FileNotFoundException(
+         "Cannot find artifacts directory: " + artifactsDir.getAbsolutePath());
+   }
    if (artifactDir == null)
    {
       throw new FileNotFoundException("Cannot find artifact directory");
@@ -617,7 +622,9 @@ static File getModuleDir(
 
 @return     node module css path specified module name
 
-@param      nodeModule     node module css name
+@param      module            node module css name
+@param      configuration     configuration
+@param      logger            logger
 
 @history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -791,27 +798,44 @@ public static String getNodeModuleTargetFromPackageJSON(
 {
    String exportItem     = null;
    File   nodeModulesDir = IConfiguration.getNodeModulesDir(logger);
+   File   target         = null;
+   String json           = null;
    String require        = module.replace(".","/");
    File   nodeModuleDir  = new File(nodeModulesDir, require);
-   String nodeModulePath = nodeModuleDir.getAbsolutePath();
 
-   logger.log(
-      logger.DEBUG,
-      "getNodeModuleTargetFromPackageJSON(): nodeModulePath="
-         + nodeModulePath);
-                                       // get any package.json 'main' entry   //
-   File   target  = null;
-   String json    = null;
-   File   pkgJson = new File(nodeModuleDir, "package.json");
-   if (pkgJson.exists())
+   while (true)
    {
-      try
+                                       // chase from the child up to the      //
+                                       // nodeModulesDir                      //
+      String nodeModulePath = nodeModuleDir.getAbsolutePath();
+
+      logger.log(
+         logger.DEBUG,
+         "getNodeModuleTargetFromPackageJSON(): nodeModulePath="
+            + nodeModulePath);
+                                       // get any package.json 'main' entry   //
+      File pkgJson = new File(nodeModuleDir, "package.json");
+      if (pkgJson.exists())
       {
-         json = IJSXTransform.getFileAsString(pkgJson, logger);
+         try
+         {
+            json = IJSXTransform.getFileAsString(pkgJson, logger);
+         }
+         catch(Exception e)
+         {
+            throw new IllegalStateException(e);
+         }
+
+         break;
       }
-      catch(Exception e)
+      else
       {
-         throw new IllegalStateException(e);
+                                       // try any parent                      //
+         nodeModuleDir = nodeModuleDir.getParentFile();
+         if (nodeModulesDir.equals(nodeModuleDir))
+         {
+            break;
+         }
       }
    }
    if (json != null)
@@ -1023,7 +1047,7 @@ static File getProjectDirectory(
                                                                              /**
             Get project directory with specified name.
 
-@return     project directory with specified name.
+@return     project directory with specified name or null if not found.
 
 @param      name           project directory name.
 @param      path           path at which to start search.
@@ -1040,7 +1064,6 @@ static File getProjectDirectory(
    TreeLogger logger)
 {
    File projectDir = null;
-
    if (path == null)
    {
                                     // find the project path                  //
@@ -1128,6 +1151,36 @@ static File getProjectDirectory(
 }
 /*------------------------------------------------------------------------------
 
+@name       getWarDir - get war directory
+                                                                              */
+                                                                             /**
+            Get war brary directory.
+
+@return     war library directory or null if not found
+
+@history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+static File getWarDir(
+   TreeLogger logger)
+{
+   File war        = null;
+   File projectDir = getProjectDirectory(null, logger);
+   File chase      = new File(projectDir, "war");
+   if (!chase.exists())
+   {
+      chase = new File(projectDir, "web");
+   }
+   if (chase.exists())
+   {
+      war = chase;
+   }
+   return(war);
+}
+/*------------------------------------------------------------------------------
+
 @name       getWarLibraryDir - get war library directory
                                                                               */
                                                                              /**
@@ -1144,16 +1197,14 @@ static File getWarLibraryDir(
    TreeLogger logger)
 {
    File libraryDir = null;
-   File projectDir = getProjectDirectory(null, logger);
-   File parent     = new File(projectDir, "war");
-   if (parent == null)
+   File war        = getWarDir(logger);
+   if (war != null)
    {
-      parent = new File(projectDir, "web");
-   }
-   if (parent != null)
-   {
-      libraryDir =
-         getProjectDirectory("lib", parent.getAbsolutePath(), logger);
+      File chase = getProjectDirectory("lib", war.getAbsolutePath(), logger);
+      if (chase.exists())
+      {
+         libraryDir = chase;
+      }
    }
    return(libraryDir);
 }

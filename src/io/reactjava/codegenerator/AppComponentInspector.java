@@ -22,13 +22,13 @@ import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.dev.util.log.PrintWriterTreeLogger;
 import io.reactjava.client.core.react.AppComponentTemplate;
+import io.reactjava.client.core.react.SEOInfo;
 import io.reactjava.jsx.IConfiguration;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
                                        // AppComponentInspector ============= //
@@ -155,13 +155,14 @@ public static String getCompileClasspath()
 }
 /*------------------------------------------------------------------------------
 
-@name       getImportedNodeModules - get imported node modules
+@name       getImportedModulesAndSEO - get imported node modules
                                                                               */
                                                                              /**
-            Get imported node modules. Typically invoked by the
+            Get imported node modules and page hashes. Typically invoked by the
             ReactCodeGenerator at GWT compile time.
 
-@return     collection of node module names to be imported by the target app.
+@return     collection of node module names to be imported by the target app
+            and page hashes.
 
 @param      appClassname      app classname
 @param      appTypes          app types
@@ -172,7 +173,7 @@ public static String getCompileClasspath()
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public static Collection<String> getImportedModules(
+public static String getImportedModulesAndSEO(
    String                 appClassname,
    Map<String,JClassType> appTypes,
    TreeLogger             logger)
@@ -180,7 +181,7 @@ public static Collection<String> getImportedModules(
 {
    logger.log(
       logger.INFO,
-      "AppComponentInspector.getImportedNodeModules(): "
+      "AppComponentInspector.getImportedModulesAndSEO(): "
     + "entered with appClassname=" + appClassname);
 
    List<String> appClassnames = new ArrayList<>();
@@ -201,24 +202,24 @@ public static Collection<String> getImportedModules(
          {
             logger.log(
                logger.INFO,
-               "AppComponentInspector.getImportedNodeModules(): adding "
-                  + classname);
+               "AppComponentInspector.getImportedModulesAndSEO(): "
+             + "adding " + classname);
 
             appClassnames.add(classname);
          }
       }
    }
 
-   return(getImportedModules(appClassnames, logger));
+   return(getImportedModulesAndSEO(appClassnames, logger));
 }
 /*------------------------------------------------------------------------------
 
-@name       getImportedNodeModules - get imported node modules
+@name       getImportedModulesAndSEO - get imported node modules
                                                                               */
                                                                              /**
-            Get imported node modules.
+            Get imported node modules and page hashes.
 
-@return     collection of node module names
+@return     collection of node module names and page hashes
 
 @param      appClassnames     app classnames
 @param      logger            logger
@@ -228,7 +229,7 @@ public static Collection<String> getImportedModules(
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public static Collection<String> getImportedModules(
+public static String getImportedModulesAndSEO(
    List<String> appClassnames,
    TreeLogger   logger)
    throws       Exception
@@ -256,30 +257,17 @@ public static Collection<String> getImportedModules(
 
    logger.log(
       logger.INFO,
-      "AppComponentInspector.getImportedModules(): result=" + result);
+      "AppComponentInspector.getImportedModulesAndSEO(): "
+    + "result=" + result);
 
-   int idxBeg = result.indexOf('[') + 1;
-   int idxEnd = result.indexOf(']');
-   if (idxBeg < 0 || idxEnd < 0)
+   if (!result.contains(SEOInfo.kDELIMITER))
    {
       throw new IllegalStateException(
-         "AppComponentInspector.getImportedModules(): result indicates error");
-   }
-                                       // preserve order of entries           //
-   Collection<String> modules = new ArrayList<>();
-   for (String module : result.substring(idxBeg, idxEnd).split(","))
-   {
-      if (module.length() > 0)
-      {
-         String trimmed = module.trim();
-         if (!modules.contains(trimmed))
-         {
-            modules.add(trimmed);
-         }
-      }
+         "AppComponentInspector.getImportedModulesAndSEO(): "
+       + "result indicates error");
    }
 
-   return(modules);
+   return(result);
 }
 /*------------------------------------------------------------------------------
 
@@ -302,8 +290,8 @@ public static void main(
    {
       long start = System.currentTimeMillis();
 
-      Collection<String> importedModules =
-         AppComponentInspector.getImportedModules(
+      String importedModules =
+         AppComponentInspector.getImportedModulesAndSEO(
             new ArrayList<>(Arrays.asList(args)), new PrintWriterTreeLogger());
 
       System.out.println("Exiting, duration=" + (System.currentTimeMillis() - start));

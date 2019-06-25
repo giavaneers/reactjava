@@ -96,6 +96,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.Element;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
                                        // Router =============================//
@@ -107,7 +108,11 @@ private static final Logger kLOGGER = Logger.newInstance();
 public static final String  kPATH_DEFAULT   = "";
                                        // class variables ------------------- //
                                        // configuration                       //
-protected static IConfiguration configuration;
+protected static IConfiguration     configuration;
+                                       // url parameters map                  //
+protected static Map<String,String> urlParameters;
+                                       // parameters map url                  //
+protected static String             parametersURL;
 
                                        // public instance variables --------- //
                                        // (none)                              //
@@ -324,6 +329,65 @@ public static String getPath()
    String[] bracketSplits = getHash().split("\\]");
    String   path          = bracketSplits[0];
    return(path);
+}
+/*------------------------------------------------------------------------------
+
+@name       getURLParameters - get current location url parameters
+                                                                              */
+                                                                             /**
+            Get current location url parameters.
+
+@return     current location url parameters
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static Map<String,String> getURLParameters()
+{
+   String url = DomGlobal.document.URL;
+   if (!url.equals(parametersURL))
+   {
+      urlParameters   = new HashMap<>();
+      String[] splits = url.split("\\?");
+      if (splits.length > 1)
+      {
+         String query = splits[1].split("#")[0];
+         for (String param : query.split("&"))
+         {
+                     splits = param.split("=");
+            String   key    = splits[0].trim();
+            String   value  = splits.length > 1 ? splits[1].trim() : "true";
+
+            urlParameters.put(key, value);
+         }
+      }
+      parametersURL = url;
+   }
+
+   return(urlParameters);
+}
+/*------------------------------------------------------------------------------
+
+@name       getURLParameter - get specified url parameter
+                                                                              */
+                                                                             /**
+            Get specified url parameter.
+
+@return     specified url parameter or null if not found
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static String getURLParameter(
+   String key)
+{
+   return(getURLParameters().get(key));
 }
 /*------------------------------------------------------------------------------
 

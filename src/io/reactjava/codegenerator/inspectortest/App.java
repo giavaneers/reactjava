@@ -1,29 +1,111 @@
 /*==============================================================================
 
-name:       App.java
+name:       AppReactJava.java
 
-purpose:    Three By Three App.
+purpose:    ReactJava website app.
 
-history:    Sat Oct 27, 2018 10:30:00 (Giavaneers - LBM) created
+history:    Thu Feb 14, 2019 10:30:00 (Giavaneers - LBM) created
 
 notes:
 
-                        COPYRIGHT (c) BY GIAVANEERS, INC.
-         This source code is licensed under the MIT license found in the
-               LICENSE file in the root directory of this source tree.
+                  This program was created by Giavaneers
+        and is the confidential and proprietary product of Giavaneers Inc.
+      Any unauthorized use, reproduction or transfer is strictly prohibited.
+
+                     COPYRIGHT 2019 BY GIAVANEERS, INC.
+      (Subject to limited distribution and restricted disclosure only).
+                           All rights reserved.
+
 
 ==============================================================================*/
                                        // package --------------------------- //
 package io.reactjava.codegenerator.inspectortest;
                                        // imports --------------------------- //
-//import io.reactjava.client.core.react.AppComponentTemplate;
-//import io.reactjava.client.core.react.Properties;
-
-                                       // App ================================//
-public class App extends AppComponentTemplate<Properties>
+import io.reactjava.client.components.generalpage.GeneralPage;
+import io.reactjava.client.core.react.SEOInfo;
+import io.reactjava.client.core.react.SEOInfo.SEOPageInfo;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+                                       // AppReactJava =======================//
+public class App extends AppComponentTemplate
 {
                                        // class constants --------------------//
-                                       // (none)                              //
+public static final String   kSEO_DEPLOY_PATH = "http://www.reactjava.io";
+public static final String   kIMAGE           = "images/ReactJava64px.png";
+public static final String   kSUB_HEADER      = "Create your first ReactJava app";
+public static final String[] kMANIFESTS       =
+{
+                                       // if kSRCCFG_BIND_MANIFESTS_INTO_IMAGE//
+   //CompileTime.resolve("text://manifests/RjContributorGuide"),
+   //CompileTime.resolve("text://manifests/RjGetStarted"),
+   //CompileTime.resolve("text://manifests/RjLanding"),
+   //CompileTime.resolve("text://manifests/RjUserGuide")
+
+                                       // else                                //
+   "manifests/RjContributorGuide",
+   "manifests/RjGetStarted",
+   "manifests/RjLanding",
+   "manifests/RjUserGuide"
+};
+public static final String kDESCRIPTION_CONTRIBUTOR_GUIDE =
+   "The ReactJava Contributor Guide contains all the resources you need to make "
+ + "contributions to this project. It includes an architectural overview, and "
+ + "detailed explanations of particular design and implementation features. "
+ + "It provides a coding convention and simple rules by which contributions "
+ + "are submitted and integrated into the project.";
+
+public static final String kDESCRIPTION_GET_STARTED =
+   "This section will help you install and build your first "
+ + "ReactJava app. If you already have ReactJava installed, you can "
+ + "skip ahead to the Tutorial.";
+
+public static final String kDESCRIPTION_LANDING =
+   "Use Java to build the same great applications for mobile and the desktop "
+ + "as you do with React and React Native. The same powerful features of React "
+ + "you expect: lightweight, declarative, performant, component-based "
+ + "programming that is simple to write and easy to debug; packaged in a way "
+ + "that naturally combines the structure, familiarity, and reach of Java. "
+ + "And targeting native mobile environments is often right out of the box. "
+ + "In most cases, ReactJava automatically translates your ReactJava "
+ + "components to React Native equivalents.";
+
+public static final String kDESCRIPTION_USER_GUIDE =
+   "The ReactJava User Guide includes a simple tutorial that is a step by step "
+ + "illustration of how ReactJava works and how you can use it to build a "
+ + "React app using Java.";
+
+public static final String kPAGE_ID_CONTRIBUTOR_GUIDE  = "contributorGuide";
+public static final String kPAGE_ID_DEFAULT            = "";
+public static final String kPAGE_ID_GET_STARTED        = "getStarted";
+public static final String kPAGE_ID_LANDING            = "landing";
+public static final String kPAGE_ID_USER_GUIDE         = "userGuide";
+
+public static final Map<String,String> kDESCRIPTIONS =
+   new HashMap<String,String>()
+   {{
+      put(kPAGE_ID_CONTRIBUTOR_GUIDE, kDESCRIPTION_CONTRIBUTOR_GUIDE);
+      put(kPAGE_ID_GET_STARTED,       kDESCRIPTION_GET_STARTED);
+      put(kPAGE_ID_DEFAULT,           kDESCRIPTION_LANDING);
+      put(kPAGE_ID_LANDING,           kDESCRIPTION_LANDING);
+      put(kPAGE_ID_USER_GUIDE,        kDESCRIPTION_USER_GUIDE);
+   }};
+
+public static final String kTITLE_CONTRIBUTOR_GUIDE = "ReactJava Contributor Guide";
+public static final String kTITLE_GET_STARTED       = "Getting Started with ReactJava";
+public static final String kTITLE_LANDING           = "ReactJava";
+public static final String kTITLE_USER_GUIDE        = "ReactJava User Guide";
+
+public static final Map<String,String> kTITLES =
+   new HashMap<String,String>()
+   {{
+      put(kPAGE_ID_CONTRIBUTOR_GUIDE, kTITLE_CONTRIBUTOR_GUIDE);
+      put(kPAGE_ID_GET_STARTED,       kTITLE_GET_STARTED);
+      put(kPAGE_ID_DEFAULT,           kTITLE_LANDING);
+      put(kPAGE_ID_LANDING,           kTITLE_LANDING);
+      put(kPAGE_ID_USER_GUIDE,        kTITLE_USER_GUIDE);
+   }};
                                        // class variables ------------------- //
                                        // (none)                              //
                                        // public instance variables --------- //
@@ -34,82 +116,100 @@ public class App extends AppComponentTemplate<Properties>
                                        // (none)                              //
 /*------------------------------------------------------------------------------
 
-@name       App - default constructor
+@name       getImportedNodeModules - get imported node modules
                                                                               */
                                                                              /**
-            Required default constructor. This implementation is null, but it
-            is not required to be.
+            Get imported node modules.
 
-@return     An instance of App iff successful.
+@return     list of node module names.
 
-@history    Sat Oct 27, 2018 10:30:00 (Giavaneers - LBM) created
+@history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-//public App()
-//{
-//}
+protected List<String> getImportedNodeModules()
+{
+   return(GeneralPage.getImportedNodeModules());
+}
 /*------------------------------------------------------------------------------
 
-@name       App - constructor for specified properties
+@name       getManifests - get manifests
                                                                               */
                                                                              /**
-            Required constructor for specified properties. This implementation
-            is essentially null, but it often is not.
+            Get manifests.
 
-@return     An instance of App iff successful.
+@return     manifests
 
-@history    Sat Oct 27, 2018 10:30:00 (Giavaneers - LBM) created
+@history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected String[] getManifests()
+{
+   return(kMANIFESTS);
+}
+/*------------------------------------------------------------------------------
+
+@name       getSEOInfo - get seo information
+                                                                              */
+                                                                             /**
+            Get SEO info. This method is typically invoked at compile time.
+
+            The intention is to provide a title, description, and base url for
+            the app deployment in order to create a redirect target for each
+            hash, along with an associated sitemap.
+
+@return     SEOInfo string
+
+@history    Sun Jun 16, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-//public App()
-//{
-//   super();
-//}
+protected SEOInfo getSEOInfo()
+{
+   SEOInfo seoInfo =
+      new SEOInfo(
+         kSEO_DEPLOY_PATH,
+         new ArrayList<SEOPageInfo>()
+         {{
+            add(new SEOPageInfo(
+               kPAGE_ID_DEFAULT,
+               kTITLE_LANDING,
+               kDESCRIPTION_LANDING));
+            add(new SEOPageInfo(
+               kPAGE_ID_CONTRIBUTOR_GUIDE,
+               kTITLE_CONTRIBUTOR_GUIDE,
+               kDESCRIPTION_CONTRIBUTOR_GUIDE));
+            add(new SEOPageInfo(
+               kPAGE_ID_GET_STARTED,
+               kTITLE_GET_STARTED,
+               kDESCRIPTION_GET_STARTED));
+            add(new SEOPageInfo(
+               kPAGE_ID_USER_GUIDE,
+               kTITLE_USER_GUIDE,
+               kDESCRIPTION_USER_GUIDE));
+         }});
+
+   return(seoInfo);
+}
 /*------------------------------------------------------------------------------
 
 @name       render - render component
                                                                               */
                                                                              /**
-            Render component. This implementation is all markup, with no java
-            code included.
+            Render component.
 
-@history    Sat Oct 27, 2018 10:30:00 (Giavaneers - LBM) created
+@history    Thu Feb 14, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
-
                                                                               */
 //------------------------------------------------------------------------------
 public void render()
 {
-/*--
-   <h1 class='hello' style='color:blue;marginTop:30px;fontSize:20px'>
-      Hello world!
-   </h1>
---*/
-};
-/*------------------------------------------------------------------------------
-
-@name       renderCSS - get component css
-                                                                              */
-                                                                             /**
-            Get component css.
-
-@history    Sat Oct 27, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-
-                                                                              */
-//------------------------------------------------------------------------------
-public void renderCSS()
-{
-/*--
-   .hello {
-      color: blue
-   }
---*/
+   super.render();
 }
-}//====================================// end App ============================//
+}//====================================// end AppReactJava ===================//

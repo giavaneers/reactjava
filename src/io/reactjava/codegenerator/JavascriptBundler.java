@@ -99,12 +99,14 @@ public static final String kREACT_JAVA_RELEASES_LATEST_DOWNLOAD_URL =
 public static final String kREACT_JAVA_DOWNLOAD_URL_CONTAINER_URL =
    kREACT_JAVA_RELEASES_LATEST_DOWNLOAD_URL + "latestReactJavaRelease.txt";
 
-public static final String kREACT_JAVA_GWT_RELEASE_NAME =
-   "gwt-2.8.2.zip";
+public static final String kGWT_RELEASES_DOWNLOAD_URL =
+   kREACT_JAVA_RELEASE_DOWNLOAD_BUCKET_URL + "releases/gwt/";
 
-public static final String kREACT_JAVA_DOWNLOAD_GWT_RELEASE_URL =
-   kREACT_JAVA_RELEASE_DOWNLOAD_BUCKET_URL
-      + "releases/gwt/" + kREACT_JAVA_GWT_RELEASE_NAME;
+public static final String kGWT_LATEST_RELEASE_FILENAME =
+   "latestRelease.txt";
+
+public static final String kGWT_DOWNLOAD_URL_CONTAINER_URL =
+   kGWT_RELEASES_DOWNLOAD_URL + kGWT_LATEST_RELEASE_FILENAME;
 
 public static final String kDOWNLOAD_URL_INTELLIJ_HELLOWORLD_PROJECT_TEMPLATE =
    kREACT_JAVA_RELEASE_DOWNLOAD_BUCKET_URL
@@ -321,19 +323,18 @@ public static final String kDATE_FORMAT_PATTERN_VERSION = "yyMMddHHmm";
 public static final String kVERSION =
    "0.1." + new SimpleDateFormat(kDATE_FORMAT_PATTERN_VERSION).format(new Date());
 
-                                       // doesn't change often so hardcoded   //
-                                       // and matched with contents of        //
-                                       // 'ReactJavaExtensionVersion.txt' in  //
-                                       // core distribution                    //
-public static final String kVERSION_COMPILER =
-   "GWT-2.8.2-X1901101109";
+                                       // matched with contents of            //
+                                       // 'ReactJavaGWTersion.txt' in gwt     //
+                                       // distribution                        //
+public static final String kVERSION_GWT =
+   "gwt-2.8.2.%version%";
 
-public static final String kCOMPILER_VERSION_FILENAME =
-   "ReactJavaExtensionVersion.txt";
+public static final String kGWT_VERSION_FILENAME =
+   "ReactJavaGWTVersion.txt";
                                        // consists of the kVERSION followed by//
                                        // the enhanced compiler version       //
 public static final String kVERSION_IMPLEMENTATION =
-   kVERSION + ";" + kVERSION_COMPILER;
+   kVERSION + ";" + kVERSION_GWT;
 
 public static final Manifest kREACT_JAVA_JAR_MANIFEST =
    new Manifest()
@@ -668,6 +669,8 @@ public static void buildGWTDevJar()
    jarUpdate(
       new File("/Users/brianm/.reactjava/gwt/gwt-2.8.2/gwt-dev.jar"),
       targets, entries);
+                                       // update the release version          //
+   updateGWTInstalledVersion();
 
    System.out.println("JavascriptBundler.buildGWTDevJar(): exiting");
 }
@@ -775,10 +778,10 @@ public static void clean()
 }
 /*------------------------------------------------------------------------------
 
-@name       copyGWTReleaseViaGCS - copy core realese from cloud storage
+@name       copyGWTReleaseViaGCS - copy gwt release from cloud storage
                                                                               */
                                                                              /**
-            Copy core realese from cloud storage.
+            Copy gwt release from cloud storage.
 
 @return     downloaded file
 
@@ -790,12 +793,15 @@ public static void clean()
                                                                               */
 //------------------------------------------------------------------------------
 public static File copyGWTReleaseViaGCS(
-   File   dstDir)
+   File   dstDir,
+   String installVersion)
    throws Exception
 {
-   File  gwtReleaseFile = new File(dstDir, kREACT_JAVA_GWT_RELEASE_NAME);
+   File   gwtReleaseFile = new File(dstDir, installVersion);
+   String gwtReleaseURL  =
+      kREACT_JAVA_RELEASE_DOWNLOAD_BUCKET_URL + "releases/gwt/" + installVersion;
 
-   copyFile(kREACT_JAVA_DOWNLOAD_GWT_RELEASE_URL, gwtReleaseFile.toPath());
+   copyFile(gwtReleaseURL, gwtReleaseFile.toPath());
 
    System.out.println("Downloaded latest reactjava.jar");
 
@@ -2034,53 +2040,115 @@ public static String getFileType(
 }
 /*------------------------------------------------------------------------------
 
-@name       getGWTInstalled - get whether core is installed
+@name       getGWTInstall - get gwt version to install
                                                                               */
                                                                              /**
-            Get whether core is installed.
+            Get gwt version to install.
 
-@return     true iff core is installed
+@return     gwt version to install or null if latest is installed
 
 @history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public static boolean getGWTInstalled()
+public static String getGWTInstall()
    throws IOException
 {
    System.out.println(
       "Checking whether the latest version of gwt is installed...");
 
-   boolean bInstalled = false;
-   String  msg        = "GWT is not installed.";
+   String  version    = getGWTInstalledVersion();
+   String  latest     = getGWTLatestVersion();
+   boolean bInstalled = latest.equals(version);
 
-   File home = new File(System.getProperty("user.home"));
-   File gwt  = new File(home, toOSPath(".reactjava/gwt/gwt-2.8.2"));
-   if (gwt.exists())
-   {
-      msg = "The GWT installation is out of date.";
-
-                                       // check the version                   //
-      File gwtVersion =
-         new File(gwt.getParentFile(), "ReactJavaExtensionVersion.txt");
-
-      if (gwtVersion.exists())
-      {
-         String version =
-            new String(
-               getInputStreamBytes(new FileInputStream(gwtVersion))).trim();
-
-         if (bInstalled = kVERSION_COMPILER.equals(version))
-         {
-            msg = "The GWT installation is up to date.";
-         }
-      }
-   }
+   String  msg =
+      bInstalled
+         ? "The GWT installation is up to date."
+         : version == null
+            ? "GWT is not installed."
+            : "The GWT installation is out of date.";
 
    System.out.println(msg);
 
-   return(bInstalled);
+   return(bInstalled ? null : latest);
+}
+/*------------------------------------------------------------------------------
+
+@name       getGWTInstalledVersion - get version of gwt release if installed
+                                                                              */
+                                                                             /**
+            Get version of gwt release if installed.
+
+@return     version of gwt release if installed; otherwise, null
+
+@history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static String getGWTInstalledVersion()
+   throws IOException
+{
+   System.out.println("Checking version of gwt if installed...");
+
+   String version = null;
+   File   release = getGWTInstalledVersionFile();
+   if (release.exists())
+   {
+      try(FileInputStream in = new FileInputStream(release))
+      {
+                                       // check the version                   //
+         version = new String(getInputStreamBytes(in)).trim();
+      }
+   }
+
+   return(version);
+}
+/*------------------------------------------------------------------------------
+
+@name       getGWTInstalledVersionFile - get version file of gwt release
+                                                                              */
+                                                                             /**
+            Get version file of gwt release.
+
+@return     version file of gwt release
+
+@history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static File getGWTInstalledVersionFile()
+{
+   File home    = new File(System.getProperty("user.home"));
+   File gwt     = new File(home, toOSPath(".reactjava/gwt/gwt-2.8.2"));
+   File release = new File(gwt, kGWT_VERSION_FILENAME);
+
+   return(release);
+}
+/*------------------------------------------------------------------------------
+
+@name       getGWTLatestVersion - get latest version of gwt release
+                                                                              */
+                                                                             /**
+            Get latest version of gwt release.
+
+@return     latest version of gwt release
+
+@history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static String getGWTLatestVersion()
+   throws IOException
+{
+   String latestVersion =
+      new String(
+         getInputStreamBytes(new URL(kGWT_DOWNLOAD_URL_CONTAINER_URL)), "UTF-8");
+
+   return(latestVersion);
 }
 /*------------------------------------------------------------------------------
 
@@ -2556,7 +2624,8 @@ public static File gwtInitialize(
    File   projectDir)
    throws Exception
 {
-   if (!getGWTInstalled())
+   String installVersion = getGWTInstall();
+   if (installVersion != null)
    {
       String sHome  = System.getProperty("user.home");
       File   home   = new File(sHome);
@@ -2567,7 +2636,7 @@ public static File gwtInitialize(
                                        // download release from cloud storage //
       System.out.println(
          "\nDownloading gwt release (this may take a few minutes)...");
-      File src = copyGWTReleaseViaGCS(gwtDir);
+      File src = copyGWTReleaseViaGCS(gwtDir, installVersion);
 
       System.out.println("\nInstalling gwt...");
       zipExtractFiles(src, gwtDir);
@@ -2575,7 +2644,7 @@ public static File gwtInitialize(
       src.delete();
                                        // create the version file             //
       writeFile(
-         new File(gwtDir, kCOMPILER_VERSION_FILENAME), kVERSION_COMPILER);
+         new File(gwtDir, kGWT_VERSION_FILENAME), installVersion);
 
       System.out.println("Done");
    }
@@ -3232,6 +3301,68 @@ public static File nodeInitialize(
 }
 /*------------------------------------------------------------------------------
 
+@name       publishBytesToCloud - publish specified file to cloud
+                                                                              */
+                                                                             /**
+            Publish specified file to cloud.
+
+@param      bytes             source bytes
+@param      gcsBucketName     gcs bucket name
+@param      gcsObjectPath     gcs object path
+
+@history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static void publishBytesToCloud(
+   byte[] bytes,
+   String gcsBucketName,
+   String gcsObjectPath)
+   throws Exception
+{
+   String uploadURL = "gs://" + gcsBucketName + "/" + gcsObjectPath;
+
+   gcsManager().writeFile(bytes, uploadURL);
+}
+/*------------------------------------------------------------------------------
+
+@name       publishFileToCloud - publish specified file to cloud
+                                                                              */
+                                                                             /**
+            Publish specified file to cloud.
+
+@param      srcPath           source file path
+@param      gcsBucketName     gcs bucket name
+@param      gcsObjectPath     gcs object path
+
+@history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static void publishFileToCloud(
+   String srcPath,
+   String gcsBucketName,
+   String gcsObjectPath)
+   throws Exception
+{
+   if (!new File(srcPath).exists())
+   {
+      throw new IllegalStateException("Cannot find source file");
+   }
+
+   String uploadURL = "gs://" + gcsBucketName + "/" + gcsObjectPath;
+
+   gcsManager().writeFile(srcPath, uploadURL, null,
+      (Object response, Object requestToken) ->
+      {
+         System.out.println(
+            ((Map<String,Object>)response).get("status").toString());
+      });
+}
+/*------------------------------------------------------------------------------
+
 @name       publishGWTSDK - publish core sdk
                                                                               */
                                                                              /**
@@ -3255,7 +3386,8 @@ public static void publishGWTSDK()
    File tmpZip = File.createTempFile("tmpZip", ".tmp");
    zipDirectory(sdkDir, tmpZip);
                                        // publish to the 'releases' directory //
-   String filename   = "gwt-2.8.2.zip";
+   String version    = getGWTInstalledVersion();
+   String filename   = version + ".zip";
    String bucketName = kRELEASE_BUCKET_NAME;
    String objectPath = "releases/gwt/" + filename;
    String uploadURL  = "gs://" + bucketName + "/" + objectPath;
@@ -3268,6 +3400,9 @@ public static void publishGWTSDK()
       });
 
    tmpZip.delete();
+                                       // publish the new version file        //
+   objectPath = "releases/gwt/" + kGWT_LATEST_RELEASE_FILENAME;
+   publishBytesToCloud(filename.getBytes("UTF-8"), bucketName, objectPath);
 }
 /*------------------------------------------------------------------------------
 
@@ -3311,46 +3446,22 @@ public static void publishJar()
    String filename   = "reactjava@" + version + ".jar";
    String bucketName = kRELEASE_BUCKET_NAME;
    String objectPath = "releases/" + filename;
-   String uploadURL  = "gs://" + bucketName + "/" + objectPath;
 
-   gcsManager().writeFile(path, uploadURL, null,
-      (Object response, Object requestToken) ->
-      {
-         System.out.println(
-            ((Map<String,Object>)response).get("status").toString());
-      });
+   publishFileToCloud(path, bucketName, objectPath);
+
                                        // write the download url              //
    byte[] content =
       (kREACT_JAVA_RELEASES_DOWNLOAD_URL + filename).getBytes("UTF-8");
 
    objectPath = "releases/latest/latestReactJavaRelease.txt";
-   uploadURL  = "gs://" + bucketName + "/" + objectPath;
 
-   gcsManager().writeFile(content, uploadURL);
+   publishBytesToCloud(content, bucketName, objectPath);
 
                                        // publish to 'releases/latest' dir    //
    filename   = "reactjava.jar";
    objectPath = "releases/latest/" + filename;
-   uploadURL  = "gs://" + bucketName + "/" + objectPath;
 
-   //List<StorageObject> objects = gcsManager().listBucket(kRELEASE_BUCKET_NAME);
-   //for (StorageObject object : objects)
-   //{
-   //   String objectName = object.getName();
-   //   if (objectName.startsWith("releases/latest/reactjava@"))
-   //   {
-   //      System.out.println("Deleting existing published object " + objectName);
-   //      String deleteURL = "gs://" + bucketName + "/" + objectName;
-   //      gcsManager.deleteFile(deleteURL);
-   //   }
-   //}
-
-   gcsManager().writeFile(path, uploadURL, null,
-      (Object response, Object requestToken) ->
-      {
-         System.out.println(
-            ((Map<String,Object>)response).get("status").toString());
-      });
+   publishFileToCloud(path, bucketName, objectPath);
 }
 /*------------------------------------------------------------------------------
 
@@ -3809,6 +3920,38 @@ public static void touchJavaSource()
    System.out.println("Touch " + sourceFile);
 
    sourceFile.setLastModified(System.currentTimeMillis());
+}
+/*------------------------------------------------------------------------------
+
+@name       updateGWTInstalledVersion - update version of gwt release
+                                                                              */
+                                                                             /**
+            Update version of gwt release.
+
+@history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static void updateGWTInstalledVersion()
+   throws IOException
+{
+   String datestamp =
+      new SimpleDateFormat(kDATE_FORMAT_PATTERN_VERSION).format(new Date());
+
+   String version = kVERSION_GWT.replace("%version%", datestamp);
+   System.out.println("Updating version of gwt release to " + version);
+
+   File release = getGWTInstalledVersionFile();
+   if (release.exists())
+   {
+      release.delete();
+   }
+
+   try (FileOutputStream out = new FileOutputStream(release))
+   {
+      out.write(version.getBytes("UTF-8"));
+   }
 }
 /*------------------------------------------------------------------------------
 

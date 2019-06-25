@@ -15,6 +15,7 @@ notes:
                                        // package --------------------------- //
 package io.reactjava.codegenerator.inspectortest;
                                        // imports --------------------------- //
+import io.reactjava.client.core.react.SEOInfo;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,7 +24,8 @@ import java.util.Map;
 public class AppComponentTemplate<P extends Properties> extends Component<P>
 {
                                        // constants ------------------------- //
-public static Collection<String> importedNodeModules = new ArrayList();
+public static Collection<String> importedNodeModules;
+public static SEOInfo seoInfo;
 
                                        // class variables ------------------- //
                                        // (none)                              //
@@ -48,6 +50,7 @@ public static Collection<String> importedNodeModules = new ArrayList();
 public AppComponentTemplate()
 {
    importedNodeModules = getImportedNodeModules();
+   seoInfo             = getSEOInfo();
                                        // stop any subsequent operation       //
    throw new UnsupportedOperationException();
 }
@@ -87,6 +90,35 @@ protected Collection<String> getImportedNodeModules()
 }
 /*------------------------------------------------------------------------------
 
+@name       getImportedNodeModulesAndSEO - imported modules and SEO info
+                                                                              */
+                                                                             /**
+            Get imported modules and SEOInfo as a single collection delimited by
+            a "$" entry.
+
+@return     collection of imported module names and SEOInfo
+
+@history    Sun Jun 16, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected static Collection<String> getImportedNodeModulesAndSEO()
+{
+   Collection importedNodeModulesAndSEO = new ArrayList();
+   if (importedNodeModules != null)
+   {
+      importedNodeModulesAndSEO.addAll(importedNodeModules);
+   }
+   importedNodeModulesAndSEO.add("$");
+   if (seoInfo != null)
+   {
+      importedNodeModulesAndSEO.add(seoInfo.toString());
+   }
+   return(importedNodeModulesAndSEO);
+}
+/*------------------------------------------------------------------------------
+
 @name       getNavRoutes - get routes for application
                                                                               */
                                                                              /**
@@ -102,6 +134,28 @@ protected Collection<String> getImportedNodeModules()
 protected Map<String,Class> getNavRoutes()
 {
    return(super.getNavRoutes());
+}
+/*------------------------------------------------------------------------------
+
+@name       getSEOInfo - get seo information
+                                                                              */
+                                                                             /**
+            Get SEO info. This method is typically invoked at compile time.
+
+            The intention is to provide a title, description, and base url for
+            the app deployment in order to create a redirect target for each
+            hash, along with an associated sitemap.
+
+@return     SEOInfo string
+
+@history    Sun Jun 16, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected SEOInfo getSEOInfo()
+{
+   return(seoInfo);
 }
 /*------------------------------------------------------------------------------
 
@@ -139,7 +193,8 @@ public static void main(
          {
                                        // constructor should generate an error//
                                        // return result to invoker            //
-            System.out.println(importedNodeModules.toString());
+            System.out.println(
+               getImportedNodeModulesAndSEO().toString());
          }
       }
       catch(Exception e)
@@ -157,7 +212,8 @@ public static void main(
             {
                                        // constructor should generate an error//
                                        // return result to invoker            //
-               System.out.println(importedNodeModules.toString());
+               System.out.println(
+                  getImportedNodeModulesAndSEO().toString());
             }
          }
          catch(Exception ee)

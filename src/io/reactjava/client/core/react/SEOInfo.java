@@ -1,0 +1,220 @@
+/*==============================================================================
+
+name:       SEOInfo - SEO information
+
+purpose:    SEO information
+
+history:    Wed Jun 19, 2019 10:30:00 (Giavaneers - LBM) created
+
+notes:
+                        COPYRIGHT (c) BY GIAVANEERS, INC.
+         This source code is licensed under the MIT license found in the
+             LICENSE file in the root directory of this source tree.
+
+==============================================================================*/
+                                       // package --------------------------- //
+package io.reactjava.client.core.react;
+                                       // imports --------------------------- //
+import java.util.ArrayList;
+import java.util.Collection;
+                                       // SEOInfo =========================== //
+public class SEOInfo
+{
+                                       // constants ------------------------- //
+public static final String kDELIMITER = "<SEOInfo>";
+
+                                       // class variables ------------------- //
+                                       // (none)                              //
+                                       // public instance variables --------- //
+                                       // deploy path; e.g.'http://myapp.com' //
+public String                  deployPath;
+                                       // page infos                          //
+public Collection<SEOPageInfo> pageInfos;
+                                       // protected instance variables ------ //
+                                       // (none)                              //
+
+/*------------------------------------------------------------------------------
+
+@name       SEOInfo - constructor for specified string
+                                                                              */
+                                                                             /**
+            Constructor for specified string.
+
+@param      deployPath     SEO deploy path
+@param      pageInfos      collection of SEOPageInfo
+
+@history    Wed Jun 19, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public SEOInfo(
+   String                  deployPath,
+   Collection<SEOPageInfo> pageInfos)
+{
+   this.deployPath = deployPath;
+   this.pageInfos  = pageInfos;
+}
+/*------------------------------------------------------------------------------
+
+@name       SEOInfo - constructor for specified string
+                                                                              */
+                                                                             /**
+            Constructor for specified string.
+
+@param      seoInfo     SEO information string
+
+@history    Wed Jun 19, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public SEOInfo(
+   String seoInfo)
+{
+   String[] splits = seoInfo.split(SEOInfo.kDELIMITER);
+   this.deployPath = splits[0];
+
+   System.out.println("SEOInfo<init>: seoInfo="       + seoInfo);
+   System.out.println("SEOInfo<init>: splits.length=" + splits.length);
+   System.out.println("SEOInfo<init>: splits[0]="     + splits[0]);
+
+   splits = splits[1].split(SEOPageInfo.kDELIMITER);
+   pageInfos = new ArrayList<>();
+   for (int i = 0; i < splits.length; i++)
+   {
+      pageInfos.add(new SEOPageInfo(splits[i]));
+   }
+}
+/*------------------------------------------------------------------------------
+
+@name       toString - standard toString method
+                                                                              */
+                                                                             /**
+            Standard toString method.
+
+@return     string representation which can be parsed by matching constructor.
+
+@history    Wed Jun 19, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public String toString()
+{
+   String value =
+      (deployPath != null ? deployPath : "") + kDELIMITER;
+
+   if (pageInfos != null)
+   {
+      for (SEOPageInfo info : pageInfos)
+      {
+         value += info;
+      }
+   }
+
+   return(value);
+}
+/*==============================================================================
+
+name:       SEOPageInfo - SEO page information
+
+purpose:    SEO page information
+
+history:    Wed Jun 19, 2019 10:30:00 (Giavaneers - LBM) created
+
+notes:
+
+==============================================================================*/
+public static class SEOPageInfo
+{
+                                       // constants ------------------------- //
+public static final String kDELIMITER      = "<SEOPageInfo>";
+public static final String kDELIMITER_ELEM = "<SEOPageInfoElem>";
+                                       // class variables ------------------- //
+                                       // (none)                              //
+                                       // public instance variables --------- //
+public String pageHash;                // page hash                           //
+public String title;                   // title                               //
+public String description;             // description                         //
+                                       // protected instance variables ------ //
+                                       // (none)                              //
+
+/*------------------------------------------------------------------------------
+
+@name       SEOPageInfo - constructor for specified string
+                                                                              */
+                                                                             /**
+            Constructor.
+
+@param      pageHash       page hash
+@param      title          page title
+@param      description    page description
+
+@history    Wed Jun 19, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public SEOPageInfo(
+   String pageHash,
+   String title,
+   String description)
+{
+   this.pageHash    = pageHash;
+   this.title       = title;
+   this.description = description;
+}
+/*------------------------------------------------------------------------------
+
+@name       SEOPageInfo - constructor for specified string
+                                                                              */
+                                                                             /**
+            Constructor for specified string.
+
+@param      infoString     SEO page information string
+
+@history    Wed Jun 19, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected SEOPageInfo(
+   String infoString)
+{
+   String[] splits = infoString.split(kDELIMITER_ELEM);
+   this.pageHash    = splits[0];
+   this.title       = splits[1];
+   this.description = splits[2];
+}
+/*------------------------------------------------------------------------------
+
+@name       toString - standard toString method
+                                                                              */
+                                                                             /**
+            Standard toString method.
+
+@return     string representation which can be parsed by matching constructor.
+
+@history    Wed Jun 19, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public String toString()
+{
+   String value =
+      (pageHash    != null ? pageHash    : "") + kDELIMITER_ELEM
+    + (title       != null ? title       : "") + kDELIMITER_ELEM
+    + (description != null ? description : "") + SEOPageInfo.kDELIMITER;
+
+   return(value);
+}
+}//====================================// end SEOPageInfo ====================//
+}//====================================// end SEOInfo ========================//

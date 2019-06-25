@@ -20,7 +20,12 @@ import com.giavaneers.util.gwt.Logger;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.Element;
 import elemental2.dom.HTMLBodyElement;
+import elemental2.dom.HTMLLinkElement;
+import elemental2.dom.HTMLMetaElement;
+import elemental2.dom.HTMLScriptElement;
 import elemental2.dom.HTMLStyleElement;
+import elemental2.dom.HTMLTitleElement;
+import elemental2.dom.StyleSheet;
 import io.reactjava.client.core.providers.platform.web.PlatformWeb;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +34,7 @@ import java.util.function.Function;
 import jsinterop.base.Js;
 import jsinterop.base.JsForEachCallbackFn;
 import jsinterop.base.JsPropertyMap;
+import jsinterop.core.dom.NodeList;
 import jsinterop.core.html.Window;
                                        // ReactJava ==========================//
 public class ReactJava
@@ -423,7 +429,6 @@ public static <P extends Properties> ReactElement createElement(
             Get native component.
 
 @param      component      component
-@param      bUpdate        iff true, update
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -459,8 +464,9 @@ public static void ensureComponentStyles(
             HTMLStyleElement style =
                (HTMLStyleElement)DomGlobal.document.createElement("style");
 
-            kLOGGER.logInfo(
-               "ReactJava.ensureComponentStyles(): injecting styleId=" + styleId);
+            //kLOGGER.logInfo(
+            //   "ReactJava.ensureComponentStyles(): injecting styleId="
+            //      + styleId);
 
             style.id          = styleId;
             style.textContent = component.css;
@@ -652,8 +658,9 @@ public static String getNativeComponentPropertiesFieldname(
                                        // in the source, it is first here...  //
                nativeComponentPropertiesFieldname = key;
 
-               kLOGGER.logInfo(
-                  "ReactJava.getNativeComponentPropertiesFieldname(): =" + key);
+               //kLOGGER.logInfo(
+               //   "ReactJava.getNativeComponentPropertiesFieldname(): ="
+               //      + key);
             }
          }
       };
@@ -895,5 +902,119 @@ public static void removeComponentStyles(
       }
       componentStyles.clear();
    }
+}
+/*------------------------------------------------------------------------------
+
+@name       setHead - set a head element
+                                                                              */
+                                                                             /**
+            Set a head element.
+
+@return     element descriptor
+
+@param      descriptor     element descriptor, where each tuple is an element
+                           attribute
+
+@history    Wed Jun 12, 2019 08:46:23 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static Element setHead(
+   NativeObject descriptor)
+{
+   String type = descriptor.getString("type");
+   if (type  == null)
+   {
+      throw new IllegalArgumentException("type may not be null");
+   }
+
+   Element element = DomGlobal.document.createElement(type);
+   switch(type)
+   {
+      case "link":
+      {
+         HTMLLinkElement link = (HTMLLinkElement)element;
+         link.as              = descriptor.getString("as");
+         link.charset         = descriptor.getString("charset");
+         link.disabled        = descriptor.getBoolean("disabled");
+         link.href            = descriptor.getString("href");
+         link.hreflang        = descriptor.getString("hreflang");
+         link.media           = descriptor.getString("media");
+         link.rel             = descriptor.getString("rel");
+         link.rev             = descriptor.getString("rev");
+         link.sheet           = (StyleSheet)descriptor.get("sheet");
+         link.target          = descriptor.getString("target");
+         link.type            = descriptor.getString("type");
+         break;
+      }
+      case "meta":
+      {
+         HTMLMetaElement meta = (HTMLMetaElement)element;
+         meta.name            = descriptor.getString("name");
+         meta.content         = descriptor.getString("content");
+         break;
+      }
+      case "title":
+      {
+         HTMLTitleElement title = (HTMLTitleElement)element;
+         title.text             = descriptor.getString("text");
+         break;
+      }
+      case "script":
+      {
+         HTMLScriptElement script = (HTMLScriptElement)element;
+         script.charset           = descriptor.getString("charset");
+         script.defer             = descriptor.getBoolean("defer");
+         script.event             = descriptor.getString("event");
+         script.htmlFor           = descriptor.getString("htmlFor");
+         script.src               = descriptor.getString("src");
+         script.text              = descriptor.getString("text");
+         script.type              = descriptor.getString("type");
+         break;
+      }
+      default:
+      {
+         throw new UnsupportedOperationException(type);
+      }
+   }
+
+   Element  head     = DomGlobal.document.head;
+   Element  remove   = null;
+   NodeList existing = Window.getDocument().getElementsByTagName(type);
+
+   removeAnyExisting:
+   for (int idx = 0, idxMax = existing.getLength(); idx < idxMax; idx++)
+   {
+      switch(type)
+      {
+                                       // identify any existing equivalent    //
+         case "meta":
+         {
+            HTMLMetaElement elem  = (HTMLMetaElement)element;
+            HTMLMetaElement chase = existing.item(idx);
+            if (elem.name.equals(chase.name))
+            {
+               remove = chase;
+               break removeAnyExisting;
+            }
+            break;
+         }
+         case "title":
+         {
+            remove = existing.item(idx);
+            break removeAnyExisting;
+         }
+      }
+   }
+   if (remove != null)
+   {
+                                       // remove any existing equivalent      //
+      head.removeChild(remove);
+   }
+                                       // insert the new element              //
+   head.insertBefore(element, head.firstChild);
+
+   return(element);
 }
 }//====================================// end ReactJava ======================//

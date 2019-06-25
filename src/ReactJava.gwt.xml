@@ -14,6 +14,13 @@
    <inherits name='com.google.gwt.json.JSON'/>
    <inherits name='com.google.gwt.user.User'/>
 
+   <!-- Specify 'safari' (chrome, safari, other webkit..)    -->
+   <!-- as the user agent to use if not recognized           -->
+   <!-- which will be the case with googlebot                -->
+   <!-- which reports error loading 'undefined.cache.js'     -->
+   <!-- since matching permutation is not found              -->
+   <set-property-fallback name="user.agent" value="safari"/>
+
 	<!-- transcode the generated code database                -->
 	<source path="generated" />
 
@@ -36,6 +43,7 @@
    <source path="io/reactjava/client/core/react/" />
    <source path="io/reactjava/client/core/resources/" />
    <source path="io/reactjava/client/core/rxjs/" />
+   <source path="io/reactjava/client/moduleapis/" />
    <source path="jsinterop/" />
 
 	<!-- Combine all platform-specific versions                   -->
