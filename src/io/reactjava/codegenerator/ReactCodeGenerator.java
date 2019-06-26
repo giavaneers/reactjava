@@ -1872,7 +1872,7 @@ protected void handleImportedNodeModulesAndSEO(
 
 @history    Sun Dec 02, 2018 18:00:00 (LBM) created.
 
-@notes
+@notes      see https://developers.google.com/search/docs/guides/intro-structured-data
                                                                               */
 //------------------------------------------------------------------------------
 protected void handleSEOInfo(

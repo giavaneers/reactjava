@@ -140,6 +140,8 @@ public static final String kDELIMITER_ELEM = "<SEOPageInfoElem>";
 public String pageHash;                // page hash                           //
 public String title;                   // title                               //
 public String description;             // description                         //
+public String structuredDataType;      // structured data type                //
+public String structuredData;          // structured data                 //
                                        // protected instance variables ------ //
                                        // (none)                              //
 
@@ -165,9 +167,39 @@ public SEOPageInfo(
    String title,
    String description)
 {
-   this.pageHash    = pageHash;
-   this.title       = title;
-   this.description = description;
+   this(pageHash, title, description, null, null);
+}
+/*------------------------------------------------------------------------------
+
+@name       SEOPageInfo - constructor for specified string
+                                                                              */
+                                                                             /**
+            Constructor.
+
+@param      pageHash                page hash
+@param      title                   page title
+@param      description             page description
+@param      structuredDataType      page description
+@param      structuredData          page description
+
+@history    Wed Jun 19, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public SEOPageInfo(
+   String pageHash,
+   String title,
+   String description,
+   String structuredDataType,
+   String structuredData)
+{
+   this.pageHash           = pageHash;
+   this.title              = title;
+   this.description        = description;
+   this.structuredDataType = structuredDataType;
+   this.structuredData     = structuredData;
 }
 /*------------------------------------------------------------------------------
 
@@ -188,9 +220,23 @@ protected SEOPageInfo(
    String infoString)
 {
    String[] splits = infoString.split(kDELIMITER_ELEM);
-   this.pageHash    = splits[0];
-   this.title       = splits[1];
-   this.description = splits[2];
+   this.pageHash   = splits[0];
+   if (splits.length > 1)
+   {
+      this.title = splits[1];
+   }
+   if (splits.length > 2)
+   {
+      this.description = splits[2];
+   }
+   if (splits.length > 3)
+   {
+      this.structuredDataType = splits[3];
+   }
+   if (splits.length > 4)
+   {
+      this.structuredData = splits[4];
+   }
 }
 /*------------------------------------------------------------------------------
 
@@ -210,9 +256,11 @@ protected SEOPageInfo(
 public String toString()
 {
    String value =
-      (pageHash    != null ? pageHash    : "") + kDELIMITER_ELEM
-    + (title       != null ? title       : "") + kDELIMITER_ELEM
-    + (description != null ? description : "") + SEOPageInfo.kDELIMITER;
+      (pageHash           != null ? pageHash           : "") + kDELIMITER_ELEM
+    + (title              != null ? title              : "") + kDELIMITER_ELEM
+    + (description        != null ? description        : "") + kDELIMITER_ELEM
+    + (structuredDataType != null ? structuredDataType : "") + kDELIMITER_ELEM
+    + (structuredData     != null ? structuredData     : "") + kDELIMITER;
 
    return(value);
 }

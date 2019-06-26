@@ -45,6 +45,13 @@ public static final  String kFACTORY = "factory";
 public static final  String kMARKUP  = "markup";
 public static final  String kSTYLES  = "styles";
 
+                                       // head element types                  //
+public static final String kHEAD_ELEM_TYPE_LINK       = "link";
+public static final String kHEAD_ELEM_TYPE_META       = "meta";
+public static final String kHEAD_ELEM_TYPE_TITLE      = "title";
+public static final String kHEAD_ELEM_TYPE_SCRIPT     = "script";
+public static final String kHEAD_ELEM_TYPE_STRUCTURED = "structured";
+
                                        // class variables ------------------- //
                                        // whether initialized                 //
 protected static boolean             bInitialized;
@@ -917,7 +924,7 @@ public static void removeComponentStyles(
 
 @history    Wed Jun 12, 2019 08:46:23 (LBM) created.
 
-@notes
+@notes      see https://developers.google.com/search/docs/guides/intro-structured-data
                                                                               */
 //------------------------------------------------------------------------------
 public static Element setHead(
@@ -932,7 +939,7 @@ public static Element setHead(
    Element element = DomGlobal.document.createElement(type);
    switch(type)
    {
-      case "link":
+      case kHEAD_ELEM_TYPE_LINK:
       {
          HTMLLinkElement link = (HTMLLinkElement)element;
          link.as              = descriptor.getString("as");
@@ -948,20 +955,14 @@ public static Element setHead(
          link.type            = descriptor.getString("type");
          break;
       }
-      case "meta":
+      case kHEAD_ELEM_TYPE_META:
       {
          HTMLMetaElement meta = (HTMLMetaElement)element;
          meta.name            = descriptor.getString("name");
          meta.content         = descriptor.getString("content");
          break;
       }
-      case "title":
-      {
-         HTMLTitleElement title = (HTMLTitleElement)element;
-         title.text             = descriptor.getString("text");
-         break;
-      }
-      case "script":
+      case kHEAD_ELEM_TYPE_SCRIPT:
       {
          HTMLScriptElement script = (HTMLScriptElement)element;
          script.charset           = descriptor.getString("charset");
@@ -971,6 +972,24 @@ public static Element setHead(
          script.src               = descriptor.getString("src");
          script.text              = descriptor.getString("text");
          script.type              = descriptor.getString("type");
+         break;
+      }
+      case kHEAD_ELEM_TYPE_STRUCTURED:
+      {
+         String structuredDataType = descriptor.getString("structuredDataType");
+         String structuredData     = descriptor.getString("structuredData");
+
+         HTMLScriptElement script = (HTMLScriptElement)element;
+         script.type  = "application/ld+json";
+         script.text  = "'@context': 'https://schema.org',";
+         script.text += "'@type': '" + structuredDataType + "',";
+         script.text += structuredData;
+         break;
+      }
+      case kHEAD_ELEM_TYPE_TITLE:
+      {
+         HTMLTitleElement title = (HTMLTitleElement)element;
+         title.text             = descriptor.getString("text");
          break;
       }
       default:
@@ -989,7 +1008,7 @@ public static Element setHead(
       switch(type)
       {
                                        // identify any existing equivalent    //
-         case "meta":
+         case kHEAD_ELEM_TYPE_META:
          {
             HTMLMetaElement elem  = (HTMLMetaElement)element;
             HTMLMetaElement chase = existing.item(idx);
@@ -1000,7 +1019,18 @@ public static Element setHead(
             }
             break;
          }
-         case "title":
+         case kHEAD_ELEM_TYPE_STRUCTURED:
+         {
+            HTMLScriptElement elem  = (HTMLScriptElement)element;
+            HTMLScriptElement chase = existing.item(idx);
+            if (elem.type.equals(chase.type))
+            {
+               remove = chase;
+               break removeAnyExisting;
+            }
+            break;
+         }
+         case kHEAD_ELEM_TYPE_TITLE:
          {
             remove = existing.item(idx);
             break removeAnyExisting;

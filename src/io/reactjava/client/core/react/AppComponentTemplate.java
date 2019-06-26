@@ -28,7 +28,12 @@ import io.reactjava.client.core.react.SEOInfo.SEOPageInfo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-                                       // AppComponentTemplate ============== //
+
+import static io.reactjava.client.core.react.ReactJava.kHEAD_ELEM_TYPE_META;
+import static io.reactjava.client.core.react.ReactJava.kHEAD_ELEM_TYPE_STRUCTURED;
+import static io.reactjava.client.core.react.ReactJava.kHEAD_ELEM_TYPE_TITLE;
+
+// AppComponentTemplate ============== //
 public class AppComponentTemplate<P extends Properties>
    extends Component<P> implements EntryPoint
 {
@@ -291,12 +296,12 @@ public void onModuleLoad()
                                                                               */
                                                                              /**
             Render markup. This implementation adds SEO support in the form of
-            specific title and description head entries if specified by an
-            app SEOInfo instance.
+            specific title, description and structured data head entries as
+            specified by any app SEOInfo instance.
 
 @history    Thu Jun 20, 2019 10:30:00 (Giavaneers - LBM) created
 
-@notes
+@notes      see https://developers.google.com/search/docs/guides/intro-structured-data
 
                                                                               */
 //------------------------------------------------------------------------------
@@ -310,16 +315,35 @@ public void render()
       {
          if (pageHash != null && pageHash.equals(pageInfo.pageHash))
          {
+            if (pageInfo.title != null && pageInfo.title.length() > 0)
+            {
                                        // assign the page title               //
-            ReactJava.setHead(
-               NativeObject.with("type", "title", "text", pageInfo.title));
-
+               ReactJava.setHead(
+                  NativeObject.with(
+                     "type", kHEAD_ELEM_TYPE_TITLE, "text", pageInfo.title));
+            }
+            if (pageInfo.description != null
+                  && pageInfo.description.length() > 0)
+            {
                                        // assign the page description         //
-            ReactJava.setHead(
-               NativeObject.with(
-                  "type",   "meta",
-                  "name",   "description",
-                  "content", pageInfo.description));
+               ReactJava.setHead(
+                  NativeObject.with(
+                     "type",   kHEAD_ELEM_TYPE_META,
+                     "name",   "description",
+                     "content", pageInfo.description));
+            }
+            if (pageInfo.structuredDataType != null
+                  && pageInfo.structuredDataType.length() > 0
+                  && pageInfo.structuredData != null
+                  && pageInfo.structuredData.length() > 0)
+            {
+                                       // assign the structured data          //
+               ReactJava.setHead(
+                  NativeObject.with(
+                     "type",               kHEAD_ELEM_TYPE_STRUCTURED,
+                     "structuredDataType", pageInfo.structuredDataType,
+                     "structuredData",     pageInfo.structuredData));
+            }
 
             break;
          }
