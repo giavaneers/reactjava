@@ -2443,13 +2443,13 @@ public void process(
    Map<String,Map<String,JClassType>> providersAndComponents =
       parseClasses(context.getTypeOracle(), configuration, logger);
 
+   handleImportedNodeModulesAndSEO(
+      providersAndComponents, module, configuration, logger);
+
                                        // copy all scripts and css to artifact//
    copyResources(configuration, context, logger);
 
    saveCurrentDependencies(logger);
-
-   handleImportedNodeModulesAndSEO(
-      providersAndComponents, module, configuration, logger);
 
    logger.log(logger.INFO, "nanoTime=" + System.nanoTime());
    logger.log(

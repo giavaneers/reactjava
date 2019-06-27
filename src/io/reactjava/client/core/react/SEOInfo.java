@@ -21,7 +21,8 @@ import java.util.Collection;
 public class SEOInfo
 {
                                        // constants ------------------------- //
-public static final String kDELIMITER = "<SEOInfo>";
+public static final String kDELIMITER  = "<SEOInfo>";
+public static final String kNULL_VALUE = kDELIMITER;
 
                                        // class variables ------------------- //
                                        // (none)                              //
@@ -74,18 +75,19 @@ public SEOInfo(
 public SEOInfo(
    String seoInfo)
 {
+   this.pageInfos  = new ArrayList<>();
    String[] splits = seoInfo.split(SEOInfo.kDELIMITER);
-   this.deployPath = splits[0];
-
-   System.out.println("SEOInfo<init>: seoInfo="       + seoInfo);
-   System.out.println("SEOInfo<init>: splits.length=" + splits.length);
-   System.out.println("SEOInfo<init>: splits[0]="     + splits[0]);
-
-   splits = splits[1].split(SEOPageInfo.kDELIMITER);
-   pageInfos = new ArrayList<>();
-   for (int i = 0; i < splits.length; i++)
+   if (splits.length > 0)
    {
-      pageInfos.add(new SEOPageInfo(splits[i]));
+      this.deployPath = splits[0];
+      if (splits.length > 1)
+      {
+         splits = splits[1].split(SEOPageInfo.kDELIMITER);
+         for (int i = 0; i < splits.length; i++)
+         {
+            pageInfos.add(new SEOPageInfo(splits[i]));
+         }
+      }
    }
 }
 /*------------------------------------------------------------------------------
@@ -105,8 +107,7 @@ public SEOInfo(
 //------------------------------------------------------------------------------
 public String toString()
 {
-   String value =
-      (deployPath != null ? deployPath : "") + kDELIMITER;
+   String value = (deployPath != null ? deployPath : "") + kDELIMITER;
 
    if (pageInfos != null)
    {

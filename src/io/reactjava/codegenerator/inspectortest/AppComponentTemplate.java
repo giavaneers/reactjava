@@ -111,10 +111,9 @@ protected static Collection<String> getImportedNodeModulesAndSEO()
       importedNodeModulesAndSEO.addAll(importedNodeModules);
    }
    importedNodeModulesAndSEO.add("$");
-   if (seoInfo != null)
-   {
-      importedNodeModulesAndSEO.add(seoInfo.toString());
-   }
+   importedNodeModulesAndSEO.add(
+      seoInfo != null ? seoInfo.toString() : SEOInfo.kNULL_VALUE);
+
    return(importedNodeModulesAndSEO);
 }
 /*------------------------------------------------------------------------------

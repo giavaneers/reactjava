@@ -2060,7 +2060,7 @@ public static String getGWTInstall()
 
    String  version    = getGWTInstalledVersion();
    String  latest     = getGWTLatestVersion();
-   boolean bInstalled = latest.equals(version);
+   boolean bInstalled = latest.startsWith(version);
 
    String  msg =
       bInstalled
@@ -2146,7 +2146,8 @@ public static String getGWTLatestVersion()
 {
    String latestVersion =
       new String(
-         getInputStreamBytes(new URL(kGWT_DOWNLOAD_URL_CONTAINER_URL)), "UTF-8");
+         getInputStreamBytes(
+         new URL(kGWT_DOWNLOAD_URL_CONTAINER_URL)), "UTF-8");
 
    return(latestVersion);
 }
@@ -2639,7 +2640,7 @@ public static File gwtInitialize(
       File src = copyGWTReleaseViaGCS(gwtDir, installVersion);
 
       System.out.println("\nInstalling gwt...");
-      zipExtractFiles(src, gwtDir);
+      zipExtractFiles(src, gwt);
                                        // delete the release zip file         //
       src.delete();
                                        // create the version file             //
