@@ -155,8 +155,8 @@ public static class FooterDsc
                                        // class variables ------------------- //
                                        // (none)                              //
                                        // public instance variables --------- //
-public String   title;                 // title                               //
-public String[] descriptions;          // descriptions                        //
+public String           title;         // title                               //
+public FooterTopicDsc[] topics;        // topics                              //
                                        // protected instance variables ------ //
                                        // (none)                              //
 
@@ -191,12 +191,102 @@ public FooterDsc()
                                                                               */
 //------------------------------------------------------------------------------
 public FooterDsc(
-   String   title,
-   String[] descriptions)
+   String           title,
+   FooterTopicDsc[] topics)
 {
-   this.title         = title;
-   this.descriptions  = descriptions;
+   this.title  = title;
+   this.topics = topics;
 }
+/*==============================================================================
+
+name:       FooterTopicDsc - footer topic descriptor
+
+purpose:    Footer topic descriptor
+
+history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+notes:
+
+==============================================================================*/
+public static class FooterTopicDsc
+{
+                                       // constants ------------------------- //
+public static final String  kTARGET_BLANK  = "_blank";
+public static final String  kTARGET_PARENT = "_parent";
+public static final String  kTARGET_SELF   = "_self";
+public static final String  kTARGET_TOP    = "_top";
+
+                                       // class variables ------------------- //
+                                       // (none)                              //
+                                       // public instance variables --------- //
+public String topic;                   // topic                               //
+public String url;                     // url                                 //
+public String target;                  // target ("_blank", "_self", etc)     //
+                                       // protected instance variables ------ //
+                                       // (none)                              //
+
+/*------------------------------------------------------------------------------
+
+@name       FooterTopicDsc - default constructor
+                                                                              */
+                                                                             /**
+            Default constructor
+
+@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public FooterTopicDsc()
+{
+}
+/*------------------------------------------------------------------------------
+
+@name       FooterTopicDsc - constructor for specified title and descriptions
+                                                                              */
+                                                                             /**
+            Constructor for specified title and descriptions
+
+@param      topic    topic
+@param      url      url
+
+@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public FooterTopicDsc(
+   String topic,
+   String url)
+{
+   this(topic, url, kTARGET_BLANK);
+}
+/*------------------------------------------------------------------------------
+
+@name       FooterTopicDsc - constructor for specified title and descriptions
+                                                                              */
+                                                                             /**
+            Constructor for specified title and descriptions
+
+@param      topic    topic
+@param      url      url
+@param      target   target
+
+@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public FooterTopicDsc(
+   String topic,
+   String url,
+   String target)
+{
+   this.topic  = topic;
+   this.url    = url;
+   this.target = target;
+}
+}//====================================// end FooterTopicDsc =================//
 }//====================================// end FooterDsc ======================//
 /*==============================================================================
 

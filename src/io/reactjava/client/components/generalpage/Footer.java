@@ -21,7 +21,9 @@ notes:
                                        // package --------------------------- //
 package io.reactjava.client.components.generalpage;
                                        // imports --------------------------- //
+import elemental2.dom.DomGlobal;
 import io.reactjava.client.components.generalpage.Descriptors.FooterDsc;
+import io.reactjava.client.components.generalpage.Descriptors.FooterDsc.FooterTopicDsc;
 import io.reactjava.client.core.react.Component;
 import io.reactjava.client.core.react.IUITheme;
 
@@ -29,32 +31,41 @@ import io.reactjava.client.core.react.IUITheme;
 public class Footer extends Component
 {
                                        // class constants ------------------- //
-public static final FooterDsc[] kFOOTERS =
+public static final String      kLOCATION = DomGlobal.location.getPathname();
+public static final FooterDsc[] kFOOTERS  =
 {
    new FooterDsc(
       "Project",
-      new String[]
+      new FooterTopicDsc[]
       {
-         "Team", "History", "Contact us"
+         new FooterTopicDsc("Team", "http://www.giavaneers.com"),
+         new FooterTopicDsc("History", "http://www.giavaneers.com"),
+         new FooterTopicDsc("Contact us", "http://www.giavaneers.com/contact")
       }),
    new FooterDsc(
       "Features",
-      new String[]
+      new FooterTopicDsc[]
       {
-         "Cool stuff", "Random feature", "Team feature", "Developer stuff",
-         "Another one"
+         new FooterTopicDsc("Get Started",       kLOCATION + "#getStarted"),
+         new FooterTopicDsc("User Guide",        kLOCATION + "#userGuide"),
+         new FooterTopicDsc("Contributor Guide", kLOCATION + "#contributorGuide"),
       }),
    new FooterDsc(
       "Resources",
-      new String[]
+      new FooterTopicDsc[]
       {
-         "Resource", "Resource name", "Another resource", "Final resource"
+         new FooterTopicDsc("Other Projects","http://www.giavaneers.com/platforms"),
+         new FooterTopicDsc("Google Console","https://console.cloud.google.com"),
+         new FooterTopicDsc("Google Search","https://search.google.com/search-console"),
+         new FooterTopicDsc("Google Analytics","https://analytics.google.com/analytics"),
       }),
    new FooterDsc(
       "Legal",
-      new String[]
+      new FooterTopicDsc[]
       {
-         "License", "Privacy policy", "Terms of use"
+         new FooterTopicDsc("License",        ""),
+         new FooterTopicDsc("Privacy policy", ""),
+         new FooterTopicDsc("Terms of use",   "")
       }),
 };
                                        // class variables ------------------- //
@@ -93,13 +104,15 @@ public void render()
                {footer.title}
             </@material-ui.core.Typography>
 --*/
-         for (String description : footer.descriptions)
+         for (FooterTopicDsc topic : footer.topics)
          {
 /*--
-            <@material-ui.core.Typography
-               key={description} variant="subtitle1" color="textSecondary">
-               {description}
-            </@material-ui.core.Typography>
+            <a href={topic.url} target={topic.target} class="topic" >
+               <@material-ui.core.Typography
+                  key={topic.topic} variant="subtitle1" color="textSecondary">
+                  {topic.topic}
+               </@material-ui.core.Typography>
+            </a>
 --*/
          }
 /*--
@@ -108,7 +121,10 @@ public void render()
       }
 /*--
       </@material-ui.core.Grid>
-      <@material-ui.core.Grid container spacing={32} justify="space-evenly">
+      <@material-ui.core.Grid container spacing={32} align="center" justify="space-evenly" >
+         <a href="http://www.giavaneers.com" target="_blank">
+            <img src="images/GiavaneersMark.png" class="logo" />
+         </a>
          <@material-ui.core.Typography
             class="footerCredit" color="textSecondary" gutterBottom>
             Website created with React and
@@ -134,24 +150,34 @@ public void renderCSS()
 {
    String unit       = "" + getTheme().getSpacing().getUnit() + "px";
    String unitX3     = IUITheme.cssLengthScale(unit, 3);
+   String unitX45    = IUITheme.cssLengthScale(unit, 4.5);
    String unitX6     = IUITheme.cssLengthScale(unit, 6);
    String unitX8     = IUITheme.cssLengthScale(unit, 8);
 /*--
    .footer
    {
-      border-top: {"1px solid " + getTheme().getPalette().getDivider()};
-      margin-top: {unitX8};
-      padding:    {unitX6};
+      border-top:   {"1px solid " + getTheme().getPalette().getDivider()};
+      margin-top:   {unitX8};
+      padding:      {unitX6};
    }
    .footerCredit
    {
-      margin-top: {unitX3}
+      margin-top:   {unitX45};
    }
    .layout
    {
       margin-left:  {unitX3};
       margin-right: {unitX3};
       width:        auto;
+   }
+   .logo
+   {
+      margin-top:   {unitX3};
+      height:       {unitX6};
+   }
+   .topic
+   {
+      text-decoration: none;
    }
 --*/
 }
