@@ -875,7 +875,7 @@ enum TokeniserState {
 /*ReactJava Giavaneers (LBM) 190220 Start*/
     AttributeValue_javaExpression {
         void read(Tokeniser t, CharacterReader r) {
-            String value = r.consumeToAny(attributeJavaExpressionValueCharsSorted);
+            String value = r.consumeToAnyUnmatched(attributeJavaExpressionValueCharsSorted);
             if (value.length() > 0)
             {
                 t.tagPending.appendAttributeValue("{" + value + "}");
@@ -930,7 +930,6 @@ enum TokeniserState {
                     r.unconsume();
                     t.transition(BeforeAttributeName);
             }
-
         }
     },
 /*ReactJava Giavaneers (LBM) 190220 End*/
@@ -1709,7 +1708,7 @@ enum TokeniserState {
     static final char[] attributeSingleValueCharsSorted = new char[]{nullChar, '&', '\''};
     static final char[] attributeDoubleValueCharsSorted = new char[]{nullChar, '"', '&'};
 /*ReactJava Giavaneers (LBM) 190220 Start*/
-    static final char[] attributeJavaExpressionValueCharsSorted = new char[]{nullChar, '}'};
+    static final char[] attributeJavaExpressionValueCharsSorted = new char[]{'{', nullChar, '}'};
 /*ReactJava Giavaneers (LBM) 190220 End*/
     static final char[] attributeNameCharsSorted = new char[]{nullChar, '\t', '\n', '\f', '\r', ' ', '"', '\'', '/', '<', '=', '>'};
     static final char[] attributeValueUnquoted = new char[]{nullChar, '\t', '\n', '\f', '\r', ' ', '"', '&', '\'', '<', '=', '>', '`'};

@@ -31,8 +31,9 @@ public static final Map<String,String> kTAG_MAP_DEFAULT =
    new HashMap<String,String>()
    {{
       put("div",    kREACT_NATIVE_VIEW);
-      put("h1",     kREACT_NATIVE_TEXT);
       put("button", kREACT_NATIVE_BUTTON);
+      put("h1",     kREACT_NATIVE_TEXT);
+      put("span",   kREACT_NATIVE_TEXT);
    }};
                                        // class variables ------------------- //
                                        // (none)                              //

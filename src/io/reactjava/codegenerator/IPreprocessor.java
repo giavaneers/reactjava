@@ -34,6 +34,45 @@ Map<String,String> components = new HashMap<>();
 
 /*------------------------------------------------------------------------------
 
+@name       initialize - initialize
+                                                                              */
+                                                                             /**
+            Initialize.
+
+@history    Sun Jul 14, 2019 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+void initialize();
+
+/*------------------------------------------------------------------------------
+
+@name       initialize - initialize all preprocessors
+                                                                              */
+                                                                             /**
+            Initialize all preprocessors.
+
+@history    Sun Jul 14, 2019 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+static void initialize(
+   TreeLogger logger)
+   throws     Exception
+{
+   logger.log(logger.DEBUG, "IPreprocessor.initialize(): entered");
+
+   for (Class preprocessor : preprocessors)
+   {
+      ((IPreprocessor)preprocessor.newInstance()).initialize();
+   }
+
+   logger.log(logger.DEBUG, "IPreprocessor.initialize(): exiting");
+}
+/*------------------------------------------------------------------------------
+
 @name       process - process specified source
                                                                               */
                                                                              /**

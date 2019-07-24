@@ -513,6 +513,16 @@ public class CompilationStateBuilder {
     CompileMoreLater compileMoreLater = new CompileMoreLater(compilerContext, compilerDelegate);
 
 /*LBM-START*/
+    try
+    {
+                                       // initialize all preprocessors        //
+       io.reactjava.codegenerator.IPreprocessor.initialize(logger);
+    }
+    catch(Exception e)
+    {
+      throw new InternalCompilerException(
+         "Unexpected error initializing preprocessors");
+    }
                                        // seed the map with all possible      //
                                        // component candidates in jars and    //
                                        // zip files                           //

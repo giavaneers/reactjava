@@ -7,9 +7,9 @@ purpose:    Native react api
 history:    Mon Aug 28, 2017 10:30:00 (Giavaneers - LBM) created
 
 notes:
-                           COPYRIGHT (c) BY GIAVANEERS, INC.
-            This source code is licensed under the MIT license found in the
-                LICENSE file in the root directory of this source tree.
+                        COPYRIGHT (c) BY GIAVANEERS, INC.
+         This source code is licensed under the MIT license found in the
+             LICENSE file in the root directory of this source tree.
 
 ==============================================================================*/
                                        // package --------------------------- //
@@ -130,8 +130,6 @@ public static native <P extends Properties> ReactElement createElement(
                                                                               */
                                                                              /**
             useEffect hook.
-
-@return     void
 
 @param      effectHandler     effect function
 

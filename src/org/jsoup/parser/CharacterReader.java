@@ -187,6 +187,69 @@ public final class CharacterReader {
         }
     }
 
+/*ReactJava Giavaneers (LBM) 190724 Start*/
+/*------------------------------------------------------------------------------
+
+@name       consumeToAnyUnmatched - read characters until unmatched delimiter
+                                                                              */
+                                                                             /**
+            Read characters until an unmatched delimeter is found.
+
+            For example, for the delimiters '{', '}' and nullChar, the sequence
+
+               "abc{def}}" will yield "abc{def}"
+
+@return     The string read
+
+@param      delims      delimeters, where the first is an opening character that
+                        can be matched by any of the following delimeters in
+                        which case reading continues until a subsequent
+                        unmatched delimeter.
+
+@history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public String consumeToAnyUnmatched(
+   final char... delims)
+{
+    bufferUp();
+    final int    start     = bufPos;
+    final int    remaining = bufLength;
+    final char[] val       = charBuf;
+    final char   match     = delims[0];
+    int          depth     = 0;
+
+    OUTER: while (bufPos < remaining)
+    {
+        char valChar = val[bufPos];
+        if (valChar == match)
+        {
+           depth++;
+        }
+        else
+        {
+            for (int i = 1; i < delims.length; i++)
+            {
+               if (valChar == delims[i])
+               {
+                  if (depth-- == 0)
+                  {
+                     break OUTER;
+                  }
+               }
+            }
+        }
+        bufPos++;
+    }
+
+    return
+       bufPos > start
+          ? cacheString(charBuf, stringCache, start, bufPos -start) : "";
+}
+/*ReactJava Giavaneers (LBM) 190724 End*/
+
     /**
      * Read characters until the first of any delimiters is found.
      * @param chars delimiters to scan for

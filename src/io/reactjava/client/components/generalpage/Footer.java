@@ -54,9 +54,9 @@ public static final FooterDsc[] kFOOTERS  =
       "Resources",
       new FooterTopicDsc[]
       {
-         new FooterTopicDsc("Other Projects","http://www.giavaneers.com/platforms"),
-         new FooterTopicDsc("Google Console","https://console.cloud.google.com"),
-         new FooterTopicDsc("Google Search","https://search.google.com/search-console"),
+         new FooterTopicDsc("Other Projects",  "http://www.giavaneers.com/platforms"),
+         new FooterTopicDsc("Google Console",  "https://console.cloud.google.com"),
+         new FooterTopicDsc("Google Search",   "https://search.google.com/search-console"),
          new FooterTopicDsc("Google Analytics","https://analytics.google.com/analytics"),
       }),
    new FooterDsc(

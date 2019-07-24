@@ -19,9 +19,9 @@ param:      <P>     the type of props this component expects
 history:    Mon Aug 28, 2017 10:30:00 (Giavaneers - LBM) created
 
 notes:
-                           COPYRIGHT (c) BY GIAVANEERS, INC.
-            This source code is licensed under the MIT license found in the
-                LICENSE file in the root directory of this source tree.
+                        COPYRIGHT (c) BY GIAVANEERS, INC.
+         This source code is licensed under the MIT license found in the
+             LICENSE file in the root directory of this source tree.
 
 ==============================================================================*/
                                        // package --------------------------- //

@@ -18,7 +18,13 @@ notes:
 package io.reactjava.codegenerator;
                                        // imports --------------------------- //
 import com.google.gwt.core.ext.TreeLogger;
-import io.reactjava.client.core.react.ReactCodeGeneratorImplementation;
+import com.google.gwt.core.ext.TreeLogger.Type;
+import com.google.gwt.dev.util.log.AbstractTreeLogger;
+import com.google.gwt.dev.util.log.PrintWriterTreeLogger;
+import io.reactjava.client.core.react.ReactGeneratedCode;
+import io.reactjava.jsx.IConfiguration;
+import java.io.File;
+import java.util.Date;
 import java.util.Map;
                                        // ReactCodeGeneratorPreprocessor =====//
 public class ReactCodeGeneratorPreprocessor implements IPreprocessor
@@ -30,7 +36,7 @@ public class ReactCodeGeneratorPreprocessor implements IPreprocessor
                                        // public instance variables --------- //
                                        // (none)                              //
                                        // protected instance variables -------//
-                                       // (none)                              //
+protected static TreeLogger logger;    // any tree logger                     //
                                        // private instance variables -------- //
                                        // (none)                              //
 
@@ -48,6 +54,72 @@ public class ReactCodeGeneratorPreprocessor implements IPreprocessor
 //------------------------------------------------------------------------------
 public ReactCodeGeneratorPreprocessor()
 {
+}
+/*------------------------------------------------------------------------------
+
+@name       getFileLogger - get file logger
+                                                                              */
+                                                                             /**
+            Get file logger.
+
+@return     file logger
+
+@param      invocationLogger     logger passed with invocation
+@param      nanoTime             time of invocation
+
+@history    Sat Aug 11, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static TreeLogger getFileLogger(
+   TreeLogger invocationLogger,
+   long       nanoTime)
+{
+   if (logger == null)
+   {
+      try
+      {
+         Type maxDetail =
+            invocationLogger == null || !(logger instanceof AbstractTreeLogger)
+               ? TreeLogger.ALL
+               :  ((AbstractTreeLogger)invocationLogger).getMaxDetail();
+
+         File logFile =
+            new File(
+               IConfiguration.getProjectDirectory(null, invocationLogger),
+               "antlog.codegenerator.preprocessor.txt");
+
+         logFile.delete();
+
+         logger = new PrintWriterTreeLogger(logFile);
+         ((PrintWriterTreeLogger)logger).setMaxDetail(maxDetail);
+
+         logger.log(logger.INFO, new Date().toString());
+         logger.log(logger.INFO, "nanoTime=" + nanoTime);
+      }
+      catch(Exception e)
+      {
+         e.printStackTrace();
+      }
+   }
+   return(logger);
+}
+/*------------------------------------------------------------------------------
+
+@name       initialize - initialize
+                                                                              */
+                                                                             /**
+            Initialize. This implementation delets any previous log file.
+
+@history    Sun Jul 14, 2019 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public void initialize()
+{
+   logger = null;
 }
 /*------------------------------------------------------------------------------
 
@@ -79,15 +151,20 @@ public byte[] process(
    TreeLogger         logger)
    throws             Exception
 {
+   long start = System.nanoTime();
+
+   logger = getFileLogger(logger, start);
+   logger.log(logger.DEBUG, "process(): entered");
+
    logger.log(
       logger.DEBUG,
       "ReactCodeGeneratorPreprocessor.process(): for " + classname);
 
-   if (ReactCodeGeneratorImplementation.class.getName().equals(classname))
+   if (ReactGeneratedCode.class.getName().equals(classname))
    {
       logger.log(
          logger.INFO,
-         "ReactCodeGeneratorPreprocessor.process(): processing.");
+         "ReactCodeGeneratorPreprocessor.process(): processing " + classname);
 
       String content = new String(contentBytes, encoding);
 
@@ -120,7 +197,7 @@ public byte[] process(
       }
 
       String platformProviderClassname =
-         "io.reactjava.client.core.providers.platform.web.PlatformWeb";
+         IConfiguration.getPlatform(logger).getClass().getName();
 
       content =
          content

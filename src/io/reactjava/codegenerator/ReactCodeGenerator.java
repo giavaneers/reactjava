@@ -7,9 +7,9 @@ purpose:    GWT Compiler post processor to build application js bundle..
 history:    Mon Aug 28, 2018 10:30:00 (Giavaneers - LBM) created
 
 notes:
-                           COPYRIGHT (c) BY GIAVANEERS, INC.
-            This source code is licensed under the MIT license found in the
-                LICENSE file in the root directory of this source tree.
+                        COPYRIGHT (c) BY GIAVANEERS, INC.
+         This source code is licensed under the MIT license found in the
+             LICENSE file in the root directory of this source tree.
 
 ==============================================================================*/
                                        // package --------------------------- //
@@ -35,8 +35,8 @@ import io.reactjava.client.core.react.AppComponentTemplate;
 import io.reactjava.client.core.react.Component;
 import io.reactjava.client.core.react.INativeEventHandler;
 import io.reactjava.client.core.react.IProvider;
-import io.reactjava.client.core.react.IReactCodeGenerator;
 import io.reactjava.client.core.react.IUITheme;
+import io.reactjava.client.core.react.ReactGeneratedCode;
 import io.reactjava.client.core.react.SEOInfo;
 import io.reactjava.client.core.react.SEOInfo.SEOPageInfo;
 import io.reactjava.client.core.react.Utilities;
@@ -77,6 +77,9 @@ public static final String  kGENERATOR_PACKAGE_NAME =
 
 public static final String  kGENERATOR_SIMPLE_CLASSNAME =
    "ReactCodeGeneratorImplementation";
+
+public static final String  kOUT_BUILD_SRC_PATH =
+   IConfiguration.toOSPath("out/build/reactnative/src");
 
 public static final String  kRSRC_BASE_PATH =
    "io/reactjava/client/core/resources/";
@@ -130,6 +133,8 @@ public static final String kBOOT_JS =
    "import {Component} from 'react';\n"
  + "import _ from './reactNativeGWTLibrary.js';\n"
  + "\n"
+ + "window.ReactJava.React = window.React;\n"
+ + "\n"
  + "export default class Boot extends Component\n"
  + "{\n"
  + "   constructor(props)\n"
@@ -139,7 +144,7 @@ public static final String kBOOT_JS =
  + "   render()\n"
  + "   {\n"
  + "      var element =\n"
- + "         new window.io.reactjava.client.generated.ReactCodeGeneratorImplementation().boot(\n"
+ + "         window.io.reactjava.client.core.react.ReactGeneratedCode.boot(\n"
  + "            '" + kAPP_CLASSNAME_TOKEN + "');\n"
  + "\n"
  + "      return(element);\n"
@@ -562,7 +567,7 @@ protected static void copyResources(
                                        // copy the list to the distribution   //
       copyStreamToArtifact(
          new ByteArrayInputStream(imported.getBytes("UTF-8")),
-         "css/" + IReactCodeGenerator.kIMPORTED_STYLESHEETS_LIST,
+         "css/" + ReactGeneratedCode.kIMPORTED_STYLESHEETS_LIST,
          configuration, context, logger);
 
       logger.log(TreeLogger.Type.INFO, "copyResources(): done copying css");
@@ -927,6 +932,45 @@ public static void copyStreamToArtifact(
    }
 
    logger.log(TreeLogger.Type.INFO, "copyStreamToArtifact(): exiting");
+}
+/*------------------------------------------------------------------------------
+
+@name       generateBootJs - generate bootstrap react component
+                                                                              */
+                                                                             /**
+            Generate bootstrap react component.
+
+
+@return     void
+
+@history    Sat Aug 11, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static File generateBootJs(
+   Map<String,Map<String,JClassType>> providersAndComponents,
+   TreeLogger                         logger)
+   throws                             Exception
+{
+   logger.log(TreeLogger.Type.INFO, "generateBootJs(): entered");
+
+   File projectDir  = IConfiguration.getProjectDirectory(null, logger);
+   File buildSrcDir = new File(projectDir, kOUT_BUILD_SRC_PATH);
+   buildSrcDir.mkdirs();
+
+   Map<String,JClassType>
+          components   = providersAndComponents.get(kKEY_COMPONENTS);
+   JType  appType      = getAppType(components, logger);
+   String appClassname = getAppClassname(appType, logger);
+   String sBootJs      = kBOOT_JS.replace(kAPP_CLASSNAME_TOKEN, appClassname);
+   File   bootJs       = new File(buildSrcDir, kBOOT_JS_FILENAME);
+
+   JavascriptBundler.writeFile(bootJs, sBootJs);
+
+   logger.log(TreeLogger.Type.INFO, "generateBootJs(): exiting");
+
+   return(bootJs);
 }
 /*------------------------------------------------------------------------------
 
@@ -2442,6 +2486,8 @@ public void process(
 
    Map<String,Map<String,JClassType>> providersAndComponents =
       parseClasses(context.getTypeOracle(), configuration, logger);
+
+   generateBootJs(providersAndComponents, logger);
 
    handleImportedNodeModulesAndSEO(
       providersAndComponents, module, configuration, logger);

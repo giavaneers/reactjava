@@ -7,9 +7,9 @@ purpose:    ReactJava Java Interface.
 history:    Mon Aug 28, 2017 10:30:00 (Giavaneers - LBM) created
 
 notes:
-                           COPYRIGHT (c) BY GIAVANEERS, INC.
-            This source code is licensed under the MIT license found in the
-                LICENSE file in the root directory of this source tree.
+                        COPYRIGHT (c) BY GIAVANEERS, INC.
+         This source code is licensed under the MIT license found in the
+             LICENSE file in the root directory of this source tree.
 
 ==============================================================================*/
                                        // package --------------------------- //
@@ -25,6 +25,7 @@ import elemental2.dom.HTMLMetaElement;
 import elemental2.dom.HTMLScriptElement;
 import elemental2.dom.HTMLStyleElement;
 import elemental2.dom.HTMLTitleElement;
+import elemental2.dom.NodeList;
 import elemental2.dom.StyleSheet;
 import io.reactjava.client.core.providers.platform.web.PlatformWeb;
 import java.util.HashMap;
@@ -34,8 +35,6 @@ import java.util.function.Function;
 import jsinterop.base.Js;
 import jsinterop.base.JsForEachCallbackFn;
 import jsinterop.base.JsPropertyMap;
-import jsinterop.core.dom.NodeList;
-import jsinterop.core.html.Window;
                                        // ReactJava ==========================//
 public class ReactJava
 {
@@ -57,7 +56,7 @@ public static final String kHEAD_ELEM_TYPE_STRUCTURED = "structured";
 protected static boolean             bInitialized;
 
                                        // core compiler preprocessor          //
-protected static IReactCodeGenerator generator;
+//protected static IReactCodeGenerator generator;
 
                                        // map of stylesheet by component class//
 protected static Map<String,String>  injectedStylesheets;
@@ -82,6 +81,8 @@ protected static String              nativeComponentPropertiesFieldname;
             different server. This function make the assignment dynamic,
             alleviating the need to supply a base tag in the main html.
 
+            Is null for react native.
+
 @history    Tue Aug 29, 2017 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -90,15 +91,17 @@ protected static String              nativeComponentPropertiesFieldname;
 //------------------------------------------------------------------------------
 protected static void addBaseTag()
 {
-   if (Window.getDocument().getElementsByTagName("base").getLength() == 0)
+   if (getIsWebPlatform()
+                                       // not for react native                //
+         && DomGlobal.document.getElementsByTagName("base").getLength() == 0)
    {
                                        // there is no base tag, so add one    //
-      String  path = Window.getLocation().getPathname();
-      jsinterop.core.dom.Element base = Window.getDocument().createElement("base");
+      String  path = DomGlobal.window.location.getPathname();
+      Element base = DomGlobal.document.createElement("base");
       base.setAttribute("href", path.substring(0, path.lastIndexOf('/') + 1));
 
-      jsinterop.core.dom.Element head = Window.getDocument().getHead();
-      head.insertBefore(base, head.getFirstChild());
+      Element head = DomGlobal.document.head;
+      head.insertBefore(base, head.firstElementChild);
    }
 }
 /*------------------------------------------------------------------------------
@@ -501,16 +504,16 @@ public static void ensureComponentStyles(
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public static IReactCodeGenerator getCodeGenerator()
-{
-   if (generator == null)
-   {
-                                       // generate preprocessor classes       //
-      //generator = GWT.create(IReactCodeGenerator.class);
-      generator = new ReactCodeGeneratorImplementation();
-   }
-   return(generator);
-}
+//public static IReactCodeGenerator getCodeGenerator()
+//{
+//   if (generator == null)
+//   {
+//                                       // generate preprocessor classes       //
+//      //generator = GWT.create(IReactCodeGenerator.class);
+//      generator = new ReactCodeGeneratorImplementation();
+//   }
+//   return(generator);
+//}
 /*------------------------------------------------------------------------------
 
 @name       getComponentFactory - get factory supplier for specified classname
@@ -531,7 +534,7 @@ public static Function<Properties,Component> getComponentFactory(
    String classname)
 {
    Function<Properties,Component> factory =
-      (Function<Properties,Component>)getCodeGenerator().getFactory(classname);
+      (Function<Properties,Component>)ReactGeneratedCode.getFactory(classname);
 
    return(factory);
 }
@@ -551,7 +554,7 @@ public static Function<Properties,Component> getComponentFactory(
 //------------------------------------------------------------------------------
 public static Map<String,Function> getComponentFactoryMap()
 {
-   return(getCodeGenerator().getFactoryMap());
+   return(ReactGeneratedCode.getFactoryMap());
 }
 /*------------------------------------------------------------------------------
 
@@ -691,7 +694,7 @@ public static String getNativeComponentPropertiesFieldname(
 //------------------------------------------------------------------------------
 public static String getPlatformProvider()
 {
-   return(getCodeGenerator().getPlatformProvider());
+   return(ReactGeneratedCode.getPlatformProvider());
 }
 /*------------------------------------------------------------------------------
 
@@ -744,7 +747,7 @@ public static Function<Properties,IProvider> getProvider(
    String classname)
 {
    Function<Properties,IProvider> factory =
-      (Function<Properties,IProvider>)getCodeGenerator().getFactory(classname);
+      (Function<Properties,IProvider>)ReactGeneratedCode.getFactory(classname);
 
    return(factory);
 }
@@ -1000,7 +1003,7 @@ public static Element setHead(
 
    Element  head     = DomGlobal.document.head;
    Element  remove   = null;
-   NodeList existing = Window.getDocument().getElementsByTagName(type);
+   NodeList existing = DomGlobal.document.getElementsByTagName(type);
 
    removeAnyExisting:
    for (int idx = 0, idxMax = existing.getLength(); idx < idxMax; idx++)
@@ -1011,7 +1014,7 @@ public static Element setHead(
          case kHEAD_ELEM_TYPE_META:
          {
             HTMLMetaElement elem  = (HTMLMetaElement)element;
-            HTMLMetaElement chase = existing.item(idx);
+            HTMLMetaElement chase = (HTMLMetaElement)existing.item(idx);
             if (elem.name.equals(chase.name))
             {
                remove = chase;
@@ -1022,7 +1025,7 @@ public static Element setHead(
          case kHEAD_ELEM_TYPE_STRUCTURED:
          {
             HTMLScriptElement elem  = (HTMLScriptElement)element;
-            HTMLScriptElement chase = existing.item(idx);
+            HTMLScriptElement chase = (HTMLScriptElement)existing.item(idx);
             if (elem.type.equals(chase.type))
             {
                remove = chase;
@@ -1032,7 +1035,7 @@ public static Element setHead(
          }
          case kHEAD_ELEM_TYPE_TITLE:
          {
-            remove = existing.item(idx);
+            remove = (Element)existing.item(idx);
             break removeAnyExisting;
          }
       }

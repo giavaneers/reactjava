@@ -17,6 +17,7 @@ notes:
 package io.reactjava.jsx;
                                        // imports --------------------------- //
 import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.TreeLogger.Type;
 import com.google.gwt.dev.util.log.PrintWriterTreeLogger;
 import io.reactjava.client.core.providers.platform.IPlatform;
 import io.reactjava.client.core.react.Component;
@@ -954,13 +955,31 @@ public void handleElement(
       if (bStdTagName || bReactTagName || bLibTagName)
       {
          String name = tagName;
-         //if (bStdTagName)
-         //{
-         //                              // resolve tag name for platform       //
-         //   name = resolvePlatformTag(tagName, bText, platform, logger);
-         //}
-         if (!bStdTagName && !bReactTagName)
+         if (bStdTagName)
          {
+                                       // resolve std tag name for platform   //
+            boolean bText = false;
+            for (int i = 0, iMax = element.childNodeSize(); i < iMax; i++)
+            {
+               if (bText = element.childNode(i) instanceof TextNode)
+               {
+                  break;
+               }
+            }
+
+            name =
+               resolvePlatformTag(
+                  tagName, bText, IConfiguration.getPlatform(logger), logger);
+
+            if (!name.equals(tagName))
+            {
+                                       // change the element tag name too     //
+               element.tagName(name);
+            }
+         }
+         else if (!bReactTagName)
+         {
+                                       // library tag name                    //
             int    idx   = tagName.lastIndexOf('.');
             String plain = idx >= 0 ? tagName.substring(idx + 1) : tagName;
                    name  = plain;
@@ -1162,14 +1181,15 @@ public Node handleText(
    TreeLogger         logger)
 {
    Node         retVal;
-   StringBuffer buf             = getCurrentBuffer(bufs);
-   String       text            = textNode.toString();
-   String       trimmed         = text.trim();
-   Node         parent          = textNode.parent();
-   String       parentName      = parent.nodeName();
-   String       parentClassname = parent.attributes().get("className");
-   boolean      bSpanText       = "span".equals(parentName);
-   boolean      bPrismText      =
+   StringBuffer buf              = getCurrentBuffer(bufs);
+   String       text             = textNode.toString();
+   String       trimmed          = text.trim();
+   Node         parent           = textNode.parent();
+   String       parentName       = parent.nodeName();
+   String       parentClassname  = parent.attributes().get("className");
+   boolean      bSpan            = "span".equals(parentName);
+   boolean      bReactNativeText = "ReactNative.Text".equals(parentName);
+   boolean      bPrism           =
       "code".equals(parentName)
          && parentClassname != null
          && parentClassname.startsWith("language-");
@@ -1186,7 +1206,7 @@ public Node handleText(
                                        // text node has been processed        //
       retVal = null;
    }
-   else if (!bSpanText && !bPrismText)
+   else if (!bSpan && !bPrism && !bReactNativeText)
    {
                                        // wrap in a span tag so any sibling   //
                                        // nodes like <code> or <strong> will  //
@@ -1388,6 +1408,68 @@ public void indent()
    {
       indent += kTAB_SPACES;
    }
+}
+/*------------------------------------------------------------------------------
+
+@name       indexOfMatchingCurlyBrace - indent one tab
+                                                                              */
+                                                                             /**
+            Indent one tab.
+
+@history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static int indexOfMatchingCurlyBrace(
+   String raw,
+   int    idxBeg)
+{
+   int depth = 0;
+   int idx   = -1;
+
+   while(true)
+   {
+      int candidate = raw.indexOf('}', idxBeg);
+      if (candidate < 0)
+      {
+                                       // no matching end brace               //
+         break;
+      }
+
+      int nextOpenBrace = raw.indexOf('{', idxBeg + 1);
+      if (nextOpenBrace > 0 && nextOpenBrace < candidate)
+      {
+         idxBeg = nextOpenBrace;
+         depth++;
+      }
+      else if (depth > 0)
+      {
+         depth--;
+      }
+      else
+      {
+         idx = candidate;
+         break;
+      }
+   }
+
+   return(idx);
+}
+/*------------------------------------------------------------------------------
+
+@name       initialize - initialize
+                                                                              */
+                                                                             /**
+            Initialize. This implementation is null.
+
+@history    Sun Jul 14, 2019 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public void initialize()
+{
 }
 /*------------------------------------------------------------------------------
 
@@ -1871,7 +1953,7 @@ public static Elements parseDocument(
    TreeLogger logger)
 {
    markup = replaceComponentTagsWithSymbols(markup, logger);
-   markup = parsePropertyReferences(classname, markup, true);
+   markup = parsePropertyReferences(classname, markup);
 
                                        // using xmlParser instead of          //
                                        // htmlParser requires many standard   //
@@ -1992,12 +2074,11 @@ public String parseElementAttributes(
          key = toReactAttributeName(key);
          if (!"style".equals(key))
          {
-
-                                       // fixup jsoup self-closing div error  //
-            value = attVal.replace("{","").replace("}/","}").replace("}","");
-
             if (bJavaLiteralValue)
             {
+                                       // remove leading and trailing braces  //
+               value = attVal.substring(1, attVal.length() - 1);
+
                String text = handleTextFromURL(value, logger);
                if (!value.equals(text))
                {
@@ -2006,6 +2087,12 @@ public String parseElementAttributes(
                   bWrapWithQuotes = true;
                }
             }
+            else
+            {
+                                       // fixup jsoup self-closing div error  //
+               value = attVal.replace("{","").replace("}/","}").replace("}","");
+            }
+
             if (!value.contains("props.get(") && !value.contains("getNextId("))
             {
                                        // check for tag as an attribute value //
@@ -2135,30 +2222,7 @@ public String parseMarkup(
 @name       parsePropertyReferences - parse property references
                                                                               */
                                                                              /**
-            Make substitutions for property references.
-
-@return     parsed
-
-@param      raw      unparsed
-
-@history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public static String parsePropertyReferences(
-   String  classname,
-   String  raw,
-   boolean bMarkup)
-{
-   return(parsePropertyReferences(classname, raw, bMarkup, 0));
-}
-/*------------------------------------------------------------------------------
-
-@name       parsePropertyReferences - parse property references
-                                                                              */
-                                                                             /**
-            Make substitutions for property references.
+            Parse property references in specified string.
 
 @return     parsed
 
@@ -2171,23 +2235,11 @@ public static String parsePropertyReferences(
 //------------------------------------------------------------------------------
 protected static String parsePropertyReferences(
    String  classname,
-   String  raw,
-   boolean bMarkup,
-   int     stack)
+   String  raw)
 {
    String res = raw;
    if (res == null)
    {
-   }
-   else if (!bMarkup)
-   {
-      for (String token : kREPLACE_TOKENS.keySet())
-      {
-         res = res.replace(token, kREPLACE_TOKENS.get(token));
-      }
-                                       // replace references to 'this'        //
-      String simple = classname.substring(classname.lastIndexOf('.') + 1);
-      res = res.replace("this.", simple + ".this.");
    }
    else
    {
@@ -2203,23 +2255,61 @@ protected static String parsePropertyReferences(
          }
                                        // make sure to copy the '{'           //
          res +=
-            parsePropertyReferences(
-               classname, raw.substring(idxEnd, idxBeg), false, ++stack);
+            parsePropertyReferencesMakeSustitutions(
+               classname, raw.substring(idxEnd, idxBeg));
 
-         idxEnd = raw.indexOf('}', idxBeg);
+                                       // find index of matching curly brace  //
+         idxEnd = indexOfMatchingCurlyBrace(raw, idxBeg);
          if (idxEnd < 0)
          {
             throw new  IllegalStateException("Unmatched curly braces in markup");
          }
                                        // make sure to  copy the '}'          //
          res +=
-            parsePropertyReferences(
-               classname, raw.substring(idxBeg, ++idxEnd), false, ++stack);
+            parsePropertyReferencesMakeSustitutions(
+               classname, raw.substring(idxBeg, ++idxEnd));
       }
 
       res +=
-         parsePropertyReferences(
-            classname, raw.substring(idxEnd), false, ++stack);
+         parsePropertyReferencesMakeSustitutions(
+            classname, raw.substring(idxEnd));
+   }
+
+   return(res);
+}
+/*------------------------------------------------------------------------------
+
+@name       parsePropertyReferencesMakeSustitutions - parse property references
+                                                                              */
+                                                                             /**
+            Make substitutions for property references.
+
+@return     parsed
+
+@param      raw      unparsed
+
+@history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected static String parsePropertyReferencesMakeSustitutions(
+   String  classname,
+   String  raw)
+{
+   String res = raw;
+   if (res == null)
+   {
+   }
+   else
+   {
+      for (String token : kREPLACE_TOKENS.keySet())
+      {
+         res = res.replace(token, kREPLACE_TOKENS.get(token));
+      }
+                                       // replace references to 'this'        //
+      String simple = classname.substring(classname.lastIndexOf('.') + 1);
+      res = res.replace("this.", simple + ".this.");
    }
 
    return(res);
@@ -2546,6 +2636,43 @@ public static String resolveCSS(
 
    String resolved = buf.toString();
    return(resolved);
+}
+/*------------------------------------------------------------------------------
+
+@name       resolvePlatformTag - resolve specified tag name for platform
+                                                                              */
+                                                                             /**
+            Resolve specified tag name for platform
+
+@return     The resolved tag name
+
+@history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public String resolvePlatformTag(
+   String     tagName,
+   boolean    bText,
+   IPlatform  platform,
+   TreeLogger logger)
+{
+   String replacement = tagName;
+   String resolved    = platform.resolveTag(tagName, bText);
+   if (resolved != null)
+   {
+      replacement = resolved;
+   }
+
+   if (logger != null)
+   {
+      logger.log(
+         Type.INFO,
+         "JSXTransform.resolvePlatformTag(): "
+       + "tagName=" + tagName + ", replacement=" + replacement);
+   }
+
+   return(replacement);
 }
 /*------------------------------------------------------------------------------
 
@@ -3525,7 +3652,7 @@ public static boolean unitTest(
                            null);
                      content = src;
                   }
-                  else if (true)
+                  else if (false)
                   {
                      components.put(
                         "GeneralPage",
@@ -3588,7 +3715,7 @@ public static boolean unitTest(
                             + "io/reactjava/client/examples/threebythree/progress/App.java"),
                            null);
                       content = src;
-                 }
+                  }
                   else if (false)
                   {
                      classname  = "landingpage.App";
@@ -3598,6 +3725,18 @@ public static boolean unitTest(
                               "/Users/brianm/working/IdeaProjects/ReactJava/"
                             + "LandingPage/src/"
                             + "landingpage/App.java"),
+                           null);
+                     content = src;
+                  }
+                  else if (true)
+                  {
+                     classname  = "io.reactjava.client.examples.statevariable.simple.App";
+                     src =
+                        IJSXTransform.getFileAsString(
+                           new File(
+                              "/Users/brianm/working/IdeaProjects/ReactJava/"
+                            + "ReactJavaExamples/src/"
+                            + "io/reactjava/client/examples/statevariable/simple/App.java"),
                            null);
                      content = src;
                   }
@@ -3768,7 +3907,7 @@ public void writeJavaBlock(
    StringBuffer buf = getCurrentBuffer(bufs);
    if (javaBlock != null)
    {
-      write(buf, parsePropertyReferences(classname, javaBlock, false));
+      write(buf, parsePropertyReferencesMakeSustitutions(classname, javaBlock));
    }
 }
 /*------------------------------------------------------------------------------

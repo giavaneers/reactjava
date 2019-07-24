@@ -71,6 +71,7 @@ public class JavascriptBundler
                                        // class constants --------------------//
 public static final boolean kSRCCFG_NODE_MODULES_IN_PROJECT   = true;
 public static final boolean kSRCCFG_PROJECT_TEMPLATE_RESOURCE = true;
+public static final boolean kSRCCFG_REACT_NATIVE_ALWAYS       = true;
 
 public static final String kPROJECT_TEMPLATE_NAME =
    "ProjectTemplate";
@@ -159,6 +160,8 @@ public static final Set<String> kREACT_NATIVE_KEEP_FILENAMES =
       "app.json",
       "ios",
       "node_modules",
+      "src",
+      "war"
    }));
 
 public static final String kGWT_LIBRARY_NAME = "reactNativeGWTLibrary.js";
@@ -180,7 +183,7 @@ public static final String kGWT_LIBRARY_PREFIX =
  + "   function getExports($wnd)\n"
  + "   {\n"
  + "      var $doc = $wnd.document;\n"
- + "      var $core = {};\n"
+ + "      var $gwt = {};\n"
  + "      var navigator =\n"
  + "      {\n"
  + "         userAgent: 'webkit'\n"
@@ -803,7 +806,7 @@ public static File copyGWTReleaseViaGCS(
 
    copyFile(gwtReleaseURL, gwtReleaseFile.toPath());
 
-   System.out.println("Downloaded latest reactjava.jar");
+   System.out.println("Downloaded " + installVersion);
 
    return(gwtReleaseFile);
 }
@@ -1008,10 +1011,10 @@ public static File copyNativeProjectSupport(
 }
 /*------------------------------------------------------------------------------
 
-@name       copyProjectTemplate - copy project template from cloud storage
+@name       copyProjectTemplate - copy project template from resource
                                                                               */
                                                                              /**
-            Copy project template from cloud storage.
+            Copy project template from resource.
 
 @return     new project folder
 
@@ -1041,8 +1044,9 @@ public static File copyProjectTemplate(
    }
    else
    {
-      System.out.println("Downloading latest project template");
-      copyFile(kDOWNLOAD_URL_INTELLIJ_HELLOWORLD_PROJECT_TEMPLATE, temp.toPath());
+      //System.out.println("Downloading latest project template");
+      //copyFile(kDOWNLOAD_URL_INTELLIJ_HELLOWORLD_PROJECT_TEMPLATE, temp.toPath());
+      throw new IllegalStateException("Templates are not available from the cloud");
    }
 
    zipExtractFiles(temp, tempDir);
@@ -1089,7 +1093,7 @@ public static File copyProjectTemplate(
                                                                              /**
             Copy react java jar to specified directory.
 
-            Use the contents of
+            Iff jarname == null, use the contents of
 
                "https://storage.googleapis.com/react4java.io/releases/latest/"
                "latestReactJavaRelease.txt"
@@ -1157,6 +1161,7 @@ public static File copyReactJavaJar(
 @return     project directory
 
 @param      projectDir     project directory
+@param      version     version
 
 @history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -1328,6 +1333,8 @@ public static void createReactJavaProjectNativeSupport(
 {
    try
    {
+      System.out.println(
+         "Creating React Native support for " + projectDir.getAbsolutePath());
 
                                        // initialize react native support     //
       File tempNativeProjectDir = reactNativeProjectInitialize(projectDir);
@@ -1471,6 +1478,7 @@ public static void doOp(
    File    currentDir   = new File(System.getProperty("user.dir"));
    String  opcode       = null;
    String  version      = null;
+   String  versionGWT   = null;
    String  path         = null;
    boolean bReactNative = false;
 
@@ -1515,6 +1523,14 @@ public static void doOp(
             throw new IllegalArgumentException("Need to specify version");
          }
          version = argsList.get(++i);
+      }
+      else if ("-versiongwt".equals(arg))
+      {
+         if (argsList.size() < i + 1)
+         {
+            throw new IllegalArgumentException("Need to specify gwt version");
+         }
+         versionGWT = argsList.get(++i);
       }
       else if (opcode == null)
       {
@@ -1879,7 +1895,7 @@ public static GoogleCloudStorageManagerBase gcsManager()
 public static File generateGWTLibrary()
    throws Exception
 {
-                                       // find the core compiler output        //
+                                       // find the core compiler output       //
    File   projectDir = new File(System.getProperty("user.dir"));
    File   gwtOut     = null;
    File   artifact   = null;
@@ -2040,7 +2056,7 @@ public static String getFileType(
 }
 /*------------------------------------------------------------------------------
 
-@name       getGWTInstall - get gwt version to install
+@name       getGWTToInstall - get gwt version to install
                                                                               */
                                                                              /**
             Get gwt version to install.
@@ -2052,26 +2068,38 @@ public static String getFileType(
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public static String getGWTInstall()
+public static String getGWTToInstall(
+   String target)
    throws IOException
 {
    System.out.println(
-      "Checking whether the latest version of gwt is installed...");
+      "Checking whether "
+    + (target == null ? "the latest version" : "version " + target)
+    + " of gwt is installed...");
 
-   String  version    = getGWTInstalledVersion();
-   String  latest     = getGWTLatestVersion();
-   boolean bInstalled = latest.startsWith(version);
+   if (target == null)
+   {
+      target = getGWTLatestVersion();
+   }
+   if (!target.endsWith(".zip"))
+   {
+      target += ".zip";
+   }
+
+   String  installed  = getGWTInstalledVersion();
+   boolean bInstalled =
+      target != null && installed != null && target.startsWith(installed);
 
    String  msg =
       bInstalled
          ? "The GWT installation is up to date."
-         : version == null
+         : target == null
             ? "GWT is not installed."
             : "The GWT installation is out of date.";
 
    System.out.println(msg);
 
-   return(bInstalled ? null : latest);
+   return(bInstalled ? null : target);
 }
 /*------------------------------------------------------------------------------
 
@@ -2080,7 +2108,8 @@ public static String getGWTInstall()
                                                                              /**
             Get version of gwt release if installed.
 
-@return     version of gwt release if installed; otherwise, null
+@return     version of gwt release if installed; otherwise, null. For example,
+
 
 @history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -2263,7 +2292,8 @@ public static boolean getIsValidJavaIdentifier(
 @name       getLatestJarAndRelaunch - get lastest jar and relaunch
                                                                               */
                                                                              /**
-            Get lastest jar and relaunch.
+            Get lastest jar and relaunch, unless -version flag is in args list
+            in which case get specified version and relaunch.
 
 @param      argsList    args
 
@@ -2276,18 +2306,69 @@ public static void getLatestJarAndRelaunch(
    List<String> argsList)
    throws       Exception
 {
-   System.out.println("Getting latest reactjava.jar and relaunching...");
+   String version    = null;
+   String versionGWT = null;
+   for (int i = 0; i < argsList.size(); i++)
+   {
+      String arg = argsList.get(i).toLowerCase();
+      if ("-version".equals(arg))
+      {
+         if (argsList.size() < i + 1)
+         {
+            throw new IllegalArgumentException("Need to specify version");
+         }
+         version = argsList.get(++i);
+      }
+      else if ("-versiongwt".equals(arg))
+      {
+         if (argsList.size() < i + 1)
+         {
+            throw new IllegalArgumentException("Need to specify gwt version");
+         }
+         versionGWT = argsList.get(++i);
+      }
+   }
+
+   System.out.println(
+      "Getting "
+    + (version == null ? "latest reactjava.jar" : "reactjava." + version + ".jar")
+    + " and relaunching...");
 
    File   tempDir = createLocalTempFile("latestJarContainer", true);
-   File   newJar  = copyReactJavaJar(tempDir, null);
+   File   newJar  = copyReactJavaJar(tempDir, version);
    File   wd      = new File(System.getProperty("user.dir"));
    String cmd     = "java -jar " + newJar.getAbsolutePath() + " -relaunched";
 
-   for (String arg : argsList)
+   for (int i = 0; i < argsList.size(); i++)
    {
+      String arg = argsList.get(i);
+      if ("-versiongwt".equals(arg.toLowerCase()))
+      {
+         i++;
+         continue;
+      }
+
       cmd += " " + arg;
    }
    int retVal = exec(new String[]{cmd}, wd);
+
+   if (version != null)
+   {
+      int versionNum =
+         Integer.parseInt(version.substring(version.lastIndexOf('.') + 1));
+
+                                       // now that the specified jar has been //
+                                       // used, post process for any ops that //
+                                       // might not have been supported with  //
+                                       // an early version                    //
+      if (versionGWT != null && versionNum < 1907030000)
+      {
+                                       // specifying the gwt version was not  //
+                                       // supported with the specified version//
+                                       // of reactjava.jar                    //
+         gwtInitialize(versionGWT);
+      }
+   }
 }
 /*------------------------------------------------------------------------------
 
@@ -2612,45 +2693,49 @@ public static String getURLAsString(
 
                but the download server seems very slow...
 
-@return     new project folder
-
-@param      projectDir    new project directory
+@param      versionRequested     gwt version or if null, latest
 
 @history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public static File gwtInitialize(
-   File   projectDir)
+public static void gwtInitialize(
+   String versionRequested)
    throws Exception
 {
-   String installVersion = getGWTInstall();
+                                       // version to install if not already   //
+   String installVersion = getGWTToInstall(versionRequested);
    if (installVersion != null)
    {
       String sHome  = System.getProperty("user.home");
       File   home   = new File(sHome);
       File   gwtDir = new File(home, toOSPath(".reactjava/gwt"));
-      File   gwt    = new File(gwtDir, "gwt-2.8.2");
 
-      gwt.mkdirs();
+      if (gwtDir.exists())
+      {
+         deleteDirectory(gwtDir);
+      }
+
+      gwtDir.mkdirs();
                                        // download release from cloud storage //
       System.out.println(
          "\nDownloading gwt release (this may take a few minutes)...");
       File src = copyGWTReleaseViaGCS(gwtDir, installVersion);
 
       System.out.println("\nInstalling gwt...");
-      zipExtractFiles(src, gwt);
+      zipExtractFiles(src, gwtDir);
                                        // delete the release zip file         //
       src.delete();
+                                       // delete any __MACOSX dir             //
+      deleteDirectory(new File(gwtDir, "__MACOSX"));
+
                                        // create the version file             //
-      writeFile(
-         new File(gwtDir, kGWT_VERSION_FILENAME), installVersion);
+      File gwtReleaseDir = new File(gwtDir, "gwt-2.8.2");
+      writeFile(new File(gwtReleaseDir, kGWT_VERSION_FILENAME), installVersion);
 
       System.out.println("Done");
    }
-
-   return(projectDir);
 }
 /*------------------------------------------------------------------------------
 
@@ -3482,14 +3567,32 @@ public static void publishJar()
 //------------------------------------------------------------------------------
 public static File reactAndReactDomInitialize(
    File     projectDir)
+   throws   Exception
 {
    String   sHome    = System.getProperty("user.home");
    File     home     = new File(sHome);
    File     wd       = kSRCCFG_NODE_MODULES_IN_PROJECT ? projectDir : home;
    String   nodePath = getLocalNodePath();
+   String   projName = projectDir.getName();
    String[] args;
 
-   if (kSRCCFG_NODE_MODULES_IN_PROJECT || getNpmPackageOutOfDate("react"))
+   if (kSRCCFG_NODE_MODULES_IN_PROJECT && kSRCCFG_REACT_NATIVE_ALWAYS)
+   {
+      System.out.println("Installing/updating and init react-native package...");
+      args = new String[]{"yes | npx react-native init " + projName};
+
+      if (exec(args, wd.getParentFile()) != 0)
+      {
+         throw new IllegalStateException("react-native was not installed");
+      }
+      System.out.println("Done");
+                                       // update react native launch page     //
+      reactNativeUpdateLaunchPage(projectDir);
+
+                                       // trim default react native support   //
+      //reactNativeTrim(projectDir);
+   }
+   else if (kSRCCFG_NODE_MODULES_IN_PROJECT || getNpmPackageOutOfDate("react"))
    {
       System.out.println("Installing/updating react package...");
       args = new String[]{"npm install react --loglevel=error"};
@@ -3686,6 +3789,10 @@ public static File reactNativeProjectInitialize(
    }
    else
    {
+      System.out.println(
+         "Existing React Native support not found for "
+            + projectDir.getAbsolutePath());
+
                                        // react-native init needs an empty    //
                                        // folder to work correctly, so use a  //
                                        // new temporary directory             //
@@ -3694,9 +3801,15 @@ public static File reactNativeProjectInitialize(
 
                                        // now initialize react native support //
 
-      System.out.println("Initializing react native project...");
+      System.out.println(
+         "Initializing react native project:react-native init " + projectName
+       + " with workingDir=" + tempProjectDir.getAbsolutePath()
+       + " and nodePath=" + nodePath);
+
       args =
          new String[]{"react-native init " + projectName};
+
+      System.out.println("react-native init " + projectName);
 
       if (exec(args, tempProjectDir, nodePath) != 0)
       {
@@ -3732,6 +3845,7 @@ public static File reactNativeTrim(
 {
    for (File chase : projectDir.listFiles())
    {
+
       if (!kREACT_NATIVE_KEEP_FILENAMES.contains(chase.getName()))
       {
          chase.delete();
@@ -3764,8 +3878,11 @@ public static File reactNativeUpdateLaunchPage(
       new File(
          projectDir,
          toOSPath(
-            "node_modules/react-native/local-cli/server/"
-          + "util/debugger-ui/index.html"));
+          //  "node_modules/react-native/local-cli/server/"
+          //+ "util/debugger-ui/index.html"));
+
+            "node_modules/react-native/node_modules/@react-native-community/"
+          + "cli/build/commands/server/debugger-ui/index.html"));
 
    if (!launchPage.exists())
    {
@@ -4049,18 +4166,13 @@ public static void updateReactJavaCore(
    {
                                        // delete if already exists            //
       deleteDirectory(projectDir);
+                                       // create a new one                    //
+      projectDir.mkdirs();
    }
-                                       // initialize/update reactjava lib     //
+                                       // initialize local .reactJava dir     //
    reactJavaDirInitialize(projectDir);
                                        // initialize/update node and npm      //
    nodeInitialize(projectDir);
-
-                                       // copy project template               //
-   copyProjectTemplate(projectDir, bUpdate);
-
-                                       // copy reactjava.jar                  //
-   copyReactJavaJarToProject(projectDir, version);
-
                                        // initialize/update react, react-dom  //
    reactAndReactDomInitialize(projectDir);
 
@@ -4070,18 +4182,14 @@ public static void updateReactJavaCore(
    reactiveXInitialize(projectDir);
                                        // initialize/update material-ui/core  //
    materialUIInitialize(projectDir);
-
-   if (bReactNative)
-   {
-                                       // initialize react native modules now //
-                                       // so project run configurations iOS   //
-                                       // and android will be able to         //
-                                       // reference react-native-cli and not  //
-                                       // indicate an error                   //
-      reactNativeInitialize(projectDir);
-   }
                                        // initialize/update core support       //
-   gwtInitialize(projectDir);
+   gwtInitialize(null);
+                                       // copy project template               //
+   copyProjectTemplate(projectDir, bUpdate);
+
+                                       // initialize/update reactjava.jar     //
+   copyReactJavaJarToProject(projectDir, version);
+
                                        // delete any temp directory           //
    deleteDirectory(getTempDir());
 
@@ -4338,7 +4446,7 @@ public static void zipDirectory(
 //   TreeLogger logger)
 //   throws     Exception
 //{
-//                                       // generate core libararyand index.js   //
+//                                       // generate core libarary and index.js //
 //   generateIndexJs(generateGWTLibrary());
 //
 //                                       // generate webpackconfig.js           //

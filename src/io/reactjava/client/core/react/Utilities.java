@@ -7,9 +7,9 @@ purpose:    Utilities.
 history:    Mon Aug 28, 2017 10:30:00 (Giavaneers - LBM) created
 
 notes:
-                           COPYRIGHT (c) BY GIAVANEERS, INC.
-            This source code is licensed under the MIT license found in the
-                LICENSE file in the root directory of this source tree.
+                        COPYRIGHT (c) BY GIAVANEERS, INC.
+         This source code is licensed under the MIT license found in the
+             LICENSE file in the root directory of this source tree.
 
 ==============================================================================*/
                                        // package --------------------------- //
@@ -22,6 +22,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.ScriptInjector;
 import com.google.gwt.typedarrays.client.Uint8ArrayNative;
 import com.google.gwt.typedarrays.shared.Uint8Array;
+import elemental2.dom.DomGlobal;
+import elemental2.dom.Element;
+import elemental2.dom.HTMLDocument;
 import elemental2.core.JsObject;
 import io.reactjava.client.core.providers.http.HttpClientBase;
 import io.reactjava.client.core.providers.http.IHttpResponse;
@@ -33,9 +36,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import jsinterop.core.dom.Document;
-import jsinterop.core.dom.Element;
-import jsinterop.core.html.Window;
                                        // Utilities ==========================//
 public class Utilities
 {
@@ -324,7 +324,7 @@ public final static native Uint8Array fromInflaterFilteredNative(
 public static Map<String,String> getHrefParams()
 {
    Map<String,String> params = new HashMap<String,String>();
-   String             hRef   = Window.getLocation().getHref();
+   String             hRef   = DomGlobal.window.location.getHref();
    int                idx    = hRef.indexOf('?');
    if (idx > 0)
    {
@@ -352,7 +352,7 @@ public static Map<String,String> getHrefParams()
 //------------------------------------------------------------------------------
 public static String getArtifactReactJavaDirectoryName()
 {
-   return(IReactCodeGenerator.kREACT_JAVA_DIR_NAME);
+   return(ReactGeneratedCode.kREACT_JAVA_DIR_NAME);
 }
 /*------------------------------------------------------------------------------
 
@@ -413,7 +413,7 @@ public static List<String> getImportedStylesheets(
       String cssListURL =
          GWT.getModuleBaseForStaticFiles()
             + getArtifactReactJavaDirectoryName()
-            + "/css/" + IReactCodeGenerator.kIMPORTED_STYLESHEETS_LIST;
+            + "/css/" + ReactGeneratedCode.kIMPORTED_STYLESHEETS_LIST;
 
                                        // read any remote list of stylesheets //
       kLOGGER.logInfo(
@@ -617,7 +617,7 @@ public static void injectLink(
       linkURL = GWT.getModuleBaseForStaticFiles() + linkURL;
    }
 
-   Document document    = Window.getDocument();
+   HTMLDocument document = DomGlobal.document;
    Element  linkElement = document.createElement("link");
             linkElement.setAttribute("href", linkURL);
 
@@ -629,7 +629,7 @@ public static void injectLink(
    {
       linkElement.setAttribute("type", type);
    }
-   document.getHead().appendChild(linkElement);
+   document.head.appendChild(linkElement);
 }
 /*------------------------------------------------------------------------------
 
