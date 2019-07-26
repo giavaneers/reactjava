@@ -27,9 +27,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import jsinterop.base.Js;
 import jsinterop.base.JsArrayLike;
+import jsinterop.base.JsPropertyMap;
 
-                                       // Component ==========================//
+// Component ==========================//
 public abstract class Component<P extends Properties>
 {
                                        // class constants --------------------//
@@ -43,6 +45,7 @@ protected static int   nextId;         // next elementId to be autoassigned   //
 private   static Map<String,Component> // map of component by id              //
                        componentById;
                                        // protected instance variables ------ //
+protected RefMgr       refMgr;         // component ref manager               //
 protected StateMgr     stateMgr;       // component state manager             //
 protected java.util.function.Function<Properties, ReactElement>
                        componentFcn;   // component function                  //
@@ -302,6 +305,131 @@ protected Map<String,Class> getNavRoutes()
 protected static String getNextId()
 {
    return("rjAuto" + ++nextId);
+}
+/*------------------------------------------------------------------------------
+
+@name       getRef - get ref element value
+                                                                              */
+                                                                             /**
+            Get ref element value.
+
+            Note, the useRef hook is supported for research purposes only, since
+            its functionality can be readily replaced in ReactJava by use of a
+            declared component instance variable.
+
+@return     ref element value
+
+@history    Thu Jul 25, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public Object getRef(
+   String key)
+{
+   return(getRefMgr().getRef(key));
+}
+/*------------------------------------------------------------------------------
+
+@name       getRefBoolean - get ref boolean value
+                                                                              */
+                                                                             /**
+            Get ref boolean value.
+
+            Note, the useRef hook is supported for research purposes only, since
+            its functionality can be readily replaced in ReactJava by use of a
+            declared component instance variable.
+
+@return     ref boolean value
+
+@history    Thu Jul 25, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected boolean getRefBoolean(
+   String key)
+{
+   Object value = getRef(key);
+   return(value != null ? (Boolean)value : false);
+}
+/*------------------------------------------------------------------------------
+
+@name       getRefInt - get ref int value
+                                                                              */
+                                                                             /**
+            Get ref int value.
+
+            Note, the useRef hook is supported for research purposes only, since
+            its functionality can be readily replaced in ReactJava by use of a
+            declared component instance variable.
+
+@return     ref int value
+
+@history    Thu Jul 25, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected int getRefInt(
+   String key)
+{
+   Object value = getRef(key);
+   return(value != null ? (Integer)value : 0);
+}
+/*------------------------------------------------------------------------------
+
+@name       getRefMgr - get ref manager
+                                                                              */
+                                                                             /**
+            Get ref manager.
+
+            Note, the useRef hook is supported for research purposes only, since
+            its functionality can be readily replaced in ReactJava by use of a
+            declared component instance variable.
+
+@return     ref manager
+
+@history    Thu Jul 25, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected RefMgr getRefMgr()
+{
+   if (refMgr == null)
+   {
+      refMgr = new RefMgr();
+   }
+   return(refMgr);
+}
+/*------------------------------------------------------------------------------
+
+@name       getRefString - get ref string value
+                                                                              */
+                                                                             /**
+            Get ref string value.
+
+            Note, the useRef hook is supported for research purposes only, since
+            its functionality can be readily replaced in ReactJava by use of a
+            declared component instance variable.
+
+@return     ref string value
+
+@history    Thu Jul 25, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected String getRefString(
+   String key)
+{
+   return((String)getRef(key));
 }
 /*------------------------------------------------------------------------------
 
@@ -675,6 +803,32 @@ protected void setId(
 }
 /*------------------------------------------------------------------------------
 
+@name       setRef - set ref value
+                                                                              */
+                                                                             /**
+            Set ref value.
+
+            Note, the useRef hook is supported for research purposes only, since
+            its functionality can be readily replaced in ReactJava by use of a
+            declared component instance variable.
+
+@param      key      key
+@param      value    value
+
+@history    Thu Jul 25, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public void setRef(
+   String key,
+   Object value)
+{
+   getRefMgr().setRef(key, value);
+}
+/*------------------------------------------------------------------------------
+
 @name       setState - set theme
                                                                               */
                                                                              /**
@@ -747,6 +901,34 @@ protected void useEffect(
 }
 /*------------------------------------------------------------------------------
 
+@name       useRef - initialize ref variables
+                                                                              */
+                                                                             /**
+            Initialize ref variables. Each attribute of the specified
+            ComponentRef contains a name (key) and an associated initial
+            value. This ReactJava implementation splits each attribute into a
+            separate React useRef hook.
+
+            Note, the useRef hook is supported for research purposes only, since
+            its functionality can be readily replaced in ReactJava by use of a
+            declared component instance variable.
+
+@param      key      key
+@param      value    value
+
+@history    Thu Jul 25, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected void useRef(
+   String key,
+   Object value)
+{
+   getRefMgr().useRef(key, value);
+}
+/*------------------------------------------------------------------------------
+
 @name       useState - initialize state variables
                                                                               */
                                                                              /**
@@ -814,9 +996,131 @@ public static String resolve(
 }//====================================// end CompileTime ====================//
 /*==============================================================================
 
-name:       StateMgr - properties
+name:       RefMgr - ref manager
 
-purpose:    JsInterop definition for access to javascript onLoad handler
+purpose:    React useRef hook support.
+
+            Note, the useRef hook is supported for research purposes only, since
+            its functionality can be readily replaced in ReactJava by use of a
+            declared component instance variable.
+
+history:    Thu Jul 25, 2019 10:30:00 (Giavaneers - LBM) created
+
+notes:
+
+==============================================================================*/
+public static class RefMgr
+{
+                                       // constants ------------------------- //
+                                       // (none)                              //
+                                       // class variables ------------------- //
+                                       // (none)                              //
+                                       // public instance variables --------- //
+                                       // (none)                              //
+                                       // protected instance variables ------ //
+                                       // map of ref variables                //
+protected Map<String,JsArrayLike> ref;
+
+/*------------------------------------------------------------------------------
+
+@name       RefMgr - constructor
+                                                                              */
+                                                                             /**
+            Constructor.
+
+@history    Thu Jul 25, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public RefMgr()
+{
+}
+/*------------------------------------------------------------------------------
+
+@name       getRef - get ref element value
+                                                                              */
+                                                                             /**
+            Get ref element value.
+
+@return     ref element value
+
+@history    Thu Jul 25, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected Object getRef(
+   String key)
+{
+   return(ref != null ? Js.asPropertyMap(ref.get(key)).get("current") : null);
+}
+/*------------------------------------------------------------------------------
+
+@name       setRef - set ref
+                                                                              */
+                                                                             /**
+            Set ref.
+
+@param      key      ref variable name
+@param      value    new ref variable value
+
+@history    Thu Jul 25, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected void setRef(
+   String key,
+   Object value)
+{
+   JsPropertyMap<Object> refVariable = Js.asPropertyMap(ref.get(key));
+   if (refVariable == null)
+   {
+      throw new IllegalStateException(
+         "useRef() with key=" + key + " must be invoked before setRef()");
+   }
+
+   refVariable.set("current", value);
+}
+/*------------------------------------------------------------------------------
+
+@name       useRef - initialize ref variable
+                                                                              */
+                                                                             /**
+            Initialize ref variable. Each attribute of the specified
+            ComponentRef contains a name (key) and an associated initial
+            value. This ReactJava implementation splits each attribute into a
+            separate React ref hook.
+
+@param      key      ref variable name
+@param      value    new ref variable value
+
+@history    Thu Jul 25, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected void useRef(
+   String key,
+   Object value)
+{
+   if (ref == null)
+   {
+      ref = new HashMap<>();
+   }
+                                       // React.useRef() invocation may not   //
+                                       // be in a conditional                 //
+   ref.put(key, React.useRef(value));
+}
+}//====================================// end RefMgr =========================//
+/*==============================================================================
+
+name:       StateMgr - state manager
+
+purpose:    React useState hook support.
 
 history:    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
 

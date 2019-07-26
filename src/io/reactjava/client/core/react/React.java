@@ -143,6 +143,23 @@ public static native void useEffect(
 
 /*------------------------------------------------------------------------------
 
+@name       useRef - useRef hook
+                                                                              */
+                                                                             /**
+            useRef hook.
+
+@param      value       initial ref value
+
+@history    Thu Jul 25, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static native JsArray useRef(
+   Object value);
+
+/*------------------------------------------------------------------------------
+
 @name       useState - useState hook
                                                                               */
                                                                              /**
