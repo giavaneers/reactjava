@@ -30,8 +30,7 @@ import java.util.Map;
 import jsinterop.base.Js;
 import jsinterop.base.JsArrayLike;
 import jsinterop.base.JsPropertyMap;
-
-// Component ==========================//
+                                       // Component ==========================//
 public abstract class Component<P extends Properties>
 {
                                        // class constants --------------------//
