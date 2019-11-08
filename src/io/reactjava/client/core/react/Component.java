@@ -16,9 +16,6 @@ notes:
 package io.reactjava.client.core.react;
                                        // imports --------------------------- //
 import com.giavaneers.util.gwt.Logger;
-import elemental2.core.Function;
-import elemental2.core.JsArray;
-import elemental2.core.JsObject;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.Element;
 import elemental2.dom.HTMLElement;
@@ -163,13 +160,33 @@ public static Component forElement(
    HTMLElement htmlElement = (HTMLElement)element;
 
    Component component =
-      htmlElement.id != null ? getComponentById().get(htmlElement.id) : null;
+      htmlElement.id != null ? getComponentByIdMap().get(htmlElement.id) : null;
 
    return(component);
 }
 /*------------------------------------------------------------------------------
 
-@name       getComponentById - get map of component by id
+@name       forId - get component by specified id
+                                                                              */
+                                                                             /**
+            Get component by specified id.
+
+@return     component by specified id or null if not found
+
+@history    Fri Nov 08, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static Component forId(
+   String id)
+{
+   return(getComponentByIdMap().get(id));
+}
+/*------------------------------------------------------------------------------
+
+@name       getComponentByIdMap - get map of component by id
                                                                               */
                                                                              /**
             Get map of component by id.
@@ -182,7 +199,7 @@ public static Component forElement(
 
                                                                               */
 //------------------------------------------------------------------------------
-private static Map<String,Component> getComponentById()
+public static Map<String,Component> getComponentByIdMap()
 {
    if (componentById == null)
    {
@@ -646,7 +663,7 @@ public P initialize(
    String id = this.componentProperties.getString("id");
    if (id != null)
    {
-      getComponentById().put(id, this);
+      getComponentByIdMap().put(id, this);
    }
 
    initConfiguration();
@@ -792,12 +809,12 @@ protected void setId(
    {
       if (current != null)
       {
-         getComponentById().remove(current);
+         getComponentByIdMap().remove(current);
 
       }
                                        // don't know why set() won't work here//
       componentProperties = (P)Properties.with(componentProperties, "id", id);
-      getComponentById().put(id, this);
+      getComponentByIdMap().put(id, this);
    }
 }
 /*------------------------------------------------------------------------------

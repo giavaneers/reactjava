@@ -71,7 +71,10 @@ public class JavascriptBundler
                                        // class constants --------------------//
 public static final boolean kSRCCFG_NODE_MODULES_IN_PROJECT   = true;
 public static final boolean kSRCCFG_PROJECT_TEMPLATE_RESOURCE = true;
-public static final boolean kSRCCFG_REACT_NATIVE_ALWAYS       = true;
+
+                                       // react-native support needs debug    //
+                                       // (LBM 191012)                        //
+public static final boolean kSRCCFG_REACT_NATIVE_ALWAYS       = false;
 
 public static final String kPROJECT_TEMPLATE_NAME =
    "ProjectTemplate";
