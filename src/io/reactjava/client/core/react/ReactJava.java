@@ -194,7 +194,11 @@ public static Map<String,String> clearInjectedStylesheets()
    Map<String,String> stylesheets = getInjectedStylesheets();
    for (String styleId : stylesheets.values())
    {
-      DomGlobal.document.getElementById(styleId).remove();
+      Element stylesheet = DomGlobal.document.getElementById(styleId);
+      if (stylesheet != null)
+      {
+         stylesheet.remove();
+      }
    }
 
    stylesheets.clear();
