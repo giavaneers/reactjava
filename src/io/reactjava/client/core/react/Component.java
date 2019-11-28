@@ -1210,14 +1210,17 @@ protected void setState(
    String key,
    Object value)
 {
-   JsArrayLike stateVariable = state.get(key);
-   if (stateVariable == null)
+   if (state != null)
    {
-      throw new IllegalStateException(
-         "useState() with key=" + key + " must be invoked before setState()");
-   }
+      JsArrayLike stateVariable = state.get(key);
+      if (stateVariable == null)
+      {
+         throw new IllegalStateException(
+            "useState() with key=" + key + " must be invoked before setState()");
+      }
 
-   setStateNative(stateVariable, value);
+      setStateNative(stateVariable, value);
+   }
 }
 /*------------------------------------------------------------------------------
 
