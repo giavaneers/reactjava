@@ -294,113 +294,6 @@ public IConfiguration getConfiguration()
 }
 /*------------------------------------------------------------------------------
 
-@name       initNative - get the Database service for the default app
-                                                                              */
-                                                                             /**
-            Get the Database service for the default app
-
-@param      defaultDatabase    default authentication provider
-
-@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public final static native void initNative(
-   Database defaultDatabase)
-   throws   Exception
-/*-{
-      var email    = 'giavaneersdeveloper@gmail.com';
-      var password = '1545 1/2 Pacific Avenue';
-      try
-      {
-         var promise;
-         promise = defaultDatabase.createUserWithEmailAndPassword(email, password)
-            .then(function(user)
-            {
-                                       // promise succeeded                   //
-               promise = defaultDatabase.signOut();
-               return(promise);
-            })
-            .then(function()
-            {
-                                       // promise succeeded                   //
-               promise = defaultDatabase.signInWithEmailAndPassword(email, password);
-               return(promise);
-            })
-            .then(function(user)
-            {
-                                       // promise succeeded                   //
-               promise = defaultDatabase.signOut();
-               return(promise);
-            })
-            .then(function(user)
-            {
-                                       // promise succeeded                   //
-               console.log("Successful!");
-            },
-            function(error)
-            {
-               switch(error.code)
-               {
-                  case 'auth/email-already-in-use':
-                  {
-                                       // createUserWithEmailAndPassword()    //
-                     $wnd.console.log(error.message);
-                     break;
-                  }
-                  case 'auth/operation-not-allowed':
-                  {
-                                       // createUserWithEmailAndPassword()    //
-                     $wnd.console.log(error.message);
-                     break;
-                  }
-                  case 'auth/weak-password':
-                  {
-                                       // createUserWithEmailAndPassword()    //
-                     $wnd.console.log(error.message);
-                     break;
-                  }
-                  case 'auth/invalid-email':
-                  {
-                                       // createUserWithEmailAndPassword()    //
-                                       // signInWithEmailAndPassword()        //
-                     $wnd.console.log(error.message);
-                     break;
-                  }
-                  case 'auth/user-disabled':
-                  {
-                                       // signInWithEmailAndPassword()        //
-                     $wnd.console.log(error.message);
-                     break;
-                  }
-                  case 'auth/user-not-found':
-                  {
-                                       // signInWithEmailAndPassword()        //
-                     $wnd.console.log(error.message);
-                     break;
-                  }
-                  case 'auth/wrong-password':
-                  {
-                                       // signInWithEmailAndPassword()        //
-                     $wnd.console.log(error.message);
-                     break;
-                  }
-                  default:
-                  {
-                     $wnd.console.log(error.message);
-                  }
-               }
-            });
-      }
-      catch (err)
-      {
-         $wnd.console.log("Could not get the Database service for the default app");
-         $wnd.console.log(err.message);
-      }
-}-*/;
-/*------------------------------------------------------------------------------
-
 @name       props - get properties
                                                                               */
                                                                              /**
@@ -559,8 +452,7 @@ public static class Database
 
 @return     firebase.Database
 
-@param      email       email
-@param      password    password
+@param      ref         reference path
 
 @example
             firebase.auth().createUserWithEmailAndPassword(email, password)
@@ -583,7 +475,7 @@ public static class Database
 //------------------------------------------------------------------------------
 @JsMethod
 public native Reference ref(
-   String String);
+   String ref);
 
 }//====================================// Database ===========================//
 /*==============================================================================
