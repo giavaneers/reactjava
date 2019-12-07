@@ -1,10 +1,10 @@
 /*==============================================================================
 
-name:       FirebaseAuthenticationService.java
+name:       FirebaseDatabaseService.java
 
-purpose:    Firebase Authentication Service.
+purpose:    Firebase Database Service.
 
-history:    Mon Aug 28, 2017 10:30:00 (Giavaneers - LBM) created
+history:    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
 
 notes:      '-generateJsInteropExports' must be included in Dev Mode parameters
             setting of GWT debug configuration for java methods to be
@@ -16,15 +16,16 @@ notes:      '-generateJsInteropExports' must be included in Dev Mode parameters
 
 ==============================================================================*/
                                        // package --------------------------- //
-package io.reactjava.client.core.providers.auth.firebase;
+package io.reactjava.client.core.providers.database.firebase;
 
                                        // imports --------------------------- //
 import com.giavaneers.util.gwt.Logger;
 import com.google.gwt.core.client.JavaScriptObject;
 import elemental2.promise.Promise;
-import io.reactjava.client.core.providers.auth.IAuthenticationService;
-import io.reactjava.client.core.providers.auth.firebase
-         .FirebaseAuthenticationService.Firebase.Auth;
+import io.reactjava.client.core.providers.database.IDatabaseService;
+import io.reactjava.client.core.providers.database.firebase.FirebaseDatabaseService.Firebase.DataSnapshot;
+import io.reactjava.client.core.providers.database.firebase.FirebaseDatabaseService.Firebase.Database;
+import io.reactjava.client.core.providers.database.firebase.FirebaseDatabaseService.Firebase.Reference;
 import io.reactjava.client.core.react.Configuration;
 import io.reactjava.client.core.react.IConfiguration;
 import io.reactjava.client.core.react.NativeObject;
@@ -32,21 +33,32 @@ import io.reactjava.client.core.react.Properties;
 import io.reactjava.client.core.rxjs.observable.Observable;
 import io.reactjava.client.core.rxjs.observable.Subscriber;
 import io.reactjava.client.core.react.Utilities;
+import java.util.HashMap;
+import java.util.Map;
 import jsinterop.annotations.JsMethod;
+import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
+import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
-                                       // FirebaseAuthenticationService ======//
+import jsinterop.base.Any;
+                                       // FirebaseDatabaseService ============//
 @JsType                                // export to Javascript                //
-public class FirebaseAuthenticationService implements IAuthenticationService
+public class FirebaseDatabaseService implements IDatabaseService
 {
                                        // class constants --------------------//
 private static final Logger   kLOGGER = Logger.newInstance();
 
-public static final String    kKEY_APP  = "app";
-public static final String    kKEY_AUTH = "auth";
+public static final String    kKEY_APP      = "app";
+public static final String    kKEY_DATABASE = "database";
                                        // class variables ------------------- //
 protected static final String kINJECT_URL =
    "https://www.gstatic.com/firebasejs/7.5.0/firebase.js";
+
+public static final String kEVENT_TYPE_CHILD_ADDED   = "child_added";
+public static final String kEVENT_TYPE_CHILD_CHANGED = "child_changed";
+public static final String kEVENT_TYPE_CHILD_MOVED   = "child_moved";
+public static final String kEVENT_TYPE_CHILD_REMOVED = "child_removed";
+public static final String kEVENT_TYPE_VALUE         = "value";
 
                                        // public instance variables --------- //
                                        // (none)
@@ -56,19 +68,19 @@ protected NativeObject props;            // properties                          
                                        // (none)                              //
 /*------------------------------------------------------------------------------
 
-@name       FirebaseAuthenticationService - constructor
+@name       FirebaseDatabaseService - constructor
                                                                               */
                                                                              /**
             Constructor
 
 @param      props    props
 
-@history    Wed Apr 27, 2016 10:30:00 (Giavaneers - LBM) created
+@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public FirebaseAuthenticationService(
+public FirebaseDatabaseService(
    Properties props)
 {
    this.props = props != null ? props.toNativeObject() : new NativeObject();
@@ -84,7 +96,7 @@ public FirebaseAuthenticationService(
 
 @param      configurationData    configuration data
 
-@history    Sat Oct 21, 2017 10:30:00 (Giavaneers - LBM) created
+@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
@@ -121,7 +133,7 @@ public Observable configure(
 @param      storageBucket        storageBucket
 @param      messagingSenderId    messagingSenderId
 
-@history    Sat Oct 21, 2017 10:30:00 (Giavaneers - LBM) created
+@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
@@ -134,87 +146,78 @@ protected Observable configure(
    String storageBucket,
    String messagingSenderId)
 {
-   Observable<Auth> observable = Observable.create((Subscriber<Auth> subscriber) ->
-   {
-      Utilities.injectScriptOrCSS(
-         getConfiguration(), kINJECT_URL, null,
-         (Object response, Object reqToken) ->
-         {
-            NativeObject config =
-               NativeObject.with(
-                  "apiKey",            apiKey,
-                  "authDomain",        authDomain,
-                  "databaseURL",       databaseURL,
-                  "projectId",         projectId,
-                  "storageBucket",     storageBucket,
-                  "messagingSenderId", messagingSenderId);
+   Observable<Database> observable =
+      Observable.create((Subscriber<Database> subscriber) ->
+      {
+         Utilities.injectScriptOrCSS(
+            getConfiguration(), kINJECT_URL, null,
+            (Object response, Object reqToken) ->
+            {
+               NativeObject config =
+                  NativeObject.with(
+                     "apiKey",            apiKey,
+                     "authDomain",        authDomain,
+                     "databaseURL",       databaseURL,
+                     "projectId",         projectId,
+                     "storageBucket",     storageBucket,
+                     "messagingSenderId", messagingSenderId);
 
-            Object rsp;
-            try
-            {
-               props().set(kKEY_APP,  Firebase.initializeApp(config));
-               props().set(kKEY_AUTH, Firebase.auth());
-               rsp  = getAuth();
-            }
-            catch(Exception e)
-            {
-               kLOGGER.logError(e);
-               rsp = e;
-            }
+               Object rsp;
+               try
+               {
+                  props().set(kKEY_APP,      Firebase.initializeApp(config));
+                  props().set(kKEY_DATABASE, Firebase.database());
+                  rsp  = getDatabase();
+               }
+               catch(Exception e)
+               {
+                  kLOGGER.logError(e);
+                  rsp = e;
+               }
 
-            if (rsp instanceof Throwable)
-            {
-               subscriber.error((Throwable)rsp);
-            }
-            else
-            {
-               subscriber.next((Auth)rsp);
-               subscriber.complete();
-            }
-         });
+               if (rsp instanceof Throwable)
+               {
+                  subscriber.error((Throwable)rsp);
+               }
+               else
+               {
+                  subscriber.next((Database)rsp);
+                  subscriber.complete();
+               }
+            });
 
-      return(subscriber);
-   });
+         return(subscriber);
+      });
    return(observable);
 }
 /*------------------------------------------------------------------------------
 
-@name       createUserWithEmailAndPassword  - create user with email and pswd
+@name       get  - get data from specified path
                                                                               */
                                                                              /**
-            Creates a new user account associated with the specified email
-            address and password.
+            Get data from the specified reference path
 
-            On successful creation of the user account, this user will also be
-            signed in to the application.
+@return     Observable
 
-            User account creation can fail if the account already exists or the
-            password is invalid.
+@param      reference      record path
 
-@return     void
-
-@param      email       email
-@param      password    password
-
-@history    Thu Sep 7, 2017 08:46:23 (LBM) created.
+@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public Observable<String> createUserWithEmailAndPassword(
-   String email,
-   String password)
+public Observable<Map<String,Object>> get(
+   String reference)
 {
-   Observable<String> observable = Observable.create(
-      (Subscriber<String> subscriber) ->
+   Observable<Map<String,Object>> observable =
+      Observable.create((Subscriber<Map<String,Object>> subscriber) ->
       {
-         Promise promise =
-            getAuth().createUserWithEmailAndPassword(email, password);
-
+         Reference ref     = getDatabase().ref(reference);
+         Promise   promise = ref.once(kEVENT_TYPE_VALUE);
          promise.then(
-            user ->
+            data ->
             {
-               subscriber.next(user.toString());
+               subscriber.next(((DataSnapshot)data).toMap());
                subscriber.complete();
                return(promise);
             },
@@ -237,7 +240,7 @@ public Observable<String> createUserWithEmailAndPassword(
 
 @return     app
 
-@history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
+@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
@@ -248,21 +251,21 @@ public JavaScriptObject getApp()
 }
 /*------------------------------------------------------------------------------
 
-@name       getAuth - get auth
+@name       getDatabase - get database
                                                                               */
                                                                              /**
-            Get auth.
+            Get database.
 
-@return     auth
+@return     database
 
-@history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
+@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public Auth getAuth()
+public Database getDatabase()
 {
-   return((Auth) props().get(kKEY_AUTH));
+   return((Database)props().get(kKEY_DATABASE));
 }
 /*------------------------------------------------------------------------------
 
@@ -273,7 +276,7 @@ public Auth getAuth()
 
 @return     application configuration.
 
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
@@ -291,44 +294,44 @@ public IConfiguration getConfiguration()
 }
 /*------------------------------------------------------------------------------
 
-@name       initNative - get the Auth service for the default app
+@name       initNative - get the Database service for the default app
                                                                               */
                                                                              /**
-            Get the Auth service for the default app
+            Get the Database service for the default app
 
-@param      defaultAuth    default authentication provider
+@param      defaultDatabase    default authentication provider
 
-@history    Sat Oct 21, 2017 10:30:00 (Giavaneers - LBM) created
+@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
 public final static native void initNative(
-   Auth   defaultAuth)
-   throws Exception
+   Database defaultDatabase)
+   throws   Exception
 /*-{
       var email    = 'giavaneersdeveloper@gmail.com';
       var password = '1545 1/2 Pacific Avenue';
       try
       {
          var promise;
-         promise = defaultAuth.createUserWithEmailAndPassword(email, password)
+         promise = defaultDatabase.createUserWithEmailAndPassword(email, password)
             .then(function(user)
             {
                                        // promise succeeded                   //
-               promise = defaultAuth.signOut();
+               promise = defaultDatabase.signOut();
                return(promise);
             })
             .then(function()
             {
                                        // promise succeeded                   //
-               promise = defaultAuth.signInWithEmailAndPassword(email, password);
+               promise = defaultDatabase.signInWithEmailAndPassword(email, password);
                return(promise);
             })
             .then(function(user)
             {
                                        // promise succeeded                   //
-               promise = defaultAuth.signOut();
+               promise = defaultDatabase.signOut();
                return(promise);
             })
             .then(function(user)
@@ -392,7 +395,7 @@ public final static native void initNative(
       }
       catch (err)
       {
-         $wnd.console.log("Could not get the Auth service for the default app");
+         $wnd.console.log("Could not get the Database service for the default app");
          $wnd.console.log(err.message);
       }
 }-*/;
@@ -405,7 +408,7 @@ public final static native void initNative(
 
 @return     properties
 
-@history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
+@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
@@ -420,72 +423,34 @@ public NativeObject props()
 }
 /*------------------------------------------------------------------------------
 
-@name       signInWithEmailAndPassword - sign in with email and password
+@name       put  - put data to specified path
                                                                               */
                                                                              /**
-            Asynchronously signs in using an email and password.
+            Put the specified data to the specified reference path
 
-            Fails with an error if the email address and password do not match.
+@return     Observable
 
-@return     void
+@param      reference   record path
+@param      value       data
 
-@param      email       email
-@param      password    password
-
-@history    Sat Oct 21, 2017 10:30:00 (Giavaneers - LBM) created
+@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public Observable<String> signInWithEmailAndPassword(
-   String email,
-   String password)
+public Observable<String> put(
+   String             reference,
+   Map<String,String> value)
 {
-   Observable<String> observable = Observable.create(
-      (Subscriber<String> subscriber) ->
+   Observable<String> observable =
+      Observable.create((Subscriber<String> subscriber) ->
       {
-         Promise promise = getAuth().signInWithEmailAndPassword(email, password);
-         promise.then(
-            user ->
-            {
-               subscriber.next(user.toString());
-               subscriber.complete();
-               return(promise);
-            },
-            error ->
-            {
-               subscriber.error(error);
-               return(promise);
-            });
-
-         return(subscriber);
-      });
-   return(observable);
-}
-/*------------------------------------------------------------------------------
-
-@name       signOut - sign out
-                                                                              */
-                                                                             /**
-            Signs out the current user.
-
-@return     non-null firebase.Promise containing void
-
-@history    Sat Oct 21, 2017 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public Observable<String> signOut()
-{
-   Observable<String> observable = Observable.create(
-      (Subscriber<String> subscriber) ->
-      {
-         Promise promise = getAuth().signOut();
+         Reference ref     = getDatabase().ref(reference);
+         Promise   promise = ref.set(NativeObject.with(value));
          promise.then(
             result ->
             {
-               subscriber.next(result.toString());
+               subscriber.next(result != null ? result.toString() : null);
                subscriber.complete();
                return(promise);
             },
@@ -498,47 +463,6 @@ public Observable<String> signOut()
          return(subscriber);
       });
    return(observable);
-}
-/*------------------------------------------------------------------------------
-
-@name       unitTest - unit test
-                                                                              */
-                                                                             /**
-            Unit test for either the callback or promise interface.
-
-@history    Sat Oct 21, 2017 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public void unitTest()
-{
-   String  email    = "giavaneersdeveloper@gmail.com";
-   String  password = "1545 1/2 Pacific Avenue";
-
-   createUserWithEmailAndPassword(email, password)
-      .subscribe(
-         user ->
-         {
-            signOut().subscribe(
-               result ->
-               {
-                  signInWithEmailAndPassword(email, password)
-                  .subscribe(
-                     userNew ->
-                     {
-                        signOut().subscribe(
-                           resultNew ->
-                           {
-                              kLOGGER.logInfo("Success!");
-                           });
-                     });
-               });
-         },
-         error ->
-         {
-            kLOGGER.logError((Throwable)error);
-         });
 }
 /*==============================================================================
 
@@ -546,7 +470,7 @@ name:       Firebase - core compatible Firebase
 
 purpose:    GWT compatible Firebase
 
-history:    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
+history:    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
 
 notes:
 
@@ -568,20 +492,20 @@ public static class Firebase
 
 /*------------------------------------------------------------------------------
 
-@name       auth - get the Auth service for the default app
+@name       database - get the Database service for the default app
                                                                               */
                                                                              /**
-            Get the Auth service for the default app
+            Get the Database service for the default app
 
-@return     Auth service for the default app
+@return     Database service for the default app
 
-@history    Sat Oct 21, 2017 10:30:00 (Giavaneers - LBM) created
+@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
 @JsMethod
-public static native Auth auth() throws Exception;
+public static native Database database() throws Exception;
 
 /*------------------------------------------------------------------------------
 
@@ -592,7 +516,7 @@ public static native Auth auth() throws Exception;
 
 @param      config      configuration
 
-@history    Sat Oct 21, 2017 10:30:00 (Giavaneers - LBM) created
+@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
@@ -602,18 +526,18 @@ public static native JavaScriptObject initializeApp(Object config);
 
 /*==============================================================================
 
-name:       Auth - core compatible Firebase Auth service
+name:       Database - core compatible Firebase Database service
 
-purpose:    GWT compatible Firebase Auth service
+purpose:    GWT compatible Firebase Database service
 
-history:    Sat Oct 21, 2017 10:30:00 (Giavaneers - LBM) created
+history:    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
 
 notes:
 
 ==============================================================================*/
 @jsinterop.annotations.JsType(
-   isNative = true, namespace = "firebase.auth", name = "Auth")
-public static class Auth
+   isNative = true, namespace = "firebase.database", name = "Database")
+public static class Database
 {
                                        // constants ------------------------- //
                                        // (none)                              //
@@ -628,39 +552,12 @@ public static class Auth
 
 /*------------------------------------------------------------------------------
 
-@name       createUserWithEmailAndPassword  - create user with email and pswd
+@name       ref  - get Reference for specified path
                                                                               */
                                                                              /**
-            Creates a new user account associated with the specified email
-            address and password.
+            Get Reference for specified path.
 
-            On successful creation of the user account, this user will also be
-            signed in to the application.
-
-            User account creation can fail if the account already exists or the
-            password is invalid.
-
-            Note: The email address acts as a unique identifier for the user and
-            enables an email-based password reset. This function will create a
-            new user account and set the initial user password.
-
-            Error Codes:
-               auth/email-already-in-use
-               Thrown if there already exists an account with the given email
-               address.
-
-               auth/invalid-email
-               Thrown if the email address is not valid.
-
-               auth/operation-not-allowed
-               Thrown if email/password accounts are not enabled. Enable
-               email/password accounts in the Firebase Console, under the Auth
-               tab.
-
-               auth/weak-password
-               Thrown if the password is not strong enough.
-
-@return     firebase.Promise containing non-null firebase.User
+@return     firebase.Database
 
 @param      email       email
 @param      password    password
@@ -679,91 +576,156 @@ public static class Auth
               console.log(error);
             });
 
-@history    Sat Oct 21, 2017 10:30:00 (Giavaneers - LBM) created
+@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
 @JsMethod
-public native Promise createUserWithEmailAndPassword(
-   String email,
-   String password);
+public native Reference ref(
+   String String);
+
+}//====================================// Database ===========================//
+/*==============================================================================
+
+name:       DataSnapshot - database data
+
+purpose:    database data
+
+history:    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
+
+notes:
+
+==============================================================================*/
+@jsinterop.annotations.JsType(
+   isNative = true, namespace = "firebase.database", name = "DataSnapshot")
+public static class DataSnapshot
+{
+                                       // constants ------------------------- //
+                                       // (none)                              //
+                                       // class variables ------------------- //
+                                       // (none)                              //
+                                       // public instance variables --------- //
+@JsProperty
+public String    key;                  // native key                          //
+@JsProperty
+public Reference ref;                  // native reference                    //
+                                       // protected instance variables ------ //
+                                       // (none)                              //
+                                       // private instance variables -------- //
+                                       // (none)                              //
 
 /*------------------------------------------------------------------------------
 
-@name       signInWithEmailAndPassword - sign in with email and password
+@name       toMap - snapshot to map
                                                                               */
                                                                              /**
-            Asynchronously signs in using an email and password.
+            Get Map representation of snapshot
 
-            Fails with an error if the email address and password do not match.
+@return     Map representation of snapshot.
 
-            Note: The user's password is NOT the password used to access the
-            user's email account. The email address serves as a unique
-            identifier for the user, and the password is used to access the
-            user's account in your Firebase project.
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
-            Error Codes:
-               auth/invalid-email
-               Thrown if the email address is not valid.
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+@JsOverlay
+public final Map<String,Object> toMap()
+{
+   Map<String,Object> map = null;
+   String             key = this.key;
+   Any                val = val();
 
-               auth/user-disabled
-               Thrown if the user corresponding to the given email has been
-               disabled.
+   if (val != null)
+   {
+      map = new HashMap<>();
+      map.put(key, val);
+   }
+   return(map);
+}
+/*------------------------------------------------------------------------------
 
-               auth/user-not-found
-               Thrown if there is no user corresponding to the given email.
+@name       val - get snapshot value
+                                                                              */
+                                                                             /**
+            Get snapshot value.
 
-               auth/wrong-password
-               Thrown if the password is invalid for the given email, or the
-               account corresponding to the email does not have a password set.
+@return     Promise
 
-@return     firebase.Promise containing non-null firebase.User
-
-@param      email       email
-@param      password    password
-
-@example
-            firebase.auth().signInWithEmailAndPassword(email, password)
-                .catch(function(error) {
-              // Handle Errors here.
-              var errorCode = error.code;
-              var errorMessage = error.message;
-              if (errorCode === 'auth/wrong-password') {
-                alert('Wrong password.');
-              } else {
-                alert(errorMessage);
-              }
-              console.log(error);
-            });
-
-@history    Sat Oct 21, 2017 10:30:00 (Giavaneers - LBM) created
+@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
 @JsMethod
-public native Promise signInWithEmailAndPassword(
-   String email,
-   String password);
+public native Any val();
+
+}//====================================// DataSnapshot =======================//
+/*==============================================================================
+
+name:       Reference - core compatible Firebase Database service
+
+purpose:    GWT compatible Firebase Database service
+
+history:    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
+
+notes:
+
+==============================================================================*/
+@jsinterop.annotations.JsType(
+   isNative = true, namespace = "firebase.database", name = "Reference")
+public static class Reference
+{
+                                       // constants ------------------------- //
+                                       // (none)                              //
+                                       // class variables ------------------- //
+                                       // public instance variables --------- //
+                                       // (none)                              //
+                                       // protected instance variables ------ //
+                                       // (none)                              //
+                                       // private instance variables -------- //
+                                       // (none)                              //
 
 /*------------------------------------------------------------------------------
 
-@name       signOut - sign out
+@name       once - read data from specified reference
                                                                               */
                                                                              /**
-            Signs out the current user.
+            Read data from specified reference.
 
-@return     non-null firebase.Promise containing void
+@return     Promise
 
-@history    Sat Oct 21, 2017 10:30:00 (Giavaneers - LBM) created
+@param      eventType      event type
+
+@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
 @JsMethod
-public native Promise signOut();
+public native Promise once(
+   String eventType);
 
-}//====================================// Auth ===============================//
+/*------------------------------------------------------------------------------
+
+@name       set - write data to specified reference
+                                                                              */
+                                                                             /**
+            Write data to specified reference.
+
+@return     Promise
+
+@param      value       data
+
+@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+@JsMethod
+public native Promise set(
+   NativeObject value);
+
+}//====================================// Reference ==========================//
 }//====================================// Firebase ===========================//
-}//====================================// end FirebaseAuthenticationService ==//
+}//====================================// end FirebaseDatabaseService ========//

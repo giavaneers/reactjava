@@ -48,6 +48,13 @@ static
       });
 
    kFACTORY_MAP.put(
+      "io.reactjava.client.core.providers.database.firebase.FirebaseDatabaseService",
+      (Function<Properties,IProvider>)(props) ->
+      {
+         return(new io.reactjava.client.core.providers.database.firebase.FirebaseDatabaseService(props));
+      });
+
+   kFACTORY_MAP.put(
       "io.reactjava.client.core.providers.http.HttpClientBase",
       (Function<Properties,IProvider>)(props) ->
       {

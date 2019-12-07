@@ -16,6 +16,7 @@ notes:
 package io.reactjava.client.core.react;
                                        // imports --------------------------- //
 import elemental2.core.JsObject;
+import java.util.Map;
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;
@@ -298,6 +299,20 @@ public final NativeObject set(
                   NativeObject.with(
                      template, "text", "MyText", "callback", MyCallbackFcn);
 
+             or to create a Native object with properties of a Map adding
+             new/overriding properties::
+
+               Map template =
+                  new HashMap()
+                  {{
+                     put("name",    "MyName");
+                     put("callback", OrigCallbackFcn);
+                  }};
+
+               NativeObject myProperties =
+                  NativeObject.with(
+                     template, "text", "MyText", "callback", MyCallbackFcn);
+
 
 @return     An instance of NativeObject if successful.
 
@@ -312,7 +327,19 @@ public static NativeObject with(Object... args)
    int i = 0;
    NativeObject o = new NativeObject();
 
-   if (args[0] instanceof NativeObject)
+   if (args[0] instanceof Map)
+   {
+                                       // must be first test since            //
+                                       // Map instanceof NativeObject resolves//
+                                       // to true                             //
+      Map template = (Map)args[0];
+      for (Object key : template.keySet())
+      {
+         o.set(key.toString(), template.get(key));
+      }
+      i = 1;
+   }
+   else if (args[0] instanceof NativeObject)
    {
       NativeObject        template = (NativeObject)args[0];
       JsForEachCallbackFn callback = new JsForEachCallbackFn()

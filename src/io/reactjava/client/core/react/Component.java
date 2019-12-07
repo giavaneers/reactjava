@@ -21,9 +21,12 @@ import elemental2.dom.Element;
 import elemental2.dom.HTMLElement;
 import elemental2.dom.Node;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import jsinterop.base.Js;
 import jsinterop.base.JsArrayLike;
 import jsinterop.base.JsPropertyMap;
@@ -1188,14 +1191,83 @@ public StateMgr()
 protected Object getState(
    String key)
 {
-   return(state != null ? state.get(key).getAt(0) : null);
+   Object copy = state != null ? state.get(key).getAt(0) : null;
+   if (copy != null)
+   {
+      copy = makeStateValueCopy(copy);
+   }
+
+   return(copy);
+}
+/*------------------------------------------------------------------------------
+
+@name       makeStateValueCopy - make copy of state element value
+                                                                              */
+                                                                             /**
+            Make copy of state element value.
+
+@return     copy of state element value
+
+@history    Wed Dec 04, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static Object makeStateValueCopy(
+   Object value)
+{
+   Object copy = value;
+   Class  clas = value.getClass();
+   try
+   {
+      if (clas.isArray())
+      {
+         List list = Arrays.asList(value);
+         copy = list.toArray();
+      }
+      else if (value instanceof Map)
+      {
+         copy = new HashMap((Map)value);
+      }
+      else if (value instanceof List)
+      {
+         copy = new ArrayList((List)value);
+      }
+      else if (value instanceof Set)
+      {
+         copy = new HashSet((Set)value);
+      }
+   }
+   catch(Exception e)
+   {
+      kLOGGER.logError(e);
+   }
+
+   return(copy);
 }
 /*------------------------------------------------------------------------------
 
 @name       setState - set state
                                                                               */
                                                                              /**
-            Set state.
+            Set state. React determines equivalence of new and old Object values
+            generally by whether both refer to the same instance, rather than
+            whether they are equivalent. As a consequence, for example, if the
+            current state variable is an int array whose first element has
+            value a, and the first element is changed to value b before being
+            set as the new state variable, React determines there has been no
+            state change since the value is the same array despite its contents
+            have changed. Similarly, for example, if the new state value is a
+            different int array of the same length and containing the same
+            content, React determines there has been a state change because
+            reference is to two different arrays, even though the arrays are
+            equivalent.
+
+            ReactJava uses a test of equivalence instead. Accordingly, unlike
+            React, ReactJava treats the first case as a state change and the
+            second case as no state change.
+
 
 @param      key      state variable name
 @param      value    new state variable value
@@ -1218,8 +1290,11 @@ protected void setState(
          throw new IllegalStateException(
             "useState() with key=" + key + " must be invoked before setState()");
       }
-
-      setStateNative(stateVariable, value);
+      Object current = getState(key);
+      if (current == null || !current.equals(value))
+      {
+         setStateNative(stateVariable, makeStateValueCopy(value));
+      }
    }
 }
 /*------------------------------------------------------------------------------
@@ -1241,6 +1316,11 @@ protected void setState(
 //------------------------------------------------------------------------------
 public native void setStateNative(JsArrayLike stateVariable, Object value)
 /*-{
+                                       // the second element of the           //
+                                       // stateVariable array is a fcn that   //
+                                       // enqueues the state variable change  //
+                                       // with the new value being passed to  //
+                                       // the fcn as an argument              //
    stateVariable[1](value);
 }-*/;
 /*------------------------------------------------------------------------------

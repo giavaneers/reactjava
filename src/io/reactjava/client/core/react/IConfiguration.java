@@ -17,6 +17,8 @@ package io.reactjava.client.core.react;
                                        // imports --------------------------- //
 import io.reactjava.client.core.providers.auth.IAuthenticationService;
 import io.reactjava.client.core.providers.auth.firebase.FirebaseAuthenticationService;
+import io.reactjava.client.core.providers.database.IDatabaseService;
+import io.reactjava.client.core.providers.database.firebase.FirebaseDatabaseService;
 import io.reactjava.client.core.providers.http.HttpClient;
 import io.reactjava.client.core.providers.http.IHttpClientBase;
 import io.reactjava.client.core.providers.platform.IPlatform;
@@ -93,6 +95,9 @@ Map<String,String> kPROVIDERS_DEFAULT =
       put(
          IAuthenticationService.class.getName(),
          FirebaseAuthenticationService.class.getName());
+      put(
+         IDatabaseService.class.getName(),
+         FirebaseDatabaseService.class.getName());
       put(
          IPlatform.class.getName(),
          PlatformWeb.class.getName());

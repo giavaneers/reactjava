@@ -903,14 +903,17 @@ public static void removeComponentStyles(
          Element style = DomGlobal.document.getElementById(styleId);
          if (style != null)
          {
-            kLOGGER.logInfo(
-               "ReactJava.removeComponentStyles(): removing styleId=" + styleId);
-
+            if (false)
+            {
+               kLOGGER.logInfo(
+                  "ReactJava.removeComponentStyles(): removing styleId="
+                     + styleId);
+            }
             style.remove();
          }
          else
          {
-            kLOGGER.logInfo(
+            kLOGGER.logWarning(
                "ReactJava.removeComponentStyles(): cannot find styleId=" + styleId);
          }
       }
