@@ -1218,31 +1218,31 @@ public static Object makeStateValueCopy(
    Object value)
 {
    Object copy = value;
-   Class  clas = value.getClass();
-   try
-   {
-      if (clas.isArray())
-      {
-         List list = Arrays.asList(value);
-         copy = list.toArray();
-      }
-      else if (value instanceof Map)
-      {
-         copy = new HashMap((Map)value);
-      }
-      else if (value instanceof List)
-      {
-         copy = new ArrayList((List)value);
-      }
-      else if (value instanceof Set)
-      {
-         copy = new HashSet((Set)value);
-      }
-   }
-   catch(Exception e)
-   {
-      kLOGGER.logError(e);
-   }
+   //Class  clas = value.getClass();
+   //try
+   //{
+   //   if (clas.isArray())
+   //   {
+   //      List list = Arrays.asList(value);
+   //      copy = list.toArray();
+   //   }
+   //   else if (value instanceof Map)
+   //   {
+   //      copy = new HashMap((Map)value);
+   //   }
+   //   else if (value instanceof List)
+   //   {
+   //      copy = new ArrayList((List)value);
+   //   }
+   //   else if (value instanceof Set)
+   //   {
+   //      copy = new HashSet((Set)value);
+   //   }
+   //}
+   //catch(Exception e)
+   //{
+   //   kLOGGER.logError(e);
+   //}
 
    return(copy);
 }

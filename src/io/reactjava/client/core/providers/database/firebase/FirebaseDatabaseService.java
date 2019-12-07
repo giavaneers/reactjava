@@ -22,10 +22,12 @@ package io.reactjava.client.core.providers.database.firebase;
 import com.giavaneers.util.gwt.Logger;
 import com.google.gwt.core.client.JavaScriptObject;
 import elemental2.promise.Promise;
+import io.reactjava.client.core.providers.auth.firebase.FirebaseAuthenticationService.Firebase;
 import io.reactjava.client.core.providers.database.IDatabaseService;
 import io.reactjava.client.core.providers.database.firebase.FirebaseDatabaseService.Firebase.DataSnapshot;
 import io.reactjava.client.core.providers.database.firebase.FirebaseDatabaseService.Firebase.Database;
 import io.reactjava.client.core.providers.database.firebase.FirebaseDatabaseService.Firebase.Reference;
+import io.reactjava.client.core.providers.database.firebase.FirebaseDatabaseService.Firebase.Reference.INativeEventCallback;
 import io.reactjava.client.core.react.Configuration;
 import io.reactjava.client.core.react.IConfiguration;
 import io.reactjava.client.core.react.NativeObject;
@@ -35,6 +37,7 @@ import io.reactjava.client.core.rxjs.observable.Subscriber;
 import io.reactjava.client.core.react.Utilities;
 import java.util.HashMap;
 import java.util.Map;
+import jsinterop.annotations.JsFunction;
 import jsinterop.annotations.JsMethod;
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
@@ -54,16 +57,13 @@ public static final String    kKEY_DATABASE = "database";
 protected static final String kINJECT_URL =
    "https://www.gstatic.com/firebasejs/7.5.0/firebase.js";
 
-public static final String kEVENT_TYPE_CHILD_ADDED   = "child_added";
-public static final String kEVENT_TYPE_CHILD_CHANGED = "child_changed";
-public static final String kEVENT_TYPE_CHILD_MOVED   = "child_moved";
-public static final String kEVENT_TYPE_CHILD_REMOVED = "child_removed";
-public static final String kEVENT_TYPE_VALUE         = "value";
-
                                        // public instance variables --------- //
                                        // (none)
                                        // protected instance variables -------//
-protected NativeObject props;            // properties                          //
+protected NativeObject props;          // properties                          //
+                                       // registered callbacks                //
+protected Map<IEventCallback,INativeEventCallback>
+                       registeredCallbacks;
                                        // private instance variables -------- //
                                        // (none)                              //
 /*------------------------------------------------------------------------------
@@ -233,6 +233,74 @@ public Observable<Map<String,Object>> get(
 }
 /*------------------------------------------------------------------------------
 
+@name       getStart  - get data from specified path for the specified event
+                                                                              */
+                                                                             /**
+            Get data from the specified reference path for the specified event.
+
+@return     event handler
+
+@param      reference      record path
+@param      eventType      kEVENT_TYPE_CHILD_ADDED, kEVENT_TYPE_CHILD_CHANGED,
+                           kEVENT_TYPE_CHILD_MOVED, kEVENT_TYPE_CHILD_REMOVED,
+                           or kEVENT_TYPE_VALUE.
+@param      callback       event handler
+
+
+@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public IEventCallback getStart(
+   String         reference,
+   String         eventType,
+   IEventCallback callback)
+{
+   INativeEventCallback nativeCallback =
+      getDatabase().ref(reference).on(
+         eventType,
+         (DataSnapshot dataSnapshot, String prevChildKey) ->
+         {
+            callback.handleEvent(dataSnapshot.toMap(), prevChildKey);
+         });
+                                       // bind the client and native callbacks//
+   getRegisteredCallbacks().put(callback, nativeCallback);
+
+   return(callback);
+}
+/*------------------------------------------------------------------------------
+
+@name       getStop - detach a previous get callback
+                                                                              */
+                                                                             /**
+            Detach a previous get callback.
+
+@param      reference      record path
+@param      eventType      kEVENT_TYPE_CHILD_ADDED, kEVENT_TYPE_CHILD_CHANGED,
+                           kEVENT_TYPE_CHILD_MOVED, kEVENT_TYPE_CHILD_REMOVED,
+                           or kEVENT_TYPE_VALUE.
+@param      callback       event handler
+
+
+@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public void getStop(
+   String         reference,
+   String         eventType,
+   IEventCallback callback)
+{
+   INativeEventCallback nativeCallback = getRegisteredCallbacks().remove(callback);
+   if (nativeCallback != null)
+   {
+      getDatabase().ref(reference).off(eventType, nativeCallback);
+   }
+}
+/*------------------------------------------------------------------------------
+
 @name       getApp - get app
                                                                               */
                                                                              /**
@@ -291,6 +359,28 @@ public IConfiguration getConfiguration()
       props().set("configuration", configuration);
    }
    return(configuration);
+}
+/*------------------------------------------------------------------------------
+
+@name       getRegisteredCallbacks - get map of registered callbacks
+                                                                              */
+                                                                             /**
+            Get map of registered callbacks
+
+@return     map of registered callbacks.
+
+@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected Map<IEventCallback,INativeEventCallback> getRegisteredCallbacks()
+{
+   if (registeredCallbacks == null)
+   {
+      registeredCallbacks = new HashMap<>();
+   }
+   return(registeredCallbacks);
 }
 /*------------------------------------------------------------------------------
 
@@ -580,6 +670,48 @@ public static class Reference
 
 /*------------------------------------------------------------------------------
 
+@name       off - detach a previous on callback
+                                                                              */
+                                                                             /**
+            Detach a previous on callback.
+
+@param      eventType      event type
+@param      callback       callback
+
+@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+@JsMethod
+public native void off(
+   String               eventType,
+   INativeEventCallback callback);
+
+/*------------------------------------------------------------------------------
+
+@name       on - read data from specified reference on specified change
+                                                                              */
+                                                                             /**
+            Read data from specified reference on specified change.
+
+@return     Promise
+
+@param      eventType      event type
+@param      callback       callback
+
+@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+@JsMethod
+public native INativeEventCallback on(
+   String               eventType,
+   INativeEventCallback callback);
+
+/*------------------------------------------------------------------------------
+
 @name       once - read data from specified reference
                                                                               */
                                                                              /**
@@ -618,6 +750,22 @@ public native Promise once(
 public native Promise set(
    NativeObject value);
 
+/*==============================================================================
+
+name:       IEventCallback - marker interface
+
+purpose:    General event callback interface
+
+history:    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
+
+notes:
+
+==============================================================================*/
+@JsFunction
+public interface INativeEventCallback
+{
+   void handleEvent(DataSnapshot dataSnapshot, String prevChildKey);
+}//====================================// IEventCallback =====================//
 }//====================================// Reference ==========================//
 }//====================================// Firebase ===========================//
 }//====================================// end FirebaseDatabaseService ========//

@@ -18,11 +18,18 @@ package io.reactjava.client.core.providers.database;
 import io.reactjava.client.core.rxjs.observable.Observable;
 import io.reactjava.client.core.react.IProvider;
 import java.util.Map;
+import jsinterop.annotations.JsFunction;
                                        // IDatabaseService ===================//
 public interface IDatabaseService extends IProvider
 {
                                        // class constants --------------------//
-                                       // (none)                              //
+public static final String kEVENT_TYPE_CHILD_ADDED   = "child_added";
+public static final String kEVENT_TYPE_CHILD_CHANGED = "child_changed";
+public static final String kEVENT_TYPE_CHILD_MOVED   = "child_moved";
+public static final String kEVENT_TYPE_CHILD_REMOVED = "child_removed";
+public static final String kEVENT_TYPE_OFF           = "off";
+public static final String kEVENT_TYPE_VALUE         = "value";
+
                                        // class variables ------------------- //
                                        // (none)                              //
 /*------------------------------------------------------------------------------
@@ -84,4 +91,70 @@ Observable<String> put(
 Observable<Map<String,Object>> get(
    String reference);
 
+/*------------------------------------------------------------------------------
+
+@name       getStart  - get data from specified path for the specified event
+                                                                              */
+                                                                             /**
+            Get data from the specified reference path for the specified event.
+
+@return     event handler
+
+@param      reference      record path
+@param      eventType      kEVENT_TYPE_CHILD_ADDED, kEVENT_TYPE_CHILD_CHANGED,
+                           kEVENT_TYPE_CHILD_MOVED, kEVENT_TYPE_CHILD_REMOVED,
+                           or kEVENT_TYPE_VALUE.
+@param      callback       event handler
+
+
+@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public IEventCallback getStart(
+   String         reference,
+   String         eventType,
+   IEventCallback callback);
+
+/*------------------------------------------------------------------------------
+
+@name       getStop - detach a previous get callback
+                                                                              */
+                                                                             /**
+            Detach a previous get callback.
+
+@param      reference      record path
+@param      eventType      kEVENT_TYPE_CHILD_ADDED, kEVENT_TYPE_CHILD_CHANGED,
+                           kEVENT_TYPE_CHILD_MOVED, kEVENT_TYPE_CHILD_REMOVED,
+                           or kEVENT_TYPE_VALUE.
+@param      callback       event handler
+
+
+@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public void getStop(
+   String         reference,
+   String         eventType,
+   IEventCallback callback);
+
+/*==============================================================================
+
+name:       IEventCallback - marker interface
+
+purpose:    General event callback interface
+
+history:    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
+
+notes:
+
+==============================================================================*/
+@JsFunction
+public interface IEventCallback
+{
+   void handleEvent(Map<String,Object> dataSnapshot, String prevChildKey);
+}//====================================// IEventCallback =====================//
 }//====================================// end IDatabaseService ===============//
