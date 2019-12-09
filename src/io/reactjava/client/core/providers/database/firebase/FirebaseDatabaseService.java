@@ -447,6 +447,47 @@ public Observable<String> put(
       });
    return(observable);
 }
+/*------------------------------------------------------------------------------
+
+@name       remove  - remove record at specified path
+                                                                              */
+                                                                             /**
+            Remove record and all of its decendants at specified refernce path
+
+@return     Observable
+
+@param      path        record path
+
+@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public Observable<String> remove(
+   String reference)
+{
+   Observable<String> observable =
+      Observable.create((Subscriber<String> subscriber) ->
+      {
+         Reference ref     = getDatabase().ref(reference);
+         Promise   promise = ref.remove();
+         promise.then(
+            result ->
+            {
+               subscriber.next(result != null ? result.toString() : null);
+               subscriber.complete();
+               return(promise);
+            },
+            error ->
+            {
+               subscriber.error(error);
+               return(promise);
+            });
+
+         return(subscriber);
+      });
+   return(observable);
+}
 /*==============================================================================
 
 name:       Firebase - core compatible Firebase
@@ -729,6 +770,23 @@ public native INativeEventCallback on(
 @JsMethod
 public native Promise once(
    String eventType);
+
+/*------------------------------------------------------------------------------
+
+@name       remove - remove record at specified reference
+                                                                              */
+                                                                             /**
+            Remove record and all of its decendants at specified reference.
+
+@return     Promise
+
+@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+@JsMethod
+public native Promise remove();
 
 /*------------------------------------------------------------------------------
 

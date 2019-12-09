@@ -53,27 +53,6 @@ public Observable configure(
 
 /*------------------------------------------------------------------------------
 
-@name       put  - put data to specified path
-                                                                              */
-                                                                             /**
-            Put the specified data to the specified reference path
-
-@return     Observable
-
-@param      path        record path
-@param      record      data
-
-@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-Observable<String> put(
-   String             path,
-   Map<String,String> record);
-
-/*------------------------------------------------------------------------------
-
 @name       get  - get data from specified path
                                                                               */
                                                                              /**
@@ -140,6 +119,46 @@ public void getStop(
    String         reference,
    String         eventType,
    IEventCallback callback);
+
+/*------------------------------------------------------------------------------
+
+@name       put  - put data to specified path
+                                                                              */
+                                                                             /**
+            Put the specified data to the specified reference path
+
+@return     Observable
+
+@param      path        record path
+@param      record      data
+
+@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+Observable<String> put(
+   String             path,
+   Map<String,String> record);
+
+/*------------------------------------------------------------------------------
+
+@name       remove  - remove record at specified path
+                                                                              */
+                                                                             /**
+            Remove record and all of its decendants at specified reference path
+
+@return     Observable
+
+@param      path        record path
+
+@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+Observable<String> remove(
+   String path);
 
 /*==============================================================================
 
