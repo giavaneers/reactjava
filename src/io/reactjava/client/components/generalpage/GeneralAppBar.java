@@ -98,6 +98,10 @@ protected AppBarDsc getAppBarDsc()
    if (appBarDsc == null)
    {
       appBarDsc = (AppBarDsc)props().get(kPROPERTY_KEY_APP_BAR_DSC);
+      if (appBarDsc == null)
+      {
+         appBarDsc = AppBarDsc.kDEFAULT;
+      }
    }
    return(appBarDsc);
 }
@@ -148,6 +152,7 @@ protected Map<String,String> getButtonMap()
 //------------------------------------------------------------------------------
 public void render()
 {
+
 /*--
    <@material-ui.core.AppBar position="fixed" color="default" class="appBar">
       <@material-ui.core.Toolbar
@@ -166,6 +171,8 @@ public void render()
          </@material-ui.core.IconButton>
 --*/
    }
+   if (getAppBarDsc().title != null)
+   {
 /*--
          <div
             id={getAppBarDsc().title}
@@ -177,13 +184,16 @@ public void render()
             </@material-ui.core.Typography>
          </div>
 --*/
-   for (ButtonDsc buttonDsc : getAppBarDsc().buttonDscs)
+   }
+   if (getAppBarDsc().buttonDscs != null)
    {
-      String color =
-         kAPP_BAR_BUTTON_TEXT_LOGIN.equals(buttonDsc.text) ? "primary" : null;
+      for (ButtonDsc buttonDsc : getAppBarDsc().buttonDscs)
+      {
+         String color =
+            kAPP_BAR_BUTTON_TEXT_LOGIN.equals(buttonDsc.text) ? "primary" : null;
 
-      String variant =
-         kAPP_BAR_BUTTON_TEXT_LOGIN.equals(buttonDsc.text) ? "outlined" : null;
+         String variant =
+            kAPP_BAR_BUTTON_TEXT_LOGIN.equals(buttonDsc.text) ? "outlined" : null;
 /*--
                                        <!-- each App Bar  button -------------->
          <@material-ui.core.Button id={buttonDsc.text} onClick={clickHandler}
@@ -191,6 +201,7 @@ public void render()
             {buttonDsc.text}
          </@material-ui.core.Button>
 --*/
+      }
    }
 /*--
       </@material-ui.core.Toolbar>

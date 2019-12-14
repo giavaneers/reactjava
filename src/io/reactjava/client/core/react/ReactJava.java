@@ -472,15 +472,29 @@ public static void ensureComponentStyles(
 
       if (bCSSChanged)
       {
+         if (component.cssInjectedStyleId != null)
+         {
+            Element style =
+               DomGlobal.document.getElementById(component.cssInjectedStyleId);
+
+            if (style != null)
+            {
+               kLOGGER.logInfo(
+                  "ReactJava.ensureComponentStyles(): to update css, "
+                + "removing injected styleId=" + styleId);
+            }
+            style.remove();
+            component.cssInjectedStyleId = null;
+         }
          if (component.css != null)
          {
                                        // inject current                      //
             HTMLStyleElement style =
                (HTMLStyleElement)DomGlobal.document.createElement("style");
 
-            //kLOGGER.logInfo(
-            //   "ReactJava.ensureComponentStyles(): injecting styleId="
-            //      + styleId);
+            kLOGGER.logInfo(
+               "ReactJava.ensureComponentStyles(): injecting styleId="
+                  + styleId);
 
             style.id          = styleId;
             style.textContent = component.css;
@@ -488,6 +502,7 @@ public static void ensureComponentStyles(
             HTMLBodyElement body = DomGlobal.document.body;
             body.insertBefore(style, body.firstElementChild);
 
+            component.cssInjectedStyleId = styleId;
             component.getInjectedStyles().add(styleId);
             getInjectedStylesheets().put(styleId, styleId);
          }
@@ -804,7 +819,7 @@ public static <P extends Properties> INativeRenderableComponent getRenderableCom
       if (fcn != null)
       {
                                        // remove any injected styles          //
-         removeComponentStyles(component);
+         //removeComponentStyles(component);
 
                                        // invoke the component function       //
          component.reactElement = fcn.apply((P)props);
@@ -903,7 +918,7 @@ public static void removeComponentStyles(
          Element style = DomGlobal.document.getElementById(styleId);
          if (style != null)
          {
-            if (false)
+            if (true)
             {
                kLOGGER.logInfo(
                   "ReactJava.removeComponentStyles(): removing styleId="

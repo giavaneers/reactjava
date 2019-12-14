@@ -23,59 +23,106 @@ package io.reactjava.client.components.generalpage;
                                        // imports --------------------------- //
 import elemental2.dom.DomGlobal;
 import io.reactjava.client.components.generalpage.Descriptors.FooterDsc;
-import io.reactjava.client.components.generalpage.Descriptors.FooterDsc.FooterTopicDsc;
+import io.reactjava.client.components.generalpage.Descriptors.FooterDsc.FooterCategoryDsc;
+import io.reactjava.client.components.generalpage.Descriptors.FooterDsc.FooterCategoryDsc.FooterTopicDsc;
+import io.reactjava.client.components.generalpage.Descriptors.FooterDsc.FooterCreditDsc;
 import io.reactjava.client.core.react.Component;
 import io.reactjava.client.core.react.IUITheme;
+import io.reactjava.client.core.react.Properties;
 
                                        // Footer =============================//
-public class Footer extends Component
+public class Footer<P extends Properties> extends Component
 {
                                        // class constants ------------------- //
-public static final String      kLOCATION = DomGlobal.location.getPathname();
-public static final FooterDsc[] kFOOTERS  =
-{
+                                       // property keys                       //
+public static final String    kKEY_FOOTER     = "footer";
+public static final FooterDsc kFOOTER_DEFAULT = new FooterDsc();
+
+public static final String    kLOCATION = DomGlobal.location.getPathname();
+public static final FooterDsc kFOOTER   =
    new FooterDsc(
-      "Project",
-      new FooterTopicDsc[]
+      new FooterCategoryDsc[]
       {
-         new FooterTopicDsc("Team", "http://www.giavaneers.com"),
-         new FooterTopicDsc("History", "http://www.giavaneers.com"),
-         new FooterTopicDsc("Contact us", "http://www.giavaneers.com/contact")
-      }),
-   new FooterDsc(
-      "Features",
-      new FooterTopicDsc[]
-      {
-         new FooterTopicDsc("Get Started",       kLOCATION + "#getStarted"),
-         new FooterTopicDsc("User Guide",        kLOCATION + "#userGuide"),
-         new FooterTopicDsc("Contributor Guide", kLOCATION + "#contributorGuide"),
-      }),
-   new FooterDsc(
-      "Resources",
-      new FooterTopicDsc[]
-      {
-         new FooterTopicDsc("Other Projects",  "http://www.giavaneers.com/platforms"),
-         new FooterTopicDsc("Google Console",  "https://console.cloud.google.com"),
-         new FooterTopicDsc("Google Search",   "https://search.google.com/search-console"),
-         new FooterTopicDsc("Google Analytics","https://analytics.google.com/analytics"),
-      }),
-   new FooterDsc(
-      "Legal",
-      new FooterTopicDsc[]
-      {
-         new FooterTopicDsc("License",        ""),
-         new FooterTopicDsc("Privacy policy", ""),
-         new FooterTopicDsc("Terms of use",   "")
-      }),
-};
+         new FooterCategoryDsc(
+            "Project",
+            new FooterTopicDsc[]
+            {
+               new FooterTopicDsc(
+                  "Team", "http://www.giavaneers.com"),
+               new FooterTopicDsc(
+                  "History", "http://www.giavaneers.com"),
+               new FooterTopicDsc(
+                  "Contact us", "http://www.giavaneers.com/contact")
+            }),
+         new FooterCategoryDsc(
+            "Features",
+            new FooterTopicDsc[]
+            {
+               new FooterTopicDsc(
+                  "Get Started",       kLOCATION + "#getStarted"),
+               new FooterTopicDsc(
+                  "User Guide",        kLOCATION + "#userGuide"),
+               new FooterTopicDsc(
+                  "Contributor Guide", kLOCATION + "#contributorGuide"),
+            }),
+         new FooterCategoryDsc(
+            "Resources",
+            new FooterTopicDsc[]
+            {
+               new FooterTopicDsc(
+                  "Other Projects",  "http://www.giavaneers.com/platforms"),
+               new FooterTopicDsc(
+                  "Google Console",  "https://console.cloud.google.com"),
+               new FooterTopicDsc(
+                  "Google Search",   "https://search.google.com/search-console"),
+               new FooterTopicDsc(
+                  "Google Analytics","https://analytics.google.com/analytics"),
+            }),
+         new FooterCategoryDsc(
+            "Legal",
+            new FooterTopicDsc[]
+            {
+               new FooterTopicDsc("License",        ""),
+               new FooterTopicDsc("Privacy policy", ""),
+               new FooterTopicDsc("Terms of use",   "")
+            }),
+      },
+   new FooterCreditDsc());
                                        // class variables ------------------- //
                                        // (none)                              //
                                        // public instance variables --------- //
                                        // (none)                              //
                                        // protected instance variables -------//
-                                       // (none)                              //
+protected FooterDsc footer;            // footer descriptor                   //
                                        // private instance variables -------- //
                                        // (none)                              //
+/*------------------------------------------------------------------------------
+
+@name       getFooters - get footer descriptor
+                                                                              */
+                                                                             /**
+            Get footer descriptor.
+
+@return     footer descriptor
+
+@history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected FooterDsc getFooter()
+{
+   if (footer == null)
+   {
+      footer = (FooterDsc)props().get(kKEY_FOOTER);
+      if (footer == null)
+      {
+         footer = kFOOTER_DEFAULT;
+      }
+   }
+   return(footer);
+}
 /*------------------------------------------------------------------------------
 
 @name       render - render component
@@ -95,16 +142,18 @@ public void render()
    <footer class="footer layout">
       <@material-ui.core.Grid container spacing={32} justify="space-evenly">
 --*/
-      for (FooterDsc footer : kFOOTERS)
+      FooterCategoryDsc[] categories =
+         getFooter().categories;
+      for (FooterCategoryDsc category : getFooter().categories)
       {
 /*--
-         <@material-ui.core.Grid item xs key={footer.title}>
+         <@material-ui.core.Grid item xs key={category.title}>
             <@material-ui.core.Typography
                variant="h6" color="textPrimary" gutterBottom>
-               {footer.title}
+               {category.title}
             </@material-ui.core.Typography>
 --*/
-         for (FooterTopicDsc topic : footer.topics)
+         for (FooterTopicDsc topic : category.topics)
          {
 /*--
             <a href={topic.url} target={topic.target} class="topic" >
@@ -121,6 +170,11 @@ public void render()
       }
 /*--
       </@material-ui.core.Grid>
+--*/
+      //FooterCreditDsc credit = getCredit();
+      //if (credit != null)
+      {
+/*--
       <@material-ui.core.Grid container spacing={32} align="center" justify="space-evenly" >
          <a href="http://www.giavaneers.com" target="_blank">
             <img src="images/GiavaneersMark.png" class="logo" />
@@ -131,6 +185,9 @@ public void render()
             <a href="http://www.reactjava.io" target="_blank">ReactJava</a>
          </@material-ui.core.Typography>
       </@material-ui.core.Grid>
+--*/
+      }
+/*--
    </footer>
 --*/
 }

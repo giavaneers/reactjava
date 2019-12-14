@@ -15,6 +15,7 @@ note:
                                        // package --------------------------- //
 package io.reactjava.client.core.providers.auth;
                                        // imports --------------------------- //
+import io.reactjava.client.core.react.NativeObject;
 import io.reactjava.client.core.rxjs.observable.Observable;
 import io.reactjava.client.core.react.IProvider;
 

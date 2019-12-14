@@ -50,6 +50,8 @@ protected java.util.function.Function<Properties, ReactElement>
                        componentFcn;   // component function                  //
 protected ReactElement reactElement;   // react element                       //
 protected String       css;            // css                                 //
+                                       // css injected styleId                //
+protected String       cssInjectedStyleId;
                                        // list of injected styleIds           //
 protected List<String> injectedStyleIds;
                                        // private to approximate immutable    //
@@ -1218,31 +1220,76 @@ public static Object makeStateValueCopy(
    Object value)
 {
    Object copy = value;
-   //Class  clas = value.getClass();
-   //try
-   //{
-   //   if (clas.isArray())
-   //   {
-   //      List list = Arrays.asList(value);
-   //      copy = list.toArray();
-   //   }
-   //   else if (value instanceof Map)
-   //   {
-   //      copy = new HashMap((Map)value);
-   //   }
-   //   else if (value instanceof List)
-   //   {
-   //      copy = new ArrayList((List)value);
-   //   }
-   //   else if (value instanceof Set)
-   //   {
-   //      copy = new HashSet((Set)value);
-   //   }
-   //}
-   //catch(Exception e)
-   //{
-   //   kLOGGER.logError(e);
-   //}
+   Class  clas = value.getClass();
+   try
+   {
+      if (clas.isArray())
+      {
+         int length;
+
+         if (value instanceof String[])
+         {
+            length = ((String[])value).length;
+            copy = new String[length];
+         }
+         else if (value instanceof int[])
+         {
+            length = ((int[])value).length;
+            copy = new int[length];
+         }
+         else if (value instanceof boolean[])
+         {
+            length = ((boolean[])value).length;
+            copy = new boolean[length];
+         }
+         else if (value instanceof float[])
+         {
+            length = ((float[])value).length;
+            copy = new float[length];
+         }
+         else if (value instanceof double[])
+         {
+            length = ((double[])value).length;
+            copy = new double[length];
+         }
+         else if (value instanceof char[])
+         {
+            length = ((char[])value).length;
+            copy = new char[length];
+         }
+         else if (value instanceof short[])
+         {
+            length = ((short[])value).length;
+            copy = new short[length];
+         }
+         else if (value instanceof Object[])
+         {
+            length = ((Object[])value).length;
+            copy = new Object[length];
+         }
+         else
+         {
+            throw new UnsupportedOperationException(clas.toString());
+         }
+         System.arraycopy(value, 0, copy, 0, length);
+      }
+      else if (value instanceof Map)
+      {
+         copy = new HashMap((Map)value);
+      }
+      else if (value instanceof List)
+      {
+         copy = new ArrayList((List)value);
+      }
+      else if (value instanceof Set)
+      {
+         copy = new HashSet((Set)value);
+      }
+   }
+   catch(Exception e)
+   {
+      kLOGGER.logError(e);
+   }
 
    return(copy);
 }

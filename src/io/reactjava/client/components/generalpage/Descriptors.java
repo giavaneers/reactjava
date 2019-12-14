@@ -21,6 +21,8 @@ notes:
                                        // package --------------------------- //
 package io.reactjava.client.components.generalpage;
                                        // imports --------------------------- //
+import io.reactjava.client.components.generalpage.Descriptors.FooterDsc.FooterCategoryDsc;
+import io.reactjava.client.components.generalpage.Descriptors.FooterDsc.FooterCategoryDsc.FooterTopicDsc;
 import java.util.function.Consumer;
                                        // Descriptors ========================//
 public class Descriptors
@@ -48,7 +50,9 @@ notes:
 public static class AppBarDsc
 {
                                        // constants ------------------------- //
-                                       // (none)                              //
+public static final AppBarDsc kDEFAULT =
+   new AppBarDsc(null, false, null, false, null);
+
                                        // class variables ------------------- //
                                        // (none)                              //
                                        // public instance variables --------- //
@@ -151,6 +155,70 @@ notes:
 public static class FooterDsc
 {
                                        // constants ------------------------- //
+public static final String  kTARGET_BLANK  = "_blank";
+public static final String  kTARGET_PARENT = "_parent";
+public static final String  kTARGET_SELF   = "_self";
+public static final String  kTARGET_TOP    = "_top";
+
+                                       // class variables ------------------- //
+                                       // (none)                              //
+                                       // public instance variables --------- //
+public FooterCategoryDsc[]  categories;// categories                          //
+public FooterCreditDsc      credit;    // credit                              //
+                                       // protected instance variables ------ //
+                                       // (none)                              //
+
+/*------------------------------------------------------------------------------
+
+@name       FooterDsc - default constructor
+                                                                              */
+                                                                             /**
+            Default constructor
+
+@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public FooterDsc()
+{
+}
+/*------------------------------------------------------------------------------
+
+@name       FooterDsc - constructor for specified categories and credit
+                                                                              */
+                                                                             /**
+            Constructor for specified categories and credit
+
+@param      categories     category descriptors
+@param      credit         credit descriptor
+
+@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public FooterDsc(
+   FooterCategoryDsc[] categories,
+   FooterCreditDsc     credit)
+{
+   this.categories = categories;
+   this.credit     = credit;
+}
+/*==============================================================================
+
+name:       FooterCategoryDsc - footer category descriptor
+
+purpose:    Footer category descriptor
+
+history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+notes:
+
+==============================================================================*/
+public static class FooterCategoryDsc
+{
+                                       // constants ------------------------- //
                                        // (none)                              //
                                        // class variables ------------------- //
                                        // (none)                              //
@@ -172,7 +240,7 @@ public FooterTopicDsc[] topics;        // topics                              //
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public FooterDsc()
+public FooterCategoryDsc()
 {
 }
 /*------------------------------------------------------------------------------
@@ -190,7 +258,7 @@ public FooterDsc()
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public FooterDsc(
+public FooterCategoryDsc(
    String           title,
    FooterTopicDsc[] topics)
 {
@@ -211,11 +279,7 @@ notes:
 public static class FooterTopicDsc
 {
                                        // constants ------------------------- //
-public static final String  kTARGET_BLANK  = "_blank";
-public static final String  kTARGET_PARENT = "_parent";
-public static final String  kTARGET_SELF   = "_self";
-public static final String  kTARGET_TOP    = "_top";
-
+                                       // (none)                              //
                                        // class variables ------------------- //
                                        // (none)                              //
                                        // public instance variables --------- //
@@ -287,6 +351,93 @@ public FooterTopicDsc(
    this.target = target;
 }
 }//====================================// end FooterTopicDsc =================//
+}//====================================// end FooterCategoryDsc ==============//
+/*==============================================================================
+
+name:       FooterCreditDsc - footer credit descriptor
+
+purpose:    Footer credit descriptor
+
+history:    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+notes:
+
+==============================================================================*/
+public static class FooterCreditDsc
+{
+                                       // constants ------------------------- //
+                                       // (none)                              //
+                                       // class variables ------------------- //
+                                       // (none)                              //
+                                       // public instance variables --------- //
+public String topic;                   // topic                               //
+public String url;                     // url                                 //
+public String target;                  // target ("_blank", "_self", etc)     //
+                                       // protected instance variables ------ //
+                                       // (none)                              //
+
+/*------------------------------------------------------------------------------
+
+@name       FooterCreditDsc - default constructor
+                                                                              */
+                                                                             /**
+            Default constructor
+
+@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public FooterCreditDsc()
+{
+}
+/*------------------------------------------------------------------------------
+
+@name       FooterCreditDsc - constructor for specified title and descriptions
+                                                                              */
+                                                                             /**
+            Constructor for specified title and descriptions
+
+@param      topic    topic
+@param      url      url
+
+@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public FooterCreditDsc(
+   String topic,
+   String url)
+{
+   this(topic, url, kTARGET_BLANK);
+}
+/*------------------------------------------------------------------------------
+
+@name       FooterCreditDsc - constructor for specified title and descriptions
+                                                                              */
+                                                                             /**
+            Constructor for specified title and descriptions
+
+@param      topic    topic
+@param      url      url
+@param      target   target
+
+@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public FooterCreditDsc(
+   String topic,
+   String url,
+   String target)
+{
+   this.topic  = topic;
+   this.url    = url;
+   this.target = target;
+}
+}//====================================// end FooterCreditDsc ================//
 }//====================================// end FooterDsc ======================//
 /*==============================================================================
 
@@ -302,13 +453,16 @@ notes:
 public static class PageDsc
 {
                                        // constants ------------------------- //
-                                       // (none)                              //
+public static final PageDsc kDEFAULT =
+   new PageDsc(null, null, false, null, null, null, null);
+
                                        // class variables ------------------- //
                                        // (none)                              //
                                        // public instance variables --------- //
 public boolean      bMenuButton;       // has menu button or not              //
 public ButtonDsc[]  appBarButtons;     // app bar button descriptors          //
 public String       image;             // image                               //
+public FooterDsc    footer;            // footer descriptor                   //
 public String[]     pushPaths;         // push paths                          //
 public SectionDsc[] sections;          // section descriptors                 //
 public String       title;             // title                               //
@@ -339,7 +493,8 @@ public PageDsc(
    boolean      bMenuButton,
    ButtonDsc[]  appBarButtons,
    String[]     pushPaths,
-   SectionDsc[] sections)
+   SectionDsc[] sections,
+   FooterDsc    footer)
 {
    this.title         = title;
    this.image         = image;
@@ -347,6 +502,7 @@ public PageDsc(
    this.appBarButtons = appBarButtons;
    this.pushPaths     = pushPaths;
    this.sections      = sections;
+   this.footer        = footer;
 }
 }//====================================// end PageDsc ========================//
 /*==============================================================================

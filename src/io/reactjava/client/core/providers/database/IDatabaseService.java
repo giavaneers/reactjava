@@ -174,6 +174,7 @@ notes:
 @JsFunction
 public interface IEventCallback
 {
-   void handleEvent(Map<String,Object> dataSnapshot, String prevChildKey);
+   void handleEvent(
+      Map<String,Map<String,Object>> dataSnapshot, String anyPrevChildKey);
 }//====================================// IEventCallback =====================//
 }//====================================// end IDatabaseService ===============//

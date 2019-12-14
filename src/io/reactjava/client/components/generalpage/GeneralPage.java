@@ -192,6 +192,10 @@ protected PageDsc getPageDsc()
    if (pageDsc == null)
    {
       pageDsc = (PageDsc)props().get(kKEY_PAGE_DSC);
+      if (pageDsc == null)
+      {
+         pageDsc = PageDsc.kDEFAULT;
+      }
    }
    return(pageDsc);
 }
@@ -211,7 +215,7 @@ public void render()
 {
    useState(kSTATE_ANCHOR, "");
    useState(kSTATE_OPEN,   false);
-/*--
+ /*--
    <div>
                                        <!-- App Bar --------------------------->
       <GeneralAppBar appbardsc={getAppBarDsc()}></GeneralAppBar>
@@ -220,7 +224,7 @@ public void render()
          <ContentPage content={getContent()}></ContentPage>
       </main>
                                        <!-- Footer ---------------------------->
-      <Footer />
+      <Footer footer={getPageDsc().footer}></Footer>
                                        <!-- Side Drawer ----------------------->
       <SideDrawer
          open={getStateBoolean(kSTATE_OPEN)}

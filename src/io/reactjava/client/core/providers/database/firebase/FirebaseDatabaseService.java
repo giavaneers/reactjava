@@ -19,51 +19,37 @@ notes:      '-generateJsInteropExports' must be included in Dev Mode parameters
 package io.reactjava.client.core.providers.database.firebase;
 
                                        // imports --------------------------- //
-import com.giavaneers.util.gwt.Logger;
-import com.google.gwt.core.client.JavaScriptObject;
 import elemental2.promise.Promise;
-import io.reactjava.client.core.providers.auth.firebase.FirebaseAuthenticationService.Firebase;
+import io.reactjava.client.core.providers.auth.firebase.FirebaseCore;
 import io.reactjava.client.core.providers.database.IDatabaseService;
-import io.reactjava.client.core.providers.database.firebase.FirebaseDatabaseService.Firebase.DataSnapshot;
-import io.reactjava.client.core.providers.database.firebase.FirebaseDatabaseService.Firebase.Database;
-import io.reactjava.client.core.providers.database.firebase.FirebaseDatabaseService.Firebase.Reference;
-import io.reactjava.client.core.providers.database.firebase.FirebaseDatabaseService.Firebase.Reference.INativeEventCallback;
-import io.reactjava.client.core.react.Configuration;
-import io.reactjava.client.core.react.IConfiguration;
+import io.reactjava.client.core.providers.database.firebase.FirebaseDatabaseService.Reference.INativeEventCallback;
 import io.reactjava.client.core.react.NativeObject;
 import io.reactjava.client.core.react.Properties;
 import io.reactjava.client.core.rxjs.observable.Observable;
 import io.reactjava.client.core.rxjs.observable.Subscriber;
-import io.reactjava.client.core.react.Utilities;
 import java.util.HashMap;
 import java.util.Map;
 import jsinterop.annotations.JsFunction;
 import jsinterop.annotations.JsMethod;
 import jsinterop.annotations.JsOverlay;
-import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
 import jsinterop.base.Any;
+import jsinterop.base.Js;
                                        // FirebaseDatabaseService ============//
 @JsType                                // export to Javascript                //
 public class FirebaseDatabaseService implements IDatabaseService
 {
                                        // class constants --------------------//
-private static final Logger   kLOGGER = Logger.newInstance();
-
-public static final String    kKEY_APP      = "app";
-public static final String    kKEY_DATABASE = "database";
+                                       // (none)
                                        // class variables ------------------- //
-protected static final String kINJECT_URL =
-   "https://www.gstatic.com/firebasejs/7.5.0/firebase.js";
-
+                                       // (none)
                                        // public instance variables --------- //
                                        // (none)
                                        // protected instance variables -------//
-protected NativeObject props;          // properties                          //
                                        // registered callbacks                //
 protected Map<IEventCallback,INativeEventCallback>
-                       registeredCallbacks;
+                            registeredCallbacks;
                                        // private instance variables -------- //
                                        // (none)                              //
 /*------------------------------------------------------------------------------
@@ -75,7 +61,7 @@ protected Map<IEventCallback,INativeEventCallback>
 
 @param      props    props
 
-@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
+@history    Wed Apr 27, 2016 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
@@ -83,7 +69,6 @@ protected Map<IEventCallback,INativeEventCallback>
 public FirebaseDatabaseService(
    Properties props)
 {
-   this.props = props != null ? props.toNativeObject() : new NativeObject();
 }
 /*------------------------------------------------------------------------------
 
@@ -96,7 +81,7 @@ public FirebaseDatabaseService(
 
 @param      configurationData    configuration data
 
-@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
+@history    Sat Oct 21, 2017 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
@@ -104,91 +89,7 @@ public FirebaseDatabaseService(
 public Observable configure(
    Object configurationData)
 {
-   if (!(configurationData instanceof String[])
-         || ((String[])configurationData).length != 6)
-   {
-      throw new IllegalArgumentException(
-         "Configuration data must be String[]"
-       + "{apiKey, authDomain, databaseURL, projectId, storageBucket, "
-       + "messagingSenderId}");
-   }
-
-   String[] args = (String[])configurationData;
-
-   return(configure(args[0], args[1], args[2], args[3], args[4], args[5]));
-}
-/*------------------------------------------------------------------------------
-
-@name       configure - configuration routine
-                                                                              */
-                                                                             /**
-            Configuration routine.
-
-@return     void
-
-@param      apiKey               apiKey
-@param      authDomain           authDomain
-@param      databaseURL          databaseURL
-@param      projectId            projectId
-@param      storageBucket        storageBucket
-@param      messagingSenderId    messagingSenderId
-
-@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-protected Observable configure(
-   String apiKey,
-   String authDomain,
-   String databaseURL,
-   String projectId,
-   String storageBucket,
-   String messagingSenderId)
-{
-   Observable<Database> observable =
-      Observable.create((Subscriber<Database> subscriber) ->
-      {
-         Utilities.injectScriptOrCSS(
-            getConfiguration(), kINJECT_URL, null,
-            (Object response, Object reqToken) ->
-            {
-               NativeObject config =
-                  NativeObject.with(
-                     "apiKey",            apiKey,
-                     "authDomain",        authDomain,
-                     "databaseURL",       databaseURL,
-                     "projectId",         projectId,
-                     "storageBucket",     storageBucket,
-                     "messagingSenderId", messagingSenderId);
-
-               Object rsp;
-               try
-               {
-                  props().set(kKEY_APP,      Firebase.initializeApp(config));
-                  props().set(kKEY_DATABASE, Firebase.database());
-                  rsp  = getDatabase();
-               }
-               catch(Exception e)
-               {
-                  kLOGGER.logError(e);
-                  rsp = e;
-               }
-
-               if (rsp instanceof Throwable)
-               {
-                  subscriber.error((Throwable)rsp);
-               }
-               else
-               {
-                  subscriber.next((Database)rsp);
-                  subscriber.complete();
-               }
-            });
-
-         return(subscriber);
-      });
-   return(observable);
+   return(FirebaseCore.configure(configurationData));
 }
 /*------------------------------------------------------------------------------
 
@@ -223,8 +124,8 @@ public Observable<Map<String,Object>> get(
             },
             error ->
             {
-               subscriber.error(error);
-               return(promise);
+               subscriber.error(FirebaseCore.getErrorMessage(error));
+               return(null);
             });
 
          return(subscriber);
@@ -257,15 +158,36 @@ public IEventCallback getStart(
    String         eventType,
    IEventCallback callback)
 {
-   INativeEventCallback nativeCallback =
-      getDatabase().ref(reference).on(
-         eventType,
-         (DataSnapshot dataSnapshot, String prevChildKey) ->
-         {
-            callback.handleEvent(dataSnapshot.toMap(), prevChildKey);
-         });
+   try
+   {
+      INativeEventCallback nativeCallback =
+         getDatabase().ref(reference).on(
+            eventType,
+            (DataSnapshot dataSnapshot, String anyPrevChildKey) ->
+            {
+               try
+               {
+                  Map<String,Object> map = dataSnapshot.toMap();
+                  String       childName = map.keySet().toArray(new String[0])[0];
+                  NativeObject value     = NativeObject.with(map.get(childName));
+
+                  Map<String,Map<String,Object>> valueMap = new HashMap<>();
+                  valueMap.put(childName, value.toMap());
+
+                  callback.handleEvent(valueMap, anyPrevChildKey);
+               }
+               catch(Throwable t)
+               {
+                  throw t;
+               }
+            });
                                        // bind the client and native callbacks//
-   getRegisteredCallbacks().put(callback, nativeCallback);
+      getRegisteredCallbacks().put(callback, nativeCallback);
+   }
+   catch(Throwable t)
+   {
+      throw t;
+   }
 
    return(callback);
 }
@@ -301,24 +223,6 @@ public void getStop(
 }
 /*------------------------------------------------------------------------------
 
-@name       getApp - get app
-                                                                              */
-                                                                             /**
-            Get app.
-
-@return     app
-
-@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public JavaScriptObject getApp()
-{
-   return((JavaScriptObject) props().get(kKEY_APP));
-}
-/*------------------------------------------------------------------------------
-
 @name       getDatabase - get database
                                                                               */
                                                                              /**
@@ -333,32 +237,7 @@ public JavaScriptObject getApp()
 //------------------------------------------------------------------------------
 public Database getDatabase()
 {
-   return((Database)props().get(kKEY_DATABASE));
-}
-/*------------------------------------------------------------------------------
-
-@name       getConfiguration - get application configuration
-                                                                              */
-                                                                             /**
-            Get application configuration
-
-@return     application configuration.
-
-@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-@SuppressWarnings("unusable-by-js")
-public IConfiguration getConfiguration()
-{
-   IConfiguration configuration = (IConfiguration)props().get("configuration");
-   if (configuration == null)
-   {
-      configuration = Configuration.sharedInstance();
-      props().set("configuration", configuration);
-   }
-   return(configuration);
+   return((Database)Js.uncheckedCast(FirebaseCore.getDatabase()));
 }
 /*------------------------------------------------------------------------------
 
@@ -381,28 +260,6 @@ protected Map<IEventCallback,INativeEventCallback> getRegisteredCallbacks()
       registeredCallbacks = new HashMap<>();
    }
    return(registeredCallbacks);
-}
-/*------------------------------------------------------------------------------
-
-@name       props - get properties
-                                                                              */
-                                                                             /**
-            Get properties.
-
-@return     properties
-
-@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public NativeObject props()
-{
-   if (props == null)
-   {
-      props = new NativeObject();
-   }
-   return(props);
 }
 /*------------------------------------------------------------------------------
 
@@ -439,8 +296,8 @@ public Observable<String> put(
             },
             error ->
             {
-               subscriber.error(error);
-               return(promise);
+               subscriber.error(FirebaseCore.getErrorMessage(error));
+               return(null);
             });
 
          return(subscriber);
@@ -456,7 +313,7 @@ public Observable<String> put(
 
 @return     Observable
 
-@param      path        record path
+@param      reference      record path
 
 @history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -480,74 +337,14 @@ public Observable<String> remove(
             },
             error ->
             {
-               subscriber.error(error);
-               return(promise);
+               subscriber.error(FirebaseCore.getErrorMessage(error));
+               return(null);
             });
 
          return(subscriber);
       });
    return(observable);
 }
-/*==============================================================================
-
-name:       Firebase - core compatible Firebase
-
-purpose:    GWT compatible Firebase
-
-history:    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
-
-notes:
-
-==============================================================================*/
-@jsinterop.annotations.JsType(
-   isNative = true, namespace= JsPackage.GLOBAL, name = "firebase")
-public static class Firebase
-{
-                                       // constants ------------------------- //
-                                       // (none)                              //
-                                       // class variables ------------------- //
-                                       // (none)                              //
-                                       // public instance variables --------- //
-                                       // (none)                              //
-                                       // protected instance variables ------ //
-                                       // (none)                              //
-                                       // private instance variables -------- //
-                                       // (none)                              //
-
-/*------------------------------------------------------------------------------
-
-@name       database - get the Database service for the default app
-                                                                              */
-                                                                             /**
-            Get the Database service for the default app
-
-@return     Database service for the default app
-
-@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-@JsMethod
-public static native Database database() throws Exception;
-
-/*------------------------------------------------------------------------------
-
-@name       initializeApp - initialize app
-                                                                              */
-                                                                             /**
-            Iinitialize app
-
-@param      config      configuration
-
-@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-@JsMethod
-public static native JavaScriptObject initializeApp(Object config);
-
 /*==============================================================================
 
 name:       Database - core compatible Firebase Database service
@@ -825,5 +622,4 @@ public interface INativeEventCallback
    void handleEvent(DataSnapshot dataSnapshot, String prevChildKey);
 }//====================================// IEventCallback =====================//
 }//====================================// Reference ==========================//
-}//====================================// Firebase ===========================//
 }//====================================// end FirebaseDatabaseService ========//

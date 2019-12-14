@@ -20,38 +20,27 @@ package io.reactjava.client.core.providers.auth.firebase;
 
                                        // imports --------------------------- //
 import com.giavaneers.util.gwt.Logger;
-import com.google.gwt.core.client.JavaScriptObject;
 import elemental2.promise.Promise;
 import io.reactjava.client.core.providers.auth.IAuthenticationService;
-import io.reactjava.client.core.providers.auth.firebase
-         .FirebaseAuthenticationService.Firebase.Auth;
-import io.reactjava.client.core.react.Configuration;
-import io.reactjava.client.core.react.IConfiguration;
-import io.reactjava.client.core.react.NativeObject;
 import io.reactjava.client.core.react.Properties;
 import io.reactjava.client.core.rxjs.observable.Observable;
 import io.reactjava.client.core.rxjs.observable.Subscriber;
-import io.reactjava.client.core.react.Utilities;
 import jsinterop.annotations.JsMethod;
-import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;
+import jsinterop.base.Js;
                                        // FirebaseAuthenticationService ======//
 @JsType                                // export to Javascript                //
 public class FirebaseAuthenticationService implements IAuthenticationService
 {
                                        // class constants --------------------//
-private static final Logger   kLOGGER = Logger.newInstance();
+private static final Logger kLOGGER = Logger.newInstance();
 
-public static final String    kKEY_APP  = "app";
-public static final String    kKEY_AUTH = "auth";
                                        // class variables ------------------- //
-protected static final String kINJECT_URL =
-   "https://www.gstatic.com/firebasejs/7.5.0/firebase.js";
-
+                                       // (none)
                                        // public instance variables --------- //
                                        // (none)
                                        // protected instance variables -------//
-protected NativeObject props;            // properties                          //
+                                       // (none)
                                        // private instance variables -------- //
                                        // (none)                              //
 /*------------------------------------------------------------------------------
@@ -71,7 +60,6 @@ protected NativeObject props;            // properties                          
 public FirebaseAuthenticationService(
    Properties props)
 {
-   this.props = props != null ? props.toNativeObject() : new NativeObject();
 }
 /*------------------------------------------------------------------------------
 
@@ -92,90 +80,7 @@ public FirebaseAuthenticationService(
 public Observable configure(
    Object configurationData)
 {
-   if (!(configurationData instanceof String[])
-         || ((String[])configurationData).length != 6)
-   {
-      throw new IllegalArgumentException(
-         "Configuration data must be String[]"
-       + "{apiKey, authDomain, databaseURL, projectId, storageBucket, "
-       + "messagingSenderId}");
-   }
-
-   String[] args = (String[])configurationData;
-
-   return(configure(args[0], args[1], args[2], args[3], args[4], args[5]));
-}
-/*------------------------------------------------------------------------------
-
-@name       configure - configuration routine
-                                                                              */
-                                                                             /**
-            Configuration routine.
-
-@return     void
-
-@param      apiKey               apiKey
-@param      authDomain           authDomain
-@param      databaseURL          databaseURL
-@param      projectId            projectId
-@param      storageBucket        storageBucket
-@param      messagingSenderId    messagingSenderId
-
-@history    Sat Oct 21, 2017 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-protected Observable configure(
-   String apiKey,
-   String authDomain,
-   String databaseURL,
-   String projectId,
-   String storageBucket,
-   String messagingSenderId)
-{
-   Observable<Auth> observable = Observable.create((Subscriber<Auth> subscriber) ->
-   {
-      Utilities.injectScriptOrCSS(
-         getConfiguration(), kINJECT_URL, null,
-         (Object response, Object reqToken) ->
-         {
-            NativeObject config =
-               NativeObject.with(
-                  "apiKey",            apiKey,
-                  "authDomain",        authDomain,
-                  "databaseURL",       databaseURL,
-                  "projectId",         projectId,
-                  "storageBucket",     storageBucket,
-                  "messagingSenderId", messagingSenderId);
-
-            Object rsp;
-            try
-            {
-               props().set(kKEY_APP,  Firebase.initializeApp(config));
-               props().set(kKEY_AUTH, Firebase.auth());
-               rsp  = getAuth();
-            }
-            catch(Exception e)
-            {
-               kLOGGER.logError(e);
-               rsp = e;
-            }
-
-            if (rsp instanceof Throwable)
-            {
-               subscriber.error((Throwable)rsp);
-            }
-            else
-            {
-               subscriber.next((Auth)rsp);
-               subscriber.complete();
-            }
-         });
-
-      return(subscriber);
-   });
-   return(observable);
+   return(FirebaseCore.configure(configurationData));
 }
 /*------------------------------------------------------------------------------
 
@@ -212,39 +117,21 @@ public Observable<String> createUserWithEmailAndPassword(
             getAuth().createUserWithEmailAndPassword(email, password);
 
          promise.then(
-            user ->
+            response ->
             {
-               subscriber.next(user.toString());
+               subscriber.next(response.toString());
                subscriber.complete();
                return(promise);
             },
             error ->
             {
-               subscriber.error(error);
-               return(promise);
+               subscriber.error(FirebaseCore.getErrorMessage(error));
+               return(null);
             });
 
          return(subscriber);
       });
    return(observable);
-}
-/*------------------------------------------------------------------------------
-
-@name       getApp - get app
-                                                                              */
-                                                                             /**
-            Get app.
-
-@return     app
-
-@history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public JavaScriptObject getApp()
-{
-   return((JavaScriptObject) props().get(kKEY_APP));
 }
 /*------------------------------------------------------------------------------
 
@@ -262,32 +149,7 @@ public JavaScriptObject getApp()
 //------------------------------------------------------------------------------
 public Auth getAuth()
 {
-   return((Auth) props().get(kKEY_AUTH));
-}
-/*------------------------------------------------------------------------------
-
-@name       getConfiguration - get application configuration
-                                                                              */
-                                                                             /**
-            Get application configuration
-
-@return     application configuration.
-
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-@SuppressWarnings("unusable-by-js")
-public IConfiguration getConfiguration()
-{
-   IConfiguration configuration = (IConfiguration)props().get("configuration");
-   if (configuration == null)
-   {
-      configuration = Configuration.sharedInstance();
-      props().set("configuration", configuration);
-   }
-   return(configuration);
+   return((Auth)Js.uncheckedCast(FirebaseCore.getAuth()));
 }
 /*------------------------------------------------------------------------------
 
@@ -304,7 +166,7 @@ public IConfiguration getConfiguration()
                                                                               */
 //------------------------------------------------------------------------------
 public final static native void initNative(
-   Auth   defaultAuth)
+   Auth defaultAuth)
    throws Exception
 /*-{
       var email    = 'giavaneersdeveloper@gmail.com';
@@ -398,28 +260,6 @@ public final static native void initNative(
 }-*/;
 /*------------------------------------------------------------------------------
 
-@name       props - get properties
-                                                                              */
-                                                                             /**
-            Get properties.
-
-@return     properties
-
-@history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public NativeObject props()
-{
-   if (props == null)
-   {
-      props = new NativeObject();
-   }
-   return(props);
-}
-/*------------------------------------------------------------------------------
-
 @name       signInWithEmailAndPassword - sign in with email and password
                                                                               */
                                                                              /**
@@ -454,8 +294,8 @@ public Observable<String> signInWithEmailAndPassword(
             },
             error ->
             {
-               subscriber.error(error);
-               return(promise);
+               subscriber.error(FirebaseCore.getErrorMessage(error));
+               return(null);
             });
 
          return(subscriber);
@@ -491,8 +331,8 @@ public Observable<String> signOut()
             },
             error ->
             {
-               subscriber.error(error);
-               return(promise);
+               subscriber.error(FirebaseCore.getErrorMessage(error));
+               return(null);
             });
 
          return(subscriber);
@@ -540,66 +380,6 @@ public void unitTest()
             kLOGGER.logError((Throwable)error);
          });
 }
-/*==============================================================================
-
-name:       Firebase - core compatible Firebase
-
-purpose:    GWT compatible Firebase
-
-history:    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
-
-notes:
-
-==============================================================================*/
-@jsinterop.annotations.JsType(
-   isNative = true, namespace= JsPackage.GLOBAL, name = "firebase")
-public static class Firebase
-{
-                                       // constants ------------------------- //
-                                       // (none)                              //
-                                       // class variables ------------------- //
-                                       // (none)                              //
-                                       // public instance variables --------- //
-                                       // (none)                              //
-                                       // protected instance variables ------ //
-                                       // (none)                              //
-                                       // private instance variables -------- //
-                                       // (none)                              //
-
-/*------------------------------------------------------------------------------
-
-@name       auth - get the Auth service for the default app
-                                                                              */
-                                                                             /**
-            Get the Auth service for the default app
-
-@return     Auth service for the default app
-
-@history    Sat Oct 21, 2017 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-@JsMethod
-public static native Auth auth() throws Exception;
-
-/*------------------------------------------------------------------------------
-
-@name       initializeApp - initialize app
-                                                                              */
-                                                                             /**
-            Iinitialize app
-
-@param      config      configuration
-
-@history    Sat Oct 21, 2017 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-@JsMethod
-public static native JavaScriptObject initializeApp(Object config);
-
 /*==============================================================================
 
 name:       Auth - core compatible Firebase Auth service
@@ -765,5 +545,4 @@ public native Promise signInWithEmailAndPassword(
 public native Promise signOut();
 
 }//====================================// Auth ===============================//
-}//====================================// Firebase ===========================//
 }//====================================// end FirebaseAuthenticationService ==//

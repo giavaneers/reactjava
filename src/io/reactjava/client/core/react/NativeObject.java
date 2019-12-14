@@ -16,6 +16,7 @@ notes:
 package io.reactjava.client.core.react;
                                        // imports --------------------------- //
 import elemental2.core.JsObject;
+import java.util.HashMap;
 import java.util.Map;
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
@@ -274,6 +275,34 @@ public final NativeObject set(
    }
 
    return(this);
+}
+/*------------------------------------------------------------------------------
+
+@name       toMap - create Map from NativeObject instance
+                                                                              */
+                                                                             /**
+            Create Map from NativeObject instance
+
+@return     Map from NativeObject instance
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+@JsOverlay
+public final Map<String,Object> toMap()
+{
+   Map<String,Object>  map      = new HashMap<>();
+   JsForEachCallbackFn callback = new JsForEachCallbackFn()
+   {
+      public void onKey(String key)
+      {
+         map.put(key, get(key));
+      }
+   };
+   Js.asPropertyMap(this).forEach(callback);
+   return(map);
 }
 /*------------------------------------------------------------------------------
 
