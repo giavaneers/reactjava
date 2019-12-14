@@ -370,8 +370,9 @@ public static class FooterCreditDsc
                                        // class variables ------------------- //
                                        // (none)                              //
                                        // public instance variables --------- //
-public String topic;                   // topic                               //
+public String text;                    // text                                //
 public String url;                     // url                                 //
+public String imageurl;                // iamge url                           //
 public String target;                  // target ("_blank", "_self", etc)     //
                                        // protected instance variables ------ //
                                        // (none)                              //
@@ -400,27 +401,6 @@ public FooterCreditDsc()
 
 @param      topic    topic
 @param      url      url
-
-@history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public FooterCreditDsc(
-   String topic,
-   String url)
-{
-   this(topic, url, kTARGET_BLANK);
-}
-/*------------------------------------------------------------------------------
-
-@name       FooterCreditDsc - constructor for specified title and descriptions
-                                                                              */
-                                                                             /**
-            Constructor for specified title and descriptions
-
-@param      topic    topic
-@param      url      url
 @param      target   target
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
@@ -429,13 +409,15 @@ public FooterCreditDsc(
                                                                               */
 //------------------------------------------------------------------------------
 public FooterCreditDsc(
-   String topic,
+   String text,
    String url,
+   String imageurl,
    String target)
 {
-   this.topic  = topic;
-   this.url    = url;
-   this.target = target;
+   this.text     = text;
+   this.url      = url;
+   this.imageurl = imageurl;
+   this.target   = target;
 }
 }//====================================// end FooterCreditDsc ================//
 }//====================================// end FooterDsc ======================//

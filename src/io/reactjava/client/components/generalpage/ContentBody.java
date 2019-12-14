@@ -260,7 +260,8 @@ public static List<ContentBodyDsc> parse(
       {
          continue;
       }
-      content.add(bMarkup ? ContentBodyDsc.parseMarkup(part) : new ContentBodyDsc(part));
+      content.add(
+         bMarkup ? ContentBodyDsc.parseMarkup(part) : new ContentBodyDsc(part));
    }
 
    return(content);

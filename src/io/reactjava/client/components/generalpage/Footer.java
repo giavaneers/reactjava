@@ -87,7 +87,11 @@ public static final FooterDsc kFOOTER   =
                new FooterTopicDsc("Terms of use",   "")
             }),
       },
-   new FooterCreditDsc());
+      new FooterCreditDsc(
+         "Website created with React and ReactJava",
+         "http://www.giavaneers.com",
+         "images/GiavaneersMark.png",
+         "_blank"));
                                        // class variables ------------------- //
                                        // (none)                              //
                                        // public instance variables --------- //
@@ -118,7 +122,7 @@ protected FooterDsc getFooter()
       footer = (FooterDsc)props().get(kKEY_FOOTER);
       if (footer == null)
       {
-         footer = kFOOTER_DEFAULT;
+         footer = kFOOTER;
       }
    }
    return(footer);
@@ -142,10 +146,11 @@ public void render()
    <footer class="footer layout">
       <@material-ui.core.Grid container spacing={32} justify="space-evenly">
 --*/
-      FooterCategoryDsc[] categories =
-         getFooter().categories;
-      for (FooterCategoryDsc category : getFooter().categories)
+      FooterCategoryDsc[] categories = getFooter().categories;
+      if (categories != null)
       {
+         for (FooterCategoryDsc category : getFooter().categories)
+         {
 /*--
          <@material-ui.core.Grid item xs key={category.title}>
             <@material-ui.core.Typography
@@ -153,8 +158,8 @@ public void render()
                {category.title}
             </@material-ui.core.Typography>
 --*/
-         for (FooterTopicDsc topic : category.topics)
-         {
+            for (FooterTopicDsc topic : category.topics)
+            {
 /*--
             <a href={topic.url} target={topic.target} class="topic" >
                <@material-ui.core.Typography
@@ -163,26 +168,39 @@ public void render()
                </@material-ui.core.Typography>
             </a>
 --*/
-         }
+            }
 /*--
          </@material-ui.core.Grid>
 --*/
+         }
       }
 /*--
       </@material-ui.core.Grid>
 --*/
-      //FooterCreditDsc credit = getCredit();
-      //if (credit != null)
+      FooterCreditDsc credit = getFooter().credit;
+      if (credit != null)
       {
 /*--
       <@material-ui.core.Grid container spacing={32} align="center" justify="space-evenly" >
-         <a href="http://www.giavaneers.com" target="_blank">
-            <img src="images/GiavaneersMark.png" class="logo" />
+--*/
+         if (credit.url != null && credit.target != null && credit.imageurl != null)
+         {
+/*--
+         <a href={credit.url} target={credit.target}>
+            <img src={credit.imageurl} class="logo" />
          </a>
+--*/
+         }
+
+         com.giavaneers.util.gwt.Logger.newInstance().logWarning(
+            "Footer.credit.text needs to be able to support markup; "
+          + "for example, "
+          + "\"Website created with React and <a href=\"http://www.reactjava.io\""
+          + " target=\"_blank\">ReactJava</a>\"");
+/*--
          <@material-ui.core.Typography
             class="footerCredit" color="textSecondary" gutterBottom>
-            Website created with React and
-            <a href="http://www.reactjava.io" target="_blank">ReactJava</a>
+            {credit.text}
          </@material-ui.core.Typography>
       </@material-ui.core.Grid>
 --*/
