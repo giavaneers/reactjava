@@ -370,10 +370,8 @@ public static class FooterCreditDsc
                                        // class variables ------------------- //
                                        // (none)                              //
                                        // public instance variables --------- //
+public String logo;                    // logo                                //
 public String text;                    // text                                //
-public String url;                     // url                                 //
-public String imageurl;                // iamge url                           //
-public String target;                  // target ("_blank", "_self", etc)     //
                                        // protected instance variables ------ //
                                        // (none)                              //
 
@@ -399,9 +397,8 @@ public FooterCreditDsc()
                                                                              /**
             Constructor for specified title and descriptions
 
-@param      topic    topic
-@param      url      url
-@param      target   target
+@param      logo     credit logo
+@param      text     credit text
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -409,15 +406,11 @@ public FooterCreditDsc()
                                                                               */
 //------------------------------------------------------------------------------
 public FooterCreditDsc(
-   String text,
-   String url,
-   String imageurl,
-   String target)
+   String logo,
+   String text)
 {
-   this.text     = text;
-   this.url      = url;
-   this.imageurl = imageurl;
-   this.target   = target;
+   this.logo = logo;
+   this.text = text;
 }
 }//====================================// end FooterCreditDsc ================//
 }//====================================// end FooterDsc ======================//

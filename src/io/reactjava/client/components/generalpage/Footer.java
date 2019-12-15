@@ -22,6 +22,7 @@ notes:
 package io.reactjava.client.components.generalpage;
                                        // imports --------------------------- //
 import elemental2.dom.DomGlobal;
+import elemental2.dom.Element;
 import io.reactjava.client.components.generalpage.Descriptors.FooterDsc;
 import io.reactjava.client.components.generalpage.Descriptors.FooterDsc.FooterCategoryDsc;
 import io.reactjava.client.components.generalpage.Descriptors.FooterDsc.FooterCategoryDsc.FooterTopicDsc;
@@ -29,8 +30,9 @@ import io.reactjava.client.components.generalpage.Descriptors.FooterDsc.FooterCr
 import io.reactjava.client.core.react.Component;
 import io.reactjava.client.core.react.IUITheme;
 import io.reactjava.client.core.react.Properties;
+import io.reactjava.client.core.react.React;
 
-                                       // Footer =============================//
+// Footer =============================//
 public class Footer<P extends Properties> extends Component
 {
                                        // class constants ------------------- //
@@ -39,59 +41,6 @@ public static final String    kKEY_FOOTER     = "footer";
 public static final FooterDsc kFOOTER_DEFAULT = new FooterDsc();
 
 public static final String    kLOCATION = DomGlobal.location.getPathname();
-public static final FooterDsc kFOOTER   =
-   new FooterDsc(
-      new FooterCategoryDsc[]
-      {
-         new FooterCategoryDsc(
-            "Project",
-            new FooterTopicDsc[]
-            {
-               new FooterTopicDsc(
-                  "Team", "http://www.giavaneers.com"),
-               new FooterTopicDsc(
-                  "History", "http://www.giavaneers.com"),
-               new FooterTopicDsc(
-                  "Contact us", "http://www.giavaneers.com/contact")
-            }),
-         new FooterCategoryDsc(
-            "Features",
-            new FooterTopicDsc[]
-            {
-               new FooterTopicDsc(
-                  "Get Started",       kLOCATION + "#getStarted"),
-               new FooterTopicDsc(
-                  "User Guide",        kLOCATION + "#userGuide"),
-               new FooterTopicDsc(
-                  "Contributor Guide", kLOCATION + "#contributorGuide"),
-            }),
-         new FooterCategoryDsc(
-            "Resources",
-            new FooterTopicDsc[]
-            {
-               new FooterTopicDsc(
-                  "Other Projects",  "http://www.giavaneers.com/platforms"),
-               new FooterTopicDsc(
-                  "Google Console",  "https://console.cloud.google.com"),
-               new FooterTopicDsc(
-                  "Google Search",   "https://search.google.com/search-console"),
-               new FooterTopicDsc(
-                  "Google Analytics","https://analytics.google.com/analytics"),
-            }),
-         new FooterCategoryDsc(
-            "Legal",
-            new FooterTopicDsc[]
-            {
-               new FooterTopicDsc("License",        ""),
-               new FooterTopicDsc("Privacy policy", ""),
-               new FooterTopicDsc("Terms of use",   "")
-            }),
-      },
-      new FooterCreditDsc(
-         "Website created with React and ReactJava",
-         "http://www.giavaneers.com",
-         "images/GiavaneersMark.png",
-         "_blank"));
                                        // class variables ------------------- //
                                        // (none)                              //
                                        // public instance variables --------- //
@@ -122,7 +71,7 @@ protected FooterDsc getFooter()
       footer = (FooterDsc)props().get(kKEY_FOOTER);
       if (footer == null)
       {
-         footer = kFOOTER;
+         footer = kFOOTER_DEFAULT;
       }
    }
    return(footer);
@@ -176,38 +125,60 @@ public void render()
       }
 /*--
       </@material-ui.core.Grid>
---*/
-      FooterCreditDsc credit = getFooter().credit;
-      if (credit != null)
-      {
-/*--
       <@material-ui.core.Grid container spacing={32} align="center" justify="space-evenly" >
---*/
-         if (credit.url != null && credit.target != null && credit.imageurl != null)
-         {
-/*--
-         <a href={credit.url} target={credit.target}>
-            <img src={credit.imageurl} class="logo" />
-         </a>
---*/
-         }
-
-         com.giavaneers.util.gwt.Logger.newInstance().logWarning(
-            "Footer.credit.text needs to be able to support markup; "
-          + "for example, "
-          + "\"Website created with React and <a href=\"http://www.reactjava.io\""
-          + " target=\"_blank\">ReactJava</a>\"");
-/*--
+         <div id="footerCreditLogo">
+         </div>
          <@material-ui.core.Typography
-            class="footerCredit" color="textSecondary" gutterBottom>
-            {credit.text}
+            id="footerCreditText"
+            class="footerCredit"
+            color="textSecondary"
+            gutterBottom>
          </@material-ui.core.Typography>
       </@material-ui.core.Grid>
---*/
-      }
-/*--
    </footer>
 --*/
+   renderAnyCredit();
+}
+/*------------------------------------------------------------------------------
+
+@name       renderAnyCredit - render any credit
+                                                                              */
+                                                                             /**
+            Render any credit.
+
+@history    Thu Feb 14, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public void renderAnyCredit()
+{
+   FooterCreditDsc credit = getFooter().credit;
+   if (credit != null)
+   {
+      DomGlobal.setTimeout(
+      (e) ->
+      {
+         Element element;
+         if (credit.logo != null)
+         {
+            element = DomGlobal.document.getElementById("footerCreditLogo");
+            if (element != null)
+            {
+               element.innerHTML = credit.logo;
+            }
+         }
+         if (credit.text != null)
+         {
+            element = DomGlobal.document.getElementById("footerCreditText");
+            if (element != null)
+            {
+               element.innerHTML = credit.text;
+            }
+         }
+      }, 0);
+   }
 }
 /*------------------------------------------------------------------------------
 
