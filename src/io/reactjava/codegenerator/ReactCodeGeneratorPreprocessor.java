@@ -24,13 +24,19 @@ import com.google.gwt.dev.util.log.PrintWriterTreeLogger;
 import io.reactjava.client.core.react.ReactGeneratedCode;
 import io.reactjava.jsx.IConfiguration;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
                                        // ReactCodeGeneratorPreprocessor =====//
 public class ReactCodeGeneratorPreprocessor implements IPreprocessor
 {
                                        // class constants --------------------//
-                                       // none                                //
+                                       // copy of generated                   //
+protected static final List<String> kFACTORY_MAP_KEYS = new ArrayList<>();
+
                                        // class variables ------------------- //
                                        // none                                //
                                        // public instance variables --------- //
@@ -184,7 +190,6 @@ public byte[] process(
           + "      \"" +  componentClassname + "\",\n"
           + "      (Function<Properties,Component>)(props) ->\n"
           + "      {\n"
-        //+ "         return(new " + componentClassname + "(props));\n"
           + "         Component component = new " + componentClassname + "();\n"
           + "         if (props != null)\n"
           + "         {\n"
@@ -194,6 +199,11 @@ public byte[] process(
           + "      });\n";
 
          mapEntries += entry;
+                                       // save the entry so it can be checked //
+                                       // in ReactCodeGenerator               //
+                                       // checkComponentFactoryMap()          //
+                                       // (temporary check before fix)        //
+         kFACTORY_MAP_KEYS.add(componentClassname);
       }
 
       String platformProviderClassname =

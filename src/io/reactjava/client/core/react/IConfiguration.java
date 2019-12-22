@@ -54,6 +54,7 @@ String kKEY_REQUIRED_PLATFORM_IMPORTS = "requiredPlatformImports";
 String kKEY_REQUIRED_PLATFORM_SCRIPTS = "requiredPlatformScripts";
 String kKEY_SCRIPTS_COMPRESSED        = "scriptsCompressed";
 String kKEY_SCRIPTS_LOAD_LAZY         = "scriptsLoadLazy";
+String kKEY_SEO_INFO                  = "seoInfo";
 String kKEY_TAG_MAP_CUSTOM            = "tagMapCustom";
 String kKEY_TAG_MAP_DEFAULT           = "tagMapDefault";
 String kKEY_THEME                     = "theme";
@@ -200,6 +201,24 @@ static IConfiguration assignSharedInstance(
    if (navRoutes != null)
    {
       configuration.setNavRoutes(navRoutes);
+   }
+                                       // seoInfo ----------------------------//
+   SEOInfo seoInfo     = null;
+   String  jsonSEOInfo =
+      Utilities.getHrefParams().get(IConfiguration.kKEY_SEO_INFO);
+
+   if (jsonSEOInfo != null)
+   {
+                                       // parse url param to seoInfo          //
+      seoInfo = null;
+   }
+   if (seoInfo == null)
+   {
+      seoInfo = app.getSEOInfo();
+   }
+   if (seoInfo != null)
+   {
+      configuration.setSEOInfo(seoInfo);
    }
                                        // imported node modules --------------//
    Collection<String> importedModules = configuration.getImportedNodeModules();
@@ -517,6 +536,22 @@ boolean getScriptsLoadLazy();
 
 /*------------------------------------------------------------------------------
 
+@name       getSEOInfo - get seo info
+                                                                              */
+                                                                             /**
+            Get seo info.
+
+@return     seo info
+
+@history    Thu Sep 7, 2017 08:46:23 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+SEOInfo getSEOInfo();
+
+/*------------------------------------------------------------------------------
+
 @name       getTagMap - get any custom tag map
                                                                               */
                                                                              /**
@@ -756,6 +791,22 @@ IConfiguration setProvider(
                                                                               */
 //------------------------------------------------------------------------------
 IConfiguration setScriptsLoadLazy(boolean bScriptsLoadLazy);
+
+/*------------------------------------------------------------------------------
+
+@name       setSEOInfo - set seo info
+                                                                              */
+                                                                             /**
+            Set seo info.
+
+@param      seoInfo     seo info
+
+@history    Thu Sep 7, 2017 08:46:23 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+IConfiguration setSEOInfo(SEOInfo seoInfo);
 
 /*------------------------------------------------------------------------------
 

@@ -50,7 +50,7 @@ public class ContentImage extends Component
 
                                                                               */
 //------------------------------------------------------------------------------
-public void render()
+public final void render()
 {
 /*--
    <img src={props().getString("content")} class="contentImage"></img>

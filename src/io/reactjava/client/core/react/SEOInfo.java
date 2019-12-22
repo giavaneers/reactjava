@@ -21,8 +21,9 @@ import java.util.Collection;
 public class SEOInfo
 {
                                        // constants ------------------------- //
-public static final String kDELIMITER  = "<SEOInfo>";
-public static final String kNULL_VALUE = kDELIMITER;
+public static final String kDELIMITER         = "<SEOInfo>";
+public static final String kNULL_VALUE        = kDELIMITER;
+public static final String kPAGE_HASH_DEFAULT = "";
 
                                        // class variables ------------------- //
                                        // (none)                              //
@@ -41,8 +42,9 @@ public Collection<SEOPageInfo> pageInfos;
                                                                              /**
             Constructor for specified string.
 
-@param      deployPath     SEO deploy path
-@param      pageInfos      collection of SEOPageInfo
+@param      deployPath           SEO deploy path
+@param      defaultPageHash      default pagr hash
+@param      pageInfos            collection of SEOPageInfo
 
 @history    Wed Jun 19, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -52,10 +54,41 @@ public Collection<SEOPageInfo> pageInfos;
 //------------------------------------------------------------------------------
 public SEOInfo(
    String                  deployPath,
+   String                  defaultPageHash,
    Collection<SEOPageInfo> pageInfos)
 {
    this.deployPath = deployPath;
    this.pageInfos  = pageInfos;
+   if (pageInfos != null)
+   {
+                                       // add a default if required           //
+      SEOPageInfo defaultPageInfo = null;
+      for (SEOPageInfo pageInfo : pageInfos)
+      {
+         if (pageInfo.pageHash.equals(kPAGE_HASH_DEFAULT))
+         {
+                                       // already has a default entry         //
+            defaultPageInfo = null;
+            break;
+         }
+         else if (pageInfo.pageHash.equals(defaultPageHash))
+         {
+                                       // found the default entry             //
+            defaultPageInfo = pageInfo;
+         }
+      }
+      if (defaultPageInfo != null)
+      {
+                                       // copy as the default                 //
+         pageInfos.add(
+            new SEOPageInfo(
+               kPAGE_HASH_DEFAULT,
+               defaultPageInfo.title,
+               defaultPageInfo.description,
+               defaultPageInfo.structuredDataType,
+               defaultPageInfo.structuredData));
+      }
+   }
 }
 /*------------------------------------------------------------------------------
 

@@ -42,6 +42,15 @@ public class Utilities
                                        // class constants --------------------//
 private static final Logger kLOGGER = Logger.newInstance();
 
+public static final String  kREGEX_ZERO_OR_MORE_CHARACTERS = ".*";
+
+public static final String  kREGEX_ONE_OR_MORE_WHITESPACE  = "\\s+";
+public static final String  kREGEX_ZERO_OR_MORE_WHITESPACE = "\\s*";
+
+public static final String  kREGEX_ONE_OR_MORE_NON_WHITESPACE  = "\\S+";
+public static final String  kREGEX_ZERO_OR_MORE_NON_WHITESPACE = "\\S*";
+
+
                                        // class variables ------------------- //
                                        // map of script by path               //
 protected static Map<String,String> scriptByPath;
@@ -1027,7 +1036,7 @@ public static void injectScriptsAndCSS(
 
    if (!bScriptsLoadLazy && scriptByPath == null)
    {
-                                    // inject pako for decompression       //
+                                       // inject pako for decompression       //
       injectRsrcURLs.remove(IJavascriptResources.kSCRIPT_PLAT_PAKO);
       injectScriptOrCSS(configuration, IJavascriptResources.kSCRIPT_PLAT_PAKO, null,
          (Object response, Object reqToken) ->

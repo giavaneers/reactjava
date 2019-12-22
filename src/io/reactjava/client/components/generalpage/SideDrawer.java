@@ -84,7 +84,7 @@ public INativeEventHandler clickHandler = (Event e) ->
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public void render()
+public final void render()
 {
    boolean          bOpen   = props().getBoolean(kPROPERTY_KEY_0PEN);
    Object           theme   = props().get("theme");

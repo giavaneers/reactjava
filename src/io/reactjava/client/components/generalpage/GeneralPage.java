@@ -211,7 +211,7 @@ protected PageDsc getPageDsc()
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public void render()
+public final void render()
 {
    useState(kSTATE_ANCHOR, "");
    useState(kSTATE_OPEN,   false);

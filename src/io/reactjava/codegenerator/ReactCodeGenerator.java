@@ -20,7 +20,9 @@ import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.TreeLogger.Type;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.JConstructor;
+import com.google.gwt.core.ext.typeinfo.JMethod;
 import com.google.gwt.core.ext.typeinfo.JType;
+import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.dev.CompilerContext;
 import com.google.gwt.dev.cfg.ModuleDef;
@@ -43,6 +45,7 @@ import io.reactjava.client.core.react.Utilities;
 import io.reactjava.client.core.resources.javascript.IJavascriptResources;
 import io.reactjava.jsx.IConfiguration;
 import io.reactjava.jsx.IJSXTransform;
+import io.reactjava.jsx.JSXTransform.MarkupDsc;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -65,7 +68,9 @@ import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.Deflater;
-                                       // ReactCodeGenerator =================//
+import org.apache.tools.ant.types.selectors.SelectSelector;
+
+// ReactCodeGenerator =================//
 public class ReactCodeGenerator implements IPostprocessor
 {
                                        // class constants --------------------//
@@ -280,6 +285,163 @@ protected void addImportedNodeModuleStylesheet(
    logger.log(TreeLogger.INFO,
       "getImportedNodeModules(): stylesheet=" + path
     + ", " + (path != null ? "" : "not ") + "found");
+}
+/*------------------------------------------------------------------------------
+
+@name       checkComponent - check component consistency
+                                                                              */
+                                                                             /**
+            Ensure component consistency.
+
+@param      type        component type
+@param      logger      logger
+
+@history    Sat Dec 21, 2019 18:00:00 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected void checkComponent(
+   JClassType type,
+   TreeLogger logger)
+   throws     Exception
+{
+   String  classname = type.getQualifiedSourceName();
+   JMethod rendor    = null;
+
+   boolean bCustomComponent =
+      !"io.reactjava.client.core.react.Component".equals(classname)
+      && !"io.reactjava.client.core.react.AppComponentTemplate".equals(classname);
+
+   if (bCustomComponent)
+   {
+                                       // ensure any render method is final   //
+      try
+      {
+
+         rendor = type.getMethod("render", new JType[0]);
+         if (!rendor.isFinal())
+         {
+            throw new IllegalStateException(
+               "Rendor() method in " + type.getQualifiedSourceName() +
+               " must be final");
+         }
+      }
+      catch(NotFoundException e)
+      {
+                                       // ignore                              //
+      }
+                                       // ensure any invocation of            //
+                                       // setComponentFcn() is within a       //
+                                       // render method                       //
+      String src     = getSourceForClassname(classname, logger);
+      int[]  offsets = null;
+
+      logger.log(
+         TreeLogger.Type.INFO,
+         "checkComponent(): " + classname + " source found");
+
+      for (int idx = 0, idxLast = 0; idx >= 0; idxLast = idx + 1)
+      {
+         idx = src.indexOf("setComponentFcn(", idxLast);
+         if (idx < 0)
+         {
+            if (idxLast == 0)
+            {
+               logger.log(
+                  TreeLogger.Type.INFO,
+                  "checkComponent(): "
+                + classname + ": \"setComponentFcn(\" not found");
+            }
+            break;
+         }
+         if (offsets == null)
+         {
+            offsets = getMethodInSource(src, "render", logger);
+         }
+         if (offsets == null || idx < offsets[0] || idx > offsets[1])
+         {
+            throw new IllegalStateException(
+               classname
+             + ": setComponentFcn() may not be invoked outside of rendor() "
+             + "method");
+         }
+         else
+         {
+            logger.log(
+               TreeLogger.Type.INFO,
+               "checkComponent(): "
+             + classname + " \"setComponentFcn(\" found in render() method");
+         }
+      }
+   }
+}
+/*------------------------------------------------------------------------------
+
+@name       checkComponentFactoryMap - ensure each component has a factory
+                                                                              */
+                                                                             /**
+            Ensure each component has an entry in the component factory map.
+
+@param      components              map of component type by classname
+@param      reactGeneratedCode      type
+
+@history    Thu Dec 19, 2019 18:00:00 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected void checkComponentFactoryMap(
+   Map<String,JClassType> components,
+   JClassType             reactGeneratedCode,
+   TreeLogger             logger)
+   throws                 Exception
+{
+   logger.log(TreeLogger.Type.INFO, "checkComponentFactoryMap(): entered");
+
+   for (JClassType type : components.values())
+   {
+      String classname = type.getQualifiedSourceName();
+      String msg       = "checkComponentFactoryMap(): " + classname + " ";
+
+      if (classname.equals(Component.class.getName())
+            || classname.equals(AppComponentTemplate.class.getName()))
+      {
+         logger.log(TreeLogger.Type.INFO, msg + "needs no factory map entry");
+         continue;
+      }
+      try
+      {
+                                       // see if the component has a render() //
+                                       // method                              //
+         type.getMethod("render", new JType[0]);
+      }
+      catch(NotFoundException e)
+      {
+         logger.log(
+            TreeLogger.Type.INFO,
+            msg + "has no render() method and so needs no factory map entry");
+
+         continue;
+      }
+
+      if (ReactCodeGeneratorPreprocessor.kFACTORY_MAP_KEYS.contains(classname))
+      {
+         logger.log(TreeLogger.Type.INFO, msg + "has a factory map entry");
+      }
+      else
+      {
+         String errorMsg =
+            msg
+             + "has no component factory map entry. Each ReactJava component "
+             + "class with a rendor() method must be in its own file for now.";
+
+         logger.log(TreeLogger.Type.ERROR, errorMsg);
+         throw new IllegalStateException(errorMsg);
+      }
+   }
+
+   logger.log(TreeLogger.Type.INFO, "checkComponentFactoryMap(): exiting");
 }
 /*------------------------------------------------------------------------------
 
@@ -896,6 +1058,11 @@ public static void copyStreamToArtifact(
       }
 
       IConfiguration.fastChannelCopy(in, out, in.available());
+
+      logger.log(
+         TreeLogger.Type.INFO,
+         "copyStreamToArtifact(): output"
+            + (bCompress ? "" : "not") + " compressed");
 
       if (bCompress)
       {
@@ -1671,6 +1838,72 @@ public String getHTMLFilenameForModule(
 }
 /*------------------------------------------------------------------------------
 
+@name       getMethodInSource - get method in source
+                                                                              */
+                                                                             /**
+            Get method location in source.
+
+@return     if method found, integer tuple indicating beginning and end;
+            otherwise null
+
+@param      src            src file string.
+@param      methodName     method name
+
+@history    Sat Dec 21, 2019 18:00:00 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static int[] getMethodInSource(
+   String      src,
+   String      methodName,
+   TreeLogger  logger)
+{
+                                       // locate any specified method         //
+   int[]   location = null;
+   String  regex    =
+      Utilities.kREGEX_ONE_OR_MORE_WHITESPACE  + methodName
+    + Utilities.kREGEX_ZERO_OR_MORE_WHITESPACE + "\\Q(\\E"
+    + Utilities.kREGEX_ZERO_OR_MORE_WHITESPACE + "\\Q)\\E"
+    + Utilities.kREGEX_ZERO_OR_MORE_WHITESPACE + "\\Q{\\E";
+
+   int idxContentBeg = -1;
+   int idxContent    = -1;
+
+   String[] splits = src.split(regex);
+   if (splits.length == 2)
+   {
+                                       // specified method found              //
+      idxContent    = src.indexOf(splits[1]);
+      idxContentBeg = idxContent;
+
+      for (int depth = 0; depth >= 0;)
+      {
+                                       // find next close brace               //
+         int idxBraceClose = src.indexOf("}", idxContent + 1);
+
+                                       // find next open brace                //
+         int idxBraceOpen = src.indexOf("{", idxContent + 1);
+         if (idxBraceOpen >= 0 && idxBraceOpen < idxBraceClose)
+         {
+            idxContent = idxBraceOpen;
+            depth++;
+            continue;
+         }
+         idxContent = idxBraceClose;
+         if (idxContent >= 0)
+         {
+            depth--;
+         }
+
+         location = new int[]{idxContentBeg, idxContent};
+      }
+   }
+
+   return(location);
+}
+/*------------------------------------------------------------------------------
+
 @name       getReactJavaJar - get any reactjava jar file
                                                                               */
                                                                              /**
@@ -2121,6 +2354,7 @@ protected Map<String,Map<String,JClassType>> parseClasses(
    String platformClassname  = IPlatform.class.getName().replace("$",".");
    String providerClassname  = IProvider.class.getName().replace("$",".");
    String componentClassname = Component.class.getName().replace("$",".");
+   String generatedClassname = ReactGeneratedCode.class.getName();
 
    JClassType[]           types    = oracle.getTypes();
    Map<String,JClassType> allTypes = new HashMap<String,JClassType>();
@@ -2133,6 +2367,7 @@ protected Map<String,Map<String,JClassType>> parseClasses(
    Map<String,JClassType> components     = new HashMap<String,JClassType>();
    JClassType             componentType  = null;
    Map<String,JClassType> appTypes       = new HashMap<String,JClassType>();
+   JClassType             generatedType  = null;
 
    for (JClassType classType : types)
    {
@@ -2179,6 +2414,17 @@ protected Map<String,Map<String,JClassType>> parseClasses(
          logger.log(
             TreeLogger.Type.DEBUG,
             "parseClasses(): found Component, "
+          + classType.getSimpleSourceName()
+          + "->" + classType.getQualifiedSourceName());
+
+         continue;
+      }
+      else if (generatedClassname.equals(classname))
+      {
+         generatedType = classType;
+         logger.log(
+            TreeLogger.Type.DEBUG,
+            "parseClasses(): found ReactGeneratedCode, "
           + classType.getSimpleSourceName()
           + "->" + classType.getQualifiedSourceName());
 
@@ -2247,6 +2493,10 @@ protected Map<String,Map<String,JClassType>> parseClasses(
    {
       throw new Exception("Can't find Component type");
    }
+   if (generatedType == null)
+   {
+      throw new Exception("Can't find ReactGeneratedCode type");
+   }
 
    for (JClassType allType : allTypes.values())
    {
@@ -2274,24 +2524,19 @@ protected Map<String,Map<String,JClassType>> parseClasses(
       String classname = allType.getQualifiedSourceName();
       logger.log(TreeLogger.Type.INFO, "parseClasses(): examining " + classname);
 
-                                       // used to require a default, nullary, //
-                                       // or constructor taking a Properties  //
-                                       // instance as a sole argument (190317)//
-      //if (parseConstructors(allType, propertiesType, logger).get("propsParam"))
-      //{
-         if (bComponent)
-         {
-            components.put(allType.getSimpleSourceName(), allType);
-         }
-         if (bPlatform)
-         {
-            platforms.put(allType.getSimpleSourceName(), allType);
-         }
-         if (bProvider)
-         {
-            providers.put(allType.getSimpleSourceName(), allType);
-         }
-      //}
+      if (bComponent)
+      {
+         checkComponent(allType, logger);
+         components.put(allType.getSimpleSourceName(), allType);
+      }
+      if (bPlatform)
+      {
+         platforms.put(allType.getSimpleSourceName(), allType);
+      }
+      if (bProvider)
+      {
+         providers.put(allType.getSimpleSourceName(), allType);
+      }
    }
    for (String classname : providers.keySet())
    {
@@ -2301,6 +2546,9 @@ protected Map<String,Map<String,JClassType>> parseClasses(
    {
       logger.log(TreeLogger.Type.INFO,"parseClasses(): component=" + classname);
    }
+                                       // check that each component has an    //
+                                       // entry in the component factory map  //
+   checkComponentFactoryMap(components, generatedType, logger);
 
    Map<String,Map<String,JClassType>> providersAndComponents =
       new HashMap<String,Map<String,JClassType>>()
@@ -2950,6 +3198,24 @@ public boolean getScriptsLoadLazy()
 }
 /*------------------------------------------------------------------------------
 
+@name       getSEOInfo - get seo info
+                                                                              */
+                                                                             /**
+            Get seo info.
+
+@return     seo info
+
+@history    Thu Sep 7, 2017 08:46:23 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public SEOInfo getSEOInfo()
+{
+  return((SEOInfo)get(kKEY_SEO_INFO));
+}
+/*------------------------------------------------------------------------------
+
 @name       getTagMap - get any custom tag map
                                                                               */
                                                                              /**
@@ -3271,6 +3537,26 @@ public io.reactjava.client.core.react.IConfiguration setScriptsLoadLazy(
    boolean bScriptsLoadLazy)
 {
    set(kKEY_SCRIPTS_LOAD_LAZY, bScriptsLoadLazy ? "true" : "false");
+   return(this);
+}
+/*------------------------------------------------------------------------------
+
+@name       setSEOInfo - set seo info
+                                                                              */
+                                                                             /**
+            Set seo info.
+
+@param      seoInfo     seo info
+
+@history    Thu Sep 7, 2017 08:46:23 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public io.reactjava.client.core.react.IConfiguration setSEOInfo(
+   SEOInfo seoInfo)
+{
+   set(kKEY_SEO_INFO, seoInfo);
    return(this);
 }
 /*------------------------------------------------------------------------------

@@ -150,7 +150,7 @@ protected Map<String,String> getButtonMap()
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public void render()
+public final void render()
 {
 
 /*--

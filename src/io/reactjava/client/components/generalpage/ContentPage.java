@@ -81,7 +81,7 @@ protected List<ContentDsc> getContent()
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public void render()
+public final void render()
 {
 /*--  <div class="contentChapter">
 --*/

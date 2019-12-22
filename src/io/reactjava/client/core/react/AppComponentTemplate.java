@@ -33,7 +33,7 @@ import static io.reactjava.client.core.react.ReactJava.kHEAD_ELEM_TYPE_META;
 import static io.reactjava.client.core.react.ReactJava.kHEAD_ELEM_TYPE_STRUCTURED;
 import static io.reactjava.client.core.react.ReactJava.kHEAD_ELEM_TYPE_TITLE;
 
-// AppComponentTemplate ============== //
+                                       // AppComponentTemplate ============== //
 public class AppComponentTemplate<P extends Properties>
    extends Component<P> implements EntryPoint
 {
@@ -181,6 +181,24 @@ protected String getConfigurationName()
 }
 /*------------------------------------------------------------------------------
 
+@name       getNavRoutes - get routes for application
+                                                                              */
+                                                                             /**
+            Get map of component classname by route path.
+
+@return     void
+
+@history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected Map<String,Class> getNavRoutes()
+{
+   return(super.getNavRoutes());
+}
+/*------------------------------------------------------------------------------
+
 @name       getSEOInfo - get seo information
                                                                               */
                                                                              /**
@@ -200,24 +218,6 @@ protected String getConfigurationName()
 protected SEOInfo getSEOInfo()
 {
    return(null);
-}
-/*------------------------------------------------------------------------------
-
-@name       getNavRoutes - get routes for application
-                                                                              */
-                                                                             /**
-            Get map of component classname by route path.
-
-@return     void
-
-@history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-protected Map<String,Class> getNavRoutes()
-{
-   return(super.getNavRoutes());
 }
 /*------------------------------------------------------------------------------
 
@@ -289,65 +289,5 @@ public void onModuleLoad()
                                        // the code generator class cannot be  //
                                        // found as a javascript global...     //
    //ReactJava.bootNative(getClass().getName());
-}
-/*------------------------------------------------------------------------------
-
-@name       render - render markup
-                                                                              */
-                                                                             /**
-            Render markup. This implementation adds SEO support in the form of
-            specific title, description and structured data head entries as
-            specified by any app SEOInfo instance.
-
-@history    Thu Jun 20, 2019 10:30:00 (Giavaneers - LBM) created
-
-@notes      see https://developers.google.com/search/docs/guides/intro-structured-data
-
-                                                                              */
-//------------------------------------------------------------------------------
-public void render()
-{
-   SEOInfo seoInfo = getSEOInfo();
-   if (seoInfo != null && seoInfo.pageInfos != null)
-   {
-      String pageHash = Router.getPath();
-      for (SEOPageInfo pageInfo : seoInfo.pageInfos)
-      {
-         if (pageHash != null && pageHash.equals(pageInfo.pageHash))
-         {
-            if (pageInfo.title != null && pageInfo.title.length() > 0)
-            {
-                                       // assign the page title               //
-               ReactJava.setHead(
-                  NativeObject.with(
-                     "type", kHEAD_ELEM_TYPE_TITLE, "text", pageInfo.title));
-            }
-            if (pageInfo.description != null
-                  && pageInfo.description.length() > 0)
-            {
-                                       // assign the page description         //
-               ReactJava.setHead(
-                  NativeObject.with(
-                     "type",   kHEAD_ELEM_TYPE_META,
-                     "name",   "description",
-                     "content", pageInfo.description));
-            }
-            if (pageInfo.structuredDataType != null
-                  && pageInfo.structuredDataType.length() > 0
-                  && pageInfo.structuredData != null
-                  && pageInfo.structuredData.length() > 0)
-            {
-                                       // assign the structured data          //
-               ReactJava.setHead(
-                  NativeObject.with(
-                     "type",               kHEAD_ELEM_TYPE_STRUCTURED,
-                     "structuredDataType", pageInfo.structuredDataType,
-                     "structuredData",     pageInfo.structuredData));
-            }
-
-            break;
-         }
-      }
-   }
 }
 }//====================================// end AppComponentTemplate ---------- //

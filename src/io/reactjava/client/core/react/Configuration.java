@@ -324,6 +324,24 @@ public boolean getScriptsLoadLazy()
 }
 /*------------------------------------------------------------------------------
 
+@name       getSEOInfo - get seo info
+                                                                              */
+                                                                             /**
+            Get seo info.
+
+@return     seo info
+
+@history    Thu Sep 7, 2017 08:46:23 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public SEOInfo getSEOInfo()
+{
+  return((SEOInfo)get(kKEY_SEO_INFO));
+}
+/*------------------------------------------------------------------------------
+
 @name       getTagMap - get any custom tag map
                                                                               */
                                                                              /**
@@ -651,6 +669,26 @@ public IConfiguration setScriptsLoadLazy(
    boolean bScriptsLoadLazy)
 {
    set(kKEY_SCRIPTS_LOAD_LAZY, bScriptsLoadLazy ? "true" : "false");
+   return(this);
+}
+/*------------------------------------------------------------------------------
+
+@name       setSEOInfo - set seo info
+                                                                              */
+                                                                             /**
+            Set seo info.
+
+@param      seoInfo     seo info
+
+@history    Thu Sep 7, 2017 08:46:23 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public IConfiguration setSEOInfo(
+   SEOInfo seoInfo)
+{
+   set(kKEY_SEO_INFO, seoInfo);
    return(this);
 }
 /*------------------------------------------------------------------------------

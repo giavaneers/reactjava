@@ -21,7 +21,6 @@ import elemental2.dom.Element;
 import elemental2.dom.HTMLElement;
 import elemental2.dom.Node;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -46,14 +45,18 @@ private   static Map<String,Component> // map of component by id              //
                                        // protected instance variables ------ //
 protected RefMgr       refMgr;         // component ref manager               //
 protected StateMgr     stateMgr;       // component state manager             //
-protected java.util.function.Function<Properties, ReactElement>
-                       componentFcn;   // component function                  //
 protected ReactElement reactElement;   // react element                       //
 protected String       css;            // css                                 //
                                        // css injected styleId                //
 protected String       cssInjectedStyleId;
                                        // list of injected styleIds           //
 protected List<String> injectedStyleIds;
+                                       // private instance variables -------- //
+                                       // component function                  //
+                                       // private to force access through     //
+                                       // accessors to support JSXTransform   //
+private java.util.function.Function<Properties, ReactElement>
+                       componentFcn;
                                        // private to approximate immutable    //
                                        // renamed from 'props' to avoid       //
                                        // minified confusion with react       //
@@ -211,6 +214,25 @@ public static Map<String,Component> getComponentByIdMap()
       componentById = new HashMap<>();
    }
    return(componentById);
+}
+/*------------------------------------------------------------------------------
+
+@name       getComponentFcn - get component function
+                                                                              */
+                                                                             /**
+            Get component function.
+
+@return     component function
+
+@history    Sat Dec 21, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected java.util.function.Function<Properties, ReactElement> getComponentFcn()
+{
+   return(componentFcn);
 }
 /*------------------------------------------------------------------------------
 
@@ -741,13 +763,13 @@ protected P props()
 @name       render - render markup
                                                                               */
                                                                              /**
-            Render markup.
+            Render markup. This implementation adds SEO support in the form of
+            specific title, description and structured data head entries as
+            specified by any app SEOInfo instance.
 
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
-            Wed Oct 17, 2018 10:30:00 (Giavaneers - LBM) renamed per suggestion
-               by Ethan Elshyeb.
+@history    Thu Jun 20, 2019 10:30:00 (Giavaneers - LBM) created
 
-@notes
+@notes      see https://developers.google.com/search/docs/guides/intro-structured-data
 
                                                                               */
 //------------------------------------------------------------------------------
@@ -790,6 +812,26 @@ protected void removeAnyStylesheet()
    {
       previous.remove();
    }
+}
+/*------------------------------------------------------------------------------
+
+@name       setComponentFcn - set component function
+                                                                              */
+                                                                             /**
+            Set component function.
+
+@param      componentFcn      component function
+
+@history    Sat Dec 21, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected void setComponentFcn(
+   java.util.function.Function<Properties, ReactElement> componentFcn)
+{
+   this.componentFcn = componentFcn;
 }
 /*------------------------------------------------------------------------------
 

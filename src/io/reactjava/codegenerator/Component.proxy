@@ -28,13 +28,14 @@ public abstract class Component<P extends Properties>
                                        // class variables                     //
 protected static int        nextId;    // next elementId to be autoassigned   //
                                        // protected instance variables ------ //
-protected java.util.function.Function<Properties,ReactElement>
-                                       // component function                  //
-                            componentFcn;
 protected String            css;       // css                                 //
-                                        // component properties                //
+                                       // component properties                //
 protected P                 componentProperties;
 protected IUITheme          theme;     // theme                               //
+                                       // private instance variables -------- //
+                                       // component function                  //
+private   java.util.function.Function<Properties,ReactElement>
+                            componentFcn;
 
 /*------------------------------------------------------------------------------
 
@@ -127,6 +128,25 @@ public static Component forId(
    String id)
 {
    return(null);
+}
+/*------------------------------------------------------------------------------
+
+@name       getComponentFcn - get component function
+                                                                              */
+                                                                             /**
+            Get component function.
+
+@return     component function
+
+@history    Sat Dec 21, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected java.util.function.Function<Properties, ReactElement> getComponentFcn()
+{
+   return(componentFcn);
 }
 /*------------------------------------------------------------------------------
 
@@ -553,6 +573,26 @@ public void render()
 public void renderCSS()
 {
 };
+/*------------------------------------------------------------------------------
+
+@name       setComponentFcn - set component function
+                                                                              */
+                                                                             /**
+            Set component function.
+
+@param      componentFcn      component function
+
+@history    Sat Dec 21, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected void setComponentFcn(
+   java.util.function.Function<Properties, ReactElement> componentFcn)
+{
+   this.componentFcn = componentFcn;
+}
 /*------------------------------------------------------------------------------
 
 @name       setId - set id

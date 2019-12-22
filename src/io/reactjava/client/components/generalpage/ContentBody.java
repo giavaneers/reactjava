@@ -85,7 +85,7 @@ protected String getVariant(
 
                                                                               */
 //------------------------------------------------------------------------------
-public void render()
+public final void render()
 {
    Function<Properties,ReactElement> fcn = (props) ->
    {
@@ -138,7 +138,7 @@ public void render()
       ReactElement element = ElementDsc.createElement(root);
       return(element);
    };
-   this.componentFcn = fcn;
+   setComponentFcn(fcn);
 }
 /*==============================================================================
 

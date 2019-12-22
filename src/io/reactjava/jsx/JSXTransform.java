@@ -21,6 +21,7 @@ import com.google.gwt.core.ext.TreeLogger.Type;
 import com.google.gwt.dev.util.log.PrintWriterTreeLogger;
 import io.reactjava.client.core.providers.platform.IPlatform;
 import io.reactjava.client.core.react.Component;
+import io.reactjava.client.core.react.Utilities;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -53,20 +54,18 @@ public static final String kHTML_NON_BREAKING_SPACE    = "&nbsp;";
 public static final String kUNICODE_NON_BREAKING_SPACE = "\\u00a0";
 public static final String kUNICODE_TAB                = "\\u00a0\\u00a0\\u00a0";
 
-public static final String kREGEX_ZERO_OR_MORE_CHARACTERS = ".*";
-
-public static final String kREGEX_ONE_OR_MORE_WHITESPACE  = "\\s+";
-public static final String kREGEX_ZERO_OR_MORE_WHITESPACE = "\\s*";
-
-public static final String kREGEX_ONE_OR_MORE_NON_WHITESPACE  = "\\S+";
-public static final String kREGEX_ZERO_OR_MORE_NON_WHITESPACE = "\\S*";
+public static final String kINLINE_BODY_DEFAULT =
+   "elem =io.reactjava.client.core.react.ElementDsc.create(parents.size() > 0"
+ + " ? parents.peek() : null,\"div\","
+ + "io.reactjava.client.core.react.Properties.with(\"id\", getNextId()));"
+ + "root = root == null ? elem : root;";
 
 public static final String kINLINE_FTR =
    "if(root != null){element="
  + "io.reactjava.client.core.react.ElementDsc.createElement(root);"
  + "setId(element.props.getString(\"id\"));}"
  + "return(element);};"
- + "this.componentFcn = fcn;";
+ + "setComponentFcn(fcn);";
 
 public static final String kINLINE_FTR_CSS =
    "if(css.length() > 0){this.css = css;}";
@@ -430,7 +429,7 @@ public void getComponent(
 {
    if (filter(classname))
    {
-      String parsed  = parse(classname, content, getTagsMap(), logger);
+      String parsed = parse(classname, content, getTagsMap(), logger);
       if (!parsed.equals(content))
       {
                                        // add any missing constructors        //
@@ -723,10 +722,10 @@ public static List<MarkupDsc> getMethodMarkupDscs(
    List<MarkupDsc> markupDscs = null;
    String          content    = null;
    String          regex      =
-      kREGEX_ONE_OR_MORE_WHITESPACE  + methodName
-    + kREGEX_ZERO_OR_MORE_WHITESPACE + "\\Q(\\E"
-    + kREGEX_ZERO_OR_MORE_WHITESPACE + "\\Q)\\E"
-    + kREGEX_ZERO_OR_MORE_WHITESPACE + "\\Q{\\E";
+      Utilities.kREGEX_ONE_OR_MORE_WHITESPACE  + methodName
+    + Utilities.kREGEX_ZERO_OR_MORE_WHITESPACE + "\\Q(\\E"
+    + Utilities.kREGEX_ZERO_OR_MORE_WHITESPACE + "\\Q)\\E"
+    + Utilities.kREGEX_ZERO_OR_MORE_WHITESPACE + "\\Q{\\E";
 
    int idxContentBeg = -1;
    int idxContent    = -1;
@@ -2196,19 +2195,31 @@ public String parseMarkup(
    if (dscs == null)
    {
    }
-   else if (dscs.size() == 1)
-   {
-                                       // modify parsed innocuously to        //
-                                       // indicate a render method was found  //
-      parsed += " ";
-   }
-   else if (dscs.size() > 1)
+   else
    {
       MarkupDsc first   = dscs.get(0);
-      int       idxBeg  = first.idxBeg;
-      int       idxEnd  = first.idxEnd;
-      String    content = src.substring(idxBeg, idxEnd);
-      if (content.trim().length() > 0)
+      String    content = src.substring(first.idxBeg, first.idxEnd);
+      if (dscs.size() == 1)
+      {
+         if (!content.contains("setComponentFcn"))
+         {
+                                       // ensure at least the default         //
+                                       // component function                  //
+            parsed  = src.substring(0, first.idxBeg);
+            parsed += kINLINE_HDR;
+            parsed += content;
+            parsed += kINLINE_BODY_DEFAULT;
+            parsed += kINLINE_FTR;
+            parsed += src.substring(first.idxEnd);
+         }
+         else
+         {
+                                       // ensure parsed is different from src //
+                                       // so classname is marked as component //
+            parsed += " ";
+         }
+      }
+      else
       {
          String body = parse(classname, src, dscs, components, logger);
          parsed = generateRenderableSource(classname, src, first, body, logger);
@@ -2531,16 +2542,16 @@ public static String replaceReactFragmentShorthands(
    String markup)
 {
    String shorthandStartTag =
-      kREGEX_ZERO_OR_MORE_WHITESPACE + "\\Q<\\E"
-    + kREGEX_ZERO_OR_MORE_WHITESPACE
+      Utilities.kREGEX_ZERO_OR_MORE_WHITESPACE + "\\Q<\\E"
+    + Utilities.kREGEX_ZERO_OR_MORE_WHITESPACE
     + "\\Q>\\E";
 
    markup = markup.replaceAll(shorthandStartTag, "<React.Fragment>");
 
    String shorthandEndTag =
-      kREGEX_ZERO_OR_MORE_WHITESPACE + "\\Q<\\E"
-    + kREGEX_ZERO_OR_MORE_WHITESPACE + "/"
-    + kREGEX_ZERO_OR_MORE_WHITESPACE + "\\Q>\\E";
+      Utilities.kREGEX_ZERO_OR_MORE_WHITESPACE + "\\Q<\\E"
+    + Utilities.kREGEX_ZERO_OR_MORE_WHITESPACE + "/"
+    + Utilities.kREGEX_ZERO_OR_MORE_WHITESPACE + "\\Q>\\E";
 
    markup = markup.replaceAll(shorthandEndTag, "</React.Fragment>");
 
@@ -3538,6 +3549,19 @@ public static boolean unitTest(
                   }
                   else if (false)
                   {
+                     classname  =
+                        "io.reactjava.client.components.generalpage.ContentBody";
+                     src =
+                        IJSXTransform.getFileAsString(
+                           new File(
+                              "/Users/brianm/working/IdeaProjects/ReactJava/"
+                            + "ReactJava/src/"
+                            + "io/reactjava/client/components/generalpage/ContentBody.java"),
+                           null);
+                     content = src;
+                  }
+                  else if (false)
+                  {
                      components.put(
                         "ContentBody",
                         "io.reactjava.client.components.generalpage.ContentBody");
@@ -3728,7 +3752,7 @@ public static boolean unitTest(
                            null);
                      content = src;
                   }
-                  else if (true)
+                  else if (false)
                   {
                      classname  = "io.reactjava.client.examples.statevariable.simple.App";
                      src =
@@ -3737,6 +3761,18 @@ public static boolean unitTest(
                               "/Users/brianm/working/IdeaProjects/ReactJava/"
                             + "ReactJavaExamples/src/"
                             + "io/reactjava/client/examples/statevariable/simple/App.java"),
+                           null);
+                     content = src;
+                  }
+                  else if (true)
+                  {
+                     classname  = "io.reactjava.client.examples.seo.ViewA";
+                     src =
+                        IJSXTransform.getFileAsString(
+                           new File(
+                              "/Users/brianm/working/IdeaProjects/ReactJava/"
+                            + "ReactJavaExamples/src/"
+                            + "io/reactjava/client/examples/seo/ViewA.java"),
                            null);
                      content = src;
                   }

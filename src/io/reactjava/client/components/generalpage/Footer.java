@@ -30,9 +30,8 @@ import io.reactjava.client.components.generalpage.Descriptors.FooterDsc.FooterCr
 import io.reactjava.client.core.react.Component;
 import io.reactjava.client.core.react.IUITheme;
 import io.reactjava.client.core.react.Properties;
-import io.reactjava.client.core.react.React;
 
-// Footer =============================//
+                                       // Footer =============================//
 public class Footer<P extends Properties> extends Component
 {
                                        // class constants ------------------- //
@@ -40,7 +39,6 @@ public class Footer<P extends Properties> extends Component
 public static final String    kKEY_FOOTER     = "footer";
 public static final FooterDsc kFOOTER_DEFAULT = new FooterDsc();
 
-public static final String    kLOCATION = DomGlobal.location.getPathname();
                                        // class variables ------------------- //
                                        // (none)                              //
                                        // public instance variables --------- //
@@ -89,7 +87,7 @@ protected FooterDsc getFooter()
 
                                                                               */
 //------------------------------------------------------------------------------
-public void render()
+public final void render()
 {
 /*--
    <footer class="footer layout">
@@ -109,8 +107,13 @@ public void render()
 --*/
             for (FooterTopicDsc topic : category.topics)
             {
+               String url = topic.url;
+               if (url.startsWith("#"))
+               {
+                  url = DomGlobal.location.getPathname() + url;
+               }
 /*--
-            <a href={topic.url} target={topic.target} class="topic" >
+            <a href={url} target={topic.target} class="topic" >
                <@material-ui.core.Typography
                   key={topic.topic} variant="subtitle1" color="textSecondary">
                   {topic.topic}

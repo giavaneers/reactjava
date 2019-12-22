@@ -48,7 +48,7 @@ public static Properties constants;    // constants                           //
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public void render()
+public final void render()
 {
    constants = props();
 }

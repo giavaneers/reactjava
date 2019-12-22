@@ -68,7 +68,7 @@ public INativeEffectHandler handleEffect = (Object status) ->
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public void render()
+public final void render()
 {
    useEffect(handleEffect);
                                        // must use style overrides rather than//

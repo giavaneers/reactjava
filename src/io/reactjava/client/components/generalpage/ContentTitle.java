@@ -50,7 +50,7 @@ public class ContentTitle extends Component
 
                                                                               */
 //------------------------------------------------------------------------------
-public void render()
+public final void render()
 {
    String content = props().getString("content");
    String id      = Integer.toString(content.hashCode());

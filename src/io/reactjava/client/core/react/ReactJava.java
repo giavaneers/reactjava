@@ -28,6 +28,7 @@ import elemental2.dom.HTMLTitleElement;
 import elemental2.dom.NodeList;
 import elemental2.dom.StyleSheet;
 import io.reactjava.client.core.providers.platform.web.PlatformWeb;
+import io.reactjava.client.core.react.SEOInfo.SEOPageInfo;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -204,6 +205,95 @@ public static Map<String,String> clearInjectedStylesheets()
    stylesheets.clear();
 
    return(stylesheets);
+}
+/*------------------------------------------------------------------------------
+
+@name       componentDoSEOInfo - do any seoInfo processing for component
+                                                                              */
+                                                                             /**
+            Do any seoInfo processing for specified component.
+
+@param      component      target component
+@param      props          component properties
+
+@history    Fri Dec 20, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static void componentDoSEOInfo(
+   Component  component,
+   Properties props)
+{
+   SEOInfo seoInfo = props.getConfiguration().getSEOInfo();
+   if (seoInfo != null && seoInfo.pageInfos != null)
+   {
+      String pageHash = Router.getPath();
+      for (SEOPageInfo pageInfo : seoInfo.pageInfos)
+      {
+         if (pageHash != null && pageHash.equals(pageInfo.pageHash))
+         {
+            if (pageInfo.title != null && pageInfo.title.length() > 0)
+            {
+                                       // assign the page title               //
+               ReactJava.setHead(
+                  NativeObject.with(
+                     "type", kHEAD_ELEM_TYPE_TITLE,
+                     "id",   "seo" + kHEAD_ELEM_TYPE_TITLE,
+                     "text", pageInfo.title));
+            }
+            if (pageInfo.description != null
+                  && pageInfo.description.length() > 0)
+            {
+                                       // assign the page description         //
+               ReactJava.setHead(
+                  NativeObject.with(
+                     "type",   kHEAD_ELEM_TYPE_META,
+                     "id",     "seo" + kHEAD_ELEM_TYPE_META,
+                     "name",   "description",
+                     "content", pageInfo.description));
+            }
+            if (pageInfo.structuredDataType != null
+                  && pageInfo.structuredDataType.length() > 0
+                  && pageInfo.structuredData != null
+                  && pageInfo.structuredData.length() > 0)
+            {
+                                       // assign the structured data          //
+               ReactJava.setHead(
+                  NativeObject.with(
+                     "type",               kHEAD_ELEM_TYPE_STRUCTURED,
+                     "id",                 "seo" + kHEAD_ELEM_TYPE_STRUCTURED,
+                     "structuredDataType", pageInfo.structuredDataType,
+                     "structuredData",     pageInfo.structuredData));
+            }
+
+            break;
+         }
+      }
+   }
+}
+/*------------------------------------------------------------------------------
+
+@name       componentPreRender - component pre-render processing
+                                                                              */
+                                                                             /**
+            Component pre-render processing.
+
+@param      component      target component
+@param      props          component properties
+
+@history    Fri Dec 20, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static void componentPreRender(
+   Component  component,
+   Properties props)
+{
+   componentDoSEOInfo(component, props);
 }
 /*------------------------------------------------------------------------------
 
@@ -595,11 +685,11 @@ public static Map<String,Function> getComponentFactoryMap()
 public static <P extends Properties> Function<P, ReactElement> getComponentFcn(
    Component component)
 {
-   Function<P, ReactElement> fcn = component.componentFcn;
+   Function<P, ReactElement> fcn = component.getComponentFcn();
    if (fcn == null)
    {
       component.render();
-      fcn = component.componentFcn;
+      fcn = component.getComponentFcn();
    }
 
    return(fcn);
@@ -818,6 +908,9 @@ public static <P extends Properties> INativeRenderableComponent getRenderableCom
       Function<P,ReactElement> fcn = getComponentFcn(component);
       if (fcn != null)
       {
+                                       // pre-render processing               //
+         componentPreRender(component, props);
+
                                        // remove any injected styles          //
          //removeComponentStyles(component);
 
@@ -962,6 +1055,8 @@ public static Element setHead(
    }
 
    Element element = DomGlobal.document.createElement(type);
+   element.setAttribute("id", descriptor.getString("id"));
+
    switch(type)
    {
       case kHEAD_ELEM_TYPE_LINK:

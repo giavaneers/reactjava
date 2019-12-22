@@ -50,7 +50,7 @@ public class ContentCode extends Component
 
                                                                               */
 //------------------------------------------------------------------------------
-public void render()
+public final void render()
 {
 /*--
    <div class='contentCode'>
