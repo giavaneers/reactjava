@@ -25,10 +25,12 @@ import elemental2.dom.HTMLMetaElement;
 import elemental2.dom.HTMLScriptElement;
 import elemental2.dom.HTMLStyleElement;
 import elemental2.dom.HTMLTitleElement;
+import elemental2.dom.Location;
 import elemental2.dom.NodeList;
 import elemental2.dom.StyleSheet;
 import io.reactjava.client.core.providers.platform.web.PlatformWeb;
 import io.reactjava.client.core.react.SEOInfo.SEOPageInfo;
+import io.reactjava.client.moduleapis.ReactGA;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -129,47 +131,37 @@ public static ReactElement boot(
    addBaseTag();
 
    final ReactElement[] renderElement = new ReactElement[1];
-   IConfiguration  configuration = Configuration.sharedInstance();
+
+   IConfiguration configuration = Configuration.sharedInstance();
+   configuration.setApp(app);
    initialize(configuration, null, (Object response, Object reqToken) ->
    {
       if (response instanceof Throwable)
       {
          kLOGGER.logError((Throwable)response);
       }
-      else
+      else if (getIsWebPlatform())
       {
-         Map<String,Class> routes = configuration.getNavRoutes();
-         if (routes == null)
-         {
-            configuration.setNavRoutes(
-               new HashMap<String,Class>()
-               {{
-                  put("", app.getClass());
-               }});
-         }
-         if (getIsWebPlatform())
-         {
-            DomGlobal.setTimeout(
-               (e) ->
-               {
+         DomGlobal.setTimeout(
+            (e) ->
+            {
                                        // currently in the last inject http   //
                                        // request completion handler, so to   //
                                        // make debugging easier, do the       //
                                        // initial render on a new task...     //
-                  try
-                  {
-                     Router.render(configuration);
-                  }
-                  catch(Throwable t)
-                  {
-                     kLOGGER.logError(t);
-                  }
-               }, 0, configuration);
-         }
-         else
-         {
-            renderElement[0] = Router.render(configuration);
-         }
+               try
+               {
+                  Router.render(configuration);
+               }
+               catch(Throwable t)
+               {
+                  kLOGGER.logError(t);
+               }
+            }, 0, configuration);
+      }
+      else
+      {
+         renderElement[0] = Router.render(configuration);
       }
    });
 
@@ -959,6 +951,7 @@ protected static void initialize(
          configuration, null, requestToken,
          (Object response1, Object reqToken1) ->
          {
+            configuration.initialize();
             bInitialized = true;
             if (requestor != null)
             {

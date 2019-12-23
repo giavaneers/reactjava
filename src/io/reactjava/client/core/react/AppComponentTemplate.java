@@ -24,15 +24,8 @@ notes:
 package io.reactjava.client.core.react;
                                        // imports --------------------------- //
 import com.google.gwt.core.client.EntryPoint;
-import io.reactjava.client.core.react.SEOInfo.SEOPageInfo;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
-import static io.reactjava.client.core.react.ReactJava.kHEAD_ELEM_TYPE_META;
-import static io.reactjava.client.core.react.ReactJava.kHEAD_ELEM_TYPE_STRUCTURED;
-import static io.reactjava.client.core.react.ReactJava.kHEAD_ELEM_TYPE_TITLE;
-
                                        // AppComponentTemplate ============== //
 public class AppComponentTemplate<P extends Properties>
    extends Component<P> implements EntryPoint
@@ -178,24 +171,6 @@ protected IConfiguration[] getConfigurations()
 protected String getConfigurationName()
 {
    return(null);
-}
-/*------------------------------------------------------------------------------
-
-@name       getNavRoutes - get routes for application
-                                                                              */
-                                                                             /**
-            Get map of component classname by route path.
-
-@return     void
-
-@history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-protected Map<String,Class> getNavRoutes()
-{
-   return(super.getNavRoutes());
 }
 /*------------------------------------------------------------------------------
 

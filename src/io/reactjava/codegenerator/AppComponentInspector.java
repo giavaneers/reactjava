@@ -244,9 +244,9 @@ public static String getImportedModulesAndSEO(
                                        // execute the proxy using the cp      //
                                        // capturing the result                //
 
-   String   main     = AppComponentTemplate.class.getName();
-   String[] commands = {"java", "-cp", classpath, main, appClassname};
-   Process  process  = new ProcessBuilder(commands).start();
+   String   mainClass = AppComponentTemplate.class.getName();
+   String[] commands  = {"java", "-cp", classpath, mainClass, appClassname};
+   Process  process   = new ProcessBuilder(commands).start();
 
    ByteArrayOutputStream out = new ByteArrayOutputStream();
    IConfiguration.fastChannelCopy(process.getInputStream(), out);

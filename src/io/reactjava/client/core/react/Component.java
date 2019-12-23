@@ -291,6 +291,24 @@ public Element getDOMParentElement()
 }
 /*------------------------------------------------------------------------------
 
+@name       getGoogleAnalyticsId - get google analytics id
+                                                                              */
+                                                                             /**
+            Get google analytics id. This impementation is to be overridden.
+
+@return     google analytics id.
+
+@history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected String getGoogleAnalyticsId()
+{
+   return(null);
+}
+/*------------------------------------------------------------------------------
+
 @name       getInjectedStyles - get list of injected styleIds
                                                                               */
                                                                              /**

@@ -257,7 +257,7 @@ protected static Map<String,String> manifestMap;
 //------------------------------------------------------------------------------
 protected String getGoogleAnalyticsId()
 {
-   return(null);
+   return("UA-142849130-1");
 }
 /*------------------------------------------------------------------------------
 
@@ -276,7 +276,7 @@ protected String getGoogleAnalyticsId()
 protected List<String> getImportedNodeModules()
 {
    List<String> modules = new ArrayList(GeneralPage.getImportedNodeModules());
-   modules.add("react-ga");
+// modules.add("react-ga");
 
    return(modules);
 }

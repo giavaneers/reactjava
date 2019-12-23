@@ -177,6 +177,9 @@ public static Component componentForHash(
 
                                        // assign any nested routes            //
          configuration.setNavRoutesNested(component.getNavRoutes());
+
+                                       // assign any google analytics id      //
+         configuration.setGoogleAnalyticsId(component.getGoogleAnalyticsId());
       }
    }
 

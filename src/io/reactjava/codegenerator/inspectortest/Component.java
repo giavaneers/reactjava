@@ -22,7 +22,6 @@ import io.reactjava.client.core.react.INativeEffectHandler;
 import io.reactjava.client.core.react.IUITheme;
 import io.reactjava.client.core.react.React;
 import io.reactjava.client.core.react.ReactElement;
-import io.reactjava.client.core.react.ReactJava;
 import java.util.Map;
 import java.util.function.Function;
                                        // Component ==========================//

@@ -15,6 +15,7 @@ notes:
                                        // package --------------------------- //
 package io.reactjava.client.core.react;
                                        // imports --------------------------- //
+import elemental2.dom.DomGlobal;
 import io.reactjava.client.core.providers.auth.IAuthenticationService;
 import io.reactjava.client.core.providers.auth.firebase.FirebaseAuthenticationService;
 import io.reactjava.client.core.providers.database.IDatabaseService;
@@ -23,6 +24,7 @@ import io.reactjava.client.core.providers.http.HttpClient;
 import io.reactjava.client.core.providers.http.IHttpClientBase;
 import io.reactjava.client.core.providers.platform.IPlatform;
 import io.reactjava.client.core.providers.platform.web.PlatformWeb;
+import io.reactjava.client.moduleapis.ReactGA;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -41,10 +43,12 @@ String kJSINTEROP_NAMESPACE =
    kSRCCFG_BUNDLE_SCRIPT ? "ReactJava" : JsPackage.GLOBAL;
 
                                        // standard keys                       //
+String kKEY_APP                       = "app";
 String kKEY_BUNDLE_SCRIPTS            = "bundleScripts";
 String kKEY_CONFIGURATION_NAME        = "configurationName";
 String kKEY_GLOBAL_CSS                = "globalCSS";
 String kKEY_GLOBAL_IMAGES             = "globalImages";
+String kKEY_GOOGLE_ANALYTICS_ID       = "googleAnalyticsId";
 String kKEY_IMPORTED_NODE_MODULES     = "importedNodeModules";
 String kKEY_NAV_ROUTES                = "navRoutes";
 String kKEY_NAV_ROUTES_NESTED         = "navRoutesNested";
@@ -220,6 +224,12 @@ static IConfiguration assignSharedInstance(
    {
       configuration.setSEOInfo(seoInfo);
    }
+                                       // googleAnalyticsId ------------------//
+   String googleAnalyticsId = app.getGoogleAnalyticsId();
+   if (googleAnalyticsId != null)
+   {
+      configuration.setGoogleAnalyticsId(googleAnalyticsId);
+   }
                                        // imported node modules --------------//
    Collection<String> importedModules = configuration.getImportedNodeModules();
    if (importedModules == null)
@@ -237,6 +247,22 @@ static IConfiguration assignSharedInstance(
 }
 /*------------------------------------------------------------------------------
 
+@name       getApp - get app
+                                                                              */
+                                                                             /**
+            Get app.
+
+@return     app
+
+@history    Mon Dec 23, 2019 08:46:23 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+AppComponentTemplate getApp();
+
+/*------------------------------------------------------------------------------
+
 @name       getBundleScripts - get bundle scripts
                                                                               */
                                                                              /**
@@ -250,53 +276,6 @@ static IConfiguration assignSharedInstance(
                                                                               */
 //------------------------------------------------------------------------------
 Collection<String> getBundleScripts();
-
-/*------------------------------------------------------------------------------
-
-@name       getGlobalCSS - get global css
-                                                                              */
-                                                                             /**
-            Get global css.
-
-@return     global css
-
-@history    Thu Sep 7, 2017 08:46:23 (LBM) created.
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-Collection<String> getGlobalCSS();
-
-/*------------------------------------------------------------------------------
-
-@name       getGlobalImages - get global images
-                                                                              */
-                                                                             /**
-            Get global images.
-
-@return     global images
-
-@history    Thu Sep 7, 2017 08:46:23 (LBM) created.
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-Collection<String> getGlobalImages();
-
-/*------------------------------------------------------------------------------
-
-@name       getImportedNodeModules - get imported node modules
-                                                                              */
-                                                                             /**
-            Get imported node modules.
-
-@history    Sun Dec 02, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-
-                                                                              */
-//------------------------------------------------------------------------------
-Collection<String> getImportedNodeModules();
 
 /*------------------------------------------------------------------------------
 
@@ -373,6 +352,69 @@ static IConfiguration getConfiguration(
 
    return(config);
 }
+/*------------------------------------------------------------------------------
+
+@name       getGlobalCSS - get global css
+                                                                              */
+                                                                             /**
+            Get global css.
+
+@return     global css
+
+@history    Thu Sep 7, 2017 08:46:23 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+Collection<String> getGlobalCSS();
+
+/*------------------------------------------------------------------------------
+
+@name       getGlobalImages - get global images
+                                                                              */
+                                                                             /**
+            Get global images.
+
+@return     global images
+
+@history    Thu Sep 7, 2017 08:46:23 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+Collection<String> getGlobalImages();
+
+/*------------------------------------------------------------------------------
+
+@name       getGoogleAnalyticsId - get google analytics id
+                                                                              */
+                                                                             /**
+            Get google analytics id. This impementation is to be overridden.
+
+@return     google analytics id.
+
+@history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+String getGoogleAnalyticsId();
+
+/*------------------------------------------------------------------------------
+
+@name       getImportedNodeModules - get imported node modules
+                                                                              */
+                                                                             /**
+            Get imported node modules.
+
+@history    Sun Dec 02, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+Collection<String> getImportedNodeModules();
+
 /*------------------------------------------------------------------------------
 
 @name       getName - get name
@@ -614,6 +656,40 @@ Map<String,String> getTagMapDefault();
 
 /*------------------------------------------------------------------------------
 
+@name       initialize - initialize
+                                                                              */
+                                                                             /**
+            Initialize. When invoked, all scripts and node modules have been
+            loaded.
+
+@history    Mon Dec 23, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+void initialize();
+
+/*------------------------------------------------------------------------------
+
+@name       setApp - set app
+                                                                              */
+                                                                             /**
+            Set app.
+
+@return     this
+
+@param      app      app
+
+@history    Mon Dec 23, 2019 08:46:23 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+IConfiguration setApp(AppComponentTemplate app);
+
+/*------------------------------------------------------------------------------
+
 @name       setBundleScripts - set bundle scripts
                                                                               */
                                                                              /**
@@ -665,6 +741,24 @@ IConfiguration setGlobalCSS(Collection<String> globalCSS);
                                                                               */
 //------------------------------------------------------------------------------
 IConfiguration setGlobalCSS(String[] globalCSS);
+
+/*------------------------------------------------------------------------------
+
+@name       setGoogleAnalyticsId - set google analytics id
+                                                                              */
+                                                                             /**
+            Set google analytics id.
+
+@return     this configuration
+
+@param      googleAnalyticsId    google analytics id.
+
+@history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+IConfiguration setGoogleAnalyticsId(String googleAnalyticsId);
 
 /*------------------------------------------------------------------------------
 

@@ -15,15 +15,20 @@ notes:
                                        // package --------------------------- //
 package io.reactjava.client.core.react;
                                        // imports --------------------------- //
+import com.giavaneers.util.gwt.Logger;
+import elemental2.dom.DomGlobal;
+import elemental2.dom.Location;
+import io.reactjava.client.moduleapis.ReactGA;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
                                        // Configuration ======================//
 public class Configuration extends NativeObject implements IConfiguration
 {
                                        // constants ------------------------- //
-                                       // (none)                              //
+private static final Logger kLOGGER = Logger.newInstance();
                                        // class variables ------------------- //
                                        // shared instance                     //
 protected static IConfiguration sharedInstance;
@@ -57,6 +62,42 @@ public Configuration()
                                        // requires js environment which does  //
                                        // not exists at compile time          //
    set(kKEY_THEME, IUITheme.defaultInstance());
+}
+/*------------------------------------------------------------------------------
+
+@name       getApp - get app
+                                                                              */
+                                                                             /**
+            Get app.
+
+@return     app
+
+@history    Mon Dec 23, 2019 08:46:23 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public AppComponentTemplate getApp()
+{
+   return((AppComponentTemplate)get(kKEY_APP));
+}
+/*------------------------------------------------------------------------------
+
+@name       getBundleScripts - get bundle scripts
+                                                                              */
+                                                                             /**
+            Get bundle scripts.
+
+@return     bundle scripts
+
+@history    Thu Sep 7, 2017 08:46:23 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public Collection<String> getBundleScripts()
+{
+  return((Collection<String>)get(kKEY_BUNDLE_SCRIPTS));
 }
 /*------------------------------------------------------------------------------
 
@@ -98,21 +139,21 @@ public Collection<String> getGlobalImages()
 }
 /*------------------------------------------------------------------------------
 
-@name       getBundleScripts - get bundle scripts
+@name       getGoogleAnalyticsId - get google analytics id
                                                                               */
                                                                              /**
-            Get bundle scripts.
+            Get google analytics id. This impementation is to be overridden.
 
-@return     bundle scripts
+@return     google analytics id.
 
-@history    Thu Sep 7, 2017 08:46:23 (LBM) created.
+@history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public Collection<String> getBundleScripts()
+public String getGoogleAnalyticsId()
 {
-  return((Collection<String>)get(kKEY_BUNDLE_SCRIPTS));
+   return((String)get(kKEY_GOOGLE_ANALYTICS_ID));
 }
 /*------------------------------------------------------------------------------
 
@@ -416,6 +457,72 @@ public IUITheme getTheme()
 }
 /*------------------------------------------------------------------------------
 
+@name       initialize - initialize
+                                                                              */
+                                                                             /**
+            Initialize. When invoked, all scripts and node modules have been
+            loaded.
+
+@history    Mon Dec 23, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public void initialize()
+{
+   Map<String,Class> routes = getNavRoutes();
+   if (routes == null)
+   {
+      setNavRoutes(
+         new HashMap<String,Class>()
+         {{
+            put("", getApp().getClass());
+         }});
+   }
+   String googleAnalyticsId = getGoogleAnalyticsId();
+   if (googleAnalyticsId != null)
+   {
+      ReactGA.initialize(googleAnalyticsId);
+
+      Location location   = DomGlobal.location;
+      String   searchPath = location.getPathname() + location.getSearch();
+
+      ReactGA.pageview(searchPath);
+
+      kLOGGER.logInfo(
+         "Configuration.initialize(): initialized Google Analytics with"
+       + " googlaAnalyticsId=" + googleAnalyticsId
+       + " and search path=" + searchPath);
+   }
+}
+/*------------------------------------------------------------------------------
+
+@name       setApp - set app
+                                                                              */
+                                                                             /**
+            Set app.
+
+@return     this
+
+@param      app      app
+
+@history    Mon Dec 23, 2019 08:46:23 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public IConfiguration setApp(
+   AppComponentTemplate app)
+{
+   if (app != null)
+   {
+      set(kKEY_APP, app);
+   }
+   return(this);
+}
+/*------------------------------------------------------------------------------
+
 @name       setBundleScripts - set bundle scripts
                                                                               */
                                                                              /**
@@ -486,6 +593,31 @@ public IConfiguration setGlobalCSS(
    if (globalCSS != null)
    {
       setGlobalCSS(new ArrayList(Arrays.asList(globalCSS)));
+   }
+   return(this);
+}
+/*------------------------------------------------------------------------------
+
+@name       setGoogleAnalyticsId - set google analytics id
+                                                                              */
+                                                                             /**
+            Set google analytics id.
+
+@return     this configuration
+
+@param      googleAnalyticsId    google analytics id.
+
+@history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public IConfiguration setGoogleAnalyticsId(
+   String googleAnalyticsId)
+{
+   if (googleAnalyticsId != null)
+   {
+      set(kKEY_GOOGLE_ANALYTICS_ID, googleAnalyticsId);
    }
    return(this);
 }

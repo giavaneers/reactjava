@@ -30,6 +30,8 @@ public static final String kPAGE_HASH_DEFAULT = "";
                                        // public instance variables --------- //
                                        // deploy path; e.g.'http://myapp.com' //
 public String                  deployPath;
+                                       // default path hash value             //
+public String                  defaultPageHash;
                                        // page infos                          //
 public Collection<SEOPageInfo> pageInfos;
                                        // protected instance variables ------ //
@@ -57,8 +59,9 @@ public SEOInfo(
    String                  defaultPageHash,
    Collection<SEOPageInfo> pageInfos)
 {
-   this.deployPath = deployPath;
-   this.pageInfos  = pageInfos;
+   this.deployPath      = deployPath;
+   this.defaultPageHash = defaultPageHash;
+   this.pageInfos       = pageInfos;
    if (pageInfos != null)
    {
                                        // add a default if required           //
@@ -115,10 +118,14 @@ public SEOInfo(
       this.deployPath = splits[0];
       if (splits.length > 1)
       {
-         splits = splits[1].split(SEOPageInfo.kDELIMITER);
-         for (int i = 0; i < splits.length; i++)
+         this.defaultPageHash = splits[1];
+         if (splits.length > 2)
          {
-            pageInfos.add(new SEOPageInfo(splits[i]));
+            splits = splits[2].split(SEOPageInfo.kDELIMITER);
+            for (int i = 0; i < splits.length; i++)
+            {
+               pageInfos.add(new SEOPageInfo(splits[i]));
+            }
          }
       }
    }
@@ -140,7 +147,8 @@ public SEOInfo(
 //------------------------------------------------------------------------------
 public String toString()
 {
-   String value = (deployPath != null ? deployPath : "") + kDELIMITER;
+   String value  = (deployPath      != null ? deployPath      : "") + kDELIMITER;
+          value += (defaultPageHash != null ? defaultPageHash : "") + kDELIMITER;
 
    if (pageInfos != null)
    {

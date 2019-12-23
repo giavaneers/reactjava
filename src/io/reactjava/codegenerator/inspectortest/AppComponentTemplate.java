@@ -19,13 +19,13 @@ import io.reactjava.client.core.react.SEOInfo;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
                                        // AppComponentTemplate ============== //
 public class AppComponentTemplate<P extends Properties> extends Component<P>
 {
                                        // constants ------------------------- //
 public static Collection<String> importedNodeModules;
-public static SEOInfo seoInfo;
+public static SEOInfo            seoInfo;
+public static String             googleAnalyticsId;
 
                                        // class variables ------------------- //
                                        // (none)                              //
@@ -51,6 +51,7 @@ public AppComponentTemplate()
 {
    importedNodeModules = getImportedNodeModules();
    seoInfo             = getSEOInfo();
+   googleAnalyticsId   = getGoogleAnalyticsId();
                                        // stop any subsequent operation       //
    throw new UnsupportedOperationException();
 }
@@ -69,6 +70,24 @@ public AppComponentTemplate()
 public AppComponentTemplate(P props)
 {
    this();
+}
+/*------------------------------------------------------------------------------
+
+@name       getGoogleAnalyticsId - get google analytics id
+                                                                              */
+                                                                             /**
+            Get google analytics id. This impementation is to be overridden.
+
+@return     google analytics id.
+
+@history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected String getGoogleAnalyticsId()
+{
+   return(googleAnalyticsId);
 }
 /*------------------------------------------------------------------------------
 
@@ -93,10 +112,10 @@ protected Collection<String> getImportedNodeModules()
 @name       getImportedNodeModulesAndSEO - imported modules and SEO info
                                                                               */
                                                                              /**
-            Get imported modules and SEOInfo as a single collection delimited by
-            a "$" entry.
+            Get googleAnalyticsId, imported modules and SEOInfo as a single
+            collection delimited by "$" entries.
 
-@return     collection of imported module names and SEOInfo
+@return     collection of googleAnalyticsId, imported module names and SEOInfo
 
 @history    Sun Jun 16, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -106,33 +125,26 @@ protected Collection<String> getImportedNodeModules()
 protected static Collection<String> getImportedNodeModulesAndSEO()
 {
    Collection importedNodeModulesAndSEO = new ArrayList();
+   if (googleAnalyticsId != null && googleAnalyticsId.length() > 0)
+   {
+      importedNodeModulesAndSEO.add(googleAnalyticsId);
+
+                                       // automatically add the supporting    //
+                                       // node module                         //
+      importedNodeModules.add("react-ga");
+   }
+
+   importedNodeModulesAndSEO.add("<delimiter>");
    if (importedNodeModules != null)
    {
       importedNodeModulesAndSEO.addAll(importedNodeModules);
    }
-   importedNodeModulesAndSEO.add("$");
+
+   importedNodeModulesAndSEO.add("<delimiter>");
    importedNodeModulesAndSEO.add(
       seoInfo != null ? seoInfo.toString() : SEOInfo.kNULL_VALUE);
 
    return(importedNodeModulesAndSEO);
-}
-/*------------------------------------------------------------------------------
-
-@name       getNavRoutes - get routes for application
-                                                                              */
-                                                                             /**
-            Get map of component classname by route path.
-
-@return     void
-
-@history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-protected Map<String,Class> getNavRoutes()
-{
-   return(super.getNavRoutes());
 }
 /*------------------------------------------------------------------------------
 

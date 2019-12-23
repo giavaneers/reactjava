@@ -68,9 +68,7 @@ import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.Deflater;
-import org.apache.tools.ant.types.selectors.SelectSelector;
-
-// ReactCodeGenerator =================//
+                                       // ReactCodeGenerator =================//
 public class ReactCodeGenerator implements IPostprocessor
 {
                                        // class constants --------------------//
@@ -2102,29 +2100,63 @@ protected void handleImportedNodeModulesAndSEO(
 
       logger.log(
          TreeLogger.INFO,
-         "handleImportedNodeModulesAndSEO(): unwrapped=" + importedModulesAndSEO);
+         "handleImportedNodeModulesAndSEO(): unwrapped="
+            + importedModulesAndSEO);
+                                       // separate the google analytics id    //
+                                       // from the imported modules           //
+                                       // from the seo info                   //
+      String[] splits = importedModulesAndSEO.split("<delimiter>");
 
-                                       // separate the imported modules from  //
-                                       // the page info                       //
-      String  sSEOInfo = "";
-      boolean bSEO     = false;
-      for (String entry : importedModulesAndSEO.split(","))
+      logger.log(
+         TreeLogger.INFO,
+         "handleImportedNodeModulesAndSEO(): splits.length=" + splits.length);
+
+      String googleAnalyticsId = splits[0];
+      if (googleAnalyticsId != null && googleAnalyticsId.length() > 0)
       {
-         entry = entry.trim();
-         if (!bSEO && "$".equals(entry))
+         googleAnalyticsId = googleAnalyticsId.split(",")[0].trim();
+      }
+
+      logger.log(
+         TreeLogger.INFO,
+         "handleImportedNodeModulesAndSEO(): googleAnalyticsId="
+            + googleAnalyticsId);
+
+      String splitModules = splits[1];
+      logger.log(
+         TreeLogger.INFO,
+         "handleImportedNodeModulesAndSEO(): splitModules=" + splitModules);
+
+      if (splitModules != null && splitModules.length() > 0)
+      {
+         for (String split : splitModules.split(","))
          {
-            bSEO = true;
-            continue;
-         }
-         else if (!bSEO)
-         {
-            importedModules.add(entry);
-         }
-         else
-         {
-            sSEOInfo += entry;
+            split =  split.trim();
+            if (split.length() > 0)
+            {
+               importedModules.add(split);
+            }
          }
       }
+
+      String sSEOInfo = "";
+      String splitSEO = splits[2];
+      logger.log(
+         TreeLogger.INFO,
+         "handleImportedNodeModulesAndSEO(): splitSEO=" + splitSEO);
+
+      if (splitSEO != null && splitSEO.length() > 0)
+      {
+         for (String split : splitSEO.split(","))
+         {
+            split = split.trim();
+            if (split.length() > 0)
+            {
+               sSEOInfo += split;
+            }
+         }
+      }
+
 
       handleImportedNodeModules(importedModules, configuration, logger);
 
@@ -2934,6 +2966,24 @@ public Configuration(
 }
 /*------------------------------------------------------------------------------
 
+@name       getApp - get app
+                                                                              */
+                                                                             /**
+            Get app.
+
+@return     app
+
+@history    Mon Dec 23, 2019 08:46:23 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public AppComponentTemplate getApp()
+{
+   return((AppComponentTemplate)get(kKEY_APP));
+}
+/*------------------------------------------------------------------------------
+
 @name       getGlobalCSS - get global css
                                                                               */
                                                                              /**
@@ -2987,6 +3037,24 @@ public Collection<String> getGlobalImages()
 public Collection<String> getBundleScripts()
 {
   return((Collection<String>)get(kKEY_BUNDLE_SCRIPTS));
+}
+/*------------------------------------------------------------------------------
+
+@name       getGoogleAnalyticsId - get google analytics id
+                                                                              */
+                                                                             /**
+            Get google analytics id. This impementation is to be overridden.
+
+@return     google analytics id.
+
+@history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public String getGoogleAnalyticsId()
+{
+   return((String)get(kKEY_GOOGLE_ANALYTICS_ID));
 }
 /*------------------------------------------------------------------------------
 
@@ -3284,6 +3352,47 @@ public IUITheme getTheme()
 }
 /*------------------------------------------------------------------------------
 
+@name       initialize - initialize
+                                                                              */
+                                                                             /**
+            Initialize. This implementation is null.
+
+@history    Mon Dec 23, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public void initialize()
+{
+}
+/*------------------------------------------------------------------------------
+
+@name       setApp - set app
+                                                                              */
+                                                                             /**
+            Set app.
+
+@return     this
+
+@param      app      app
+
+@history    Mon Dec 23, 2019 08:46:23 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public io.reactjava.client.core.react.IConfiguration setApp(
+   AppComponentTemplate app)
+{
+   if (app != null)
+   {
+      set(kKEY_APP, app);
+   }
+   return(this);
+}
+/*------------------------------------------------------------------------------
+
 @name       setBundleScripts - set bundle scripts
                                                                               */
                                                                              /**
@@ -3354,6 +3463,31 @@ public io.reactjava.client.core.react.IConfiguration setGlobalCSS(
    if (globalCSS != null)
    {
       setGlobalCSS(new ArrayList(Arrays.asList(globalCSS)));
+   }
+   return(this);
+}
+/*------------------------------------------------------------------------------
+
+@name       setGoogleAnalyticsId - set google analytics id
+                                                                              */
+                                                                             /**
+            Set google analytics id.
+
+@return     this configuration
+
+@param      googleAnalyticsId    google analytics id.
+
+@history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public io.reactjava.client.core.react.IConfiguration setGoogleAnalyticsId(
+   String googleAnalyticsId)
+{
+   if (googleAnalyticsId != null)
+   {
+      set(kKEY_GOOGLE_ANALYTICS_ID, googleAnalyticsId);
    }
    return(this);
 }
