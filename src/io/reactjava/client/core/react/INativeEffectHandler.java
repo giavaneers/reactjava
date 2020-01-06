@@ -18,11 +18,10 @@ notes:
                                        // package --------------------------- //
 package io.reactjava.client.core.react;
                                        // imports --------------------------- //
-import elemental2.dom.Event;
 import jsinterop.annotations.JsFunction;
                                        // INativeEffectHandler ===============//
 @JsFunction
 public interface INativeEffectHandler
 {
-   void handleEffect(Object status);
+   void handleEffect();
 }//====================================// end INativeEffectHandler ===========//

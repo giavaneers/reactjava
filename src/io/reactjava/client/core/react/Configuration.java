@@ -18,6 +18,10 @@ package io.reactjava.client.core.react;
 import com.giavaneers.util.gwt.Logger;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.Location;
+import io.reactjava.client.core.providers.auth.firebase.FirebaseCore;
+import io.reactjava.client.core.react.IConfiguration.ICloudServices;
+import io.reactjava.client.core.rxjs.observable.Observable;
+import io.reactjava.client.core.rxjs.observable.Subscriber;
 import io.reactjava.client.moduleapis.ReactGA;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -151,9 +155,9 @@ public Collection<String> getGlobalImages()
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public String getGoogleAnalyticsId()
+public ICloudServices getCloudServicesConfig()
 {
-   return((String)get(kKEY_GOOGLE_ANALYTICS_ID));
+   return((ICloudServices)get(kKEY_CLOUD_SERVICES_CONFIG));
 }
 /*------------------------------------------------------------------------------
 
@@ -469,7 +473,115 @@ public IUITheme getTheme()
 
                                                                               */
 //------------------------------------------------------------------------------
-public void initialize()
+public Observable<IConfiguration> initialize()
+{
+   initializeNavRoutes();
+   initializeGoogleAnalytics();
+   return(initializeCloudServices());
+}
+/*------------------------------------------------------------------------------
+
+@name       initializeCloudServices - initialize cloud services
+                                                                              */
+                                                                             /**
+            Initialize cloud services. When invoked, all scripts and node
+            modules have been loaded.
+
+@history    Mon Dec 23, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public Observable<IConfiguration> initializeCloudServices()
+{
+   IConfiguration configuration       = this;
+   ICloudServices cloudServicesConfig = getCloudServicesConfig();
+
+   boolean bInit =
+      cloudServicesConfig != null
+       && ICloudServices.kPLATFORM_FIREBASE.equals(
+            cloudServicesConfig.getCloudPlatform());
+
+   Observable<IConfiguration> observable = Observable.create(
+      (Subscriber<IConfiguration> subscriber) ->
+      {
+         if (bInit)
+         {
+            FirebaseCore.configure(cloudServicesConfig).subscribe(
+               response ->
+               {
+                  subscriber.next(configuration);
+                  subscriber.complete();
+               },
+               error ->
+               {
+                  subscriber.error(error);
+               });
+         }
+         else if (cloudServicesConfig == null)
+         {
+            subscriber.next(configuration);
+            subscriber.complete();
+         }
+         else
+         {
+            subscriber.error("Only Firebase supported for now");
+         }
+         return(subscriber);
+      });
+
+   return(observable);
+}
+/*------------------------------------------------------------------------------
+
+@name       initializeGoogleAnalytics - initialize google analytics
+                                                                              */
+                                                                             /**
+            Initialize google analytics. When invoked, all scripts and node
+            modules have been loaded.
+
+@history    Mon Dec 23, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public void initializeGoogleAnalytics()
+{
+   ICloudServices cloudServicesConfig = getCloudServicesConfig();
+   if (cloudServicesConfig != null)
+   {
+      String trackingId = cloudServicesConfig.getTrackingId();
+      if (trackingId != null)
+      {
+         ReactGA.initialize(trackingId);
+
+         Location location   = DomGlobal.location;
+         String   searchPath = location.getPathname() + location.getSearch();
+
+         ReactGA.pageview(searchPath);
+
+         kLOGGER.logInfo(
+            "Configuration.initialize(): initialized Google Analytics with"
+          + " googlaAnalyticsId=" + trackingId
+          + " and search path=" + searchPath);
+      }
+   }
+}
+/*------------------------------------------------------------------------------
+
+@name       initializeNavRoutes - initialize nav routes
+                                                                              */
+                                                                             /**
+            Initialize nav routes. When invoked, all scripts and node modules
+            have been loaded.
+
+@history    Mon Dec 23, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public void initializeNavRoutes()
 {
    Map<String,Class> routes = getNavRoutes();
    if (routes == null)
@@ -479,21 +591,6 @@ public void initialize()
          {{
             put("", getApp().getClass());
          }});
-   }
-   String googleAnalyticsId = getGoogleAnalyticsId();
-   if (googleAnalyticsId != null)
-   {
-      ReactGA.initialize(googleAnalyticsId);
-
-      Location location   = DomGlobal.location;
-      String   searchPath = location.getPathname() + location.getSearch();
-
-      ReactGA.pageview(searchPath);
-
-      kLOGGER.logInfo(
-         "Configuration.initialize(): initialized Google Analytics with"
-       + " googlaAnalyticsId=" + googleAnalyticsId
-       + " and search path=" + searchPath);
    }
 }
 /*------------------------------------------------------------------------------
@@ -598,26 +695,26 @@ public IConfiguration setGlobalCSS(
 }
 /*------------------------------------------------------------------------------
 
-@name       setGoogleAnalyticsId - set google analytics id
+@name       setCloudServicesConfig - set cloud services config
                                                                               */
                                                                              /**
-            Set google analytics id.
+            Set cloud services config
 
 @return     this configuration
 
-@param      googleAnalyticsId    google analytics id.
+@param      cloudServicesConfig    cloud services config.
 
 @history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public IConfiguration setGoogleAnalyticsId(
-   String googleAnalyticsId)
+public IConfiguration setCloudServicesConfig(
+   ICloudServices cloudServicesConfig)
 {
-   if (googleAnalyticsId != null)
+   if (cloudServicesConfig != null)
    {
-      set(kKEY_GOOGLE_ANALYTICS_ID, googleAnalyticsId);
+      set(kKEY_CLOUD_SERVICES_CONFIG, cloudServicesConfig);
    }
    return(this);
 }
@@ -867,4 +964,399 @@ public static IConfiguration sharedInstance()
 {
    return(sharedInstance);
 }
+/*==============================================================================
+
+name:       CloudServices - cloud services configuration
+
+purpose:    Cloud services configuration
+
+history:    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
+
+notes:
+
+==============================================================================*/
+public static class CloudServices implements ICloudServices
+{
+                                       // constants ------------------------- //
+                                       // (none)                              //
+                                       // class variables ------------------- //
+                                       // (none)                              //
+                                       // public instance variables --------- //
+                                       // (none)                              //
+                                       // protected instance variables ------ //
+protected String apiKey;               // apiKey                              //
+protected String appId;                // appId                               //
+protected String authDomain;           // authDomain                          //
+protected String cloudPlatform;        // cloudPlatform                       //
+protected String databaseURL;          // databaseURL                         //
+protected String messagingSenderId;    // messagingSenderId                   //
+protected String projectId;            // projectId                           //
+protected String storageBucket;        // storageBucket                       //
+protected String trackingId;           // trackingId                          //
+
+/*------------------------------------------------------------------------------
+
+@name       getAPIKey - get apiKey
+                                                                              */
+                                                                             /**
+            Get apiKey.
+
+@return     apiKey
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public String getAPIKey()
+{
+   return(apiKey);
+}
+/*------------------------------------------------------------------------------
+
+@name       getAppId - get appId
+                                                                              */
+                                                                             /**
+            Get appId.
+
+@return     appId
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public String getAppId()
+{
+   return(appId);
+}
+/*------------------------------------------------------------------------------
+
+@name       getAuthDomain - get auth domain
+                                                                              */
+                                                                             /**
+            Get auth domain.
+
+@return     auth domain
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public String getAuthDomain()
+{
+   return(authDomain);
+}
+/*------------------------------------------------------------------------------
+
+@name       getCloudPlatform - get cloud platform
+                                                                              */
+                                                                             /**
+            Get cloud platform.
+
+@return     cloud platform
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public String getCloudPlatform()
+{
+   if (cloudPlatform == null)
+   {
+      cloudPlatform = kPLATFORM_DEFAULT;
+   }
+   return(cloudPlatform);
+}
+/*------------------------------------------------------------------------------
+
+@name       getDatabaseURL - get database url
+                                                                              */
+                                                                             /**
+            Get database url.
+
+@return     database url
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public String getDatabaseURL()
+{
+   return(databaseURL);
+}
+/*------------------------------------------------------------------------------
+
+@name       getCloudMessagingSenderId - get cloud messaging sender id
+                                                                              */
+                                                                             /**
+            Get cloud messaging sender id.
+
+@return     cloud messaging sender id
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public String getMessagingSenderId()
+{
+   return(messagingSenderId);
+}
+/*------------------------------------------------------------------------------
+
+@name       getProjectId - get projectId
+                                                                              */
+                                                                             /**
+            Get projectId.
+
+@return     projectId
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public String getProjectId()
+{
+   return(projectId);
+}
+/*------------------------------------------------------------------------------
+
+@name       getStorageBucket - get cloud storage bucket
+                                                                              */
+                                                                             /**
+            Get cloud storage bucket.
+
+@return     cloud storage bucket
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public String getStorageBucket()
+{
+   return(storageBucket);
+}
+/*------------------------------------------------------------------------------
+
+@name       getTrackingId - get tracking id
+                                                                              */
+                                                                             /**
+            Get tracking id.
+
+@return     tracking id
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public String getTrackingId()
+{
+   return(trackingId);
+}
+/*------------------------------------------------------------------------------
+
+@name       setAPIKey - set apiKey
+                                                                              */
+                                                                             /**
+            Set apiKey.
+
+@return     cloud services configfuration
+
+@param      apiKey    apiKey
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public ICloudServices setAPIKey(
+   String apiKey)
+{
+   this.apiKey = apiKey;
+   return(this);
+}
+/*------------------------------------------------------------------------------
+
+@name       setAppId - set appId
+                                                                              */
+                                                                             /**
+            Set appId.
+
+@return     cloud services configfuration
+
+@param      appId    appId
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public ICloudServices setAppId(
+   String appId)
+{
+   this.appId = appId;
+   return(this);
+}
+/*------------------------------------------------------------------------------
+
+@name       setAuthDomain - set auth domain
+                                                                              */
+                                                                             /**
+            Set auth domain.
+
+@return     cloud services configfuration
+
+@param      authDomain    auth domain
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public ICloudServices setAuthDomain(
+   String authDomain)
+{
+   this.authDomain = authDomain;
+   return(this);
+}
+/*------------------------------------------------------------------------------
+
+@name       setCloudPlatform - set cloud platform
+                                                                              */
+                                                                             /**
+            Set cloud platform.
+
+@return     cloud services configfuration
+
+@param      cloudPlatform    cloud platform
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public ICloudServices setCloudPlatform(
+   String cloudPlatform)
+{
+   this.cloudPlatform = cloudPlatform;
+   return(this);
+}
+/*------------------------------------------------------------------------------
+
+@name       setDatabaseURL - set database url
+                                                                              */
+                                                                             /**
+            Set database url.
+
+@return     cloud services configfuration
+
+@param      databaseURL    databaseURL
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public ICloudServices setDatabaseURL(
+   String databaseURL)
+{
+   this.databaseURL = databaseURL;
+   return(this);
+}
+/*------------------------------------------------------------------------------
+
+@name       setMessagingSenderId - set cloud messaging sender id
+                                                                              */
+                                                                             /**
+            Set cloud messaging sender id.
+
+@return     cloud services configfuration
+
+@param      messagingSenderId    cloud messaging sender id
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public ICloudServices setMessagingSenderId(
+   String messagingSenderId)
+{
+   this.messagingSenderId = messagingSenderId;
+   return(this);
+}
+/*------------------------------------------------------------------------------
+
+@name       setProjectId - set projectId
+                                                                              */
+                                                                             /**
+            Set projectId.
+
+@return     cloud services configfuration
+
+@param      projectId    projectId
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public ICloudServices setProjectId(
+   String projectId)
+{
+   this.projectId = projectId;
+   return(this);
+}
+/*------------------------------------------------------------------------------
+
+@name       setStorageBucket - set cloud storage bucket
+                                                                              */
+                                                                             /**
+            Set cloud storage bucket.
+
+@return     cloud services configfuration
+
+@param      storageBucket    cloud storage bucket
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public ICloudServices setStorageBucket(
+   String storageBucket)
+{
+   this.storageBucket = storageBucket;
+   return(this);
+}
+/*------------------------------------------------------------------------------
+
+@name       setTrackingId - set tracking id
+                                                                              */
+                                                                             /**
+            Set tracking id.
+
+@return     cloud services configfuration
+
+@param      trackingId     trackingId
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public ICloudServices setTrackingId(
+   String trackingId)
+{
+   this.trackingId = trackingId;
+   return(this);
+}
+}//====================================// end CompileTime ====================//
 }//====================================// end Configuration ------------------//

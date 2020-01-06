@@ -15,6 +15,7 @@ notes:
                                        // package --------------------------- //
 package io.reactjava.codegenerator.inspectortest;
                                        // imports --------------------------- //
+import io.reactjava.client.core.react.IConfiguration.ICloudServices;
 import io.reactjava.client.core.react.SEOInfo;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ public class AppComponentTemplate<P extends Properties> extends Component<P>
                                        // constants ------------------------- //
 public static Collection<String> importedNodeModules;
 public static SEOInfo            seoInfo;
-public static String             googleAnalyticsId;
+public static ICloudServices     cloudServicesConfig;
 
                                        // class variables ------------------- //
                                        // (none)                              //
@@ -49,9 +50,13 @@ public static String             googleAnalyticsId;
 //------------------------------------------------------------------------------
 public AppComponentTemplate()
 {
-   importedNodeModules = getImportedNodeModules();
+   cloudServicesConfig = getCloudServicesConfig();
    seoInfo             = getSEOInfo();
-   googleAnalyticsId   = getGoogleAnalyticsId();
+   importedNodeModules = getImportedNodeModules();
+   importedNodeModules =
+      importedNodeModules == null
+         ? new ArrayList<>() : new ArrayList<>(importedNodeModules);
+
                                        // stop any subsequent operation       //
    throw new UnsupportedOperationException();
 }
@@ -73,21 +78,22 @@ public AppComponentTemplate(P props)
 }
 /*------------------------------------------------------------------------------
 
-@name       getGoogleAnalyticsId - get google analytics id
+@name       getCloudServicesConfig - get cloud services configuration
                                                                               */
                                                                              /**
-            Get google analytics id. This impementation is to be overridden.
+            Get cloud services configuration. This impementation is to be
+            overridden.
 
-@return     google analytics id.
+@return     cloud services configuration.
 
 @history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-protected String getGoogleAnalyticsId()
+protected ICloudServices getCloudServicesConfig()
 {
-   return(googleAnalyticsId);
+   return(cloudServicesConfig);
 }
 /*------------------------------------------------------------------------------
 
@@ -113,7 +119,7 @@ protected Collection<String> getImportedNodeModules()
                                                                               */
                                                                              /**
             Get googleAnalyticsId, imported modules and SEOInfo as a single
-            collection delimited by "$" entries.
+            collection delimited by "<delimiter>" entries.
 
 @return     collection of googleAnalyticsId, imported module names and SEOInfo
 
@@ -125,13 +131,17 @@ protected Collection<String> getImportedNodeModules()
 protected static Collection<String> getImportedNodeModulesAndSEO()
 {
    Collection importedNodeModulesAndSEO = new ArrayList();
-   if (googleAnalyticsId != null && googleAnalyticsId.length() > 0)
+   if (cloudServicesConfig != null)
    {
-      importedNodeModulesAndSEO.add(googleAnalyticsId);
+      String googleAnalyticsId = cloudServicesConfig.getTrackingId();
+      if (googleAnalyticsId != null && googleAnalyticsId.length() > 0)
+      {
+         importedNodeModulesAndSEO.add(googleAnalyticsId);
 
                                        // automatically add the supporting    //
                                        // node module                         //
-      importedNodeModules.add("react-ga");
+         importedNodeModules.add("react-ga");
+      }
    }
 
    importedNodeModulesAndSEO.add("<delimiter>");
@@ -157,7 +167,7 @@ protected static Collection<String> getImportedNodeModulesAndSEO()
             the app deployment in order to create a redirect target for each
             hash, along with an associated sitemap.
 
-@return     SEOInfo string
+@return     SEOInfo
 
 @history    Sun Jun 16, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -204,8 +214,7 @@ public static void main(
          {
                                        // constructor should generate an error//
                                        // return result to invoker            //
-            System.out.println(
-               getImportedNodeModulesAndSEO().toString());
+            System.out.println(getImportedNodeModulesAndSEO().toString());
          }
       }
       catch(Exception e)
@@ -217,14 +226,13 @@ public static void main(
             try
             {
                                        // invoke the props constructor        //
-               ctor.newInstance((Properties)null);
+               ctor.newInstance(new Properties());
             }
             catch(Exception uoe)
             {
                                        // constructor should generate an error//
                                        // return result to invoker            //
-               System.out.println(
-                  getImportedNodeModulesAndSEO().toString());
+               System.out.println(getImportedNodeModulesAndSEO().toString());
             }
          }
          catch(Exception ee)

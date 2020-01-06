@@ -43,9 +43,9 @@ import io.reactjava.client.core.react.SEOInfo;
 import io.reactjava.client.core.react.SEOInfo.SEOPageInfo;
 import io.reactjava.client.core.react.Utilities;
 import io.reactjava.client.core.resources.javascript.IJavascriptResources;
+import io.reactjava.client.core.rxjs.observable.Observable;
 import io.reactjava.jsx.IConfiguration;
 import io.reactjava.jsx.IJSXTransform;
-import io.reactjava.jsx.JSXTransform.MarkupDsc;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -3040,21 +3040,21 @@ public Collection<String> getBundleScripts()
 }
 /*------------------------------------------------------------------------------
 
-@name       getGoogleAnalyticsId - get google analytics id
+@name       getCloudServicesConfig - get cloud services config
                                                                               */
                                                                              /**
-            Get google analytics id. This impementation is to be overridden.
+            Get cloud services config.
 
-@return     google analytics id.
+@return     cloud services config.
 
 @history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public String getGoogleAnalyticsId()
+public ICloudServices getCloudServicesConfig()
 {
-   return((String)get(kKEY_GOOGLE_ANALYTICS_ID));
+   return((ICloudServices)get(kKEY_CLOUD_SERVICES_CONFIG));
 }
 /*------------------------------------------------------------------------------
 
@@ -3363,8 +3363,9 @@ public IUITheme getTheme()
 
                                                                               */
 //------------------------------------------------------------------------------
-public void initialize()
+public Observable<IConfiguration> initialize()
 {
+   return(null);
 }
 /*------------------------------------------------------------------------------
 
@@ -3468,26 +3469,26 @@ public io.reactjava.client.core.react.IConfiguration setGlobalCSS(
 }
 /*------------------------------------------------------------------------------
 
-@name       setGoogleAnalyticsId - set google analytics id
+@name       setCloudServicesConfig - set cloud services config
                                                                               */
                                                                              /**
-            Set google analytics id.
+            Set cloud services config.
 
 @return     this configuration
 
-@param      googleAnalyticsId    google analytics id.
+@param      cloudServicesConfig    cloud services config.
 
 @history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public io.reactjava.client.core.react.IConfiguration setGoogleAnalyticsId(
-   String googleAnalyticsId)
+public io.reactjava.client.core.react.IConfiguration setCloudServicesConfig(
+   ICloudServices cloudServicesConfig)
 {
-   if (googleAnalyticsId != null)
+   if (cloudServicesConfig != null)
    {
-      set(kKEY_GOOGLE_ANALYTICS_ID, googleAnalyticsId);
+      set(kKEY_CLOUD_SERVICES_CONFIG, cloudServicesConfig);
    }
    return(this);
 }

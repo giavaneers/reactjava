@@ -15,6 +15,7 @@ notes:
                                        // package --------------------------- //
 package io.reactjava.client.components.generalpage;
                                        // imports --------------------------- //
+import elemental2.core.JsObject;
 import elemental2.dom.Element;
 import io.reactjava.client.core.react.Component;
 import io.reactjava.client.core.react.INativeEffectHandler;
@@ -48,13 +49,9 @@ public class Prism extends Component
 
                                                                               */
 //------------------------------------------------------------------------------
-public INativeEffectHandler handleEffect = (Object status) ->
+public INativeEffectHandler handleEffect = () ->
 {
-   if (status == null)
-   {
-                                       // on update                           //
-      PrismNative.highlightAllUnder(getDOMElement());
-   }
+   PrismNative.highlightAllUnder(getDOMElement());
 };
 /*------------------------------------------------------------------------------
 

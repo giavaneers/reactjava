@@ -25,12 +25,10 @@ import elemental2.dom.HTMLMetaElement;
 import elemental2.dom.HTMLScriptElement;
 import elemental2.dom.HTMLStyleElement;
 import elemental2.dom.HTMLTitleElement;
-import elemental2.dom.Location;
 import elemental2.dom.NodeList;
 import elemental2.dom.StyleSheet;
 import io.reactjava.client.core.providers.platform.web.PlatformWeb;
 import io.reactjava.client.core.react.SEOInfo.SEOPageInfo;
-import io.reactjava.client.moduleapis.ReactGA;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -360,7 +358,7 @@ public static <P extends Properties> ReactElement createElement(
 
    element =
       createElement(
-         getRenderableComponent(component), component.props());
+         getNativeFunctionalComponent(component), component.props());
 
    return(element);
 }
@@ -375,7 +373,7 @@ public static <P extends Properties> ReactElement createElement(
 
    element =
       createElement(
-         getRenderableComponent(component), component.props(),
+         getNativeFunctionalComponent(component), component.props(),
          children);
 
    return(element);
@@ -401,7 +399,7 @@ public static <P extends Properties> ReactElement createElement(
    Component  component)
 {
    Properties   props   = component.props();
-   ReactElement element = createElement(getRenderableComponent(component), props);
+   ReactElement element = createElement(getNativeFunctionalComponent(component), props);
 
    return(element);
 }
@@ -472,19 +470,19 @@ public static <P extends Properties> ReactElement createElement(
                                                                               */
 //------------------------------------------------------------------------------
 public static <P extends Properties> ReactElement createElement(
-   INativeRenderableComponent<P> type, P props)
+   INativeFunctionalComponent<P> type, P props)
 {
    return(React.createElement(type, props));
 }
 
 public static <P extends Properties> ReactElement createElement(
-   INativeRenderableComponent<P> type, P props, String value)
+   INativeFunctionalComponent<P> type, P props, String value)
 {
    return(React.createElement(type, props, value));
 }
 
 public static <P extends Properties> ReactElement createElement(
-   INativeRenderableComponent<P> type, P props, ReactElement...children)
+   INativeFunctionalComponent<P> type, P props, ReactElement...children)
 {
    return(React.createElement(type, props, children));
 }
@@ -854,12 +852,12 @@ public static Function<Properties,IProvider> getProvider(
 }
 /*------------------------------------------------------------------------------
 
-@name       getRenderableComponent - get native component for specified component
+@name       getNativeFunctionalComponent - get native component
                                                                               */
                                                                              /**
-            Get native component.
+            Get native component for specified component classname.
 
-@return     native component
+@return     native component for specified component classname
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -867,20 +865,20 @@ public static Function<Properties,IProvider> getProvider(
 
                                                                               */
 //------------------------------------------------------------------------------
-public static <P extends Properties> INativeRenderableComponent getRenderableComponent(
+public static <P extends Properties> INativeFunctionalComponent getNativeFunctionalComponent(
    String classname)
 {
    Component component = getComponentFactory(classname).apply(new Properties());
-   return(getRenderableComponent(component));
+   return(getNativeFunctionalComponent(component));
 }
 /*------------------------------------------------------------------------------
 
-@name       getRenderableComponent - get native component for specified component
+@name       getNativeFunctionalComponent - get native component
                                                                               */
                                                                              /**
-            Get native component.
+            Get native component for specified ReactJava component.
 
-@return     native component
+@return     native component for specified ReactJava component
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -888,7 +886,7 @@ public static <P extends Properties> INativeRenderableComponent getRenderableCom
 
                                                                               */
 //------------------------------------------------------------------------------
-public static <P extends Properties> INativeRenderableComponent getRenderableComponent(
+public static <P extends Properties> INativeFunctionalComponent getNativeFunctionalComponent(
    Component component)
 {
    return((props) ->
@@ -951,12 +949,22 @@ protected static void initialize(
          configuration, null, requestToken,
          (Object response1, Object reqToken1) ->
          {
-            configuration.initialize();
-            bInitialized = true;
-            if (requestor != null)
-            {
-               requestor.apiResponse(response1, requestToken);
-            }
+            configuration.initialize().subscribe(
+               (Object rsp) ->
+               {
+                  bInitialized = true;
+                  if (requestor != null)
+                  {
+                     requestor.apiResponse(response1, requestToken);
+                  }
+               },
+               (Object error) ->
+               {
+                  if (requestor != null)
+                  {
+                     requestor.apiResponse(error, requestToken);
+                  }
+               });
          });
    }
 }

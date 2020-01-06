@@ -90,13 +90,13 @@ public static native <P extends Properties> ReactElement createElement(
                                                                               */
 //------------------------------------------------------------------------------
 public static native <P extends Properties> ReactElement createElement(
-   INativeRenderableComponent<P> type, P props);
+   INativeFunctionalComponent<P> type, P props);
 
 public static native <P extends Properties> ReactElement createElement(
-   INativeRenderableComponent<P> type, P props, String value);
+   INativeFunctionalComponent<P> type, P props, String value);
 
 public static native <P extends Properties> ReactElement createElement(
-   INativeRenderableComponent<P> type, P props, ReactElement...children);
+   INativeFunctionalComponent<P> type, P props, ReactElement...children);
 
 /*------------------------------------------------------------------------------
 
@@ -131,7 +131,8 @@ public static native <P extends Properties> ReactElement createElement(
                                                                              /**
             useEffect hook.
 
-@param      effectHandler     effect function
+@param      effectHandler     effect function to be invoked when component
+                              mounted, unmounted, and updated.
 
 @history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -140,6 +141,30 @@ public static native <P extends Properties> ReactElement createElement(
 //------------------------------------------------------------------------------
 public static native void useEffect(
    INativeEffectHandler effectHandler);
+
+/*------------------------------------------------------------------------------
+
+@name       useEffect - useEffect hook
+                                                                              */
+                                                                             /**
+            useEffect hook.
+
+@param      effectHandler     effect function.
+
+@param      dependencies      array of property and state values when changed
+                              will also cause the effect handler to be
+                              invoked; passing an empty array will cause the
+                              effect handler to be invoked only on component
+                              mounted and unmounted (not on update).
+
+@history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static native void useEffect(
+   INativeEffectHandler effectHandler,
+   Object[]             dependencies);
 
 /*------------------------------------------------------------------------------
 

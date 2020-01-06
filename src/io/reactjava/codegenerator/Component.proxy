@@ -18,6 +18,7 @@ package io.reactjava.client.core.react;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.Element;
 import elemental2.dom.Node;
+import io.reactjava.client.core.react.IConfiguration.ICloudServices;
 import java.util.Map;
 import java.util.function.Function;
                                        // Component ==========================//
@@ -34,7 +35,7 @@ protected P                 componentProperties;
 protected IUITheme          theme;     // theme                               //
                                        // private instance variables -------- //
                                        // component function                  //
-private   java.util.function.Function<Properties,ReactElement>
+private   Function<Properties,ReactElement>
                             componentFcn;
 
 /*------------------------------------------------------------------------------
@@ -43,8 +44,6 @@ private   java.util.function.Function<Properties,ReactElement>
                                                                               */
                                                                              /**
             Default constructor
-
-@return     An instance of Component if successful.
 
 @history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -60,8 +59,6 @@ public Component()
                                                                               */
                                                                              /**
             Constructor for specified properties
-
-@return     An instance of Component if successful.
 
 @history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -144,7 +141,7 @@ public static Component forId(
 
                                                                               */
 //------------------------------------------------------------------------------
-protected java.util.function.Function<Properties, ReactElement> getComponentFcn()
+protected Function<Properties, ReactElement> getComponentFcn()
 {
    return(componentFcn);
 }
@@ -205,19 +202,20 @@ public Element getDOMParentElement()
 }
 /*------------------------------------------------------------------------------
 
-@name       getGoogleAnalyticsId - get google analytics id
+@name       getCloudServicesConfig - get cloud services configuration
                                                                               */
                                                                              /**
-            Get google analytics id. This impementation is to be overridden.
+            Get cloud services configuration. This impementation is to be
+            overridden.
 
-@return     google analytics id.
+@return     cloud services configuration.
 
 @history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-protected String getGoogleAnalyticsId()
+protected ICloudServices getCloudServicesConfig()
 {
    return(null);
 }
@@ -491,9 +489,7 @@ public IUITheme getTheme()
                                                                              /**
             Set properties.
 
-@return     void
-
-@return     props     properties
+@return     initialProps     properties
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -562,8 +558,6 @@ public P props()
                                                                              /**
             Render markup.
 
-@return     void
-
 @history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -579,8 +573,6 @@ public void render()
                                                                               */
                                                                              /**
             Get component css.
-
-@return     void
 
 @history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -618,8 +610,6 @@ protected void setComponentFcn(
                                                                              /**
             Set id.
 
-@return     void
-
 @param      id    new id value
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
@@ -655,14 +645,13 @@ public void setRef(
 }
 /*------------------------------------------------------------------------------
 
-@name       setState - set theme
+@name       setState - set state
                                                                               */
                                                                              /**
-            Set theme.
+            Set state.
 
-@return     theme
-
-@param      new theme
+@param      key      key
+@param      value    value
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -684,7 +673,7 @@ public void setState(
 
 @return     theme
 
-@param      new theme
+@param      theme    new theme
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -699,23 +688,46 @@ public IUITheme setTheme(
 }
 /*------------------------------------------------------------------------------
 
-@name       useEffect - component side effect handler
+@name       useEffect - useEffect hook
                                                                               */
                                                                              /**
-            Effect hook handler similar to componentDidMount,
-            componentDidUpdate, and componentWillUnmount combined.
+            useEffect hook.
 
-@return     void
-
-@param      effectHandler     function to be invoked on effect
+@param      effectHandler     effect function to be invoked when component
+                              mounted, unmounted, and updated.
 
 @history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public void useEffect(
+protected void useEffect(
    INativeEffectHandler effectHandler)
+{
+}
+/*------------------------------------------------------------------------------
+
+@name       useEffect - useEffect hook
+                                                                              */
+                                                                             /**
+            useEffect hook.
+
+@param      effectHandler     effect function.
+
+@param      dependencies      array of property and state values when changed
+                              will also cause the effect handler to be
+                              invoked; passing an empty array will cause the
+                              effect handler to be invoked only on component
+                              mounted and unmounted (not on update).
+
+@history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected void useEffect(
+   INativeEffectHandler effectHandler,
+   Object[]             dependencies)
 {
 }
 /*------------------------------------------------------------------------------
@@ -751,10 +763,8 @@ protected void useRef(
             value. This ReactJava implementation splits each attribute into a
             separate React state hook.
 
-@return     The specified initial state
-
-
-@param      state       initial state
+@param      key       key
+@param      value     initial value
 
 @history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
 

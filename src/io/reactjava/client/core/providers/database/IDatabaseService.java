@@ -34,25 +34,6 @@ public static final String kEVENT_TYPE_VALUE         = "value";
                                        // (none)                              //
 /*------------------------------------------------------------------------------
 
-@name       configure - configuration routine
-                                                                              */
-                                                                             /**
-            Configuration routine.
-
-@return     void
-
-@param      configurationData    configuration data
-
-@history    Thu Dec 05, 2019 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public Observable configure(
-   Object configurationData);
-
-/*------------------------------------------------------------------------------
-
 @name       get  - get data from specified path
                                                                               */
                                                                              /**
@@ -91,7 +72,7 @@ Observable<Map<String,Object>> get(
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public IEventCallback getStart(
+IEventCallback getStart(
    String         reference,
    String         eventType,
    IEventCallback callback);
@@ -115,7 +96,7 @@ public IEventCallback getStart(
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public void getStop(
+void getStop(
    String         reference,
    String         eventType,
    IEventCallback callback);

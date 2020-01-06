@@ -170,9 +170,9 @@ public static ReactElement createElement(
          kLOGGER.logInfo("ElementDsc.createElement(): " + type);
          element = ReactJava.createElement(type, root.configuration, children);
       }
-      else if (root.type instanceof INativeRenderableComponent)
+      else if (root.type instanceof INativeFunctionalComponent)
       {
-         INativeRenderableComponent type = (INativeRenderableComponent)root.type;
+         INativeFunctionalComponent type = (INativeFunctionalComponent)root.type;
          if (root.value != null)
          {
             element = ReactJava.createElement(type, root.props, root.value);

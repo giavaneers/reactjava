@@ -15,17 +15,18 @@ notes:
                                        // package --------------------------- //
 package io.reactjava.client.core.react;
                                        // imports --------------------------- //
+import io.reactjava.client.core.react.IConfiguration.ICloudServices;
+import io.reactjava.client.core.react.SEOInfo;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
                                        // AppComponentTemplate ============== //
 public class AppComponentTemplate<P extends Properties> extends Component<P>
 {
                                        // constants ------------------------- //
 public static Collection<String> importedNodeModules;
 public static SEOInfo            seoInfo;
-public static String             googleAnalyticsId;
+public static ICloudServices     cloudServicesConfig;
 
                                        // class variables ------------------- //
                                        // (none)                              //
@@ -42,8 +43,6 @@ public static String             googleAnalyticsId;
                                                                              /**
             AppComponentTemplate for specified properties
 
-@return     An instance of AppComponentTemplate if successful.
-
 @history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -51,9 +50,12 @@ public static String             googleAnalyticsId;
 //------------------------------------------------------------------------------
 public AppComponentTemplate()
 {
-   importedNodeModules = getImportedNodeModules();
+   cloudServicesConfig = getCloudServicesConfig();
    seoInfo             = getSEOInfo();
-   googleAnalyticsId   = getGoogleAnalyticsId();
+   importedNodeModules = getImportedNodeModules();
+   importedNodeModules =
+      importedNodeModules == null
+         ? new ArrayList<>() : new ArrayList<>(importedNodeModules);
 
                                        // stop any subsequent operation       //
    throw new UnsupportedOperationException();
@@ -64,8 +66,6 @@ public AppComponentTemplate()
                                                                               */
                                                                              /**
             AppComponentTemplate for specified properties
-
-@return     An instance of AppComponentTemplate if successful.
 
 @history    Sat Dec 08, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -78,21 +78,22 @@ public AppComponentTemplate(P props)
 }
 /*------------------------------------------------------------------------------
 
-@name       getGoogleAnalyticsId - get google analytics id
+@name       getCloudServicesConfig - get cloud services configuration
                                                                               */
                                                                              /**
-            Get google analytics id. This impementation is to be overridden.
+            Get cloud services configuration. This impementation is to be
+            overridden.
 
-@return     google analytics id.
+@return     cloud services configuration.
 
 @history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-protected String getGoogleAnalyticsId()
+protected ICloudServices getCloudServicesConfig()
 {
-   return(googleAnalyticsId);
+   return(cloudServicesConfig);
 }
 /*------------------------------------------------------------------------------
 
@@ -130,13 +131,17 @@ protected Collection<String> getImportedNodeModules()
 protected static Collection<String> getImportedNodeModulesAndSEO()
 {
    Collection importedNodeModulesAndSEO = new ArrayList();
-   if (googleAnalyticsId != null && googleAnalyticsId.length() > 0)
+   if (cloudServicesConfig != null)
    {
-      importedNodeModulesAndSEO.add(googleAnalyticsId);
+      String googleAnalyticsId = cloudServicesConfig.getTrackingId();
+      if (googleAnalyticsId != null && googleAnalyticsId.length() > 0)
+      {
+         importedNodeModulesAndSEO.add(googleAnalyticsId);
 
                                        // automatically add the supporting    //
-                                       // node module                         //
-      importedNodeModules.add("react-ga");
+                                       // node module for posting events      //
+         importedNodeModules.add("react-ga");
+      }
    }
 
    importedNodeModulesAndSEO.add("<delimiter>");
@@ -179,8 +184,6 @@ protected SEOInfo getSEOInfo()
                                                                               */
                                                                              /**
             Standard main routine.
-
-@return     void
 
 @param      args     args[0] - platform specification
 

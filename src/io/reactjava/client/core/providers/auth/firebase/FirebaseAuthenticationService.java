@@ -80,7 +80,7 @@ public FirebaseAuthenticationService(
 public Observable configure(
    Object configurationData)
 {
-   return(FirebaseCore.configure(configurationData));
+   return(null);
 }
 /*------------------------------------------------------------------------------
 

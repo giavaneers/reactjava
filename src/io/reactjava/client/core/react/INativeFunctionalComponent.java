@@ -1,0 +1,1 @@
+/Users/brianm/working/io/reactjava/client/core/react/INativeFunctionalComponent.java

@@ -15,7 +15,6 @@ note:
                                        // package --------------------------- //
 package io.reactjava.client.core.providers.auth;
                                        // imports --------------------------- //
-import io.reactjava.client.core.react.NativeObject;
 import io.reactjava.client.core.rxjs.observable.Observable;
 import io.reactjava.client.core.react.IProvider;
 
@@ -42,7 +41,7 @@ public interface IAuthenticationService extends IProvider
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public Observable configure(
+Observable configure(
    Object configurationData);
 
 /*------------------------------------------------------------------------------

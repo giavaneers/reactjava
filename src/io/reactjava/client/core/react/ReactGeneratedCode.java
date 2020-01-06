@@ -41,6 +41,13 @@ static
    kFACTORY_MAP = new HashMap<>();
 
    kFACTORY_MAP.put(
+      "io.reactjava.client.core.providers.analytics.firebase.GoogleAnalyticsService",
+      (Function<Properties,IProvider>)(props) ->
+      {
+         return(new io.reactjava.client.core.providers.analytics.firebase.GoogleAnalyticsService(props));
+      });
+
+   kFACTORY_MAP.put(
       "io.reactjava.client.core.providers.auth.firebase.FirebaseAuthenticationService",
       (Function<Properties,IProvider>)(props) ->
       {

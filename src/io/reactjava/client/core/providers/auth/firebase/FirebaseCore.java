@@ -23,29 +23,53 @@ import com.giavaneers.util.gwt.Logger;
 import elemental2.core.JsObject;
 import io.reactjava.client.core.react.Configuration;
 import io.reactjava.client.core.react.IConfiguration;
+import io.reactjava.client.core.react.IConfiguration.ICloudServices;
 import io.reactjava.client.core.react.NativeObject;
 import io.reactjava.client.core.rxjs.observable.Observable;
 import io.reactjava.client.core.rxjs.observable.Subscriber;
 import io.reactjava.client.core.react.Utilities;
+import java.util.ArrayList;
+import java.util.Arrays;
 import jsinterop.annotations.JsMethod;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;
 import jsinterop.base.Js;
-
-// FirebaseCore =======================//
+                                       // FirebaseCore =======================//
 @JsType                                // export to Javascript                //
 public class FirebaseCore
 {
                                        // class constants --------------------//
 private static final Logger   kLOGGER = Logger.newInstance();
 
-public static final String    kKEY_APP      = "app";
-public static final String    kKEY_AUTH     = "auth";
-public static final String    kKEY_CONFIG   = "configuration";
-public static final String    kKEY_DATABASE = "database";
+public static final String    kKEY_ANALYTICS    = "analytics";
+public static final String    kKEY_APP          = "app";
+public static final String    kKEY_AUTH         = "auth";
+public static final String    kKEY_CONFIG       = "configuration";
+public static final String    kKEY_DATABASE     = "database";
 
-protected static final String kINJECT_URL =
-   "https://www.gstatic.com/firebasejs/7.5.0/firebase.js";
+protected static final String kSCRIPT_ANALYTICS = "firebase-analytics.js";
+protected static final String kSCRIPT_APP       = "firebase-app.js";
+protected static final String kSCRIPT_AUTH      = "firebase-auth.js";
+protected static final String kSCRIPT_DATABASE  =  "firebase-database.js";
+protected static final String kSCRIPT_VERSION   = "7.6.1";
+
+protected static final String kINJECT_URL_BASE  =
+   "https://www.gstatic.com/firebasejs/";
+
+protected static final String kINJECT_URL_VERSION =
+   kINJECT_URL_BASE + kSCRIPT_VERSION + "/";
+
+protected static final String kINJECT_URL_ANALYTICS =
+   kINJECT_URL_VERSION + kSCRIPT_ANALYTICS;
+
+protected static final String kINJECT_URL_APP =
+   kINJECT_URL_VERSION + kSCRIPT_APP;
+
+protected static final String kINJECT_URL_AUTH =
+   kINJECT_URL_VERSION + kSCRIPT_AUTH;
+
+protected static final String kINJECT_URL_DATABASE =
+   kINJECT_URL_VERSION + kSCRIPT_DATABASE;
 
                                        // class variables ------------------- //
 protected static NativeObject props;   // properties                          //
@@ -62,9 +86,9 @@ protected static NativeObject props;   // properties                          //
                                                                              /**
             Configuration routine.
 
-@return     void
+@return     Observable
 
-@param      configurationData    configuration data
+@param      cloudConfig    cloud services config
 
 @history    Sat Oct 21, 2017 10:30:00 (Giavaneers - LBM) created
 
@@ -72,20 +96,20 @@ protected static NativeObject props;   // properties                          //
                                                                               */
 //------------------------------------------------------------------------------
 public static Observable configure(
-   Object configurationData)
+   ICloudServices cloudConfig)
 {
-   if (!(configurationData instanceof String[])
-         || ((String[])configurationData).length != 6)
-   {
-      throw new IllegalArgumentException(
-         "Configuration data must be String[]"
-       + "{apiKey, authDomain, databaseURL, projectId, storageBucket, "
-       + "messagingSenderId}");
-   }
+   Observable obs  =
+      configure(
+         cloudConfig.getAPIKey(),
+         cloudConfig.getAuthDomain(),
+         cloudConfig.getDatabaseURL(),
+         cloudConfig.getProjectId(),
+         cloudConfig.getStorageBucket(),
+         cloudConfig.getMessagingSenderId(),
+         cloudConfig.getAppId(),
+         cloudConfig.getTrackingId());
 
-   String[] args = (String[])configurationData;
-
-   return(configure(args[0], args[1], args[2], args[3], args[4], args[5]));
+   return(obs);
 }
 /*------------------------------------------------------------------------------
 
@@ -116,6 +140,44 @@ protected static Observable configure(
    String storageBucket,
    String messagingSenderId)
 {
+   return(
+      configure(
+         apiKey, authDomain, databaseURL, projectId, storageBucket,
+         messagingSenderId, "", ""));
+}
+/*------------------------------------------------------------------------------
+
+@name       configure - configuration routine
+                                                                              */
+                                                                             /**
+            Configuration routine.
+
+@return     void
+
+@param      apiKey               apiKey
+@param      authDomain           authDomain
+@param      databaseURL          databaseURL
+@param      projectId            projectId
+@param      storageBucket        storageBucket
+@param      messagingSenderId    messagingSenderId
+@param      appId                firebase appId
+@param      measurementId        analytics trackingId
+
+@history    Sat Oct 21, 2017 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected static Observable configure(
+   String apiKey,
+   String authDomain,
+   String databaseURL,
+   String projectId,
+   String storageBucket,
+   String messagingSenderId,
+   String appId,
+   String measurementId)
+{
    Observable<NativeObject> observable = Observable.create(
       (Subscriber<NativeObject> subscriber) ->
       {
@@ -125,10 +187,35 @@ protected static Observable configure(
             subscriber.next(props());
             subscriber.complete();
          }
+         else if (apiKey == null || projectId == null || appId == null)
+         {
+                                       // ensure minimum config spec          //
+            kLOGGER.logInfo(
+               "Firebase not initialized "
+             + "since apiKey, projectId and appId were not all specified");
+            subscriber.next(props());
+            subscriber.complete();
+         }
          else
          {
-            Utilities.injectScriptOrCSS(
-               getConfiguration(), kINJECT_URL, null,
+            ArrayList<String> scripts = new ArrayList<>();
+            scripts.add(kINJECT_URL_APP);
+
+            //if (measurementId != null)
+            //{
+            //   scripts.add(kINJECT_URL_ANALYTICS);
+            //}
+            if (authDomain != null)
+            {
+               scripts.add(kINJECT_URL_AUTH);
+            }
+            if (databaseURL != null)
+            {
+               scripts.add(kINJECT_URL_DATABASE);
+            }
+                                       // inject the required scripts         //
+            Utilities.injectScriptsAndCSS(
+               getConfiguration(), scripts, null,
                (Object response, Object reqToken) ->
                {
                   NativeObject config =
@@ -138,13 +225,28 @@ protected static Observable configure(
                         "databaseURL",       databaseURL,
                         "projectId",         projectId,
                         "storageBucket",     storageBucket,
-                        "messagingSenderId", messagingSenderId);
+                        "messagingSenderId", messagingSenderId,
+                        "appId",             appId,
+                        "measurementId",     measurementId);
                   try
                   {
-                     props().set(kKEY_APP,      Firebase.initializeApp(config));
-                     props().set(kKEY_AUTH,     Firebase.auth());
-                     props().set(kKEY_CONFIG,   config);
-                     props().set(kKEY_DATABASE, Firebase.database());
+                     props().set(kKEY_CONFIG, config);
+                     props().set(kKEY_APP,    Firebase.initializeApp(config));
+
+                     //if (measurementId != null)
+                     //{
+                     //                  // using google analytics exclusively  //
+                     //                  // for now                             //
+                     //   props().set(kKEY_ANALYTICS, Firebase.analytics());
+                     //}
+                     if (authDomain != null)
+                     {
+                        props().set(kKEY_AUTH, Firebase.auth());
+                     }
+                     if (databaseURL != null)
+                     {
+                        props().set(kKEY_DATABASE, Firebase.database());
+                     }
 
                      subscriber.next(props());
                      subscriber.complete();
@@ -161,6 +263,24 @@ protected static Observable configure(
       });
 
    return(observable);
+}
+/*------------------------------------------------------------------------------
+
+@name       getAnalytics - get analytics
+                                                                              */
+                                                                             /**
+            Get analytics.
+
+@return     analytics
+
+@history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static JsObject getAnalytics()
+{
+   return((JsObject)props().get(kKEY_ANALYTICS));
 }
 /*------------------------------------------------------------------------------
 
@@ -243,12 +363,12 @@ public static JsObject getDatabase()
 }
 /*------------------------------------------------------------------------------
 
-@name       getDatabase - get database
+@name       getErrorMessage - get error message
                                                                               */
                                                                              /**
-            Get database.
+            Get error message.
 
-@return     database
+@return     error message
 
 @history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
 
@@ -309,6 +429,23 @@ public static class Firebase
                                        // (none)                              //
                                        // private instance variables -------- //
                                        // (none)                              //
+
+/*------------------------------------------------------------------------------
+
+@name       analytics - get the Analytics service for the default app
+                                                                              */
+                                                                             /**
+            Get the Analytics service for the default app
+
+@return     Analytics service for the default app
+
+@history    Sat Oct 21, 2017 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+@JsMethod
+public static native JsObject analytics() throws Exception;
 
 /*------------------------------------------------------------------------------
 

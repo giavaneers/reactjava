@@ -15,7 +15,8 @@ notes:
                                        // package --------------------------- //
 package io.reactjava.client.core.react;
                                        // imports --------------------------- //
-import elemental2.dom.DomGlobal;
+import io.reactjava.client.core.providers.analytics.IAnalyticsService;
+import io.reactjava.client.core.providers.analytics.firebase.GoogleAnalyticsService;
 import io.reactjava.client.core.providers.auth.IAuthenticationService;
 import io.reactjava.client.core.providers.auth.firebase.FirebaseAuthenticationService;
 import io.reactjava.client.core.providers.database.IDatabaseService;
@@ -24,7 +25,7 @@ import io.reactjava.client.core.providers.http.HttpClient;
 import io.reactjava.client.core.providers.http.IHttpClientBase;
 import io.reactjava.client.core.providers.platform.IPlatform;
 import io.reactjava.client.core.providers.platform.web.PlatformWeb;
-import io.reactjava.client.moduleapis.ReactGA;
+import io.reactjava.client.core.rxjs.observable.Observable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -37,7 +38,6 @@ public interface IConfiguration
                                        // class constants --------------------//
 boolean kSRCCFG_RENDER_INLINE = true;
 boolean kSRCCFG_BUNDLE_SCRIPT = true;
-
                                        // jsinterop namespace and name        //
 String kJSINTEROP_NAMESPACE =
    kSRCCFG_BUNDLE_SCRIPT ? "ReactJava" : JsPackage.GLOBAL;
@@ -45,10 +45,10 @@ String kJSINTEROP_NAMESPACE =
                                        // standard keys                       //
 String kKEY_APP                       = "app";
 String kKEY_BUNDLE_SCRIPTS            = "bundleScripts";
+String kKEY_CLOUD_SERVICES_CONFIG     = "cloudServicesConfig";
 String kKEY_CONFIGURATION_NAME        = "configurationName";
 String kKEY_GLOBAL_CSS                = "globalCSS";
 String kKEY_GLOBAL_IMAGES             = "globalImages";
-String kKEY_GOOGLE_ANALYTICS_ID       = "googleAnalyticsId";
 String kKEY_IMPORTED_NODE_MODULES     = "importedNodeModules";
 String kKEY_NAV_ROUTES                = "navRoutes";
 String kKEY_NAV_ROUTES_NESTED         = "navRoutesNested";
@@ -97,6 +97,9 @@ Map<String,String> kPROVIDERS_DEFAULT =
       put(
          IHttpClientBase.class.getName(),
          HttpClient.class.getName());
+      put(
+         IAnalyticsService.class.getName(),
+         GoogleAnalyticsService.class.getName());
       put(
          IAuthenticationService.class.getName(),
          FirebaseAuthenticationService.class.getName());
@@ -225,10 +228,10 @@ static IConfiguration assignSharedInstance(
       configuration.setSEOInfo(seoInfo);
    }
                                        // googleAnalyticsId ------------------//
-   String googleAnalyticsId = app.getGoogleAnalyticsId();
-   if (googleAnalyticsId != null)
+   ICloudServices cloudServicesConfig = app.getCloudServicesConfig();
+   if (cloudServicesConfig != null)
    {
-      configuration.setGoogleAnalyticsId(googleAnalyticsId);
+      configuration.setCloudServicesConfig(cloudServicesConfig);
    }
                                        // imported node modules --------------//
    Collection<String> importedModules = configuration.getImportedNodeModules();
@@ -386,19 +389,19 @@ Collection<String> getGlobalImages();
 
 /*------------------------------------------------------------------------------
 
-@name       getGoogleAnalyticsId - get google analytics id
+@name       getCloudServicesConfig - get cloud services config
                                                                               */
                                                                              /**
-            Get google analytics id. This impementation is to be overridden.
+            Get cloud services config.
 
-@return     google analytics id.
+@return     cloud services config.
 
 @history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-String getGoogleAnalyticsId();
+ICloudServices getCloudServicesConfig();
 
 /*------------------------------------------------------------------------------
 
@@ -662,13 +665,15 @@ Map<String,String> getTagMapDefault();
             Initialize. When invoked, all scripts and node modules have been
             loaded.
 
+@return     observable
+
 @history    Mon Dec 23, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
 
                                                                               */
 //------------------------------------------------------------------------------
-void initialize();
+Observable initialize();
 
 /*------------------------------------------------------------------------------
 
@@ -744,21 +749,21 @@ IConfiguration setGlobalCSS(String[] globalCSS);
 
 /*------------------------------------------------------------------------------
 
-@name       setGoogleAnalyticsId - set google analytics id
+@name       setCloudServicesConfig - set cloud services config
                                                                               */
                                                                              /**
-            Set google analytics id.
+            Set cloud services config.
 
 @return     this configuration
 
-@param      googleAnalyticsId    google analytics id.
+@param      cloudServicesConfig    cloud services config.
 
 @history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-IConfiguration setGoogleAnalyticsId(String googleAnalyticsId);
+IConfiguration setCloudServicesConfig(ICloudServices cloudServicesConfig);
 
 /*------------------------------------------------------------------------------
 
@@ -925,4 +930,344 @@ IConfiguration setSEOInfo(SEOInfo seoInfo);
 //------------------------------------------------------------------------------
 void setTagMap(Map<String,String> tagMap);
 
+/*==============================================================================
+
+name:       ICloudServices - cloud services configuration interface
+
+purpose:    Cloud services configuration interface
+
+history:    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created
+
+notes:
+
+==============================================================================*/
+public static interface ICloudServices
+{
+                                       // constants ------------------------- //
+public static final String kPLATFORM_FIREBASE = "firebase";
+public static final String kPLATFORM_GOOGLE   = "google";
+public static final String kPLATFORM_DEFAULT  = kPLATFORM_FIREBASE;
+
+                                       // class variables ------------------- //
+                                       // (none)                              //
+                                       // public instance variables --------- //
+                                       // (none)                              //
+                                       // protected instance variables ------ //
+                                       // (none)                              //
+/*------------------------------------------------------------------------------
+
+@name       getAPIKey - get apiKey
+                                                                              */
+                                                                             /**
+            Get apiKey.
+
+@return     apiKey
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+String getAPIKey();
+
+/*------------------------------------------------------------------------------
+
+@name       getAppId - get appId
+                                                                              */
+                                                                             /**
+            Get appId.
+
+@return     appId
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+String getAppId();
+
+/*------------------------------------------------------------------------------
+
+@name       getAuthDomain - get auth domain
+                                                                              */
+                                                                             /**
+            Get auth domain.
+
+@return     auth domain
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+String getAuthDomain();
+
+/*------------------------------------------------------------------------------
+
+@name       getCloudPlatform - get cloud platform
+                                                                              */
+                                                                             /**
+            Get cloud platform.
+
+@return     cloud platform
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+String getCloudPlatform();
+
+/*------------------------------------------------------------------------------
+
+@name       getDatabaseURL - get database url
+                                                                              */
+                                                                             /**
+            Get database url.
+
+@return     database url
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+String getDatabaseURL();
+
+/*------------------------------------------------------------------------------
+
+@name       getMessagingSenderId - get cloud messaging sender id
+                                                                              */
+                                                                             /**
+            Get cloud messaging sender id.
+
+@return     cloud messaging sender id
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+String getMessagingSenderId();
+
+/*------------------------------------------------------------------------------
+
+@name       getProjectId - get projectId
+                                                                              */
+                                                                             /**
+            Get projectId.
+
+@return     projectId
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+String getProjectId();
+
+/*------------------------------------------------------------------------------
+
+@name       getStorageBucket - get cloud storage bucket
+                                                                              */
+                                                                             /**
+            Get cloud storage bucket.
+
+@return     cloud storage bucket
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+String getStorageBucket();
+
+/*------------------------------------------------------------------------------
+
+@name       getTrackingId - get tracking id
+                                                                              */
+                                                                             /**
+            Get tracking id.
+
+@return     tracking id
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+String getTrackingId();
+
+/*------------------------------------------------------------------------------
+
+@name       setAppId - set appId
+                                                                              */
+                                                                             /**
+            Set appId.
+
+@return     cloud services configfuration
+
+@param      appId    appId
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+ICloudServices setAppId(
+   String appId);
+
+/*------------------------------------------------------------------------------
+
+@name       setAPIKey - set apiKey
+                                                                              */
+                                                                             /**
+            Set apiKey.
+
+@return     cloud services configfuration
+
+@param      apiKey    apiKey
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+ICloudServices setAPIKey(
+   String apiKey);
+
+/*------------------------------------------------------------------------------
+
+@name       setAuthDomain - set auth domain
+                                                                              */
+                                                                             /**
+            Set auth domain.
+
+@return     cloud services configfuration
+
+@param      authDomain    auth domain
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+ICloudServices setAuthDomain(
+   String authDomain);
+
+/*------------------------------------------------------------------------------
+
+@name       setCloudPlatform - set cloud platform
+                                                                              */
+                                                                             /**
+            Set cloud platform.
+
+@return     cloud services configfuration
+
+@param      cloudPlatform    cloud platform
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+ICloudServices setCloudPlatform(
+   String cloudPlatform);
+
+/*------------------------------------------------------------------------------
+
+@name       setDatabaseURL - set database url
+                                                                              */
+                                                                             /**
+            Set database url.
+
+@return     cloud services configfuration
+
+@param      databaseURL    databaseURL
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+ICloudServices setDatabaseURL(
+   String databaseURL);
+
+/*------------------------------------------------------------------------------
+
+@name       setMessagingSenderId - set cloud messaging sender id
+                                                                              */
+                                                                             /**
+            Set cloud messaging sender id.
+
+@return     cloud services configfuration
+
+@param      cloudMessagingSenderId    cloud messaging sender id
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+ICloudServices setMessagingSenderId(
+   String cloudMessagingSenderId);
+
+/*------------------------------------------------------------------------------
+
+@name       setProjectId - set projectId
+                                                                              */
+                                                                             /**
+            Set projectId.
+
+@return     cloud services configfuration
+
+@param      projectId    projectId
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+ICloudServices setProjectId(
+   String projectId);
+
+/*------------------------------------------------------------------------------
+
+@name       setStorageBucket - set cloud storage bucket
+                                                                              */
+                                                                             /**
+            Set cloud storage bucket.
+
+@return     cloud services configfuration
+
+@param      storageBucket    cloud storage bucket
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+ICloudServices setStorageBucket(
+   String storageBucket);
+
+/*------------------------------------------------------------------------------
+
+@name       setTrackingId - set tracking id
+                                                                              */
+                                                                             /**
+            Set tracking id.
+
+@return     cloud services configfuration
+
+@param      trackingId     trackingId
+
+@history    Wed Jan 01, 2020 10:30:00 (Giavaneers - LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+ICloudServices setTrackingId(
+   String trackingId);
+
+}//====================================// end ICloudServices =================//
 }//====================================// end IConfiguration =================//
