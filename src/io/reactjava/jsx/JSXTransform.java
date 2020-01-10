@@ -3451,65 +3451,6 @@ public static boolean unitTest(
                   else if (false)
                   {
                      components.put(
-                        "ContentChapter", "reactjavawebsite.ContentChapter");
-                     components.put(
-                        "Footer", "reactjavawebsite.Footer");
-                     components.put(
-                        "GeneralAppBar", "reactjavawebsite.GeneralAppBar");
-                     components.put(
-                        "SideDrawer", "reactjavawebsite.SideDrawer");
-
-                     classname  = "reactjavawebsite.GetStarted";
-                     src =
-                        IJSXTransform.getFileAsString(
-                           new File(
-                              "/Users/brianm/working/IdeaProjects/ReactJava/"
-                            + "ReactJavaWebsite/src/"
-                            + "reactjavawebsite/GetStarted.java"),
-                           null);
-                     content = src;
-                  }
-                  else if (false)
-                  {
-                     components.put(
-                        "ContentChapter", "reactjavawebsite.ContentChapter");
-                     components.put(
-                        "Footer", "reactjavawebsite.Footer");
-                     components.put(
-                        "GeneralAppBar", "reactjavawebsite.GeneralAppBar");
-                     components.put(
-                        "SideDrawer", "reactjavawebsite.SideDrawer");
-
-                     classname  = "reactjavawebsite.UserGuide";
-                     src =
-                        IJSXTransform.getFileAsString(
-                           new File(
-                              "/Users/brianm/working/IdeaProjects/ReactJava/"
-                            + "ReactJavaWebsite/src/"
-                            + "reactjavawebsite/UserGuide.java"),
-                           null);
-                     content = src;
-                  }
-                  else if (false)
-                  {
-                     components.put(
-                        "Footer", "reactjavawebsite.Footer");
-                     components.put(
-                        "LandingAppBar", "reactjavawebsite.LandingAppBar");
-
-                     classname  = "reactjavawebsite.Landing";
-                     src =
-                        IJSXTransform.getFileAsString(
-                           new File(
-                              "/Users/brianm/working/IdeaProjects/ReactJava/"
-                            + "ReactJavaWebsite/src/"
-                            + "reactjavawebsite/Landing.java"),
-                           null);
-                     content = src;
-                  }
-                  else if (false)
-                  {
-                     components.put(
                         "ContentBody",
                         "io.reactjava.client.examples.materialui.generalpage.ContentBody");
                      components.put(

@@ -36,7 +36,6 @@
 
 	<!-- transcode source paths -->
    <source path="com/giavaneers/util/" />
-   <source path="com/github/" />
    <source path="elemental2/" />
    <source path="io/reactjava/client/components/" />
    <source path="io/reactjava/client/core/providers/" />

@@ -40,54 +40,6 @@ static
 {
    kFACTORY_MAP = new HashMap<>();
 
-   kFACTORY_MAP.put(
-      "io.reactjava.client.core.providers.analytics.firebase.GoogleAnalyticsService",
-      (Function<Properties,IProvider>)(props) ->
-      {
-         return(new io.reactjava.client.core.providers.analytics.firebase.GoogleAnalyticsService(props));
-      });
-
-   kFACTORY_MAP.put(
-      "io.reactjava.client.core.providers.auth.firebase.FirebaseAuthenticationService",
-      (Function<Properties,IProvider>)(props) ->
-      {
-         return(new io.reactjava.client.core.providers.auth.firebase.FirebaseAuthenticationService(props));
-      });
-
-   kFACTORY_MAP.put(
-      "io.reactjava.client.core.providers.database.firebase.FirebaseDatabaseService",
-      (Function<Properties,IProvider>)(props) ->
-      {
-         return(new io.reactjava.client.core.providers.database.firebase.FirebaseDatabaseService(props));
-      });
-
-   kFACTORY_MAP.put(
-      "io.reactjava.client.core.providers.http.HttpClientBase",
-      (Function<Properties,IProvider>)(props) ->
-      {
-         return(new io.reactjava.client.core.providers.http.HttpClientBase(props));
-      });
-
-   kFACTORY_MAP.put(
-      "io.reactjava.client.core.providers.platform.mobile.android.PlatformAndroid",
-      (Function<Properties,IProvider>)(props) ->
-      {
-         return(new io.reactjava.client.core.providers.platform.mobile.android.PlatformAndroid(props));
-      });
-
-   kFACTORY_MAP.put(
-      "io.reactjava.client.core.providers.platform.mobile.ios.PlatformIOS",
-      (Function<Properties,IProvider>)(props) ->
-      {
-         return(new io.reactjava.client.core.providers.platform.mobile.ios.PlatformIOS(props));
-      });
-
-   kFACTORY_MAP.put(
-      "io.reactjava.client.core.providers.platform.web.PlatformWeb",
-      (Function<Properties,IProvider>)(props) ->
-      {
-         return(new io.reactjava.client.core.providers.platform.web.PlatformWeb(props));
-      });
 //%componentEntries%
 }
 /*------------------------------------------------------------------------------

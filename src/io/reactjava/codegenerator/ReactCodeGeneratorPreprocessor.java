@@ -26,10 +26,8 @@ import io.reactjava.jsx.IConfiguration;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
                                        // ReactCodeGeneratorPreprocessor =====//
 public class ReactCodeGeneratorPreprocessor implements IPreprocessor
 {
@@ -42,7 +40,6 @@ protected static final List<String> kFACTORY_MAP_KEYS = new ArrayList<>();
                                        // public instance variables --------- //
                                        // (none)                              //
                                        // protected instance variables -------//
-protected static TreeLogger logger;    // any tree logger                     //
                                        // private instance variables -------- //
                                        // (none)                              //
 
@@ -63,56 +60,6 @@ public ReactCodeGeneratorPreprocessor()
 }
 /*------------------------------------------------------------------------------
 
-@name       getFileLogger - get file logger
-                                                                              */
-                                                                             /**
-            Get file logger.
-
-@return     file logger
-
-@param      invocationLogger     logger passed with invocation
-@param      nanoTime             time of invocation
-
-@history    Sat Aug 11, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public static TreeLogger getFileLogger(
-   TreeLogger invocationLogger,
-   long       nanoTime)
-{
-   if (logger == null)
-   {
-      try
-      {
-         Type maxDetail =
-            invocationLogger == null || !(logger instanceof AbstractTreeLogger)
-               ? TreeLogger.ALL
-               :  ((AbstractTreeLogger)invocationLogger).getMaxDetail();
-
-         File logFile =
-            new File(
-               IConfiguration.getProjectDirectory(null, invocationLogger),
-               "antlog.codegenerator.preprocessor.txt");
-
-         logFile.delete();
-
-         logger = new PrintWriterTreeLogger(logFile);
-         ((PrintWriterTreeLogger)logger).setMaxDetail(maxDetail);
-
-         logger.log(logger.INFO, new Date().toString());
-         logger.log(logger.INFO, "nanoTime=" + nanoTime);
-      }
-      catch(Exception e)
-      {
-         e.printStackTrace();
-      }
-   }
-   return(logger);
-}
-/*------------------------------------------------------------------------------
-
 @name       initialize - initialize
                                                                               */
                                                                              /**
@@ -125,7 +72,6 @@ public static TreeLogger getFileLogger(
 //------------------------------------------------------------------------------
 public void initialize()
 {
-   logger = null;
 }
 /*------------------------------------------------------------------------------
 
@@ -157,9 +103,6 @@ public byte[] process(
    TreeLogger         logger)
    throws             Exception
 {
-   long start = System.nanoTime();
-
-   logger = getFileLogger(logger, start);
    logger.log(logger.DEBUG, "process(): entered");
 
    logger.log(

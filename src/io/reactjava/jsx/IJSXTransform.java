@@ -16,6 +16,7 @@ notes:
 package io.reactjava.jsx;
                                        // imports --------------------------- //
 import com.google.gwt.core.ext.TreeLogger;
+import io.reactjava.codegenerator.IPostprocessor;
 import io.reactjava.codegenerator.IPreprocessor;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;

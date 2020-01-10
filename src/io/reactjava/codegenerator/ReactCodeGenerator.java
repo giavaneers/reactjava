@@ -1576,6 +1576,53 @@ protected void generateHashRedirect(
 }
 /*------------------------------------------------------------------------------
 
+@name       generateNewComponentFactoryMap - generate new component factory map
+                                                                              */
+                                                                             /**
+            Generate new component factory map. Exploring how to build the map
+            as a postprocessor activity in which a type oracle exists.
+
+
+@return     void
+
+@history    Sat Aug 11, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static File generateNewComponentFactoryMap(
+   Map<String,Map<String,JClassType>> providersAndComponents,
+   TreeLogger                         logger)
+   throws                             Exception
+{
+   logger.log(TreeLogger.Type.INFO, "generateNewComponentFactoryMap(): entered");
+
+   logger.log(TreeLogger.Type.INFO, "generateNewComponentFactoryMap(): providers:");
+   Map<String,JClassType> providers = providersAndComponents.get(kKEY_PROVIDERS);
+   for (JClassType type : providers.values())
+   {
+      String classname = type.getQualifiedSourceName();
+      logger.log(
+         TreeLogger.Type.INFO,
+         "generateNewComponentFactoryMap(): provider=" + classname);
+   }
+
+   logger.log(TreeLogger.Type.INFO, "generateNewComponentFactoryMap(): components:");
+   Map<String,JClassType> components = providersAndComponents.get(kKEY_COMPONENTS);
+   for (JClassType type : components.values())
+   {
+      String classname = type.getQualifiedSourceName();
+      logger.log(
+         TreeLogger.Type.INFO,
+         "generateNewComponentFactoryMap(): component=" + classname);
+   }
+
+   logger.log(TreeLogger.Type.INFO, "generateNewComponentFactoryMap(): exiting");
+
+   return(null);
+}
+/*------------------------------------------------------------------------------
+
 @name       generateSitemapItem - generate sitemap
                                                                               */
                                                                              /**
@@ -2299,7 +2346,7 @@ public static void main(
       {
          new ReactCodeGenerator().parseReactiveXInvocations(
             "io.reactjava.client.core.providers.http.HttpClient",
-            newFileLogger(null, 0));
+            IPostprocessor.getFileLogger(null, 0));
       }
       else
       {
@@ -2310,49 +2357,6 @@ public static void main(
    {
       e.printStackTrace();
    }
-}
-/*------------------------------------------------------------------------------
-
-@name       newFileLogger - new file logger
-                                                                              */
-                                                                             /**
-            New file logger.
-
-@return     new file logger
-
-@history    Sat Aug 11, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public static TreeLogger newFileLogger(
-   TreeLogger logger,
-   long       nanoTime)
-{
-   if (logger == null || logger instanceof AbstractTreeLogger)
-   {
-      try
-      {
-         Type maxDetail =
-            logger == null
-               ? TreeLogger.ALL : ((AbstractTreeLogger)logger).getMaxDetail();
-
-         File logFile   =
-            new File(
-               IConfiguration.getProjectDirectory(null, logger),
-               "antlog.codegenerator.txt");
-
-         logFile.delete();
-
-         logger = new PrintWriterTreeLogger(logFile);
-         ((PrintWriterTreeLogger)logger).setMaxDetail(maxDetail);
-      }
-      catch(Exception e)
-      {
-         e.printStackTrace();
-      }
-   }
-   return(logger);
 }
 /*------------------------------------------------------------------------------
 
@@ -2580,7 +2584,7 @@ protected Map<String,Map<String,JClassType>> parseClasses(
    }
                                        // check that each component has an    //
                                        // entry in the component factory map  //
-   checkComponentFactoryMap(components, generatedType, logger);
+// checkComponentFactoryMap(components, generatedType, logger);
 
    Map<String,Map<String,JClassType>> providersAndComponents =
       new HashMap<String,Map<String,JClassType>>()
@@ -2751,10 +2755,6 @@ public void process(
    throws                Exception
 {
    long start = System.nanoTime();
-
-   logger = newFileLogger(logger, start);
-   logger.log(logger.INFO, new Date().toString());
-   logger.log(logger.INFO, "nanoTime=" + start);
    logger.log(logger.DEBUG, "process(): entered");
 
    ModuleDef module = compilerContext.getModule();
@@ -2766,6 +2766,9 @@ public void process(
 
    Map<String,Map<String,JClassType>> providersAndComponents =
       parseClasses(context.getTypeOracle(), configuration, logger);
+
+                                       // explore as postprocessor function   //
+   generateNewComponentFactoryMap(providersAndComponents, logger);
 
    generateBootJs(providersAndComponents, logger);
 
