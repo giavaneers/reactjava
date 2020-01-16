@@ -40,7 +40,7 @@ static
 {
    kFACTORY_MAP = new HashMap<>();
 
-//%componentEntries%
+//%entries%
 }
 /*------------------------------------------------------------------------------
 

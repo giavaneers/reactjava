@@ -138,7 +138,7 @@ public static <P extends Properties> ElementDsc create(
 public static ReactElement createElement(
    ElementDsc root)
 {
-   List<ReactElement> childList = new ArrayList<ReactElement>();
+   List<ReactElement> childList = new ArrayList<>();
    for (ElementDsc childDsc : (List<ElementDsc>)root.children)
    {
       childList.add(createElement(childDsc));

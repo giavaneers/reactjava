@@ -15,16 +15,16 @@ notes:
                                        // package --------------------------- //
 package io.reactjava.client.core.react;
                                        // imports --------------------------- //
-import io.reactjava.client.core.providers.analytics.IAnalyticsService;
-import io.reactjava.client.core.providers.analytics.firebase.GoogleAnalyticsService;
-import io.reactjava.client.core.providers.auth.IAuthenticationService;
-import io.reactjava.client.core.providers.auth.firebase.FirebaseAuthenticationService;
-import io.reactjava.client.core.providers.database.IDatabaseService;
-import io.reactjava.client.core.providers.database.firebase.FirebaseDatabaseService;
-import io.reactjava.client.core.providers.http.HttpClient;
-import io.reactjava.client.core.providers.http.IHttpClientBase;
-import io.reactjava.client.core.providers.platform.IPlatform;
-import io.reactjava.client.core.providers.platform.web.PlatformWeb;
+import io.reactjava.client.providers.analytics.IAnalyticsService;
+import io.reactjava.client.providers.analytics.firebase.GoogleAnalyticsService;
+import io.reactjava.client.providers.auth.IAuthenticationService;
+import io.reactjava.client.providers.auth.firebase.FirebaseAuthenticationService;
+import io.reactjava.client.providers.database.IDatabaseService;
+import io.reactjava.client.providers.database.firebase.FirebaseDatabaseService;
+import io.reactjava.client.providers.http.HttpClient;
+import io.reactjava.client.providers.http.IHttpClientBase;
+import io.reactjava.client.providers.platform.IPlatform;
+import io.reactjava.client.providers.platform.web.PlatformWeb;
 import io.reactjava.client.core.rxjs.observable.Observable;
 import java.util.ArrayList;
 import java.util.Arrays;

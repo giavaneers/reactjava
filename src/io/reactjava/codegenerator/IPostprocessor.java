@@ -33,7 +33,7 @@ public interface IPostprocessor
                                        // all preprocessors on the classpath  //
 Class[] postprocessors =
 {
-   ReactCodeGenerator.class
+   ReactCodePackager.class
 };
                                        // postprocessors tree logger          //
 TreeLogger[] logger = new TreeLogger[1];

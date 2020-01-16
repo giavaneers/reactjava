@@ -152,7 +152,7 @@ public static Component componentForHash(
    Component component = null;
    if (descriptor != null)
    {
-      String     classname = ((Class)descriptor.get(kKEY_CLASS)).getName();
+      String     classname = ((Class)descriptor.get(kKEY_CLASS)).getCanonicalName();
       Properties props     = new Properties();
 
       Map<String,String> properties =

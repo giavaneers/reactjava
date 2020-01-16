@@ -20,7 +20,7 @@ notes:
 package io.reactjava.codegenerator;
                                        // imports --------------------------- //
 import com.giavaneers.net.cloudstorage.GoogleCloudStorageManagerBase;
-import io.reactjava.client.core.providers.platform.IPlatform;
+import io.reactjava.client.providers.platform.IPlatform;
 import io.reactjava.jsx.IConfiguration;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

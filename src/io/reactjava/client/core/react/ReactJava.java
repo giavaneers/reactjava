@@ -27,7 +27,7 @@ import elemental2.dom.HTMLStyleElement;
 import elemental2.dom.HTMLTitleElement;
 import elemental2.dom.NodeList;
 import elemental2.dom.StyleSheet;
-import io.reactjava.client.core.providers.platform.web.PlatformWeb;
+import io.reactjava.client.providers.platform.web.PlatformWeb;
 import io.reactjava.client.core.react.SEOInfo.SEOPageInfo;
 import java.util.HashMap;
 import java.util.List;
@@ -447,8 +447,7 @@ public static <P extends Properties> ReactElement createElement(
    ReactElement element =
       Character.isLowerCase(type.charAt(0))
          ? React.createElement(type, props, children)
-         : React.createElement(
-            ReactJavaNative.getType(type), props, children);
+         : React.createElement(ReactJavaNative.getType(type), props, children);
 
    return(element);
 }

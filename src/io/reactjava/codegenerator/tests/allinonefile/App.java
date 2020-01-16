@@ -34,7 +34,7 @@ package io.reactjava.codegenerator.tests.allinonefile;
                                        // imports --------------------------- //
 import elemental2.dom.Event;
 import io.reactjava.client.core.react.INativeEventHandler;
-import io.reactjava.client.core.react.IProvider;
+import io.reactjava.client.core.react.Properties;
 import java.util.Vector;
 import java.util.function.Consumer;
                                        // App ================================//
@@ -93,6 +93,7 @@ public final void render()
                                        // 'stateChangeHandler' ->             //
                                        //    'statechangehandler'             //
 /*--
+   <div class={clas} onClick={clickHandler} id="Bdiv"></div>
    <div id={"App"}>
       <A on={onValue} statechangehandler={onHandler} id="A"></A>
       <B on={onValue.equals("true") ? "false" : "true"}
@@ -158,7 +159,12 @@ public final void render()
 {
    String clas = "true".equals(props().getString(kPROPERTY_ON)) ? "on" : "off";
 /*--
-   <div class={clas} onClick={clickHandler} id="Adiv"></div>
+   <div>
+      <B class={clas} onClick={clickHandler} id="b" />
+      <E class={clas} onClick={clickHandler} id="e" />
+      <App.B.F class={clas} onClick={clickHandler} id="abf" />
+      <TopLevelComponent.TopLevelComponentA class={clas} onClick={clickHandler} id="topA" />
+   </div>
 --*/
 };
 /*------------------------------------------------------------------------------
@@ -930,7 +936,106 @@ public static final String kPROPERTY_STATE_CHANGE_HANDLER = "statechangehandler"
                                        // (none)                              //
 
 }//====================================// end NonComponentB ==================//
-}//====================================// end TopLevelComponent ==============//
+/*==============================================================================
+
+name:       IProvider - non component inner class
+
+purpose:    non component inner class
+
+history:    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
+
+notes:
+
+==============================================================================*/
+public static interface IProvider extends io.reactjava.client.core.react.IProvider
+{
+                                       // constants ------------------------- //
+                                       // class variables ------------------- //
+                                       // (none)                              //
+                                       // public instance variables --------- //
+                                       // (none)                              //
+                                       // protected instance variables ------ //
+                                       // (none)                              //
+
+}//====================================// end IProvider ======================//
+/*==============================================================================
+
+name:       ProviderA - non component inner class
+
+purpose:    non component inner class
+
+history:    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
+
+notes:
+
+==============================================================================*/
+public static class ProviderA implements IProvider
+{
+                                       // constants ------------------------- //
+                                       // class variables ------------------- //
+                                       // (none)                              //
+                                       // public instance variables --------- //
+                                       // (none)                              //
+                                       // protected instance variables ------ //
+                                       // (none)                              //
+
+}//====================================// end ProviderA ======================//
+/*==============================================================================
+
+name:       ProviderB - non component inner class
+
+purpose:    non component inner class
+
+history:    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
+
+notes:
+
+==============================================================================*/
+public static class ProviderB implements io.reactjava.client.core.react.IProvider
+{
+                                       // constants ------------------------- //
+                                       // class variables ------------------- //
+                                       // (none)                              //
+                                       // public instance variables --------- //
+                                       // (none)                              //
+                                       // protected instance variables ------ //
+                                       // (none)                              //
+
+
+/*------------------------------------------------------------------------------
+
+@name       ProviderB - default constructor
+                                                                              */
+                                                                             /**
+            default constructor.
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public ProviderB()
+{
+};
+/*------------------------------------------------------------------------------
+
+@name       ProviderB - constructor for specified props
+                                                                              */
+                                                                             /**
+            Constructor for specified props.
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public ProviderB(Properties props)
+{
+};
+}//====================================// end ProviderB ======================//
+}//====================================// end App ============================//
 /*==============================================================================
 
 name:       TopLevelComponent - a second top level class in the same file
@@ -940,6 +1045,9 @@ purpose:    A second top level class in the same file
 history:    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
 
 notes:
+            String key = Component.kFORCE_UPDATE_KEY;
+            Ref                  Tag               Classname
+            TopLevelComponentA   App.Component     io.reactjava.codegenerator.tests.allinonefile,App.Component
 
 ==============================================================================*/
 class TopLevelComponent extends io.reactjava.client.core.react.Component
@@ -980,12 +1088,7 @@ public final void render()
                                        // 'stateChangeHandler' ->             //
                                        //    'statechangehandler'             //
 /*--
-   <div id={"App"}>
-      <A on={onValue} statechangehandler={onHandler} id="A"></A>
-      <B on={onValue.equals("true") ? "false" : "true"}
-         statechangehandler={onHandler} id="B">
-      </B>
-   </div>
+   <div class={clas} onClick={clickHandler} id="Bdiv"></div>
 --*/
 };
 /*==============================================================================

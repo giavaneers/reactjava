@@ -26,9 +26,15 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
+import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.TreeLogger.Type;
 import com.google.gwt.dev.util.log.AbstractTreeLogger;
@@ -51,9 +57,11 @@ public interface IPreprocessor
 {
                                        // class constants --------------------//
                                        // parsed map keys                     //
-String kKEY_PARSED_COMPONENTS = "components";
-String kKEY_PARSED_PROVIDERS  = "providers";
-String kKEY_PARSED_TYPES      = "types";
+String kKEY_PARSED_COMPONENTS          = "components";
+String kKEY_PARSED_PROVIDER_INTERFACES = "providerInterfaces";
+String kKEY_PARSED_PROVIDERS           = "providers";
+String kKEY_PARSED_TYPES               = "types";
+
                                        // parsed candidates                   //
 Map<String,Map<String,TypeDsc>> parsed  = new HashMap<>();
 
@@ -106,7 +114,8 @@ static byte[] allPreprocessors(
    logger = getFileLogger(logger);
 
    logger.log(
-      logger.DEBUG, "IPreprocessor.allPreprocessors(): entered for " + classname);
+      logger.DEBUG,
+      "IPreprocessor.allPreprocessors(): entered for " + classname);
 
                                        // parse each of the candidates,       //
                                        // building the providers and          //
@@ -118,8 +127,7 @@ static byte[] allPreprocessors(
    {
       processed =
          ((IPreprocessor)preprocessor.newInstance()).process(
-            classname, processed, encoding,
-            providerAndComponentCandidates, components, logger);
+            classname, processed, encoding, logger);
    }
 
    logger.log(logger.DEBUG, "IPreprocessor.allPreprocessors(): exiting");
@@ -185,6 +193,63 @@ static void generateTypesMap(
 }
 /*------------------------------------------------------------------------------
 
+@name       getAssignableTo - get all types assignable to specified type
+                                                                              */
+                                                                             /**
+            Get all types assignable to specified type; that is, all subtypes
+            and their substypes.
+
+@return     map of types assignable to specified type
+
+@param      root        specified type
+@param      logger      logger
+
+@history    Thu Jan 09, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+static Map<String,TypeDsc> getAssignableTo(
+   TypeDsc    root,
+   TreeLogger logger)
+{
+   Map<String,TypeDsc> assignables = new HashMap<>();
+   Map<String,TypeDsc> types       = getParsedTypes();
+   for (TypeDsc chaseDsc : types.values())
+   {
+      if (root.type.isInterface() == chaseDsc.type.isInterface())
+      {
+         List<TypeDsc> assignableDscs = new ArrayList<>();
+         boolean       bAssignable    = false;
+         while(chaseDsc != null)
+         {
+            assignableDscs.add(chaseDsc);
+
+            if (root.equals(chaseDsc))
+            {
+               bAssignable = true;
+               break;
+            }
+            if (chaseDsc.superType == null)
+            {
+               break;
+            }
+
+            chaseDsc = getSuperType(chaseDsc, logger);
+         }
+         if (bAssignable)
+         {
+            for (TypeDsc assignable : assignableDscs)
+            {
+               assignables.put(getClassname(assignable.type), assignable);
+            }
+         }
+      }
+   }
+   return(assignables);
+}
+/*------------------------------------------------------------------------------
+
 @name       getClassname - get classname for specified type declaration
                                                                               */
                                                                              /**
@@ -211,11 +276,82 @@ static String getClassname(
    {
       classname = Component.class.getName();
    }
+   else if (type.equals(TypeDsc.kROOT_IPROVIDER))
+   {
+      classname = IProvider.class.getName();
+   }
    else
    {
       classname = ((Optional<String>)type.getFullyQualifiedName()).get();
    }
    return(classname);
+}
+/*------------------------------------------------------------------------------
+
+@name       getComponentRenderCSSProcedure - get any renderCSS() procedure
+                                                                              */
+                                                                             /**
+            Get any renderCSS() procedure for the specified component.
+
+@return     any renderCSS() procedure for the specified component.
+
+@param      component      target component
+
+@history    Sun Jan 12, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+static MethodDeclaration getComponentRenderCSSProcedure(
+   TypeDsc component)
+{
+   MethodDeclaration method = null;
+                                       // find any renderCSS() procedure      //
+   for (MethodDeclaration chase : component.type.getMethodsByName("renderCSS"))
+   {
+      if (chase.getParameters().size() == 0)
+      {
+         method = chase;
+      }
+   }
+   return(method);
+}
+/*------------------------------------------------------------------------------
+
+@name       getComponentRenderProcedure - get any component render() procedure
+                                                                              */
+                                                                             /**
+            Get any render() procedure for the specified component.
+
+@return     any render() procedure for the specified component.
+
+@param      component      target component
+
+@history    Sun Jan 12, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+static MethodDeclaration getComponentRenderProcedure(
+   TypeDsc component)
+{
+   MethodDeclaration method = null;
+                                       // find any render() procedure         //
+   for (MethodDeclaration chase : component.type.getMethodsByName("render"))
+   {
+      if (chase.getParameters().size() == 0)
+      {
+         if (!chase.isFinal())
+         {
+            throw new IllegalStateException(
+               "render() method for " + getClassname(component.type)
+             + " must be final");
+         }
+
+         method = chase;
+      }
+   }
+   return(method);
 }
 /*------------------------------------------------------------------------------
 
@@ -267,6 +403,84 @@ static TreeLogger getFileLogger(
 }
 /*------------------------------------------------------------------------------
 
+@name       getDirectImplementors - get all that implement the specified type
+                                                                              */
+                                                                             /**
+            Get all types that directly implement the specified interface type.
+
+@return     map of types assignable to specified type
+
+@param      root        specified interface type
+@param      logger      logger
+
+@history    Thu Jan 09, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+static Map<String,TypeDsc> getDirectImplementors(
+   TypeDsc    root,
+   TreeLogger logger)
+{
+   Map<String,TypeDsc> implementors = new HashMap<>();
+   Map<String,TypeDsc> types        = getParsedTypes();
+   for (TypeDsc chaseDsc : types.values())
+   {
+      if (!chaseDsc.type.isInterface())
+      {
+         NodeList<ClassOrInterfaceType> implementedInterfaces =
+            chaseDsc.type.getImplementedTypes();
+
+         for (ClassOrInterfaceType type : implementedInterfaces)
+         {
+            TypeDsc implemented = getType(type, chaseDsc, logger);
+            if (root.equals(implemented))
+            {
+               implementors.put(getClassname(chaseDsc.type), chaseDsc);
+            }
+         }
+      }
+   }
+   return(implementors);
+}
+/*------------------------------------------------------------------------------
+
+@name       getImportForSimpleName - get typedDsc for simple name
+                                                                              */
+                                                                             /**
+            Get import with specified simple name for specified compilation
+            unit.
+
+@param      importSimpleName     import simple name
+@param      cu                   compilation unti
+@param      logger               compiler logger
+
+@history    Sat Jan 11, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+static TypeDsc getImportForSimpleName(
+   String          importSimpleName,
+   CompilationUnit cu,
+   TreeLogger      logger)
+{
+   TypeDsc importType = null;
+
+   for (ImportDeclaration targetImport : cu.getImports())
+   {
+      String importName = targetImport.getName().toString();
+      if (importName.endsWith("." + importSimpleName))
+      {
+         importType = getParsedTypes().get(importName);
+         break;
+      }
+   }
+
+   return(importType);
+}
+/*------------------------------------------------------------------------------
+
 @name       getParsedComponents - get map of parsed components by classname
                                                                               */
                                                                              /**
@@ -279,50 +493,46 @@ static TreeLogger getFileLogger(
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-static Map<String,TypeDsc> getParsedComponents()
+static Map<String,TypeDsc> getParsedComponents(
+   TreeLogger logger)
 {
    Map<String,TypeDsc> components = parsed.get(kKEY_PARSED_COMPONENTS);
    if (components.size() == 0)
    {
                                        // lazily create                       //
-      Map<String,TypeDsc> types = getParsedTypes();
-      for (String classname : types.keySet())
-      {
-         if (components.get(classname) != null)
-         {
-            continue;
-         }
+      components.putAll(
+         getAssignableTo(TypeDsc.kROOT_COMPONENT_INSTANCE, logger));
 
-         List<String> classnames = new ArrayList<>();
-         boolean      bComponent = false;
-         for (String chase = classname; true;)
-         {
-            classnames.add(chase);
-
-            TypeDsc chaseDsc = types.get(chase);
-            if (TypeDsc.kROOT_APP_COMPONENT_TEMPLATE_INSTANCE.equals(chaseDsc)
-                  || TypeDsc.kROOT_COMPONENT_INSTANCE.equals(chaseDsc))
-            {
-               bComponent = true;
-               break;
-            }
-            if (chaseDsc.superType == null)
-            {
-               break;
-            }
-
-            chase = getClassname(chaseDsc.superType);
-         }
-         if (bComponent)
-         {
-            for (String componentClassname : classnames)
-            {
-               components.put(componentClassname, types.get(componentClassname));
-            }
-         }
-      }
+      components.putAll(
+         getAssignableTo(TypeDsc.kROOT_APP_COMPONENT_TEMPLATE_INSTANCE, logger));
    }
    return(components);
+}
+/*------------------------------------------------------------------------------
+
+@name       getParsedComponents - get map of parsed components by classname
+                                                                              */
+                                                                             /**
+            Get map of parsed components by classname.
+
+@return     map of parsed components by classname
+
+@history    Thu Jan 09, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+static Map<String,TypeDsc> getParsedProviderInterfaces(
+   TreeLogger logger)
+{
+   Map<String,TypeDsc> iProviders = parsed.get(kKEY_PARSED_PROVIDER_INTERFACES);
+   if (iProviders.size() == 0)
+   {
+                                       // lazily create                       //
+      iProviders.putAll(
+         getAssignableTo(TypeDsc.kROOT_IPROVIDER_INSTANCE, logger));
+   }
+   return(iProviders);
 }
 /*------------------------------------------------------------------------------
 
@@ -338,81 +548,27 @@ static Map<String,TypeDsc> getParsedComponents()
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-static Map<String,TypeDsc> getParsedProviders()
+static Map<String,TypeDsc> getParsedProviders(
+   TreeLogger logger)
 {
    Map<String,TypeDsc> providers = parsed.get(kKEY_PARSED_PROVIDERS);
    if (providers.size() == 0)
    {
-                                       // lazily create                       //
-      Map<String,TypeDsc> types = getParsedTypes();
-      for (String classname : types.keySet())
+                                       // get direct implementors of each of  //
+                                       // the provider interfaces             //
+      Map<String,TypeDsc> direct     = new HashMap<>();
+      Map<String,TypeDsc> iProviders = getParsedProviderInterfaces(logger);
+      for (TypeDsc iProvider : iProviders.values())
       {
-         if (providers.get(classname) != null)
-         {
-            continue;
-         }
-         if (Component.class.getName().equals(classname))
-         {
-            continue;
-         }
-         if (AppComponentTemplate.class.getName().equals(classname))
-         {
-            continue;
-         }
-
-         List<String> classnames = new ArrayList<>();
-         boolean      bProvider  = false;
-         TypeDsc      chaseDsc;
-         String       chase = classname;
-
-         while (!bProvider)
-         {
-            classnames.add(chase);
-            chaseDsc = types.get(chase);
-
-            NodeList<ClassOrInterfaceType> implementedInterfaces =
-               chaseDsc.type.getImplementedTypes();
-
-            if (implementedInterfaces.size() > 0)
-            {
-               checkImplemented:
-               for (ClassOrInterfaceType implemented : implementedInterfaces)
-               {
-                  String implementedString = implemented.asString();
-                  String providerClassname = IProvider.class.getName();
-                  if (providerClassname.equals(implementedString))
-                  {
-                     bProvider = true;
-                     break checkImplemented;
-                  }
-                  else if (IProvider.class.getSimpleName().equals(implementedString))
-                  {
-                     for (ImportDeclaration imported : chaseDsc.cu.getImports())
-                     {
-                        if (providerClassname.equals(imported.getName().asString()))
-                        {
-                           bProvider = true;
-                           break checkImplemented;
-                        }
-                     }
-                  }
-               }
-            }
-            if (chaseDsc.superType == null
-                  || chaseDsc.superType == TypeDsc.kROOT_COMPONENT
-                  || chaseDsc.superType == TypeDsc.kROOT_APP_COMPONENT_TEMPLATE)
-            {
-               break;
-            }
-            chase = getClassname(chaseDsc.superType);
-         }
-         if (bProvider)
-         {
-            for (String providerClassname : classnames)
-            {
-               providers.put(providerClassname, types.get(providerClassname));
-            }
-         }
+         direct.putAll(getDirectImplementors(iProvider, logger));
+      }
+      providers.putAll(direct);
+                                       // add all assignable to the direct    //
+                                       // implementors as well                //
+      Map<String,TypeDsc> indirect = new HashMap<>();
+      for (TypeDsc directProvider : direct.values())
+      {
+         providers.putAll(getAssignableTo(directProvider, logger));
       }
    }
    return(providers);
@@ -434,6 +590,113 @@ static Map<String,TypeDsc> getParsedProviders()
 static Map<String,TypeDsc> getParsedTypes()
 {
    return(parsed.get(kKEY_PARSED_TYPES));
+}
+/*------------------------------------------------------------------------------
+
+@name       getSuperType - get supertype for specified type
+                                                                              */
+                                                                             /**
+            Get supertype for specified type.
+
+@param      typeDsc        target typeDsc
+@param      logger         compiler logger
+
+@history    Sat Jan 11, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+static TypeDsc getSuperType(
+   TypeDsc    typeDsc,
+   TreeLogger logger)
+{
+   TypeDsc superTypeDsc = null;
+   if (typeDsc.superType != null)
+   {
+      superTypeDsc =
+         getParsedTypes().get(typeDsc.superType.getFullyQualifiedName());
+   }
+   if (superTypeDsc == null)
+   {
+      NodeList<ClassOrInterfaceType> extendedTypes =
+         typeDsc.type.getExtendedTypes();
+
+      for (ClassOrInterfaceType extendedType : extendedTypes)
+      {
+         superTypeDsc = getType(extendedType, typeDsc, logger);
+         if (superTypeDsc != null)
+         {
+            typeDsc.superType = superTypeDsc.type;
+         }
+      }
+   }
+   return(superTypeDsc);
+}
+/*------------------------------------------------------------------------------
+
+@name       getType - get typedDsc for specified type
+                                                                              */
+                                                                             /**
+            Get typedDsc for specified type.
+
+@param      type        target type
+@param      logger      compiler logger
+
+@history    Sat Jan 11, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+static TypeDsc getType(
+   ClassOrInterfaceType type,
+   TypeDsc              refType,
+   TreeLogger           logger)
+{
+   String  refClassname    = getClassname(refType.type);
+   String  typeClassname   = type.toString();
+   String  simpleClassname = type.getName().asString();
+   TypeDsc typeDsc         = getParsedTypes().get(typeClassname);
+
+   if (typeDsc == null)
+   {
+      String typePackage =
+         refType.cu.getPackageDeclaration().get().getName().asString();
+
+      String superClassnameWPackage = typePackage + "." + typeClassname;
+
+      typeDsc = getParsedTypes().get(superClassnameWPackage);
+   }
+   if (typeDsc == null)
+   {
+      if (typeClassname.equals(simpleClassname))
+      {
+         typeDsc = getImportForSimpleName(simpleClassname, refType.cu, logger);
+      }
+   }
+   if (typeDsc == null)
+   {
+                              // chase classname prefix of outer     //
+                              // classes starting with same          //
+                              // classname prefix as type            //
+      String superPrefix = refClassname;
+      for (int idx = superPrefix.lastIndexOf('.');
+            idx > 0;
+            idx = superPrefix.lastIndexOf('.'))
+      {
+         superPrefix = superPrefix.substring(0, idx);
+
+                              // check for existing type             //
+
+         typeClassname = superPrefix + "." + simpleClassname;
+         typeDsc       = getParsedTypes().get(typeClassname);
+         if (typeDsc != null)
+         {
+            break;
+         }
+       }
+   }
+
+   return(typeDsc);
 }
 /*------------------------------------------------------------------------------
 
@@ -476,6 +739,99 @@ static void initialize(
 }
 /*------------------------------------------------------------------------------
 
+@name       isInstantiatableComponent - test if is an instantiable component
+                                                                              */
+                                                                             /**
+            Test whether the specified type is an instantiable component,
+            meaning it is a parsedComponent that is not abstract and if it has
+            a zero argument render() method, that method is final.
+
+@return     true iff the specified type is an instantiable component.
+
+@param      type     target type
+
+@history    Sat Jan 11, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+static boolean isInstantiatableComponent(
+   TypeDsc type)
+{
+   boolean bInstantiable = false;
+
+   if (getParsedComponents(null).get(getClassname(type.type)) != null
+         && !TypeDsc.kROOT_COMPONENT_INSTANCE.equals(type)
+         && !TypeDsc.kROOT_APP_COMPONENT_TEMPLATE_INSTANCE.equals(type)
+         && !type.type.isAbstract())
+   {
+                                       // find any render() procedure         //
+      getComponentRenderProcedure(type);
+                                       // if no exception thrown...           //
+      bInstantiable = true;
+   }
+
+   return(bInstantiable);
+}
+/*------------------------------------------------------------------------------
+
+@name       isInstantiatableProvider - test whether is an instantiable provider
+                                                                              */
+                                                                             /**
+            Test whether the specified type is an instantiable provider,
+            meaning it is a parsedProvider that is not abstract, with  a single
+            arg constructor, where the constructor type has the simple classname
+            "Properties".
+
+@return     true iff the specified type is an instantiable provider.
+
+@param      type     target type
+
+@history    Sat Jan 11, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+static boolean isInstantiatableProvider(
+   TypeDsc type)
+{
+   boolean bInstantiable = false;
+
+   if (getParsedProviders(null).get(getClassname(type.type)) != null
+         && !type.type.isAbstract())
+   {
+      for (BodyDeclaration member : type.type.getMembers())
+      {
+         if (member.isConstructorDeclaration())
+         {
+            NodeList<Parameter> params =
+               ((ConstructorDeclaration)member).getParameters();
+
+            if (params.size() == 1)
+            {
+               com.github.javaparser.ast.type.Type paramType =
+                  params.get(0).getType();
+
+               if (paramType.isClassOrInterfaceType())
+               {
+                  String simpleName =
+                     ((ClassOrInterfaceType)paramType).getNameAsString();
+
+                  if ("Properties".equals(simpleName))
+                  {
+                     bInstantiable = true;
+                     break;
+                  }
+               }
+            }
+         }
+      }
+   }
+
+   return(bInstantiable);
+}
+/*------------------------------------------------------------------------------
+
 @name       main - standard main method
                                                                               */
                                                                              /**
@@ -490,105 +846,6 @@ static void main(
    String[] args)
 {
    unitTest(args);
-}
-/*------------------------------------------------------------------------------
-
-@name       parseCandidate - parse provider and component candidates
-                                                                              */
-                                                                             /**
-            Parse provider and component candidates, storing results in the
-            'providers' and 'components' maps.
-
-@param      typeDsc        typeDsc
-@param      logger         compiler logger
-
-@history    Thu Jan 09, 2020 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-static void parseCandidate(
-   TypeDsc    typeDsc,
-   TreeLogger logger)
-{
-   NodeList<ClassOrInterfaceType> extendedTypes =
-      typeDsc.type.getExtendedTypes();
-
-   for (ClassOrInterfaceType extendedType : extendedTypes)
-   {
-      if (typeDsc.type.isInterface())
-      {
-         extendedType = extendedType;
-      }
-      else
-      {
-         String  classname       = getClassname(typeDsc.type);
-         String  superClassname  = extendedType.toString();
-         String  simpleClassname = extendedType.getName().asString();
-         TypeDsc superTypeDsc    = getParsedTypes().get(superClassname);
-         if (superTypeDsc == null)
-         {
-            String typePackage =
-               typeDsc.cu.getPackageDeclaration().get().getName().asString();
-
-            String superClassnameWPackage = typePackage + "." + superClassname;
-
-            superTypeDsc = getParsedTypes().get(superClassnameWPackage);
-         }
-         if (superTypeDsc == null)
-         {
-            if (superClassname.equals(simpleClassname))
-            {
-               for (ImportDeclaration targetImport : typeDsc.cu.getImports())
-               {
-                  String importName = targetImport.getName().toString();
-                  if (importName.endsWith("." + simpleClassname))
-                  {
-                     superTypeDsc = getParsedTypes().get(importName);
-                     break;
-                  }
-               }
-            }
-         }
-         if (superTypeDsc == null)
-         {
-                                       // chase classname prefix of outer     //
-                                       // classes starting with same          //
-                                       // classname prefix as type            //
-            String superPrefix = classname;
-            for (int idx = superPrefix.lastIndexOf('.');
-                  idx > 0;
-                  idx = superPrefix.lastIndexOf('.'))
-            {
-               superPrefix = superPrefix.substring(0, idx);
-
-                                       // check for existing type             //
-
-               superClassname = superPrefix + "." + simpleClassname;
-               superTypeDsc   = getParsedTypes().get(superClassname);
-               if (superTypeDsc != null)
-               {
-                  break;
-               }
-             }
-         }
-         if (superTypeDsc != null)
-         {
-            typeDsc.superType = superTypeDsc.type;
-         }
-      }
-   }
-                                       // handle any inner classes            //
-   for (Node child : typeDsc.type.getChildNodes())
-   {
-      if (child instanceof ClassOrInterfaceDeclaration)
-      {
-         String innerClassname = getClassname((TypeDeclaration)child);
-         parseCandidate(getParsedTypes().get(innerClassname), logger);
-      }
-   }
-
-   logger.log(logger.INFO, "IPreprocessor.parseCandidate(): exiting");
 }
 /*------------------------------------------------------------------------------
 
@@ -617,13 +874,13 @@ static void parseCandidates(
 {
    if (parsed.size() == 0)
    {
-      logger.log(logger.INFO, "IPreprocessor.parse(): entered");
+      logger.log(logger.INFO, "IPreprocessor.parseCandidates(): entered");
 
-      parsed.put(kKEY_PARSED_COMPONENTS, new HashMap<>());
-      parsed.put(kKEY_PARSED_PROVIDERS,  new HashMap<>());
-      parsed.put(kKEY_PARSED_TYPES,      new HashMap<>());
+      parsed.put(kKEY_PARSED_COMPONENTS,          new HashMap<>());
+      parsed.put(kKEY_PARSED_PROVIDER_INTERFACES, new HashMap<>());
+      parsed.put(kKEY_PARSED_PROVIDERS,           new HashMap<>());
+      parsed.put(kKEY_PARSED_TYPES,               new HashMap<>());
 
-                                       // seed the root entries               //
       getParsedTypes().put(
          Component.class.getName(),
          TypeDsc.kROOT_COMPONENT_INSTANCE);
@@ -632,13 +889,24 @@ static void parseCandidates(
          AppComponentTemplate.class.getName(),
          TypeDsc.kROOT_APP_COMPONENT_TEMPLATE_INSTANCE);
 
+      getParsedTypes().put(
+         IProvider.class.getName(),
+         TypeDsc.kROOT_IPROVIDER_INSTANCE);
+
                                        // generate the types map sans supers  //
       for (String classname : providerAndComponentCandidates.keySet())
       {
-         String          source   = providerAndComponentCandidates.get(classname);
-         CompilationUnit cu       = StaticJavaParser.parse(source);
+         logger.log(
+            logger.INFO,
+            "IPreprocessor.parseCandidates(): parsing " + classname);
 
-         generateTypesMap(source, cu);
+         String          src = providerAndComponentCandidates.get(classname);
+         CompilationUnit cu  = StaticJavaParser.parse(src);
+
+                                       // setup lexical preserving printing   //
+         LexicalPreservingPrinter.setup(cu);
+
+         generateTypesMap(src, cu);
       }
                                        // add the supers to the types map     //
       for (TypeDsc typeDsc : getParsedTypes().values())
@@ -646,10 +914,10 @@ static void parseCandidates(
          if (!TypeDsc.kROOT_APP_COMPONENT_TEMPLATE_INSTANCE.equals(typeDsc)
                && !TypeDsc.kROOT_COMPONENT_INSTANCE.equals(typeDsc))
          {
-            parseCandidate(typeDsc, logger);
+            getSuperType(typeDsc, logger);
          }
       }
-      logger.log(logger.INFO, "IPreprocessor.parse(): exiting");
+      logger.log(logger.INFO, "IPreprocessor.parseCandidates(): exiting");
    }
 }
 /*------------------------------------------------------------------------------
@@ -664,13 +932,6 @@ static void parseCandidates(
 @param      classname      classname to be processed
 @param      contentBytes   content to be processed
 @param      encoding       content encoding
-
-@param      providerAndComponentCandidates
-                           provider and component candidates from compiler
-                           (com.google.gwt.dev.javac.CompilationStateBuilder
-                            .doBuildFrom())
-
-@param      components     components identified by preprocessors
 @param      logger         compiler logger
 
 @history    Tue May 15, 2017 10:30:00 (Giavaneers - LBM) created
@@ -682,8 +943,6 @@ byte[] process(
    String             classname,
    byte[]             contentBytes,
    String             encoding,
-   Map<String,String> providerAndComponentCandidates,
-   Map<String,String> components,
    TreeLogger         logger)
    throws             Exception;
 
@@ -706,27 +965,42 @@ static void unitTest(
    try
    {
       Map<String,String> providerAndComponentCandidates = new HashMap<>();
+      String classname;
+      String src;
 
-      String classname  =
-         "io.reactjava.codegenerator.tests.allinonefile.App";
+      if (false)
+      {
+         classname  = "io.reactjava.client.core.react.Component";
+         src =
+            IJSXTransform.getFileAsString(
+               new File(
+                  "/Users/brianm/working/IdeaProjects/ReactJava/ReactJava/src/"
+                + "io/reactjava/client/core/react/Component.java"),
+               null);
 
-      String src =
-         IJSXTransform.getFileAsString(
-            new File(
-               "/Users/brianm/working/IdeaProjects/ReactJava/ReactJava/src/"
-             + "io/reactjava/codegenerator/tests/"
-             + "allinonefile/App.java"),
-            null);
+         providerAndComponentCandidates.put(classname, src);
+      }
+      if (true)
+      {
+         classname  = "io.reactjava.codegenerator.tests.allinonefile.App";
+         src =
+            IJSXTransform.getFileAsString(
+               new File(
+                  "/Users/brianm/working/IdeaProjects/ReactJava/ReactJava/src/"
+                + "io/reactjava/codegenerator/tests/"
+                + "allinonefile/App.java"),
+               null);
 
-      providerAndComponentCandidates.put(classname, src);
+         providerAndComponentCandidates.put(classname, src);
+      }
 
       parseCandidates(providerAndComponentCandidates, logger);
 
                                        // get components lazily               //
-      Map<String,TypeDsc> components = getParsedComponents();
+      Map<String,TypeDsc> components = getParsedComponents(logger);
 
                                        // get providers lazily                //
-      Map<String,TypeDsc> providers = getParsedProviders();
+      Map<String,TypeDsc> providers = getParsedProviders(logger);
 
       if (components.size() == 14 && providers.size() == 6)
       {
@@ -756,19 +1030,59 @@ notes:
 class TypeDsc
 {
                                        // constants ------------------------- //
+                                       // Component root declaration          //
 public static final ClassOrInterfaceDeclaration kROOT_COMPONENT =
-   new ClassOrInterfaceDeclaration().setName(
-      Component.class.getName());
+   new ClassOrInterfaceDeclaration(
+      null,                            // tokenRange                          //
+      new NodeList<>(),                // modifiers                           //
+      new NodeList<>(),                // annotations                         //
+      false,                           // isInterface                         //
+                                       // name                                //
+      new SimpleName("io.react.client.core.react.Component"),
+      new NodeList<>(),                // typeParameters                      //
+      new NodeList<>(),                // extendedTypes                       //
+      new NodeList<>(),                // implementedTypes                    //
+      new NodeList<>());               // members                             //
 
+                                       // AppComponentTemplate declaration    //
 public static final ClassOrInterfaceDeclaration kROOT_APP_COMPONENT_TEMPLATE =
-   new ClassOrInterfaceDeclaration().setName(
-      AppComponentTemplate.class.getName());
+   new ClassOrInterfaceDeclaration(
+      null,                            // tokenRange                          //
+      new NodeList<>(),                // modifiers                           //
+      new NodeList<>(),                // annotations                         //
+      false,                           // isInterface                         //
+                                       // name                                //
+      new SimpleName("io.react.client.core.react.AppComponentTemplate"),
+      new NodeList<>(),                // typeParameters                      //
+      new NodeList<>(),                // extendedTypes                       //
+      new NodeList<>(),                // implementedTypes                    //
+      new NodeList<>());               // members                             //
 
+                                       // IProvider root declaration          //
+public static final ClassOrInterfaceDeclaration kROOT_IPROVIDER =
+   new ClassOrInterfaceDeclaration(
+      null,                            // tokenRange                          //
+      new NodeList<>(),                // modifiers                           //
+      new NodeList<>(),                // annotations                         //
+      true,                            // isInterface                         //
+                                       // name                                //
+      new SimpleName("io.react.client.core.react.IProvider"),
+      new NodeList<>(),                // typeParameters                      //
+      new NodeList<>(),                // extendedTypes                       //
+      new NodeList<>(),                // implementedTypes                    //
+      new NodeList<>());               // members                             //
+
+                                       // Component root typeDsc              //
 public static final TypeDsc kROOT_COMPONENT_INSTANCE =
-   new TypeDsc(kROOT_COMPONENT, null, null, kROOT_COMPONENT);
+   new TypeDsc(kROOT_COMPONENT, null, null, null);
 
+                                       // AppComponentTemplate root typeDsc   //
 public static final TypeDsc kROOT_APP_COMPONENT_TEMPLATE_INSTANCE =
-   new TypeDsc(kROOT_COMPONENT, null, null, kROOT_COMPONENT);
+   new TypeDsc(kROOT_APP_COMPONENT_TEMPLATE, null, null, kROOT_COMPONENT);
+
+                                       // IProvider root typeDsc              //
+public static final TypeDsc kROOT_IPROVIDER_INSTANCE =
+   new TypeDsc(kROOT_IPROVIDER, null, null, null);
 
                                        // class variables ------------------- //
                                        // (none)                              //

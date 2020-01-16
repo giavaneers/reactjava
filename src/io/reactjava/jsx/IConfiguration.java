@@ -17,10 +17,10 @@ package io.reactjava.jsx;
                                        // imports --------------------------- //
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.dev.util.log.PrintWriterTreeLogger;
-import io.reactjava.client.core.providers.platform.IPlatform;
-import io.reactjava.client.core.providers.platform.mobile.android.PlatformAndroid;
-import io.reactjava.client.core.providers.platform.mobile.ios.PlatformIOS;
-import io.reactjava.client.core.providers.platform.web.PlatformWeb;
+import io.reactjava.client.providers.platform.IPlatform;
+import io.reactjava.client.providers.platform.mobile.android.PlatformAndroid;
+import io.reactjava.client.providers.platform.mobile.ios.PlatformIOS;
+import io.reactjava.client.providers.platform.web.PlatformWeb;
 import io.reactjava.jsx.IJSXTransform.ILibraryComponent;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -513,20 +513,20 @@ public static String getLibraryComponentJavascript(
       int idx = tagName.indexOf('.');
       if (idx > 0)
       {
-         try
-         {
+         //try
+         //{
             componentPath = getNodeModuleJavascript(tagName, logger);
-         }
-         catch(IllegalStateException e)
-         {
-            throw new IllegalStateException(
-               "Cannot find component for <" + tagName + ">: "
-             + "did you forget to install a node module?");
-         }
-         catch(Exception e)
-         {
-            throw new RuntimeException(e);
-         }
+         //}
+         //catch(IllegalStateException e)
+         //{
+         //   throw new IllegalStateException(
+         //      "Cannot find component for <" + tagName + ">: "
+         //    + "did you forget to install a node module?");
+         //}
+         //catch(Exception e)
+         //{
+         //   throw new RuntimeException(e);
+         //}
       }
    }
    return(componentPath);
@@ -690,7 +690,6 @@ static String getNodeModuleCSS(
 static String getNodeModuleJavascript(
    String     module,
    TreeLogger logger)
-   throws     Exception
 {
    String nodeModulePath = getDependenciesPrevious().get(module);
    if (nodeModulePath == null)
@@ -710,13 +709,14 @@ static String getNodeModuleJavascript(
       }
 
       File descendant = getDescendantJavascript(moduleDir, filename, logger);
-      if (descendant == null)
-      {
-         throw new IllegalStateException(
-            "Cannot find node module " + module + ": "
-          + "did you forget to install it?");
-      }
-      else
+      //if (descendant == null)
+      //{
+      //   throw new IllegalStateException(
+      //      "Cannot find node module " + module + ": "
+      //    + "did you forget to install it?");
+      //}
+      //else
+      if (descendant != null)
       {
          nodeModulePath = descendant.getAbsolutePath();
 
@@ -770,7 +770,6 @@ public static String getNodeModuleCSSFromPackageJSON(
 public static String getNodeModuleJavascriptFromPackageJSON(
    String     module,
    TreeLogger logger)
-   throws     Exception
 {
    return(getNodeModuleTargetFromPackageJSON(module, true, logger));
 }
@@ -794,7 +793,6 @@ public static String getNodeModuleTargetFromPackageJSON(
    String     module,
    boolean    bJavascript,
    TreeLogger logger)
-   throws     Exception
 {
    String exportItem     = null;
    File   nodeModulesDir = IConfiguration.getNodeModulesDir(logger);
@@ -841,8 +839,15 @@ public static String getNodeModuleTargetFromPackageJSON(
    if (json != null)
    {
       String key     = bJavascript ? "main" : "style";
-      String relPath =
-         (String)((JSONObject)new JSONParser().parse(json)).get(key);
+      String relPath = null;
+      try
+      {
+         relPath = (String)((JSONObject)new JSONParser().parse(json)).get(key);
+      }
+      catch(Exception e)
+      {
+                                       // ignore                              //
+      }
 
       logger.log(
          logger.DEBUG,

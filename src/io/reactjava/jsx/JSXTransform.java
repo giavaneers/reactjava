@@ -16,12 +16,19 @@ notes:
                                        // package --------------------------- //
 package io.reactjava.jsx;
                                        // imports --------------------------- //
+import com.github.javaparser.StaticJavaParser;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.TreeLogger.Type;
 import com.google.gwt.dev.util.log.PrintWriterTreeLogger;
-import io.reactjava.client.core.providers.platform.IPlatform;
+import io.reactjava.client.providers.platform.IPlatform;
+import io.reactjava.client.core.react.AppComponentTemplate;
 import io.reactjava.client.core.react.Component;
 import io.reactjava.client.core.react.Utilities;
+import io.reactjava.codegenerator.IPreprocessor;
+import io.reactjava.jsx.JSXTransform.MarkupDsc;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,7 +49,7 @@ import org.jsoup.nodes.TextNode;
 import org.jsoup.parser.ParseSettings;
 import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
-                                       // JSXTransform =======================//
+                                       // JSXTransform ====================//
 public class JSXTransform implements IJSXTransform
 {
                                        // class constants --------------------//
@@ -286,11 +293,8 @@ public boolean filter(
 
 @return     markup with replaced component tag names
 
-@param      classname            classname
-@param      src                  src
-@param      markupDsc            markupDsc
-@param      parsedMethodBody     parsedMethodBody
-@param      logger               logger
+@param      body        parsed method body
+@param      logger      logger
 
 @history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -298,18 +302,10 @@ public boolean filter(
                                                                               */
 //------------------------------------------------------------------------------
 public static String generateRenderableSource(
-   String     classname,
-   String     src,
-   MarkupDsc  markupDsc,
-   String     parsedMethodBody,
+   String     body,
    TreeLogger logger)
 {
-   String renderable =
-      src.substring(0, markupDsc.idxBeg)
-         + kINLINE_HDR.replace("%classname%", classname)
-         + parsedMethodBody
-         + kINLINE_FTR
-         + src.substring(markupDsc.idxEnd);
+   String renderable = kINLINE_HDR + body + kINLINE_FTR;
 
    return(renderable);
 }
@@ -445,6 +441,142 @@ public void getComponent(
             "JSXTransform.getComponent(): added parsed component " + classname);
       }
    }
+}
+/*------------------------------------------------------------------------------
+
+@name       getComponentForTagName - get component for specified tag name
+                                                                              */
+                                                                             /**
+            Get component for the specified tagName used by the specified
+            reference component.
+
+            If the tagName is the simple classname of an import statement,
+            the component classname is the classname of the import statement
+            (which may or may not exist in the 'parsedComponents' map).
+
+            Otherwise, if the tagName is a fully qualified classname, the
+            component classname is the tagName (which may or may not exist in
+            the 'parsedComponents' map).
+
+            Otherwise, if the tagName is a simple classname or a partially
+            qualified classname, the component classname is found by an
+            iterative search building a candidate qualified classname from the
+            reference classname, substituting the reference simple classname
+            with the tagName, iteratively working backwards along the classname
+            path until finding an entry in the 'parsedComponents' map or
+            reaching the reference package name.
+
+            Otherwise, if the tagName is a simple classname or a partially
+            qualified classname, the component classname is assumed to be a
+            relative inner classname and is found by appending the tagName to
+            the reference classname and checking for an entry in the
+            'parsedComponents' map.
+
+            For example, to map the component for tagName 'D' for the reference
+            component with classname 'packagename.A.B.C'
+
+            try 1 -  check for an import whose path ends in '.D'
+            try 2 -  check the 'parsedComponents' map for 'D'
+                     (in case 'C' is a fully qualified name)
+            try 3 -  check the 'parsedComponents' map for 'packagename.A.B.D'
+            try 4 -  check the 'parsedComponents' map for 'packagename.A.D'
+            try 5 -  check the 'parsedComponents' map for 'packagename.D'
+            try 6 -
+
+            For another example, to map the component for tagName 'A.D' for the
+            reference component with classname 'packagename.A.B.C'
+
+            try 1 -  check for an import whose path ends in '.A.D'
+            try 2 -  check the 'parsedComponents' map for 'A.D'
+                     (in case 'A.D' is a fully qualified name)
+            try 3 -  check the 'parsedComponents' map for 'packagename.A.B.A.D'
+            try 4 -  check the 'parsedComponents' map for 'packagename.A.A.D'
+            try 5 -  check the 'parsedComponents' map for 'packagename.A.D'
+
+
+@param      tagName     target tag name
+@param      ref         classname of component using the tag name
+@param      logger      compiler logger
+
+@history    Mon Jan 12, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public TypeDsc getComponentForTagName(
+   String      tagName,
+   String      ref,
+   TreeLogger  logger)
+{
+   TypeDsc component;
+                                       // check if tag is the simple classname//
+                                       // of an import statement              //
+   TypeDsc refType = IPreprocessor.getParsedTypes().get(ref);
+   if (refType == null)
+   {
+      throw new IllegalStateException(
+         "Reference type cannot be found for " + ref);
+   }
+
+   Map<String,TypeDsc> components  = IPreprocessor.getParsedComponents(logger);
+
+   component = IPreprocessor.getImportForSimpleName(tagName, refType.cu, logger);
+   if (component != null && !components.values().contains(component))
+   {
+      throw new IllegalStateException(
+         "Type is not a known component: " + component);
+   }
+   if (component == null)
+   {
+                                       // check if tag is a fully qualified   //
+                                       // component name                      //
+      component = IPreprocessor.getParsedComponents(logger).get(tagName);
+   }
+   if (component == null)
+   {
+      String packageName =
+         refType.cu.getPackageDeclaration().get().getName().asString();
+
+                                       // search building a candidate         //
+                                       // qualified classname from the        //
+                                       // reference classname, substituting   //
+                                       // the reference simple classname with //
+                                       // the tagName, iteratively working    //
+                                       // backwards along the classname path  //
+                                       // until finding an entry in the       //
+                                       // 'parsedComponents' map or reaching  //
+                                       // the reference package name          //
+      String prefix = ref;
+      while (component == null)
+      {
+         int idx = prefix.lastIndexOf('.');
+         if (idx < 0)
+         {
+            break;
+         }
+
+         prefix = prefix.substring(0, idx);
+         if (prefix.length() < packageName.length())
+         {
+            break;
+         }
+
+         String chase = prefix + "." + tagName;
+         component    = IPreprocessor.getParsedComponents(logger).get(chase);
+      }
+   }
+   if (component == null)
+   {
+                                       // assuming the tagName to be a        //
+                                       // relative inner classname, try       //
+                                       // appending the tagName to reference  //
+                                       // classname and checking for an entry //
+                                       // in the 'parsedComponents' map       //
+      String chase = ref + "." + tagName;
+      component = IPreprocessor.getParsedComponents(logger).get(chase);
+   }
+
+   return(component);
 }
 /*------------------------------------------------------------------------------
 
@@ -670,7 +802,23 @@ public static boolean getIsLibraryTagName(
 public static boolean getIsReactTagName(
    String tagName)
 {
-   return(tagName != null && kREACT_TAGS.get(tagName) != null);
+   boolean bReactTagName = tagName != null && kREACT_TAGS.get(tagName) != null;
+   if (bReactTagName)
+   {
+                                       // at runtime, React objects if        //
+                                       // React.Fragment has properties other //
+                                       // than 'key' and 'children' but       //
+                                       // currently need an id in the         //
+                                       // component fcn, since                //
+                                       // Component.setId() cannot have null  //
+                                       // assignment value and for now the    //
+                                       // component takes the id of the root  //
+                                       // element...                          //
+      throw new IllegalStateException(
+         "React.Fragment not currently supported,  would 'div' work instead?");
+   }
+
+   return(bReactTagName);
 }
 /*------------------------------------------------------------------------------
 
@@ -765,6 +913,61 @@ public static List<MarkupDsc> getMethodMarkupDscs(
                                        // the first dsc is the entire content //
       markupDscs = new ArrayList<>();
       markupDscs.add(new MarkupDsc(idxContentBeg, idxContent));
+
+                                       // any additional are for each section //
+      for (int idxBeg = 0, idxEnd = idxBeg, idxMax = content.length(); true;)
+      {
+         idxBeg = content.indexOf(kJSX_MARKUP_BEG, idxEnd);
+         if (idxBeg < 0 || idxBeg > idxMax)
+         {
+            break;
+         }
+         idxEnd = content.indexOf(kJSX_MARKUP_END, idxBeg);
+         idxEnd = content.indexOf("\n", idxEnd) + 1;
+         if (idxEnd < 0 || idxEnd > idxMax || idxEnd < idxBeg)
+         {
+            throw new IllegalStateException(
+               "Unmatched markup delimiters.\n" + content);
+         }
+                                       // subsequent descriptors are the      //
+                                       // number of lines of each markup      //
+                                       // section                             //
+         String[] lines = content.substring(idxBeg, idxEnd).split("\n");
+         markupDscs.add(new MarkupDsc(lines.length, 0));
+      }
+   }
+
+   return(markupDscs);
+}
+/*------------------------------------------------------------------------------
+
+@name       getMethodMarkupDscs - get method markup dscs from source
+                                                                              */
+                                                                             /**
+            Get method markup descriptors from source.
+
+@return     method markup descriptors from source.
+
+@param      content        method body
+@param      logger         logger
+
+@history    Mon May 19, 2014 18:00:00 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static List<MarkupDsc> getMethodMarkupDscs(
+   String     content,
+   TreeLogger logger)
+{
+   logger.log(logger.DEBUG, "JSXTransform.getMethodMarkupDscs(): entered");
+
+   List<MarkupDsc>   markupDscs = null;
+   if (content != null)
+   {
+                                       // the first dsc is the entire content //
+      markupDscs = new ArrayList<>();
+      markupDscs.add(new MarkupDsc(0, content.length()));
 
                                        // any additional are for each section //
       for (int idxBeg = 0, idxEnd = idxBeg, idxMax = content.length(); true;)
@@ -990,10 +1193,11 @@ public void handleElement(
       }
       else
       {
-         String componentClassname =
-            components != null ? components.get(tagName) : null;
+         //String componentClassname =
+         //   components != null ? components.get(tagName) : null;
 
-         if (componentClassname == null)
+         TypeDsc component = getComponentForTagName(tagName, classname, logger);
+         if (component == null)
          {
             throw new IllegalStateException(
                tagName + " is neither a standard tag name "
@@ -1002,6 +1206,8 @@ public void handleElement(
              + "Are you sure you have included all source paths "
              + "in your module xml file?");
          }
+
+         String componentClassname = IPreprocessor.getClassname(component.type);
 
          write(
             buf,
@@ -1590,6 +1796,38 @@ public void outdent()
 }
 /*------------------------------------------------------------------------------
 
+@name       parse - parse specified component
+                                                                              */
+                                                                             /**
+            Parse the specified component in the working content.
+
+@return     possibly modified content
+
+@param      component      component
+@param      content        working content
+@param      logger         logger
+
+@history    Sun Jan 12, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected String parse(
+   TypeDsc    component,
+   String     content,
+   TreeLogger logger)
+   throws     Exception
+{
+   parseMarkup(component, logger);
+   parseCSS(component, logger);
+
+   String modifiedContent = LexicalPreservingPrinter.print(component.cu);
+          modifiedContent = parseCompileTimeDirectives(modifiedContent, logger);
+
+   return(modifiedContent);
+}
+/*------------------------------------------------------------------------------
+
 @name       parse - parse specified classname
                                                                               */
                                                                              /**
@@ -1638,11 +1876,84 @@ public String parse(
    Map<String,String> components,
    TreeLogger         logger)
 {
-   String parsed = parseMarkup(classname, src, components, logger);
+   String parsed = null;//parseMarkup(classname, src, components, logger);
           parsed = parseCSS(parsed, logger);
           parsed = parseCompileTimeDirectives(parsed, logger);
 
    return(parsed);
+}
+/*------------------------------------------------------------------------------
+
+@name       parse - parse specified markup
+                                                                              */
+                                                                             /**
+            Parse specified markup.
+
+@return     parsed markup
+
+@history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public String parse(
+   String             classname,
+   String             body,
+   List<MarkupDsc>    markupDscs,
+   TreeLogger         logger)
+{
+   List<String>       javaBlks = new ArrayList<>();
+   MarkupDsc          first    = markupDscs.remove(0);
+   String             content  = body;
+   String             markup   = parseContent(content, javaBlks);
+   List<StringBuffer> bufs     = new ArrayList<>();
+
+   parse(classname, bufs, javaBlks, markup, components, logger);
+
+   boolean      bAnyMarkup = false;
+   Boolean      bMarkup    = null;
+   StringBuffer full       = new StringBuffer();
+   for (StringBuffer chase : bufs)
+   {
+      String sChase = chase.toString();
+      //if (!bInlineHdr)
+      //{
+      //   sChase     = kINLINE_HDR + sChase;
+      //   bInlineHdr = true;
+      //}
+      if (bMarkup == null)
+      {
+         bMarkup = sChase.startsWith(kPARSED_MARKUP_SECTION_BEGINNING);
+      }
+
+      full.append(sChase);
+      if (bMarkup)
+      {
+         bAnyMarkup = true;
+         if (markupDscs.size() > 0)
+         {
+            MarkupDsc markupDsc = markupDscs.remove(0);
+            //if (markupDscs.size() == 0)
+            //{
+            //   addInlineFooter(full);
+            //}
+            int numLines = markupDsc.idxBeg;
+            for (int i = 1; i < numLines; i++)
+            {
+               full.append("\n");
+            }
+         }
+      }
+      bMarkup = !bMarkup;
+   }
+   if (!bAnyMarkup)
+   {
+      logger.log(
+         logger.WARN,
+         "JSXTransform.parse(): no markup found for " + classname);
+   }
+
+   return(full.toString());
 }
 /*------------------------------------------------------------------------------
 
@@ -1934,6 +2245,55 @@ public String parseCSS(
 }
 /*------------------------------------------------------------------------------
 
+@name       parseCSS - parse markup of specified classname
+                                                                              */
+                                                                             /**
+            Parse markup of specified src.
+
+@history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public void parseCSS(
+   TypeDsc    component,
+   TreeLogger logger)
+{
+   logger.log(logger.DEBUG, "JSXTransform.parseCSS(): entered");
+
+   MethodDeclaration method =
+      IPreprocessor.getComponentRenderCSSProcedure(component);
+
+   if (method != null)
+   {
+                                       // get the renderCSS method body       //
+      String body = LexicalPreservingPrinter.print(method.getBody().get());
+
+                                       // between the brackets                //
+      body = body.substring(1, body.length() - 1);
+
+      List<MarkupDsc> dscs = getMethodMarkupDscs(body, logger);
+      if (dscs != null && dscs.size() > 0)
+      {
+         String content = body;
+         if (content.trim().length() > 0)
+         {
+            String parsed = generateStyleSource(content, logger);
+            if (parsed.length() > 1)
+            {
+                                       // update the method body              //
+               parsed = "{" + parsed + "}";
+
+               BlockStmt block = StaticJavaParser.parseBlock(parsed);
+               LexicalPreservingPrinter.setup(block);
+               method.setBody(block);
+            }
+         }
+      }
+   }
+}
+/*------------------------------------------------------------------------------
+
 @name       parseDocument - parse specified markup document
                                                                               */
                                                                              /**
@@ -2007,6 +2367,7 @@ public String parseElementAttributes(
          break;
       }
    }
+
    if (idValue == null && !getIsReactTagName(element.tag().getName()))
    {
       idValue = "getNextId()";
@@ -2176,57 +2537,57 @@ public String parseElementAttributes(
                                                                              /**
             Parse markup of specified src.
 
-@return     parsed markup of specified unless no render() method found, in which
-            case returns original source.
-
 @history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public String parseMarkup(
-   String             classname,
-   String             src,
-   Map<String,String> components,
-   TreeLogger         logger)
+public void parseMarkup(
+   TypeDsc    component,
+   TreeLogger logger)
 {
-   String          parsed = src;
-   List<MarkupDsc> dscs   = getMethodMarkupDscs(src, "render", logger);
-   if (dscs == null)
-   {
-   }
-   else
-   {
-      MarkupDsc first   = dscs.get(0);
-      String    content = src.substring(first.idxBeg, first.idxEnd);
-      if (dscs.size() == 1)
-      {
-         if (!content.contains("setComponentFcn"))
-         {
-                                       // ensure at least the default         //
-                                       // component function                  //
-            parsed  = src.substring(0, first.idxBeg);
-            parsed += kINLINE_HDR;
-            parsed += content;
-            parsed += kINLINE_BODY_DEFAULT;
-            parsed += kINLINE_FTR;
-            parsed += src.substring(first.idxEnd);
-         }
-         else
-         {
-                                       // ensure parsed is different from src //
-                                       // so classname is marked as component //
-            parsed += " ";
-         }
-      }
-      else
-      {
-         String body = parse(classname, src, dscs, components, logger);
-         parsed = generateRenderableSource(classname, src, first, body, logger);
-      }
-   }
+   logger.log(logger.DEBUG, "JSXTransform.parseMarkup(): entered");
 
-   return(parsed);
+   MethodDeclaration method =
+      IPreprocessor.getComponentRenderProcedure(component);
+
+   if (method != null)
+   {
+                                       // get the render method body          //
+      String body = LexicalPreservingPrinter.print(method.getBody().get());
+      if (!body.contains("setComponentFcn"))
+      {
+                                       // between the brackets                //
+         body = body.substring(1, body.length() - 1);
+
+         List<MarkupDsc> dscs = getMethodMarkupDscs(body, logger);
+         if (dscs != null)
+         {
+            if (dscs.size() == 1)
+            {
+                                          // ensure at least the default         //
+                                          // component function                  //
+               body += kINLINE_BODY_DEFAULT;
+            }
+            else
+            {
+               String classname = IPreprocessor.getClassname(component.type);
+                      body      = parse(classname, body, dscs, logger);
+            }
+
+            String parsed = generateRenderableSource(body, logger);
+            if (parsed.length() > 1)
+            {
+                                          // update the method body              //
+               parsed = "{" + parsed + "}";
+
+               BlockStmt block = StaticJavaParser.parseBlock(parsed);
+               LexicalPreservingPrinter.setup(block);
+               method.setBody(block);
+            }
+         }
+      }
+   }
 }
 /*------------------------------------------------------------------------------
 
@@ -2362,63 +2723,57 @@ public static String pretty(
 @return     void
 
 @param      classname      classname to be processed
-@param      contentBytes   cantent to be processed
+@param      contentBytes   cantent to be processed (unused)
 @param      encoding       cantent encoding
-@param      candidatesNew  component and provider candidates noted by compiler
-@param      components     components identified by preprocessors
 @param      logger         compiler logger
 
-@history    Fri Dec 21, 2018 10:30:00 (Giavaneers - LBM) created
+@history    Sun Jan 12, 2020 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
 public byte[] process(
-   String             classname,
-   byte[]             contentBytes,
-   String             encoding,
-   Map<String,String> candidatesNew,
-   Map<String,String> components,
-   TreeLogger         logger)
-   throws             Exception
+   String     classname,
+   byte[]     contentBytes,
+   String     encoding,
+   TreeLogger logger)
+   throws     Exception
 {
-   logger.log(logger.DEBUG, "JSXTransform.process(): for " + classname);
+   Map<String,TypeDsc> components = IPreprocessor.getParsedComponents(logger);
+   TypeDsc             component  = components.get(classname);
+   if (component != null
+         && !Component.class.getName().equals(classname)
+         && !AppComponentTemplate.class.getName().equals(classname))
+   {
 
-   if (candidates == null)
-   {
-      candidates = candidatesNew;
-   }
-   if (components.size() == 0)
-   {
-      getComponents(candidates, components, logger);
-   }
+      logger.log(logger.INFO, "JSXTransform.process(): for " + classname);
 
-   String parsed = components.get(classname);
-   if (parsed != null)
-   {
-      String contentOrig = candidates.get(classname);
-      String content     = new String(contentBytes, encoding);
-      if (!content.equals(contentOrig))
+      String contentOrig = component.source;
+      String working     = contentOrig;
+
+                                       // process each component in the same  //
+                                       // source file                         //
+      for (TypeDsc chase : components.values())
       {
-         logger.log(
-            logger.INFO,
-            "JSXTransform.process(): updating " + classname + "."
-          + "\nFor better debugging performance, consider supporting "
-          + "incremental build...");
-
-         candidates.put(classname, content);
-
-         getComponent(classname, content, components, logger);
-
-         parsed = components.get(classname);
+         if (TypeDsc.kROOT_COMPONENT_INSTANCE.equals(chase)
+               || TypeDsc.kROOT_APP_COMPONENT_TEMPLATE_INSTANCE.equals(chase)
+               || !chase.cu.equals(component.cu))
+         {
+            continue;
+         }
+                                       // parse and modify any render() method//
+                                       // returning the modified content      //
+         working = parse(chase, working, logger);
+      }
+      if (!working.equals(contentOrig))
+      {
+         contentBytes = working.getBytes(encoding);
       }
       else
       {
          logger.log(
-            logger.INFO, "JSXTransform.process(): using cached " + classname);
+            logger.INFO, "JSXTransform.process(): using cached "+ classname);
       }
-
-      contentBytes = parsed.getBytes(encoding);
    }
 
    return(contentBytes);
@@ -3003,6 +3358,8 @@ public static boolean unitTest(
       TreeLogger         logger     = new PrintWriterTreeLogger();
       boolean            bCapturing = false;
 
+      Map<String,String> providerAndComponentCandidates = new HashMap<>();
+
       switch(testNum)
       {
          case 0:
@@ -3356,7 +3713,7 @@ public static boolean unitTest(
                }
                case 16:
                {
-                  if (true)
+                  if (false)
                   {
                      classname  = "io.reactjava.client.examples.helloworld.App";
                      src =
@@ -3802,6 +4159,118 @@ public static boolean unitTest(
              + footer;
             break;
          }
+         case 21:
+         {
+            if (false)
+            {
+               classname = "io.reactjava.client.examples.helloworld.App";
+               src =
+                  IJSXTransform.getFileAsString(
+                     new File(
+                        "/Users/brianm/working/IdeaProjects/ReactJava/"
+                      + "ReactJavaExamples/src/"
+                      + "io/reactjava/client/examples/helloworld/App.java"),
+                      null);
+            }
+            else if (false)
+            {
+               classname = "io.reactjava.client.examples.simple.App";
+               src =
+                  IJSXTransform.getFileAsString(
+                     new File(
+                        "/Users/brianm/working/IdeaProjects/ReactJava/"
+                      + "ReactJavaExamples/src/"
+                      + "io/reactjava/client/examples/simple/App.java"),
+                      null);
+            }
+            else if (false)
+            {
+               classname =
+                  "io.reactjava.client.examples.threebythree.step09.board.App";
+               src =
+                  IJSXTransform.getFileAsString(
+                     new File(
+                        "/Users/brianm/working/IdeaProjects/ReactJava/"
+                      + "ReactJavaExamples/src/"
+                      + "io/reactjava/client/examples/threebythree/step09/board/App.java"),
+                      null);
+            }
+            else if (false)
+            {
+               classname = "io.reactjava.codegenerator.tests.allinonefile.App";
+               src =
+                  IJSXTransform.getFileAsString(
+                     new File(
+                        "/Users/brianm/working/IdeaProjects/ReactJava/"
+                      + "ReactJava/src/io/reactjava/codegenerator/tests/"
+                      + "allinonefile/App.java"),
+                     null);
+            }
+            else if (false)
+            {
+               classname = "io.reactjava.client.examples.statevariable.twosquaresoneclass.App";
+               src =
+                  IJSXTransform.getFileAsString(
+                     new File(
+                        "/Users/brianm/working/IdeaProjects/ReactJava/"
+                      + "ReactJavaExamples/src/"
+                      + "io/reactjava/client/examples/statevariable/twosquaresoneclass/App.java"),
+                     null);
+            }
+            else if (true)
+            {
+               classname = "helloworld.App";
+               src =
+                  IJSXTransform.getFileAsString(
+                     new File(
+                        "/Users/brianm/working/IdeaProjects/ReactJava/"
+                      + "GWTCompiler/src/helloworld/App.java"),
+                     null);
+            }
+            else if (false)
+            {
+               classname = "io.reactjava.client.components.generalpage.ContentBody";
+               src =
+                  IJSXTransform.getFileAsString(
+                     new File(
+                        "/Users/brianm/working/IdeaProjects/ReactJava/"
+                      + "ReactJava/src/io/reactjava/client/components/"
+                      + "generalpage/ContentBody.java"),
+                     null);
+            }
+            else if (false)
+            {
+               providerAndComponentCandidates.put(
+                  "io.reactjava.client.components.generalpage.GeneralAppBar",
+                  IJSXTransform.getFileAsString(
+                     new File(
+                        "/Users/brianm/working/IdeaProjects/ReactJava/"
+                      + "ReactJava/src/io/reactjava/client/components/"
+                      + "generalpage/GeneralAppBar.java"),
+                     null));
+
+               providerAndComponentCandidates.put(
+                  "io.reactjava.client.components.generalpage.SideDrawer",
+                  IJSXTransform.getFileAsString(
+                     new File(
+                        "/Users/brianm/working/IdeaProjects/ReactJava/"
+                      + "ReactJava/src/io/reactjava/client/components/"
+                      + "generalpage/SideDrawer.java"),
+                     null));
+
+               classname  =
+                  "io.reactjava.client.examples.materialui.theme.App";
+               src =
+                  IJSXTransform.getFileAsString(
+                     new File(
+                        "/Users/brianm/working/IdeaProjects/ReactJava/"
+                      + "ReactJavaExamples/src/"
+                      + "io/reactjava/client/examples/materialui/theme/App.java"),
+                     null);
+               content = src;
+            }
+            break;
+         }
       }
 
       switch(testNum)
@@ -3815,6 +4284,28 @@ public static boolean unitTest(
          {
                                        // these cases simply parse markup     //
             System.out.println(parseDocument(classname, src, logger).get(0).toString());
+            break;
+         }
+         case 21:
+         {
+                                       // these cases go through process()    //
+            providerAndComponentCandidates.put(classname, src);
+            IPreprocessor.parseCandidates(providerAndComponentCandidates, logger);
+
+                                       // get components lazily               //
+            IPreprocessor.getParsedComponents(logger);
+
+                                       // get providers lazily                //
+            IPreprocessor.getParsedProviders(logger);
+
+            String encoding      = "UTF-8";
+            byte[] modifiedBytes =
+               new JSXTransform().process(
+                  classname, src.getBytes("UTF-8"), encoding, logger);
+
+            String generated  = new String(modifiedBytes, encoding);
+            String pretty     = JSXTransform.pretty(generated);
+            String normalized = normalizeParsed(generated, bCapturing);
             break;
          }
          default:
@@ -3950,4 +4441,4 @@ public MarkupDsc(
    this.idxEnd  = idxEnd;
 }
 }//====================================// end MarkupDsc ======================//
-}//====================================// end JSXTransform ===================//
+}//====================================// end JSXTransform ================//

@@ -15,7 +15,6 @@ notes:
                                        // package --------------------------- //
 package io.reactjava.client.components.generalpage;
                                        // imports --------------------------- //
-import elemental2.core.JsObject;
 import elemental2.dom.Element;
 import io.reactjava.client.core.react.Component;
 import io.reactjava.client.core.react.INativeEffectHandler;
