@@ -68,7 +68,7 @@ Observable configure(
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-Observable<String> createUserWithEmailAndPassword(
+Observable<IUserCredential> createUserWithEmailAndPassword(
    String email,
    String password);
 
@@ -91,7 +91,7 @@ Observable<String> createUserWithEmailAndPassword(
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-Observable<String> signInWithEmailAndPassword(
+Observable<IUserCredential> signInWithEmailAndPassword(
    String email,
    String password);
 
@@ -109,7 +109,7 @@ Observable<String> signInWithEmailAndPassword(
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-Observable<String> signOut();
+Observable<IUserCredential> signOut();
 
 /*------------------------------------------------------------------------------
 
@@ -125,4 +125,40 @@ Observable<String> signOut();
 //------------------------------------------------------------------------------
 void unitTest();
 
+/*==============================================================================
+
+name:       IUserCredential - Authentication Service User Credential
+
+purpose:    GWT compatible Firebase Auth service
+
+history:    Sat Oct 21, 2017 10:30:00 (Giavaneers - LBM) created
+
+notes:
+
+==============================================================================*/
+public static interface IUserCredential
+{
+                                       // constants ------------------------- //
+                                       // (none)                              //
+                                       // class variables ------------------- //
+                                       // (none)                              //
+
+/*------------------------------------------------------------------------------
+
+@name       getIdToken - get a token used to identify user to auth service
+                                                                              */
+                                                                             /**
+            Get a token used to identify user to auth service.
+
+@return     the current token if it has not expired; otherwise, this will
+            refresh the token and return a new one.
+
+@history    Sat Oct 21, 2017 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+Observable<String> getIdToken();
+
+}//====================================// end IUserCredential ================//
 }//====================================// end IAuthenticationService =========//

@@ -166,7 +166,17 @@ public static Component componentForHash(
          }
       }
                                        // for debugging...                    //
-      Map<String,Function> factoryMap = ReactJava.getComponentFactoryMap();
+      //Map<String,Function> factoryMap = ReactJava.getComponentFactoryMap();
+      //kLOGGER.logInfo(
+      //   "Router.componentForHash(): factoryMap size=" + factoryMap.size());
+      //for (String clasname : factoryMap.keySet())
+      //{
+      //   kLOGGER.logInfo(
+      //      "Router.componentForHash(): factoryMap entry for classname="
+      //    + clasname
+      //    + " -> "
+      //    + ReactJava.getComponentFactory(clasname));
+      //}
 
       Function<Properties,Component> factory =
          ReactJava.getComponentFactory(classname);

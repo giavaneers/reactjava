@@ -1058,6 +1058,40 @@ public static void injectScriptsAndCSS(
 }
 /*------------------------------------------------------------------------------
 
+@name       isURL - test whether specified candidate is URL
+                                                                              */
+                                                                             /**
+            Test whether specified candidate is URL.
+
+            The specified candidate is considered a URL if it starts with
+            "http://", "https://", or it contains a "/" and contains no
+            whitespace characters,
+
+@return     true iff specified candidate is URL
+
+@history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static boolean isURL(
+   String candidate)
+{
+   boolean bURL =
+      candidate.startsWith("http://")
+         || candidate.startsWith("https://")
+                                       // relative url                        //
+         || (candidate.indexOf('/') >= 0
+               && candidate.indexOf('\n') < 0
+               && candidate.indexOf('\t') < 0
+               && candidate.indexOf('\r') < 0
+               && candidate.indexOf(' ') < 0);
+
+   return(bURL);
+}
+/*------------------------------------------------------------------------------
+
 @name       scriptByPath - get map of script by path
                                                                               */
                                                                              /**

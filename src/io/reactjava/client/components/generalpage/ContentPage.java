@@ -266,10 +266,40 @@ public ContentDsc(
 }
 /*------------------------------------------------------------------------------
 
+@name       equals - standard equals method
+                                                                              */
+                                                                             /**
+            Standard equals method.
+
+@return     true iff target equals this
+
+@history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public boolean equals(
+   Object target)
+{
+   ContentDsc test    = null;
+   boolean    bEquals =
+      this == target
+      || (this.getClass() == target.getClass()
+            && type == (test = (ContentDsc)target).type
+            && text == null ? test.text == null : text.equals(test.text)
+            && id   == null ? test .id  == null : id.equals(test.id));
+
+   return(bEquals);
+}
+/*------------------------------------------------------------------------------
+
 @name       parse - parse specified raw content
                                                                               */
                                                                              /**
             Parse specified raw content.
+
+            If raw content is a url, fetch the refernced content and parse that.
 
 @return     list of content descriptors
 

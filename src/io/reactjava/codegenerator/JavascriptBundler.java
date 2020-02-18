@@ -2684,6 +2684,44 @@ public static String getURLAsString(
 }
 /*------------------------------------------------------------------------------
 
+@name       googleAnalyticsInitialize - install google analytics module
+                                                                              */
+                                                                             /**
+            Install google analytics module.
+
+@return     new project folder
+
+@param      projectDir    new project directory
+
+@history    Sun Aug 26, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static File googleAnalyticsInitialize(
+   File     projectDir)
+{
+   String   sHome    = System.getProperty("user.home");
+   File     home     = new File(sHome);
+   File     wd       = kSRCCFG_NODE_MODULES_IN_PROJECT ? projectDir : home;
+   String   nodePath = getLocalNodePath();
+   String[] args;
+
+   if (kSRCCFG_NODE_MODULES_IN_PROJECT || getNpmPackageOutOfDate("react-ga"))
+   {
+      System.out.println("Installing/updating react-ga package...");
+      args = new String[]{"npm install react-ga --loglevel=error"};
+      if (exec(args, wd, nodePath) != 0)
+      {
+         throw new IllegalStateException("react-ga was not installed");
+      }
+      System.out.println("Done");
+   }
+
+   return(projectDir);
+}
+/*------------------------------------------------------------------------------
+
 @name       reactNativeProjectInitialize - copy project template
                                                                               */
                                                                              /**
@@ -4185,7 +4223,9 @@ public static void updateReactJavaCore(
    reactiveXInitialize(projectDir);
                                        // initialize/update material-ui/core  //
    materialUIInitialize(projectDir);
-                                       // initialize/update core support       //
+                                       // initialize/update google analytics  //
+   googleAnalyticsInitialize(projectDir);
+                                       // initialize/update core support      //
    gwtInitialize(null);
                                        // copy project template               //
    copyProjectTemplate(projectDir, bUpdate);

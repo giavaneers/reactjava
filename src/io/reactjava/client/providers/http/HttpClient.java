@@ -516,13 +516,14 @@ public DefaultReadyStateChangeListener(
 protected void signalCompletion()
 {
    HttpResponse response = new HttpResponse(getClient());
-   if (response.getError() != null)
+   Throwable    error    = response.getError();
+   if (error != null)
    {
       kLOGGER.logError(
          "HttpClient.DefaultReadyStateChangeListener.signalCompletion(): "
-       + "responding to subscriber with error=" + response);
+       + "responding to subscriber with error=" + error);
 
-      subscriber.error(response);
+      subscriber.error(error);
    }
    else
    {

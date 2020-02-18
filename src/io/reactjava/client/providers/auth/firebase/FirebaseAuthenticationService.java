@@ -20,12 +20,15 @@ package io.reactjava.client.providers.auth.firebase;
 
                                        // imports --------------------------- //
 import com.giavaneers.util.gwt.Logger;
+import elemental2.core.JsObject;
 import elemental2.promise.Promise;
 import io.reactjava.client.providers.auth.IAuthenticationService;
 import io.reactjava.client.core.react.Properties;
 import io.reactjava.client.core.rxjs.observable.Observable;
 import io.reactjava.client.core.rxjs.observable.Subscriber;
+import io.reactjava.client.providers.auth.IAuthenticationService.IUserCredential;
 import jsinterop.annotations.JsMethod;
+import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
 import jsinterop.base.Js;
                                        // FirebaseAuthenticationService ======//
@@ -106,21 +109,21 @@ public Observable configure(
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public Observable<String> createUserWithEmailAndPassword(
+public Observable<IUserCredential> createUserWithEmailAndPassword(
    String email,
    String password)
 {
-   Observable<String> observable = Observable.create(
-      (Subscriber<String> subscriber) ->
+   Observable<IUserCredential> observable = Observable.create(
+      (Subscriber<IUserCredential> subscriber) ->
       {
-         Promise promise =
+         Promise<UserCredential> promise =
             getAuth().createUserWithEmailAndPassword(email, password);
 
          promise.then(
-            response ->
+            (UserCredential userCredential) ->
             {
-               subscriber.next(response.toString());
-               subscriber.complete();
+               subscriber.next(new FirebaseUserCredential(userCredential));
+               subscriber.complete();;
                return(promise);
             },
             error ->
@@ -277,19 +280,21 @@ public final static native void initNative(
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public Observable<String> signInWithEmailAndPassword(
+public Observable<IUserCredential> signInWithEmailAndPassword(
    String email,
    String password)
 {
-   Observable<String> observable = Observable.create(
-      (Subscriber<String> subscriber) ->
+   Observable<IUserCredential> observable = Observable.create(
+      (Subscriber<IUserCredential> subscriber) ->
       {
-         Promise promise = getAuth().signInWithEmailAndPassword(email, password);
+         Promise<UserCredential> promise =
+            getAuth().signInWithEmailAndPassword(email, password);
+
          promise.then(
-            user ->
+            (UserCredential userCredential) ->
             {
-               subscriber.next(user.toString());
-               subscriber.complete();
+               subscriber.next(new FirebaseUserCredential(userCredential));
+               subscriber.complete();;
                return(promise);
             },
             error ->
@@ -316,17 +321,17 @@ public Observable<String> signInWithEmailAndPassword(
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public Observable<String> signOut()
+public Observable<IUserCredential> signOut()
 {
-   Observable<String> observable = Observable.create(
-      (Subscriber<String> subscriber) ->
+   Observable<IUserCredential> observable = Observable.create(
+      (Subscriber<IUserCredential> subscriber) ->
       {
-         Promise promise = getAuth().signOut();
+         Promise<UserCredential> promise = getAuth().signOut();
          promise.then(
-            result ->
+            (UserCredential userCredential) ->
             {
-               subscriber.next(result.toString());
-               subscriber.complete();
+               subscriber.next(new FirebaseUserCredential(userCredential));
+               subscriber.complete();;
                return(promise);
             },
             error ->
@@ -465,7 +470,7 @@ public static class Auth
                                                                               */
 //------------------------------------------------------------------------------
 @JsMethod
-public native Promise createUserWithEmailAndPassword(
+public native Promise<UserCredential> createUserWithEmailAndPassword(
    String email,
    String password);
 
@@ -523,7 +528,7 @@ public native Promise createUserWithEmailAndPassword(
                                                                               */
 //------------------------------------------------------------------------------
 @JsMethod
-public native Promise signInWithEmailAndPassword(
+public native Promise<UserCredential> signInWithEmailAndPassword(
    String email,
    String password);
 
@@ -542,7 +547,169 @@ public native Promise signInWithEmailAndPassword(
                                                                               */
 //------------------------------------------------------------------------------
 @JsMethod
-public native Promise signOut();
+public native Promise<UserCredential> signOut();
 
 }//====================================// Auth ===============================//
+/*==============================================================================
+
+name:       FirebaseUserCredential - Firebase User Credential
+
+purpose:    Firebase User Credential
+
+history:    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
+
+notes:
+
+==============================================================================*/
+public static class FirebaseUserCredential implements IUserCredential
+{
+                                       // constants ------------------------- //
+                                       // (none)                              //
+                                       // class variables ------------------- //
+                                       // (none)                              //
+                                       // public instance variables --------- //
+                                       // (none)                              //
+                                       // protected instance variables ------ //
+                                       // user credential                     //
+protected UserCredential userCredential;
+                                       // private instance variables -------- //
+                                       // (none)                              //
+
+/*------------------------------------------------------------------------------
+
+@name       FirebaseUserCredential - constructor for native UserCredential
+                                                                              */
+                                                                             /**
+            Constructor for specified native UserCredential.
+
+@history    Sat Oct 21, 2017 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public FirebaseUserCredential(
+   UserCredential userCredential)
+{
+   this.userCredential = userCredential;
+}
+/*------------------------------------------------------------------------------
+
+@name       getIdToken - get a JWT used to identify user to a Firebase service
+                                                                              */
+                                                                             /**
+            Get a JSON Web Token (JWT) used to identify the user to a Firebase
+            service.
+
+@return     the current token if it has not expired; otherwise, this will
+            refresh the token and return a new one.
+
+@history    Sat Oct 21, 2017 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public Observable<String> getIdToken()
+{
+   Observable<String> observable = Observable.create(
+      (Subscriber<String> subscriber) ->
+      {
+         Promise<String> promise = userCredential.user.getIdToken();
+         promise.then(
+            (String idToken) ->
+            {
+               subscriber.next(idToken);
+               subscriber.complete();
+               return(promise);
+            },
+            error ->
+            {
+               subscriber.error(FirebaseCore.getErrorMessage(error));
+               return(null);
+            });
+
+         return(subscriber);
+      });
+   return(observable);
+}
+}//====================================// FirebaseUserCredential =============//
+/*==============================================================================
+
+name:       User - Firebase User
+
+purpose:    GWT compatible Firebase User
+
+history:    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
+
+notes:
+
+==============================================================================*/
+@jsinterop.annotations.JsType(
+   isNative = true, namespace= "firebase", name = "User")
+public static class User
+{
+                                       // constants ------------------------- //
+                                       // (none)                              //
+                                       // class variables ------------------- //
+                                       // (none)                              //
+                                       // public instance variables --------- //
+                                       // (none)                              //
+                                       // protected instance variables ------ //
+                                       // (none)                              //
+                                       // private instance variables -------- //
+                                       // (none)                              //
+
+/*------------------------------------------------------------------------------
+
+@name       getIdToken - get a JWT used to identify user to a Firebase service
+                                                                              */
+                                                                             /**
+            Get a JSON Web Token (JWT) used to identify the user to a Firebase
+            service.
+
+@return     the current token if it has not expired; otherwise, this will
+            refresh the token and return a new one.
+
+@history    Sat Oct 21, 2017 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+@JsMethod
+public native Promise<String> getIdToken();
+
+}//====================================// User ===============================//
+/*==============================================================================
+
+name:       UserCredential - core compatible Firebase Auth service
+
+purpose:    GWT compatible Firebase Auth service
+
+history:    Sat Oct 21, 2017 10:30:00 (Giavaneers - LBM) created
+
+notes:
+
+==============================================================================*/
+@jsinterop.annotations.JsType(
+   isNative = true, namespace = "firebase.auth", name = "UserCredential")
+public static class UserCredential
+{
+                                       // constants ------------------------- //
+                                       // (none)                              //
+                                       // class variables ------------------- //
+                                       // (none)                              //
+                                       // public instance variables --------- //
+@JsProperty
+public JsObject additionalUserInfo;    // native additional user info         //
+@JsProperty
+public JsObject credential;            // native credential                   //
+@JsProperty
+public String   operationType;         // native operation type               //
+@JsProperty
+public User     user;                  // native user                         //
+                                       // protected instance variables ------ //
+                                       // (none)                              //
+                                       // private instance variables -------- //
+                                       // (none)                              //
+
+}//====================================// UserCredential =====================//
 }//====================================// end FirebaseAuthenticationService ==//

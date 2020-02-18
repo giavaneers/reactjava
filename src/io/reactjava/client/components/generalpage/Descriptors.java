@@ -21,8 +21,8 @@ notes:
                                        // package --------------------------- //
 package io.reactjava.client.components.generalpage;
                                        // imports --------------------------- //
-import io.reactjava.client.components.generalpage.Descriptors.FooterDsc.FooterCategoryDsc;
-import io.reactjava.client.components.generalpage.Descriptors.FooterDsc.FooterCategoryDsc.FooterTopicDsc;
+import io.reactjava.client.components.generalpage.ContentPage.ContentDsc;
+import java.util.Arrays;
 import java.util.function.Consumer;
                                        // Descriptors ========================//
 public class Descriptors
@@ -94,6 +94,39 @@ public AppBarDsc(
    this.bOpen       = bOpen;
    this.openHandler = openHandler;
 }
+/*------------------------------------------------------------------------------
+
+@name       equals - standard equals method
+                                                                              */
+                                                                             /**
+            Standard equals method.
+
+@return     true iff target equals this
+
+@history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public boolean equals(
+   Object target)
+{
+   AppBarDsc test    = null;
+   boolean   bEquals =
+      this == target
+      || (getClass()  == target.getClass()
+            && bMenuButton == (test = (AppBarDsc)target).bMenuButton
+            && bOpen       == test.bOpen
+            && title == null ? test.title == null : title.equals(test.title)
+            && buttonDscs == null
+                  ? test .buttonDscs != null
+                  : Arrays.equals(buttonDscs, test.buttonDscs)
+            && openHandler == null
+                  ? test.openHandler == null
+                  : openHandler.equals(test.openHandler));
+   return(bEquals);
+}
 }//====================================// end AppBarDsc ======================//
 /*==============================================================================
 
@@ -139,6 +172,33 @@ public ButtonDsc(
 {
    this.text = text;
    this.url  = url;
+}
+/*------------------------------------------------------------------------------
+
+@name       equals - standard equals method
+                                                                              */
+                                                                             /**
+            Standard equals method.
+
+@return     true iff target equals this
+
+@history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public boolean equals(
+   Object target)
+{
+   ButtonDsc test    = null;
+   boolean   bEquals =
+      this == target
+      || (this.getClass() == target.getClass()
+            && (test = (ButtonDsc)target).text == null
+                  ? text == null : text.equals(test.text)
+            && url == null ? test.url == null : url.equals(test.url));
+   return(bEquals);
 }
 }//====================================// end ButtonDsc ======================//
 /*==============================================================================
@@ -205,6 +265,34 @@ public FooterDsc(
    this.categories = categories;
    this.credit     = credit;
 }
+/*------------------------------------------------------------------------------
+
+@name       equals - standard equals method
+                                                                              */
+                                                                             /**
+            Standard equals method.
+
+@return     true iff target equals this
+
+@history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public boolean equals(
+   Object target)
+{
+   FooterDsc test    = null;
+   boolean   bEquals =
+      this == target
+      || (this.getClass() == target.getClass()
+            && (test = (FooterDsc)target).credit.equals(credit)
+            && categories == null
+               ? test.categories == null
+               : Arrays.equals(categories, test.categories));
+   return(bEquals);
+}
 /*==============================================================================
 
 name:       FooterCategoryDsc - footer category descriptor
@@ -230,7 +318,7 @@ public FooterTopicDsc[] topics;        // topics                              //
 
 /*------------------------------------------------------------------------------
 
-@name       FooterDsc - default constructor
+@name       FooterCategoryDsc - default constructor
                                                                               */
                                                                              /**
             Default constructor
@@ -245,13 +333,13 @@ public FooterCategoryDsc()
 }
 /*------------------------------------------------------------------------------
 
-@name       FooterDsc - constructor for specified title and descriptions
+@name       FooterCategoryDsc - constructor for specified title and descriptions
                                                                               */
                                                                              /**
             Constructor for specified title and descriptions
 
-@param      title             title
-@param      descriptions      array of descriptions
+@param      title       title
+@param      topics      array of topics
 
 @history    Fri Feb 15, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -264,6 +352,35 @@ public FooterCategoryDsc(
 {
    this.title  = title;
    this.topics = topics;
+}
+/*------------------------------------------------------------------------------
+
+@name       equals - standard equals method
+                                                                              */
+                                                                             /**
+            Standard equals method.
+
+@return     true iff target equals this
+
+@history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public boolean equals(
+   Object target)
+{
+   FooterCategoryDsc test = null;
+
+   boolean bEquals =
+      this == target
+      || (getClass() == target.getClass()
+           && (test = (FooterCategoryDsc)target).title == null
+                 ? title == null : title.equals(test.title)
+           && topics == null
+                 ? test.topics == null : Arrays.equals(topics, test.topics));
+   return(bEquals);
 }
 /*==============================================================================
 
@@ -350,6 +467,34 @@ public FooterTopicDsc(
    this.url    = url;
    this.target = target;
 }
+/*------------------------------------------------------------------------------
+
+@name       equals - standard equals method
+                                                                              */
+                                                                             /**
+            Standard equals method.
+
+@return     true iff target equals this
+
+@history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public boolean equals(
+   Object object)
+{
+   FooterTopicDsc test = null;
+
+   boolean bEquals =
+      this == object
+      || (getClass() == object.getClass()
+            && (test = (FooterTopicDsc)object).target == null
+               ? target == null : target.equals(test.target)
+            && topic == null ? test.topic == null : topic.equals(test.topic));
+   return(bEquals);
+}
 }//====================================// end FooterTopicDsc =================//
 }//====================================// end FooterCategoryDsc ==============//
 /*==============================================================================
@@ -411,6 +556,35 @@ public FooterCreditDsc(
 {
    this.logo = logo;
    this.text = text;
+}
+/*------------------------------------------------------------------------------
+
+@name       equals - standard equals method
+                                                                              */
+                                                                             /**
+            Standard equals method.
+
+@return     true iff target equals this
+
+@history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public boolean equals(
+   Object target)
+{
+   FooterCreditDsc test = null;
+
+   boolean bEquals =
+      this == target
+      || (getClass() == target.getClass()
+           && (test = (FooterCreditDsc)target).logo == null
+                 ? logo == null : logo.equals(test.logo)
+           && text == null ? text == null : text.equals(test.text));
+
+   return(bEquals);
 }
 }//====================================// end FooterCreditDsc ================//
 }//====================================// end FooterDsc ======================//
@@ -478,6 +652,43 @@ public PageDsc(
    this.pushPaths     = pushPaths;
    this.sections      = sections;
    this.footer        = footer;
+}
+/*------------------------------------------------------------------------------
+
+@name       equals - standard equals method
+                                                                              */
+                                                                             /**
+            Standard equals method.
+
+@return     true iff target equals this
+
+@history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public boolean equals(
+   Object target)
+{
+   PageDsc test    = null;
+   boolean bEquals =
+      this == target
+      || (getClass()  == target.getClass()
+            && bMenuButton == (test = (PageDsc)target).bMenuButton
+            && appBarButtons == null
+                  ? test .appBarButtons != null
+                  : Arrays.equals(appBarButtons, test.appBarButtons)
+            && pushPaths == null
+                  ? test .pushPaths != null
+                  : Arrays.equals(pushPaths, test.pushPaths)
+            && sections == null
+                  ? test .sections != null
+                  : Arrays.equals(sections, test.sections)
+            && image == null ? test.image == null : image.equals(test.image)
+            && title == null ? test.title == null : title.equals(test.title));
+
+   return(bEquals);
 }
 }//====================================// end PageDsc ========================//
 /*==============================================================================
@@ -582,6 +793,45 @@ public SectionDsc(
    this.descriptions  = descriptions;
    this.buttonText    = buttonText;
    this.buttonVariant = buttonVariant;
+}
+/*------------------------------------------------------------------------------
+
+@name       equals - standard equals method
+                                                                              */
+                                                                             /**
+            Standard equals method.
+
+@return     true iff target equals this
+
+@history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public boolean equals(
+   Object target)
+{
+   SectionDsc test    = null;
+   boolean    bEquals =
+      this == target
+      || (getClass() == target.getClass()
+            && (test = (SectionDsc)target).title == null
+                  ? title == null : title.equals(test.title)
+            && descriptions == null
+                  ? test.descriptions != null
+                  : Arrays.equals(descriptions, test.descriptions)
+            && buttonText == null
+               ? test.buttonText == null : buttonText.equals(test.buttonText)
+            && buttonVariant == null
+               ? test.buttonVariant == null
+               : buttonVariant.equals(test.buttonVariant)
+            && imagePath == null
+               ? test.imagePath == null : imagePath.equals(test.imagePath)
+            && subheader == null
+               ? test.subheader == null : subheader.equals(test.subheader));
+
+   return(bEquals);
 }
 }//====================================// end SectionDsc =====================//
 }//====================================// end Descriptors ====================//

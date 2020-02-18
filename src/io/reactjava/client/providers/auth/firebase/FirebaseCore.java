@@ -21,6 +21,7 @@ package io.reactjava.client.providers.auth.firebase;
                                        // imports --------------------------- //
 import com.giavaneers.util.gwt.Logger;
 import elemental2.core.JsObject;
+import elemental2.promise.Promise;
 import io.reactjava.client.core.react.Configuration;
 import io.reactjava.client.core.react.IConfiguration;
 import io.reactjava.client.core.react.IConfiguration.ICloudServices;

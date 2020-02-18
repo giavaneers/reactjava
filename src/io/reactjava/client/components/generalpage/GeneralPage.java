@@ -21,6 +21,7 @@ notes:
                                        // package --------------------------- //
 package io.reactjava.client.components.generalpage;
                                        // imports --------------------------- //
+import com.giavaneers.util.gwt.Logger;
 import elemental2.dom.DomGlobal;
 import io.reactjava.client.components.generalpage.ContentPage.ContentDsc;
 import io.reactjava.client.components.generalpage.Descriptors.AppBarDsc;
@@ -29,6 +30,11 @@ import io.reactjava.client.core.react.Component;
 import io.reactjava.client.core.react.IUITheme;
 import io.reactjava.client.core.react.Properties;
 import io.reactjava.client.core.react.Router;
+import io.reactjava.client.core.react.Utilities;
+import io.reactjava.client.core.rxjs.observable.Observable;
+import io.reactjava.client.providers.http.HttpClient;
+import io.reactjava.client.providers.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -37,21 +43,23 @@ import java.util.function.Consumer;
 public class GeneralPage<P extends Properties> extends Component
 {
                                        // class constants ------------------- //
+private static final Logger kLOGGER = Logger.newInstance();
+
                                        // property keys                       //
-public static final String kKEY_PAGE_DSC = "pagedsc";
-public static final String kKEY_MANIFEST = "manifest";
+public static final String  kKEY_PAGE_DSC = "pagedsc";
+public static final String  kKEY_MANIFEST = "manifest";
 
                                        // state variable name                 //
-public static final String kSTATE_ANCHOR = "anchor";
-public static final String kSTATE_OPEN   = "open";
+public static final String  kSTATE_ANCHOR           = "anchor";
+public static final String  kSTATE_CONTENT          = "content";
+public static final String  KSTATE_SIDE_DRAWER_OPEN = "sideDrawerOpen";
 
                                        // class variables ------------------- //
                                        // (none)                              //
                                        // public instance variables --------- //
                                        // protected instance variables -------//
-protected List<ContentDsc> content;    // array of content descriptors        //
-protected AppBarDsc        appBarDsc;  // app bar descriptor                  //
-protected PageDsc          pageDsc;    // page descriptor                     //
+protected AppBarDsc         appBarDsc; // app bar descriptor                  //
+protected PageDsc           pageDsc;   // page descriptor                     //
                                        // private instance variables -------- //
                                        // (none)                              //
 /*------------------------------------------------------------------------------
@@ -78,7 +86,7 @@ protected AppBarDsc getAppBarDsc()
             getPageDsc().title,
             getPageDsc().bMenuButton,
             getPageDsc().appBarButtons,
-            getStateBoolean(kSTATE_OPEN),
+            getStateBoolean(KSTATE_SIDE_DRAWER_OPEN),
             openHandler);
    }
    return(appBarDsc);
@@ -90,7 +98,14 @@ protected AppBarDsc getAppBarDsc()
                                                                              /**
             Get content.
 
-@return     content descriptor list
+            If props().getString(kKEY_MANIFEST) is a url, returns an empty list
+            and sets the kSTATE_CONTENT state value after the raw text has been
+            fetched and parsed.
+
+            Otherwise, returns the parsed manifest immediately.
+
+@return     content descriptor list which is empty iff the manifest is a url to
+            be fetched.
 
 @history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -100,10 +115,27 @@ protected AppBarDsc getAppBarDsc()
 //------------------------------------------------------------------------------
 protected List<ContentDsc> getContent()
 {
-   if (content == null)
+   List<ContentDsc> content = new ArrayList<>();
+   Object           rawText = getManifestRawText();
+   if (rawText instanceof Observable)
    {
-      content = ContentDsc.parse(props().getString(kKEY_MANIFEST));
+      ((Observable<HttpResponse>)rawText).subscribe(
+         (HttpResponse httpResponse) ->
+         {
+            List<ContentDsc> parsed = ContentDsc.parse(httpResponse.getText());
+            setState(kSTATE_CONTENT, parsed);
+         },
+         error ->
+         {
+                                       // ignore                              //
+            kLOGGER.logError(error.toString());
+         });
    }
+   else
+   {
+      content = ContentDsc.parse((String)rawText);
+   }
+
    return(content);
 }
 /*------------------------------------------------------------------------------
@@ -145,7 +177,7 @@ public static List<String> getImportedNodeModules()
 public Consumer<Map<String,Object>> openHandler = (Map<String,Object> args) ->
 {
    boolean bOpen = (Boolean)args.get("bOpen");
-   setState(kSTATE_OPEN, bOpen);
+   setState(KSTATE_SIDE_DRAWER_OPEN, bOpen);
 
    String url = (String)args.get("url");
    String id  = url != null ? url : (String)args.get("id");
@@ -157,14 +189,9 @@ public Consumer<Map<String,Object>> openHandler = (Map<String,Object> args) ->
    {
       Router.push(id.substring(id.indexOf(':') + 1).trim());
    }
-   else if (id.startsWith("http:") || id.startsWith("https:"))
+   else if (Utilities.isURL(id))
    {
-                                       // absolute reference                  //
-      DomGlobal.window.open(id, "_blank");
-   }
-   else if (id.startsWith("/"))
-   {
-                                       // relative reference                  //
+                                       // relative or absolute reference      //
       DomGlobal.window.open(id, "_blank");
    }
    else
@@ -172,6 +199,29 @@ public Consumer<Map<String,Object>> openHandler = (Map<String,Object> args) ->
       setState(kSTATE_ANCHOR, id);
    }
 };
+/*------------------------------------------------------------------------------
+
+@name       getManifestRawText - get manifest raw text
+                                                                              */
+                                                                             /**
+            Get manifest raw text.
+
+@return     page descriptor
+
+@history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected Object getManifestRawText()
+{
+   String manifest = props().getString(kKEY_MANIFEST);
+   Object retVal   =
+      Utilities.isURL(manifest) ? HttpClient.get(manifest) : manifest;
+
+   return(retVal);
+}
 /*------------------------------------------------------------------------------
 
 @name       getPageDsc - get page descriptor
@@ -214,22 +264,23 @@ protected PageDsc getPageDsc()
 public final void render()
 {
    useState(kSTATE_ANCHOR, "");
-   useState(kSTATE_OPEN,   false);
+   useState(kSTATE_CONTENT, getContent());
+   useState(KSTATE_SIDE_DRAWER_OPEN, false);
  /*--
    <div>
                                        <!-- App Bar --------------------------->
       <GeneralAppBar appbardsc={getAppBarDsc()}></GeneralAppBar>
       <main class="layout">
                                        <!-- Content --------------------------->
-         <ContentPage content={getContent()}></ContentPage>
+         <ContentPage content={getState(kSTATE_CONTENT)}></ContentPage>
       </main>
                                        <!-- Footer ---------------------------->
       <Footer footer={getPageDsc().footer}></Footer>
                                        <!-- Side Drawer ----------------------->
       <SideDrawer
-         open={getStateBoolean(kSTATE_OPEN)}
+         open={getStateBoolean(KSTATE_SIDE_DRAWER_OPEN)}
          openhandler={openHandler}
-         content={getContent()}>
+         content={getState(kSTATE_CONTENT)}>
       </SideDrawer>
    </div>
 --*/
