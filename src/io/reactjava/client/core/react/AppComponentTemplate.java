@@ -236,10 +236,14 @@ public P initialize(
    P initialProps)
 {
    P props = super.initialize(initialProps);
-   if (props.getString("id") == null)
+                                       // assign the app id                   //
+   props.set("id", getClass().getName());
+                                       // assign any url parameters as props  //
+   for (String propertyName : Router.getURLParameters().keySet())
    {
-      setId(getNextId());
+      props().set(propertyName, Router.getURLParameter(propertyName));
    }
+
    return(props);
 }
 /*------------------------------------------------------------------------------
@@ -265,4 +269,26 @@ public void onModuleLoad()
                                        // found as a javascript global...     //
    //ReactJava.bootNative(getClass().getName());
 }
+/*------------------------------------------------------------------------------
+
+@name       preRender - component pre-render processing
+                                                                              */
+                                                                             /**
+            Component pre-render processing.
+
+
+@history    Fri Dec 20, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+//@Override
+//protected void preRender(
+//   Properties props)
+//{
+//                                     // initialize Component statics        //
+//   initStatics();
+//   super.preRender(props);
+//}
 }//====================================// end AppComponentTemplate ---------- //

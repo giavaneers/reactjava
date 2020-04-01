@@ -33,9 +33,11 @@ import java.util.Map;
 public class GeneralAppBar extends Component
 {
                                        // class constants ------------------- //
-public static final String kPROPERTY_KEY_APP_BAR_DSC  = "appbardsc";
-public static final String kAPP_BAR_BUTTON_TEXT_LOGIN = "Login";
-public static final String kAPP_BAR_BUTTON_TEXT_MENU  = "MenuButton";
+public static final String kELEMENT_ID_GENERAL_APP_BAR = "RJGeneralAppBar";
+
+public static final String kPROPERTY_KEY_APP_BAR_DSC   = "appbardsc";
+public static final String kAPP_BAR_BUTTON_TEXT_LOGIN  = "Login";
+public static final String kAPP_BAR_BUTTON_TEXT_MENU   = "MenuButton";
 
                                        // class variables ------------------- //
                                        // (none)                              //
@@ -64,18 +66,23 @@ public INativeEventHandler clickHandler = (Event e) ->
    AppBarDsc dsc = getAppBarDsc();
    if (dsc.openHandler != null)
    {
+      Map<String,Object> openHandlerArgs = new HashMap<>();
+
                                        // the element handling the click      //
                                        // (not necessarily the root target)   //
-      String id  = ((Element)e.currentTarget).getAttribute("id");
-      String url = getButtonMap().get(id);
+      String id = ((Element)e.currentTarget).getAttribute("id");
+      if (kAPP_BAR_BUTTON_TEXT_MENU.equals(id))
+      {
+         openHandlerArgs.put("bOpen", true);
+      }
+      else
+      {
+         String url = getButtonMap().get(id);
+         openHandlerArgs.put("url", url);
+         openHandlerArgs.put("id",  id);
+      }
 
-      dsc.openHandler.accept(
-         new HashMap<String,Object>()
-         {{
-            put("id",    id);
-            put("url",   url);
-            put("bOpen", kAPP_BAR_BUTTON_TEXT_MENU.equals(id));
-         }});
+      dsc.openHandler.accept(openHandlerArgs);
    }
 };
 /*------------------------------------------------------------------------------
@@ -125,10 +132,16 @@ protected Map<String,String> getButtonMap()
    if (buttonMap == null)
    {
       buttonMap = new HashMap<>();
-      for (ButtonDsc dsc : getAppBarDsc().buttonDscs)
+
+      ButtonDsc[] buttonDscs = getAppBarDsc().buttonDscs;
+      if (buttonDscs != null)
       {
-         buttonMap.put(dsc.text, dsc.url);
+         for (ButtonDsc dsc : getAppBarDsc().buttonDscs)
+         {
+            buttonMap.put(dsc.text, dsc.url);
+         }
       }
+
       String title = getAppBarDsc().title;
       if (buttonMap.get(title) == null)
       {
@@ -154,7 +167,11 @@ public final void render()
 {
 
 /*--
-   <@material-ui.core.AppBar position="fixed" color="default" class="appBar">
+   <@material-ui.core.AppBar
+      id={kELEMENT_ID_GENERAL_APP_BAR}
+      position="fixed"
+      color="default"
+      class="appBar">
       <@material-ui.core.Toolbar
          disableGutters={getAppBarDsc().bOpen ? true : null}>
 --*/

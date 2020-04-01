@@ -59,9 +59,6 @@ protected static boolean             bInitialized;
                                        // core compiler preprocessor          //
 //protected static IReactCodeGenerator generator;
 
-                                       // map of stylesheet by component class//
-protected static Map<String,String>  injectedStylesheets;
-
                                        // component properties native         //
                                        // fieldname which changes with degree //
                                        // of minification                     //
@@ -164,126 +161,6 @@ public static ReactElement boot(
    });
 
    return(renderElement[0]);
-}
-/*------------------------------------------------------------------------------
-
-@name       clearInjectedStylesheets - clear injected stylesheets
-                                                                              */
-                                                                             /**
-            Remove all injected stylesheets and clear the list.
-
-@return     empty list of injected stylesheets
-
-@history    Sat Dec 15, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-
-                                                                              */
-//------------------------------------------------------------------------------
-public static Map<String,String> clearInjectedStylesheets()
-{
-   Map<String,String> stylesheets = getInjectedStylesheets();
-   for (String styleId : stylesheets.values())
-   {
-      Element stylesheet = DomGlobal.document.getElementById(styleId);
-      if (stylesheet != null)
-      {
-         stylesheet.remove();
-      }
-   }
-
-   stylesheets.clear();
-
-   return(stylesheets);
-}
-/*------------------------------------------------------------------------------
-
-@name       componentDoSEOInfo - do any seoInfo processing for component
-                                                                              */
-                                                                             /**
-            Do any seoInfo processing for specified component.
-
-@param      component      target component
-@param      props          component properties
-
-@history    Fri Dec 20, 2019 10:30:00 (Giavaneers - LBM) created
-
-@notes
-
-                                                                              */
-//------------------------------------------------------------------------------
-public static void componentDoSEOInfo(
-   Component  component,
-   Properties props)
-{
-   SEOInfo seoInfo = props.getConfiguration().getSEOInfo();
-   if (seoInfo != null && seoInfo.pageInfos != null)
-   {
-      String pageHash = Router.getPath();
-      for (SEOPageInfo pageInfo : seoInfo.pageInfos)
-      {
-         if (pageHash != null && pageHash.equals(pageInfo.pageHash))
-         {
-            if (pageInfo.title != null && pageInfo.title.length() > 0)
-            {
-                                       // assign the page title               //
-               ReactJava.setHead(
-                  NativeObject.with(
-                     "type", kHEAD_ELEM_TYPE_TITLE,
-                     "id",   "seo" + kHEAD_ELEM_TYPE_TITLE,
-                     "text", pageInfo.title));
-            }
-            if (pageInfo.description != null
-                  && pageInfo.description.length() > 0)
-            {
-                                       // assign the page description         //
-               ReactJava.setHead(
-                  NativeObject.with(
-                     "type",   kHEAD_ELEM_TYPE_META,
-                     "id",     "seo" + kHEAD_ELEM_TYPE_META,
-                     "name",   "description",
-                     "content", pageInfo.description));
-            }
-            if (pageInfo.structuredDataType != null
-                  && pageInfo.structuredDataType.length() > 0
-                  && pageInfo.structuredData != null
-                  && pageInfo.structuredData.length() > 0)
-            {
-                                       // assign the structured data          //
-               ReactJava.setHead(
-                  NativeObject.with(
-                     "type",               kHEAD_ELEM_TYPE_STRUCTURED,
-                     "id",                 "seo" + kHEAD_ELEM_TYPE_STRUCTURED,
-                     "structuredDataType", pageInfo.structuredDataType,
-                     "structuredData",     pageInfo.structuredData));
-            }
-
-            break;
-         }
-      }
-   }
-}
-/*------------------------------------------------------------------------------
-
-@name       componentPreRender - component pre-render processing
-                                                                              */
-                                                                             /**
-            Component pre-render processing.
-
-@param      component      target component
-@param      props          component properties
-
-@history    Fri Dec 20, 2019 10:30:00 (Giavaneers - LBM) created
-
-@notes
-
-                                                                              */
-//------------------------------------------------------------------------------
-public static void componentPreRender(
-   Component  component,
-   Properties props)
-{
-   componentDoSEOInfo(component, props);
 }
 /*------------------------------------------------------------------------------
 
@@ -516,80 +393,6 @@ public static <P extends Properties> ReactElement createElement(
 }
 /*------------------------------------------------------------------------------
 
-@name       ensureComponentStyles - get native component
-                                                                              */
-                                                                             /**
-            Get native component.
-
-@param      component      component
-
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-
-                                                                              */
-//------------------------------------------------------------------------------
-public static void ensureComponentStyles(
-   Component component)
-{
-   String styleId = component.getStyleId();
-   if (styleId != null && ReactJava.getIsWebPlatform())
-   {
-                                       // inject the stylesheet at the start  //
-                                       // of the body (OK as of a later HTML5 //
-                                       // version) so that it is more specific//
-                                       // than those of material-ui, for      //
-                                       // example, which are placed at the    //
-                                       // bottom of the head
-      String cssSave = component.css;
-      component.renderCSS();
-                                       // check if the css has changed        //
-      boolean bCSSChanged =
-         (component.css != null && cssSave == null)
-            || (component.css == null && cssSave != null)
-            || (component.css != null && !component.css.equals(cssSave));
-
-      if (bCSSChanged)
-      {
-         if (component.cssInjectedStyleId != null)
-         {
-            Element style =
-               DomGlobal.document.getElementById(component.cssInjectedStyleId);
-
-            if (style != null)
-            {
-               kLOGGER.logInfo(
-                  "ReactJava.ensureComponentStyles(): to update css, "
-                + "removing injected styleId=" + styleId);
-            }
-            style.remove();
-            component.cssInjectedStyleId = null;
-         }
-         if (component.css != null)
-         {
-                                       // inject current                      //
-            HTMLStyleElement style =
-               (HTMLStyleElement)DomGlobal.document.createElement("style");
-
-            kLOGGER.logInfo(
-               "ReactJava.ensureComponentStyles(): injecting styleId="
-                  + styleId);
-
-            style.id          = styleId;
-            style.textContent = component.css;
-
-            HTMLBodyElement body = DomGlobal.document.body;
-            body.insertBefore(style, body.firstElementChild);
-
-            component.cssInjectedStyleId = styleId;
-            component.getInjectedStyles().add(styleId);
-            getInjectedStylesheets().put(styleId, styleId);
-         }
-      }
-   }
-}
-/*------------------------------------------------------------------------------
-
 @name       getCodeGenerator - get ReactJava code generator
                                                                               */
                                                                              /**
@@ -682,29 +485,6 @@ public static <P extends Properties> Function<P, ReactElement> getComponentFcn(
    }
 
    return(fcn);
-}
-/*------------------------------------------------------------------------------
-
-@name       getInjectedStylesheets - get stylesheets
-                                                                              */
-                                                                             /**
-            Get stylesheets.
-
-@return     stylesheets
-
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-
-                                                                              */
-//------------------------------------------------------------------------------
-public static Map<String,String> getInjectedStylesheets()
-{
-   if (injectedStylesheets == null)
-   {
-      injectedStylesheets = new HashMap<>();
-   }
-   return(injectedStylesheets);
 }
 /*------------------------------------------------------------------------------
 
@@ -898,16 +678,14 @@ public static <P extends Properties> INativeFunctionalComponent getNativeFunctio
       if (fcn != null)
       {
                                        // pre-render processing               //
-         componentPreRender(component, props);
-
-                                       // remove any injected styles          //
-         //removeComponentStyles(component);
-
+         component.preRender(props);
                                        // invoke the component function       //
          component.reactElement = fcn.apply((P)props);
 
                                        // update any styles                   //
-         ensureComponentStyles(component);
+         component.ensureStyles();
+                                       // post-render processing              //
+         component.postRender();
       }
       return(component.reactElement);
    });
@@ -984,49 +762,6 @@ protected static void initialize(
 public static boolean initialized()
 {
    return(bInitialized);
-}
-/*------------------------------------------------------------------------------
-
-@name       removeComponentStyles - remove any injected styles for the component
-                                                                              */
-                                                                             /**
-            Remove any injected styles for the specified component.
-
-@param      component      component
-
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-
-                                                                              */
-//------------------------------------------------------------------------------
-public static void removeComponentStyles(
-   Component component)
-{
-   if (ReactJava.getIsWebPlatform())
-   {
-      List<String> componentStyles = component.getInjectedStyles();
-      for (String styleId : componentStyles)
-      {
-         Element style = DomGlobal.document.getElementById(styleId);
-         if (style != null)
-         {
-            if (true)
-            {
-               kLOGGER.logInfo(
-                  "ReactJava.removeComponentStyles(): removing styleId="
-                     + styleId);
-            }
-            style.remove();
-         }
-         else
-         {
-            kLOGGER.logWarning(
-               "ReactJava.removeComponentStyles(): cannot find styleId=" + styleId);
-         }
-      }
-      componentStyles.clear();
-   }
 }
 /*------------------------------------------------------------------------------
 

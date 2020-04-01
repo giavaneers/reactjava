@@ -35,7 +35,7 @@ protected static int        nextId;    // next elementId to be autoassigned   //
 protected String            css;       // css                                 //
                                        // component properties                //
 protected P                 componentProperties;
-protected IUITheme theme;     // theme                               //
+protected IUITheme theme;              // theme                               //
                                        // private instance variables -------- //
                                        // component function                  //
 private   Function<Properties, ReactElement>
@@ -70,6 +70,24 @@ public Component()
 //------------------------------------------------------------------------------
 public Component(P initialProps)
 {
+}
+/*------------------------------------------------------------------------------
+
+@name       defaultElementId - provide a default elementId
+                                                                              */
+                                                                             /**
+            Provide a default elementId.
+
+@return     default elementId, or null if none.
+
+@history    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected String defaultElementId()
+{
+   return(null);
 }
 /*------------------------------------------------------------------------------
 
@@ -533,6 +551,41 @@ protected void initConfiguration()
                                                                               */
 //------------------------------------------------------------------------------
 protected void initTheme()
+{
+}
+/*------------------------------------------------------------------------------
+
+@name       preRender - component pre-render processing
+                                                                              */
+                                                                             /**
+            Component pre-render processing.
+
+
+@history    Fri Dec 20, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected void preRender(
+   P props)
+{
+}
+/*------------------------------------------------------------------------------
+
+@name       postRender - component post-render processing
+                                                                              */
+                                                                             /**
+            Component post-render processing. This implementation is null.
+
+
+@history    Fri Dec 20, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected void postRender()
 {
 }
 /*------------------------------------------------------------------------------

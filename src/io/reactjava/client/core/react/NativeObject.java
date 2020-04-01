@@ -21,6 +21,7 @@ import java.util.Map;
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;
+import jsinterop.base.Any;
 import jsinterop.base.Js;
 import jsinterop.base.JsForEachCallbackFn;
 import jsinterop.base.JsPropertyMap;

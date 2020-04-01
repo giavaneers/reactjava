@@ -69,8 +69,8 @@ public static final String kINLINE_BODY_DEFAULT =
 
 public static final String kINLINE_FTR =
    "if(root != null){element="
- + "io.reactjava.client.core.react.ElementDsc.createElement(root);"
- + "setId(element.props.getString(\"id\"));}"
+ + "io.reactjava.client.core.react.ElementDsc.createElement(root);}"
+ //+ "setId(element.props.getString(\"id\"));}"
  + "return(element);};"
  + "setComponentFcn(fcn);";
 
@@ -2424,6 +2424,12 @@ public String parseElementAttributes(
       }
       if (attVal == null || attVal.length() == 0)
       {
+                                       // make the value a string instead of  //
+                                       // boolean as React workaround (see    //
+                                       // "https://github.com/"               //
+                                       // "styled-components/"                //
+                                       // "styled-components/issues/1198"     //
+//       properties += "\"" + key + "\", \"true\"";
          properties += "\"" + key + "\", true";
       }
       else
@@ -2445,6 +2451,20 @@ public String parseElementAttributes(
                                        // escape double quotes                //
                   value = text.replace("\"","\\\"");
                   bWrapWithQuotes = true;
+               }
+               else
+               {
+                  String trimmed = value.trim();
+                  if ("true".equals(trimmed) || "false".equals(trimmed))
+                  {
+
+                                       // make the value a string instead of  //
+                                       // boolean as React workaround (see    //
+                                       // "https://github.com/"               //
+                                       // "styled-components/issues/1198"     //
+                     //value           = trimmed;
+                     //bWrapWithQuotes = true;
+                  }
                }
             }
             else
@@ -2488,9 +2508,9 @@ public String parseElementAttributes(
                String   item   = items[iItem];
                String[] fields = item.split(":");
 
-               logger.log(
-                  logger.DEBUG,
-                  "JSXTransform.parseElementAttributes(): item=" + item);
+               //logger.log(
+               //   logger.DEBUG,
+               //   "JSXTransform.parseElementAttributes(): item=" + item);
 
                if (iItem > 0)
                {
@@ -2527,6 +2547,10 @@ public String parseElementAttributes(
    }
 
    properties += ")";
+
+   logger.log(
+      logger.DEBUG,
+      "JSXTransform.parseElementAttributes(): properties=" + properties);
 
    return(properties);
 }
@@ -2584,6 +2608,12 @@ public void parseMarkup(
                BlockStmt block = StaticJavaParser.parseBlock(parsed);
                LexicalPreservingPrinter.setup(block);
                method.setBody(block);
+
+               logger.log(
+                  logger.DEBUG,
+                  "JSXTransform.parseMarkup(): "
+                + "component=" + component.type.getFullyQualifiedName()
+                + "generated=" + pretty("\nrender()\n" + parsed));
             }
          }
       }
@@ -2707,9 +2737,10 @@ public static String pretty(
 {
    String pretty =
       generated
-         .replace(";", ";\n")
-         .replace("{", "\n{\n")
-         .replace("}", "\n}\n");
+         .replace(";",    ";\n")
+         .replace("{",    "\n{\n")
+         .replace("}",    "\n}\n")
+         .replace("\n\n", "\n");
 
    return(pretty);
 }
@@ -2842,7 +2873,7 @@ public static String replaceComponentTagsWithSymbols(
 
       logger.log(
          logger.DEBUG,
-         "JSXTrandform.replaceComponentTagsWithSymbols(): "
+         "JSXTransform.replaceComponentTagsWithSymbols(): "
        + "replacing " + tag + " with " + replacement);
 
                                        // make replacements in markup         //
@@ -4074,6 +4105,22 @@ public static boolean unitTest(
                            null);
                      content = src;
                   }
+                  else if (true)
+                  {
+                     components.put(
+                        "PDFViewer",
+                        "io.reactjava.client.components.generalpage.PDFViewer");
+
+                     classname = "io.reactjava.client.components.generalpage.ContentPage";
+                     src =
+                        IJSXTransform.getFileAsString(
+                           new File(
+                              "/Users/brianm/working/IdeaProjects/ReactJava/"
+                            + "ReactJava/src/io/reactjava/client/components/"
+                            + "generalpage/ContentPage.java"),
+                           null);
+                     content = src;
+                  }
                   break;
                }
             }
@@ -4217,7 +4264,7 @@ public static boolean unitTest(
                       + "io/reactjava/client/examples/statevariable/twosquaresoneclass/App.java"),
                      null);
             }
-            else if (true)
+            else if (false)
             {
                classname = "helloworld.App";
                src =

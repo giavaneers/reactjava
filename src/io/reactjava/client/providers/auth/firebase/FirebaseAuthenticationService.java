@@ -26,7 +26,6 @@ import io.reactjava.client.providers.auth.IAuthenticationService;
 import io.reactjava.client.core.react.Properties;
 import io.reactjava.client.core.rxjs.observable.Observable;
 import io.reactjava.client.core.rxjs.observable.Subscriber;
-import io.reactjava.client.providers.auth.IAuthenticationService.IUserCredential;
 import jsinterop.annotations.JsMethod;
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;

@@ -43,7 +43,7 @@ public interface JsArrayLike<T> {
 
   @JsOverlay
   @SuppressWarnings("unchecked")
-  default T getAt(int index) {
+  default Object getAt(int index) {
     return (T) InternalJsUtil.getAt(this, index);
   }
 

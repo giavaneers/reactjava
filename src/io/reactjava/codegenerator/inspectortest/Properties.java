@@ -16,7 +16,9 @@ notes:
 package io.reactjava.codegenerator.inspectortest;
                                        // imports --------------------------- //
 import java.util.HashMap;
-                                       // Properties =========================//
+import jsinterop.annotations.JsOverlay;
+
+// Properties =========================//
 public class Properties extends HashMap
 {
                                        // constants ------------------------- //
@@ -63,10 +65,36 @@ public Properties()
 public final boolean getBoolean(
    String propertyName)
 {
+   return(getBoolean(propertyName, false));
+}
+/*------------------------------------------------------------------------------
+
+@name       getBoolean - get boolean value of specified property
+                                                                              */
+                                                                             /**
+            Get boolean value of specified property
+
+@return     boolean value of specified property, or null if not found.
+
+@param      propertyName      property name
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public final boolean getBoolean(
+   String  propertyName,
+   boolean defaultValue)
+{
    boolean booleanValue;
 
    Object value = get(propertyName);
-   if (value instanceof String)
+   if (value == null)
+   {
+      booleanValue = defaultValue;
+   }
+   else if (value instanceof String)
    {
       booleanValue = "true".equals((String)value);
    }

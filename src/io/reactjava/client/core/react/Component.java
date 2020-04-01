@@ -16,11 +16,15 @@ notes:
 package io.reactjava.client.core.react;
                                        // imports --------------------------- //
 import com.giavaneers.util.gwt.Logger;
+import elemental2.core.JsArray;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.Element;
+import elemental2.dom.HTMLBodyElement;
 import elemental2.dom.HTMLElement;
+import elemental2.dom.HTMLStyleElement;
 import elemental2.dom.Node;
 import io.reactjava.client.core.react.IConfiguration.ICloudServices;
+import io.reactjava.client.core.react.SEOInfo.SEOPageInfo;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,18 +38,22 @@ import jsinterop.base.JsPropertyMap;
 public abstract class Component<P extends Properties>
 {
                                        // class constants --------------------//
-public static final boolean kSRCCFG_USE_STATE_HOOK = true;
-public static final String  kFORCE_UPDATE_KEY      = "builtinForceUpdate";
+public static final boolean   kSRCCFG_USE_STATE_HOOK = true;
+public static final String    kFORCE_UPDATE_KEY      = "builtinForceUpdate";
 
-private static final Logger kLOGGER = Logger.newInstance();
+protected static final Logger kLOGGER = Logger.newInstance();
 
                                        // class variables                     //
 protected static int   nextId;         // next elementId to be autoassigned   //
 private   static Map<String,Component> // map of component by id              //
                        componentById;
+                                       // map of stylesheet by component class//
+protected static Map<String,String>
+                       injectedStylesheets;
+
                                        // protected instance variables ------ //
-protected RefMgr       refMgr;         // component ref manager               //
-protected StateMgr     stateMgr;       // component state manager             //
+protected RefMgr refMgr;         // component ref manager               //
+protected StateMgr stateMgr;       // component state manager             //
 protected ReactElement reactElement;   // react element                       //
 protected String       css;            // css                                 //
                                        // css injected styleId                //
@@ -103,6 +111,37 @@ public Component(P initialProps)
 }
 /*------------------------------------------------------------------------------
 
+@name       clearInjectedStylesheets - clear injected stylesheets
+                                                                              */
+                                                                             /**
+            Remove all injected stylesheets and clear the list.
+
+@return     empty list of injected stylesheets
+
+@history    Sat Dec 15, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static Map<String,String> clearInjectedStylesheets()
+{
+   Map<String,String> stylesheets = getInjectedStylesheets();
+   for (String styleId : stylesheets.values())
+   {
+      Element stylesheet = DomGlobal.document.getElementById(styleId);
+      if (stylesheet != null)
+      {
+         stylesheet.remove();
+      }
+   }
+
+   stylesheets.clear();
+
+   return(stylesheets);
+}
+/*------------------------------------------------------------------------------
+
 @name       componentDidMount - componentDidMount event handler
                                                                               */
                                                                              /**
@@ -136,6 +175,158 @@ protected void componentDidMount()
 protected String cssSelectorForId()
 {
    return("#" + props().get("id"));
+}
+/*------------------------------------------------------------------------------
+
+@name       componentDoSEOInfo - do any seoInfo processing for component
+                                                                              */
+                                                                             /**
+            Do any seoInfo processing for specified component.
+
+@history    Fri Dec 20, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public void doSEOInfo(
+   Properties props)
+{
+   SEOInfo seoInfo = props.getConfiguration().getSEOInfo();
+   if (seoInfo != null && seoInfo.pageInfos != null)
+   {
+      String pageHash = Router.getPath();
+      for (SEOPageInfo pageInfo : seoInfo.pageInfos)
+      {
+         if (pageHash != null && pageHash.equals(pageInfo.pageHash))
+         {
+            if (pageInfo.title != null && pageInfo.title.length() > 0)
+            {
+                                       // assign the page title               //
+               ReactJava.setHead(
+                  NativeObject.with(
+                     "type", ReactJava.kHEAD_ELEM_TYPE_TITLE,
+                     "id",   "seo" + ReactJava.kHEAD_ELEM_TYPE_TITLE,
+                     "text", pageInfo.title));
+            }
+            if (pageInfo.description != null
+                  && pageInfo.description.length() > 0)
+            {
+                                       // assign the page description         //
+               ReactJava.setHead(
+                  NativeObject.with(
+                     "type",   ReactJava.kHEAD_ELEM_TYPE_META,
+                     "id",     "seo" + ReactJava.kHEAD_ELEM_TYPE_META,
+                     "name",   "description",
+                     "content", pageInfo.description));
+            }
+            if (pageInfo.structuredDataType != null
+                  && pageInfo.structuredDataType.length() > 0
+                  && pageInfo.structuredData != null
+                  && pageInfo.structuredData.length() > 0)
+            {
+                                       // assign the structured data          //
+               ReactJava.setHead(
+                  NativeObject.with(
+                     "type",               ReactJava.kHEAD_ELEM_TYPE_STRUCTURED,
+                     "id",                 "seo" + ReactJava.kHEAD_ELEM_TYPE_STRUCTURED,
+                     "structuredDataType", pageInfo.structuredDataType,
+                     "structuredData",     pageInfo.structuredData));
+            }
+
+            break;
+         }
+      }
+   }
+}
+/*------------------------------------------------------------------------------
+
+@name       defaultElementId - provide a default elementId
+                                                                              */
+                                                                             /**
+            Provide a default elementId. This implemnetation is null;
+
+@return     default elementId, or null if none.
+
+@history    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected String defaultElementId()
+{
+   return(null);
+}
+/*------------------------------------------------------------------------------
+
+@name       ensureComponentStyles - get native component
+                                                                              */
+                                                                             /**
+            Get native component.
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected void ensureStyles()
+{
+   String styleId = getStyleId();
+   if (styleId != null && ReactJava.getIsWebPlatform())
+   {
+                                       // inject the stylesheet at the start  //
+                                       // of the body (OK as of a later HTML5 //
+                                       // version) so that it is more specific//
+                                       // than those of material-ui, for      //
+                                       // example, which are placed at the    //
+                                       // bottom of the head
+      String cssSave = css;
+      renderCSS();
+                                       // check if the css has changed        //
+      boolean bCSSChanged =
+         (css != null && cssSave == null)
+            || (css == null && cssSave != null)
+            || (css != null && !css.equals(cssSave));
+
+      if (bCSSChanged)
+      {
+         if (cssInjectedStyleId != null)
+         {
+            Element style =
+               DomGlobal.document.getElementById(cssInjectedStyleId);
+
+            if (style != null)
+            {
+               kLOGGER.logInfo(
+                  "Component.ensureComponentStyles(): to update css, "
+                + "removing injected styleId=" + styleId);
+            }
+            style.remove();
+            cssInjectedStyleId = null;
+         }
+         if (css != null)
+         {
+                                       // inject current                      //
+            HTMLStyleElement style =
+               (HTMLStyleElement)DomGlobal.document.createElement("style");
+
+            kLOGGER.logInfo(
+               "Component.ensureComponentStyles(): injecting styleId="
+                  + styleId);
+
+            style.id          = styleId;
+            style.textContent = css;
+
+            HTMLBodyElement body = DomGlobal.document.body;
+            body.insertBefore(style, body.firstElementChild);
+
+            cssInjectedStyleId = styleId;
+            getInjectedStyles().add(styleId);
+            getInjectedStylesheets().put(styleId, styleId);
+         }
+      }
+   }
 }
 /*------------------------------------------------------------------------------
 
@@ -347,6 +538,29 @@ protected List<String> getInjectedStyles()
       injectedStyleIds = new ArrayList<>();
    }
    return(injectedStyleIds);
+}
+/*------------------------------------------------------------------------------
+
+@name       getInjectedStylesheets - get stylesheets
+                                                                              */
+                                                                             /**
+            Get stylesheets.
+
+@return     stylesheets
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static Map<String,String> getInjectedStylesheets()
+{
+   if (injectedStylesheets == null)
+   {
+      injectedStylesheets = new HashMap<>();
+   }
+   return(injectedStylesheets);
 }
 /*------------------------------------------------------------------------------
 
@@ -724,12 +938,6 @@ public P initialize(
 
    this.componentProperties.setComponent(this);
 
-   String id = this.componentProperties.getString("id");
-   if (id != null)
-   {
-      getComponentByIdMap().put(id, this);
-   }
-
    initConfiguration();
    initTheme();
 
@@ -762,6 +970,23 @@ protected void initConfiguration()
 }
 /*------------------------------------------------------------------------------
 
+@name       initStatics - initialize static variables
+                                                                              */
+                                                                             /**
+            Initialize static variables.
+
+@history    Thu Mar 12, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected static void initStatics()
+{
+//   nextId        = 0;
+   componentById = null;
+}
+/*------------------------------------------------------------------------------
+
 @name       initTheme - initialize theme
                                                                               */
                                                                              /**
@@ -775,6 +1000,43 @@ protected void initConfiguration()
 protected void initTheme()
 {
    getTheme();
+}
+/*------------------------------------------------------------------------------
+
+@name       preRender - component pre-render processing
+                                                                              */
+                                                                             /**
+            Component pre-render processing.
+
+
+@history    Fri Dec 20, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected void preRender(
+   P props)
+{
+   registerId(props);
+   doSEOInfo(props);
+}
+/*------------------------------------------------------------------------------
+
+@name       postRender - component post-render processing
+                                                                              */
+                                                                             /**
+            Component post-render processing. This implementation is null.
+
+
+@history    Fri Dec 20, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected void postRender()
+{
 }
 /*------------------------------------------------------------------------------
 
@@ -794,6 +1056,46 @@ protected void initTheme()
 protected P props()
 {
    return(componentProperties);
+}
+/*------------------------------------------------------------------------------
+
+@name       putComponentById - put map of component by id
+                                                                              */
+                                                                             /**
+            Put map of component by id.
+
+@param      id             id
+@param      component      component
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static void putComponentById(
+   String    id,
+   Component component)
+{
+   String    componentClass = component.getClass().getName();
+   Component previousOwner  = getComponentByIdMap().put(id, component);
+   String    previousClass  =
+      previousOwner != null ? previousOwner.getClass().getName() : null;
+
+   if (previousClass != null && !previousClass.equals(componentClass))
+   {
+      throw new IllegalStateException(
+         "id=" + id + " of " + previousClass
+        + " being assigned to " + componentClass
+        + "\nDoes your render() method contain more than one root component?");
+   }
+
+   String previousDsc =
+      previousClass == null ? "initial assignment": "existing id update";
+
+   kLOGGER.logInfo(
+      "Component.putComponentById(): "
+    + "component=" + componentClass + ", id=" + id + ", " + previousDsc);
 }
 /*------------------------------------------------------------------------------
 
@@ -828,6 +1130,36 @@ public void renderCSS()
 }
 /*------------------------------------------------------------------------------
 
+@name       registerId - register any id
+                                                                              */
+                                                                             /**
+            Register any id.
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected void registerId(
+   Properties props)
+{
+   String id = props().getString("id");
+   if (id == null || id.startsWith("rjAuto"))
+   {
+      id = defaultElementId();
+      if (id != null)
+      {
+         props().set("id", id);
+      }
+   }
+   if (id != null)
+   {
+      putComponentById(id, this);
+   }
+}
+/*------------------------------------------------------------------------------
+
 @name       removeAnyStylesheet - remove any injected stylesheet
                                                                               */
                                                                              /**
@@ -849,6 +1181,47 @@ protected void removeAnyStylesheet()
 }
 /*------------------------------------------------------------------------------
 
+@name       removeStyles - remove any injected styles for the component
+                                                                              */
+                                                                             /**
+            Remove any injected styles for the specified component.
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected void removeStyles()
+{
+   if (ReactJava.getIsWebPlatform())
+   {
+      List<String> componentStyles = getInjectedStyles();
+      for (String styleId : componentStyles)
+      {
+         Element style = DomGlobal.document.getElementById(styleId);
+         if (style != null)
+         {
+            if (true)
+            {
+               kLOGGER.logInfo(
+                  "ReactJava.removeComponentStyles(): removing styleId="
+                     + styleId);
+            }
+            style.remove();
+         }
+         else
+         {
+            kLOGGER.logWarning(
+               "ReactJava.removeComponentStyles(): "
+             + "cannot find styleId=" + styleId);
+         }
+      }
+      componentStyles.clear();
+   }
+}
+/*------------------------------------------------------------------------------
+
 @name       setComponentFcn - set component function
                                                                               */
                                                                              /**
@@ -866,37 +1239,6 @@ protected void setComponentFcn(
    java.util.function.Function<Properties, ReactElement> componentFcn)
 {
    this.componentFcn = componentFcn;
-}
-/*------------------------------------------------------------------------------
-
-@name       setId - set id
-                                                                              */
-                                                                             /**
-            Set id.
-
-@param      id    new id value
-
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-
-                                                                              */
-//------------------------------------------------------------------------------
-protected void setId(
-   String id)
-{
-   String current = componentProperties.getString("id");
-   if (!id.equals(current))
-   {
-      if (current != null)
-      {
-         getComponentByIdMap().remove(current);
-
-      }
-                                       // don't know why set() won't work here//
-      componentProperties = (P)Properties.with(componentProperties, "id", id);
-      getComponentByIdMap().put(id, this);
-   }
 }
 /*------------------------------------------------------------------------------
 
@@ -1295,7 +1637,15 @@ public StateMgr()
 protected Object getState(
    String key)
 {
-   Object copy = state != null ? state.get(key).getAt(0) : null;
+   Object copy = null;
+   if (state != null)
+   {
+      JsArrayLike stateMembers = state.get(key);
+      if (stateMembers != null)
+      {
+         copy = stateMembers.getAt(0);
+      }
+   }
    if (copy != null)
    {
       copy = makeStateValueCopy(copy);
@@ -1321,6 +1671,10 @@ protected Object getState(
 public static Object makeStateValueCopy(
    Object value)
 {
+   if (value == null)
+   {
+      throw new IllegalArgumentException("valuye may not be null");
+   }
    Object copy = value;
    Class  clas = value.getClass();
    try
@@ -1499,7 +1853,10 @@ protected void useState(
       state = new HashMap<>();
    }
                                        // React.useState() invocation may not //
-                                       // be in a conditional                 //
+                                       // be in a conditional;                //
+                                       // the stateVariable as a two element  //
+                                       // JsArray is returned by React and    //
+                                       // stored in the map for the key       //
    state.put(key, React.useState(value));
 }
 }//====================================// end StateMgr =======================//

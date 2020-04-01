@@ -17,6 +17,7 @@ package io.reactjava.jsx;
                                        // imports --------------------------- //
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.dev.util.log.PrintWriterTreeLogger;
+import io.reactjava.client.core.react.Utilities;
 import io.reactjava.client.providers.platform.IPlatform;
 import io.reactjava.client.providers.platform.mobile.android.PlatformAndroid;
 import io.reactjava.client.providers.platform.mobile.ios.PlatformIOS;
@@ -45,6 +46,10 @@ public interface IConfiguration
    extends io.reactjava.client.core.react.IConfiguration
 {
                                        // class constants --------------------//
+                                       // "export " at beginning of a line    //
+String kREGEX_EXPORT = "(?m)^export\\b";
+                                       // "import " at beginning of a line    //
+String kREGEX_IMPORT = "(?m)^import\\b";
 
                                        // class variables ------------------- //
                                        // platform                            //
@@ -332,37 +337,59 @@ static File getDescendantJavascript(
 {
    File             descendant = null;
    String           jsName     = filename + ".js";
+   String           parentName = parent.getName();
    File[]           children   = parent.listFiles();
    Map<String,File> candidates = new HashMap<String,File>();
 
    if (children != null)
    {
+      boolean bES6Syntax = false;
+
       for (File child : children)
       {
+         String content   = null;
          String childName = child.getName();
          if (jsName.equals(childName)
-               || ("index.js".equals(childName)
-                     && filename.equals(parent.getName())))
+               || "index.js".equals(childName) && filename.equals(parentName))
          {
-            candidates.put(childName, child);
+            try
+            {
+               content = IJSXTransform.getFileAsString(child, logger);
+               if (isES6Syntax(content))
+               {
+                                       // ensure not using ES6                //
+                  bES6Syntax = true;
+                  break;
+               }
+
+               candidates.put(childName, child);
+            }
+            catch(Exception e)
+            {
+                                       // break on error reading candidate    //
+               break;
+            }
          }
       }
+      if (!bES6Syntax)
+      {
                                        // in preferred order...               //
-      descendant = candidates.get(jsName);
-      if (descendant == null)
-      {
-         descendant = candidates.get("index.js");
-      }
-      if (descendant == null)
-      {
-         for (File child : children)
+         descendant = candidates.get(jsName);
+         if (descendant == null)
          {
-            if (child.isDirectory())
+            descendant = candidates.get("index.js");
+         }
+         if (descendant == null)
+         {
+            for (File child : children)
             {
-               descendant = getDescendantJavascript(child, filename, logger);
-               if (descendant != null)
+               if (child.isDirectory())
                {
-                  break;
+                  descendant = getDescendantJavascript(child, filename, logger);
+                  if (descendant != null)
+                  {
+                     break;
+                  }
                }
             }
          }
@@ -692,6 +719,10 @@ static String getNodeModuleJavascript(
    TreeLogger logger)
 {
    String nodeModulePath = getDependenciesPrevious().get(module);
+   //if (nodeModulePath == null) example pdfjs-dist causes problems here
+   //{
+   //   nodeModulePath = getNodeModuleJavascriptFromWebpack(module, logger);
+   //}
    if (nodeModulePath == null)
    {
       nodeModulePath = getNodeModuleJavascriptFromPackageJSON(module, logger);
@@ -701,12 +732,26 @@ static String getNodeModuleJavascript(
       File   nodeModules = getNodeModulesDir(logger);
       File   moduleDir   = nodeModules;
       String filename    = module;
-      int    idx         = module.indexOf('.');
-      if (idx > 0)
+                                       // chase the module directory          //
+      for (int idx = module.indexOf('.');
+            idx > 0;
+            idx = module.indexOf('.', idx + 1))
       {
-         moduleDir = new File(moduleDir,  module.substring(0, idx));
-         filename  = module.substring(module.lastIndexOf('.') + 1);
+         String relPath = module.substring(0, idx).replace(".", "/");
+         File   chase   = new File(nodeModules, relPath);
+         if (!chase.isDirectory())
+         {
+            break;
+         }
+         moduleDir = chase;
+         filename  = module.substring(idx + 1);
       }
+
+      logger.log(
+         logger.INFO,
+         "jsx.IConfiguration.getNodeModuleJavascript(): module=" + module
+       + ", moduleDir=" + moduleDir
+       + ", filename="  + filename);
 
       File descendant = getDescendantJavascript(moduleDir, filename, logger);
       //if (descendant == null)
@@ -721,7 +766,7 @@ static String getNodeModuleJavascript(
          nodeModulePath = descendant.getAbsolutePath();
 
          logger.log(
-            logger.DEBUG,
+            logger.INFO,
             "jsx.IConfiguration.getNodeModuleJavascript(): module=" + module
           + ", componentPath=" + nodeModulePath);
       }
@@ -778,11 +823,20 @@ public static String getNodeModuleJavascriptFromPackageJSON(
 @name       getNodeModuleJavascriptFromPackageJSON - get node module export item
                                                                               */
                                                                              /**
-            Get node module export item.
+            Get node module export item.  The specified module is either just
+            the module name, or a relative path to a specific item.
+
+            If the specified module is a relative path to a specific item, and
+            if the item is found, that is returned as the target.
+
+            Otherwise the specified module is searched for a 'package.json'
+            file, and if found, the 'main' entry is found for a javascript
+            file, and the 'style' entry is found for a css file. If that is
+            found, it is returned as the target.
 
 @return     browserify inject script item
 
-@param      module      corresponding node module name.
+@param      module      corresponding node module name or relative path.
 
 @history    Wed Dec 12, 2018 08:46:23 (LBM) created.
 
@@ -794,23 +848,40 @@ public static String getNodeModuleTargetFromPackageJSON(
    boolean    bJavascript,
    TreeLogger logger)
 {
-   String exportItem     = null;
-   File   nodeModulesDir = IConfiguration.getNodeModulesDir(logger);
-   File   target         = null;
-   String json           = null;
-   String require        = module.replace(".","/");
-   File   nodeModuleDir  = new File(nodeModulesDir, require);
-
-   while (true)
+   String  exportItem     = null;
+   File    nodeModulesDir = IConfiguration.getNodeModulesDir(logger);
+   File    target         = null;
+   String  json           = null;
+   String  relPath        = module.indexOf('/') > 0 ? module : null;
+   if (relPath != null)
    {
-                                       // chase from the child up to the      //
-                                       // nodeModulesDir                      //
-      String nodeModulePath = nodeModuleDir.getAbsolutePath();
-
+                                       // explicit path specification ------- //
       logger.log(
-         logger.DEBUG,
-         "getNodeModuleTargetFromPackageJSON(): nodeModulePath="
-            + nodeModulePath);
+         logger.INFO,
+         "IConfiguration.getNodeModuleTargetFromPackageJSON(): "
+       + "target relative path specified explicitly=" + module);
+
+      if (bJavascript && !module.endsWith(".js"))
+      {
+         module += ".js";
+      }
+      else if (!bJavascript && !module.endsWith(".css"))
+      {
+         module += ".css";
+      }
+
+      target = new File(nodeModulesDir, module);
+   }
+   else
+   {
+                                       // module name specification --------- //
+      logger.log(
+         logger.INFO,
+         "IConfiguration.getNodeModuleTargetFromPackageJSON(): "
+       + "specified module name=" + module);
+
+      File nodeModuleDir  = new File(nodeModulesDir, module);
+
                                        // get any package.json 'main' entry   //
       File pkgJson = new File(nodeModuleDir, "package.json");
       if (pkgJson.exists())
@@ -823,96 +894,78 @@ public static String getNodeModuleTargetFromPackageJSON(
          {
             throw new IllegalStateException(e);
          }
-
-         break;
       }
-      else
+      if (json != null)
       {
-                                       // try any parent                      //
-         nodeModuleDir = nodeModuleDir.getParentFile();
-         if (nodeModulesDir.equals(nodeModuleDir))
+                                       // module name specification (cont)    //
+         String key = bJavascript ? "main" : "style";
+         try
          {
-            break;
+            relPath = (String)((JSONObject)new JSONParser().parse(json)).get(key);
+         }
+         catch(Exception e)
+         {
+                                       // ignore                              //
          }
       }
-   }
-   if (json != null)
-   {
-      String key     = bJavascript ? "main" : "style";
-      String relPath = null;
-      try
-      {
-         relPath = (String)((JSONObject)new JSONParser().parse(json)).get(key);
-      }
-      catch(Exception e)
-      {
-                                       // ignore                              //
-      }
-
-      logger.log(
-         logger.DEBUG,
-         "getNodeModuleTargetFromPackageJSON(): "
-       + "checking package.json for " + relPath);
 
       if (relPath != null)
       {
          File file = new File(nodeModuleDir, relPath);
 
          logger.log(
-            logger.DEBUG,
-            "getNodeModuleTargetFromPackageJSON(): "
+            logger.INFO,
+            "IConfiguration.getNodeModuleTargetFromPackageJSON(): "
           + "checking package.json for " + file.getAbsolutePath());
 
          if (file.exists())
          {
             target = file;
+
+            logger.log(
+               logger.INFO,
+               "IConfiguration.getNodeModuleTargetFromPackageJSON(): "
+                  + target.getAbsolutePath() + " found");
          }
       }
-   }
 
-   if (bJavascript && target == null)
-   {
-      String item =
-         IConfiguration.toReactAttributeName(
-            module.substring(module.lastIndexOf('.') + 1));
-
-      String[] filenames = {"index.js", "default.js", item};
-      for (int i = 0; i < filenames.length; i++)
+      if (bJavascript && target == null)
       {
-         File file = new File(nodeModuleDir, filenames[i]);
+         String item = IConfiguration.toReactAttributeName(module, logger);
+
+         String[] filenames = {"index.js", "default.js", item};
+         for (int i = 0; i < filenames.length; i++)
+         {
+            File file = new File(nodeModuleDir, filenames[i]);
+
+            logger.log(
+               logger.INFO,
+               "IConfiguration.getNodeModuleTargetFromPackageJSON(): "
+             + "checking for " + file.getAbsolutePath());
+
+            if (file.exists())
+            {
+               target = file;
+               break;
+            }
+         }
+      }
+      if (bJavascript && target == null)
+      {
+         target = new File(nodeModuleDir + ".js");
 
          logger.log(
-            logger.DEBUG,
-            "getNodeModuleTargetFromPackageJSON(): checking for "
-               + file.getAbsolutePath());
-
-         if (file.exists())
-         {
-            target = file;
-            break;
-         }
-      }
-   }
-   if (bJavascript && target == null)
-   {
-      File file = new File(nodeModuleDir + ".js");
-
-      logger.log(
-         logger.DEBUG,
-         "getNodeModuleTargetFromPackageJSON(): checking for "
-       + file.getAbsolutePath());
-
-      if (file.exists())
-      {
-         target = file;
+            logger.INFO,
+            "IConfiguration.getNodeModuleTargetFromPackageJSON(): checking for "
+          + target.getAbsolutePath());
       }
    }
 
-   if (target != null)
+   if (target != null && target.exists())
    {
       logger.log(
-         logger.DEBUG,
-         "getNodeModuleTargetFromPackageJSON(): target="
+         logger.INFO,
+         "IConfiguration.getNodeModuleTargetFromPackageJSON(): target="
             + target.getAbsolutePath());
 
       String suffix = bJavascript ? ".js" : ".css";
@@ -926,9 +979,89 @@ public static String getNodeModuleTargetFromPackageJSON(
    }
 
    logger.log(
-      logger.DEBUG,
-      "getNodeModuleTargetFromPackageJSON(): for module=" + module
-    + ", exportItem=" + exportItem);
+      logger.INFO,
+      "IConfiguration.getNodeModuleTargetFromPackageJSON(): for module="
+         + module + ", exportItem=" + exportItem);
+
+   return(exportItem);
+}
+/*------------------------------------------------------------------------------
+
+@name       getNodeModuleJavascriptFromWebpack - get node module export item
+                                                                              */
+                                                                             /**
+            Get node module export item from any module webpack.js file.
+
+@return     browserify inject script item
+
+@param      module      corresponding node module name.
+
+@history    Wed Dec 12, 2018 08:46:23 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static String getNodeModuleJavascriptFromWebpack(
+   String     module,
+   TreeLogger logger)
+{
+   return(getNodeModuleTargetFromWebpack(module, true, logger));
+}
+/*------------------------------------------------------------------------------
+
+@name       getNodeModuleTargetFromWebpack - get node module export item
+                                                                              */
+                                                                             /**
+            Get node module export item from any module webpack.js.
+
+@return     browserify inject script item
+
+@param      module      corresponding node module name or relative path.
+
+@history    Wed Dec 12, 2018 08:46:23 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static String getNodeModuleTargetFromWebpack(
+   String     module,
+   boolean    bJavascript,
+   TreeLogger logger)
+{
+   String  exportItem     = null;
+   File    nodeModulesDir = IConfiguration.getNodeModulesDir(logger);
+
+   if (!bJavascript)
+   {
+      throw new UnsupportedOperationException("Many are called...");
+   }
+   else
+   {
+                                       // module name specification --------- //
+      logger.log(
+         logger.INFO,
+         "IConfiguration.getNodeModuleTargetFromWebpack(): "
+       + "specified module name=" + module);
+
+      File nodeModuleDir  = new File(nodeModulesDir, module);
+
+                                       // get any webpack.js                  //
+      File webpack = new File(nodeModuleDir, "webpack.js");
+      if (webpack.exists())
+      {
+         exportItem = webpack.getAbsolutePath();
+
+         logger.log(
+            logger.INFO,
+            "IConfiguration.getNodeModuleTargetFromWebpack(): "
+               + exportItem + " found");
+      }
+   }
+
+   logger.log(
+      logger.INFO,
+      "IConfiguration.getNodeModuleTargetFromWebpack(): for module="
+         + module + ", exportItem=" + exportItem);
 
    return(exportItem);
 }
@@ -1132,8 +1265,8 @@ static File getProjectDirectory(
             {
                logger.log(
                   logger.DEBUG,
-                  "jsx.IConfiguration.getProjectDirectory(): project directory="
-                  + dir.getAbsolutePath());
+                  "jsx.IConfiguration.getProjectDirectory(): "
+                     + name + " directory=" + dir.getAbsolutePath());
             }
             break;
          }
@@ -1311,6 +1444,35 @@ static IPlatform initPlatform(
 }
 /*------------------------------------------------------------------------------
 
+@name       isES6Syntax - test whether specified string contains ES6 syntax
+                                                                              */
+                                                                             /**
+            Test whether specified string contains ES6 syntax.
+
+            This implementation simply looks for the beginning of a line
+            starting with the word "import" or "export", neither of which is
+            allowed in ES5.
+
+@return     True iff specified string contains ES6 syntax
+
+@param      target      target string
+
+@history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+static boolean isES6Syntax(
+   String target)
+{
+   boolean bES6Syntax =
+      target.split(kREGEX_IMPORT, 2).length > 1
+         || target.split(kREGEX_EXPORT, 2).length > 1;
+
+   return(bES6Syntax);
+}
+/*------------------------------------------------------------------------------
+
 @name       main - standard main routine
                                                                               */
                                                                              /**
@@ -1364,9 +1526,10 @@ static String toOSPath(
 @name       toReactAttributeName - convert attribute name to react syntax
                                                                               */
                                                                              /**
-            Replace all '-x' sequences to 'X'.
+            Replace all '-x' sequences to 'X' or if does not contain a '-'
+            character, replace all '.x' sequences to 'X'
 
-@return     The specified attribute name in rect syntax.
+@return     The specified attribute name in react syntax.
 
 @history    Thu May 17, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -1374,10 +1537,13 @@ static String toOSPath(
                                                                               */
 //------------------------------------------------------------------------------
 public static String toReactAttributeName(
-   String attributeName)
+   String     attributeName,
+   TreeLogger logger)
 {
    String reactName = "class".equals(attributeName) ? "className" : attributeName;
-   String parts[]   = reactName.split("-");
+   String delim     = reactName.indexOf('-') > 0 ? "-" : "\\.";
+   String parts[]   = reactName.split(delim);
+
    if (parts.length > 1)
    {
       StringBuffer buf = new StringBuffer(parts[0]);

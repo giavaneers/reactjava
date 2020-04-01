@@ -22,6 +22,7 @@ notes:
 package io.reactjava.client.components.generalpage;
 
                                        // imports --------------------------- //
+import io.reactjava.client.components.pdfviewer.PDFViewer;
 import io.reactjava.client.core.react.Component;
 import io.reactjava.client.core.react.IUITheme;
 import io.reactjava.client.core.react.Properties;
@@ -32,7 +33,7 @@ public class ContentPage extends Component
 {
                                        // class constants ------------------- //
                                        // property keys                       //
-public static final String  kKEY_CONTENT  = "content";
+public static final String kKEY_CONTENT  = "content";
 
                                        // class variables ------------------- //
                                        // (none)                              //
@@ -83,46 +84,52 @@ protected List<ContentDsc> getContent()
 //------------------------------------------------------------------------------
 public final void render()
 {
-/*--  <div class="contentChapter">
+   String pdfURL = props().getString(PDFViewer.kPROPERTY_PDF_URL);
+   if (pdfURL != null)
+   {
+     Object bookmarks   = props().get(PDFViewer.kPROPERTY_BOOKMARKS);
+     Object scrollSrcId =
+        props().get(PDFViewer.kPROPERTY_SCROLL_SRC_ID);
+/*--
+      <PDFViewer pdfurl={pdfURL} bookmarks={bookmarks} scrollsrcid={scrollSrcId}/>
 --*/
+   }
+   else
+   {
+/*--  <div class="contentChapter">                                          --*/
       for (ContentDsc dsc : getContent())
       {
          switch(dsc.type)
          {
             case ContentDsc.kTYPE_CAPTION:
             {
-/*--           <ContentCaption content={dsc.text} id={dsc.id}></ContentCaption>
---*/
+/*--           <ContentCaption content={dsc.text} id={dsc.id}/>             --*/
                break;
             }
             case ContentDsc.kTYPE_BODY:
             {
-/*--           <ContentBody content={dsc.text}></ContentBody>
---*/
+/*--           <ContentBody content={dsc.text}/>                            --*/
                break;
             }
             case ContentDsc.kTYPE_CODE:
             {
-/*--           <ContentCode content={dsc.text}></ContentCode>
---*/
+/*--           <ContentCode content={dsc.text}/>                            --*/
                break;
             }
             case ContentDsc.kTYPE_IMAGE:
             {
-/*--           <ContentImage content={dsc.text}></ContentImage>
---*/
+/*--           <ContentImage content={dsc.text}/>                           --*/
                break;
             }
             case ContentDsc.kTYPE_TITLE:
             {
-/*--           <ContentTitle content={dsc.text} id={dsc.id}></ContentTitle>
---*/
+/*--           <ContentTitle content={dsc.text} id={dsc.id}/>               --*/
                break;
             }
          }
       }
-/*--  </div>
---*/
+/*--  </div> --*/
+   }
 }
 /*------------------------------------------------------------------------------
 
@@ -147,11 +154,16 @@ public void renderCSS()
       max-width:   600px;
       padding-top: {unit8X};
    }
+   .contentChapterPDF
+   {
+      margin:      0 auto;
+      padding-top: {unit8X};
+   }
 --*/
 }
 /*==============================================================================
 
-name:       ContentBodyDsc - content descriptor
+name:       ContentDsc - content descriptor
 
 purpose:    Content descriptor
 
@@ -170,6 +182,7 @@ public static final int    kTYPE_CODE      = 3;
 public static final int    kTYPE_IMAGE     = 4;
 public static final int    kTYPE_TITLE     = 5;
 public static final int    kTYPE_REFERENCE = 6;
+public static final int    kTYPE_URL       = 7;
 
                                        // tokens                              //
 public static final String kTOKEN_BODY      = ".body";
@@ -179,6 +192,7 @@ public static final String kTOKEN_END       = ".end";
 public static final String kTOKEN_IMAGE     = ".image";
 public static final String kTOKEN_TITLE     = ".title";
 public static final String kTOKEN_REFERENCE = ".reference";
+public static final String kTOKEN_URL       = ".url";
 
                                        // class variables ------------------- //
 public static Properties   manifests;  // getManifests map                       //
@@ -317,7 +331,7 @@ public static List<ContentDsc> parse(
    int              idxEnd  = 0;
    int              type;
 
-   while(true)
+   while(raw != null)
    {
       type   = 0;
       idxBeg = raw.indexOf('.', idxEnd);
@@ -356,6 +370,11 @@ public static List<ContentDsc> parse(
          type    = kTYPE_TITLE;
          idxBeg += kTOKEN_TITLE.length();
       }
+      else if (chase.startsWith(kTOKEN_URL))
+      {
+         type    = kTYPE_URL;
+         idxBeg += kTOKEN_URL.length();
+      }
       else
       {
          idxEnd++;
@@ -374,5 +393,5 @@ public static List<ContentDsc> parse(
 
    return(content);
 }
-}//====================================// end ContentBodyDsc =====================//
+}//====================================// end ContentDsc =====================//
 }//====================================// end ContentPage ====================//

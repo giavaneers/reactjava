@@ -21,7 +21,6 @@ notes:
                                        // package --------------------------- //
 package io.reactjava.client.components.generalpage;
                                        // imports --------------------------- //
-import io.reactjava.client.components.generalpage.ContentPage.ContentDsc;
 import java.util.Arrays;
 import java.util.function.Consumer;
                                        // Descriptors ========================//

@@ -125,7 +125,7 @@ static
       {
          public void onValueChange(ValueChangeEvent event)
          {
-            ReactJava.clearInjectedStylesheets();
+            Component.clearInjectedStylesheets();
             render(configuration);
          }
       });

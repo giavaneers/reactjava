@@ -26,6 +26,7 @@ import elemental2.dom.DomGlobal;
 import elemental2.dom.Element;
 import elemental2.dom.HTMLDocument;
 import elemental2.core.JsObject;
+import elemental2.dom.HTMLElement;
 import io.reactjava.client.providers.http.HttpClientBase;
 import io.reactjava.client.providers.http.IHttpResponse;
 import io.reactjava.client.providers.http.IHttpResponse.ResponseType;
@@ -317,6 +318,57 @@ public final static native Uint8Array fromInflaterFilteredNative(
       console.log(err);
    }
 }-*/;
+/*------------------------------------------------------------------------------
+
+@name       getElementHeight - get element height
+                                                                              */
+                                                                             /**
+            Get element height in pixels including padding and border.
+
+@return     Element height in pixels, or null if not found.
+
+@param      elementId      target elementId
+
+@history    Tue Aug 29, 2017 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static Integer getElementHeight(
+   String elementId)
+{
+   Integer height  = null;
+   Element element = DomGlobal.document.getElementById(elementId);
+   if (element instanceof HTMLElement)
+   {
+      height = getElementHeight((HTMLElement)element);
+   }
+
+   return(height);
+}
+/*------------------------------------------------------------------------------
+
+@name       getElementHeight - get element height
+                                                                              */
+                                                                             /**
+            Get element height in pixels including padding and border.
+
+@return     Element height in pixels, or null if not found.
+
+@param      element     target element
+
+@history    Tue Aug 29, 2017 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static Integer getElementHeight(
+   HTMLElement element)
+{
+   return(element != null ? element.offsetHeight : null);
+}
 /*------------------------------------------------------------------------------
 
 @name       getHrefParams - get href params
@@ -718,6 +770,28 @@ public static void injectResourceLoadLazyCompressed(
 }
 /*------------------------------------------------------------------------------
 
+@name       injectScript- inject script into the top window
+                                                                              */
+                                                                             /**
+            Inject script into the top window.
+
+@param      scriptURL      script url
+
+@history    Sun Jan 7, 2016 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static void injectScript(
+   String                   scriptURL,
+   Callback<Void,Exception> callback)
+{
+   ScriptInjector.fromUrl(
+      scriptURL + "?" + System.currentTimeMillis()).setWindow(
+         ScriptInjector.TOP_WINDOW).setCallback(callback).inject();
+}
+/*------------------------------------------------------------------------------
+
 @name       injectScriptAsResource - inject script into the top window
                                                                               */
                                                                              /**
@@ -1110,6 +1184,51 @@ public static Map<String,String> scriptByPath()
       scriptByPath = new HashMap<String,String>();
    }
    return(scriptByPath);
+}
+/*------------------------------------------------------------------------------
+
+@name       toAbsoluteURL - generate an absolute url from specified url
+                                                                              */
+                                                                             /**
+            Generate absolute url from specified url.
+
+            If the specified url is a relative url, generates an absolute url
+            using the current location; otherwise, if the specified url is an
+            absolute url, returns it unchanged, and if the specified url is not
+            a url, returns null.
+
+@return     an absolute url from specified url, or null if the specified is not
+            a url
+
+@history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static String toAbsoluteURL(
+   String url)
+{
+   String absolute = null;
+   if (url == null)
+   {
+   }
+   else if (url.startsWith("http://") || url.startsWith("https://"))
+   {
+      absolute = url;
+   }
+   else if ((url.indexOf('/') >= 0
+               && url.indexOf('\n') < 0
+               && url.indexOf('\t') < 0
+               && url.indexOf('\r') < 0
+               && url.indexOf(' ') < 0))
+   {
+                                       // relative url                        //
+      absolute = DomGlobal.window.location.getHref();
+      absolute = absolute.substring(0, absolute.lastIndexOf('/') + 1) + url;
+   }
+
+   return(absolute);
 }
 /*------------------------------------------------------------------------------
 

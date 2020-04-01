@@ -1189,7 +1189,7 @@ protected void signalCompletion()
       }
    }
 }
-}//====================================// DefaultReadyStateChangeListener -----//
+}//====================================// DefaultReadyStateChangeListener ----//
 /*==============================================================================
 
 name:       JsXMLHttpRequest - jsinterop definition for access to javascript

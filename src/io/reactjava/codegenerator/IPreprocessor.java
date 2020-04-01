@@ -967,6 +967,8 @@ static void unitTest(
       Map<String,String> providerAndComponentCandidates = new HashMap<>();
       String classname;
       String src;
+      int    numComponentsExpected;
+      int    numProvidersExpected;
 
       if (false)
       {
@@ -979,8 +981,10 @@ static void unitTest(
                null);
 
          providerAndComponentCandidates.put(classname, src);
+         numComponentsExpected = 1;
+         numProvidersExpected  = 0;
       }
-      if (true)
+      else if (false)
       {
          classname  = "io.reactjava.codegenerator.tests.allinonefile.App";
          src =
@@ -992,6 +996,22 @@ static void unitTest(
                null);
 
          providerAndComponentCandidates.put(classname, src);
+         numComponentsExpected = 14;
+         numProvidersExpected  = 8;
+      }
+      else if (true)
+      {
+         classname  = "io.reactjava.client.components.generalpage.ContentPage";
+         src =
+            IJSXTransform.getFileAsString(
+               new File(
+                  "/Users/brianm/working/IdeaProjects/ReactJava/ReactJava/src/"
+                + "io/reactjava/client/components/generalpage/ContentPage.java"),
+               null);
+
+         providerAndComponentCandidates.put(classname, src);
+         numComponentsExpected = 3;
+         numProvidersExpected  = 0;
       }
 
       parseCandidates(providerAndComponentCandidates, logger);
@@ -1002,7 +1022,8 @@ static void unitTest(
                                        // get providers lazily                //
       Map<String,TypeDsc> providers = getParsedProviders(logger);
 
-      if (components.size() == 14 && providers.size() == 6)
+      if (components.size() == numComponentsExpected
+            && providers.size() == numProvidersExpected)
       {
          logger.log(TreeLogger.INFO, "IPreprocessor.unitTest(): successful");
       }

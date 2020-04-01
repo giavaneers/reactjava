@@ -49,7 +49,7 @@ protected FooterDsc footer;            // footer descriptor                   //
                                        // (none)                              //
 /*------------------------------------------------------------------------------
 
-@name       getFooters - get footer descriptor
+@name       getFooter - get footer descriptor
                                                                               */
                                                                              /**
             Get footer descriptor.
