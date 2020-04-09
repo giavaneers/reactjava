@@ -135,7 +135,7 @@ public final void render()
             dsc.text);
       }
 
-      ReactElement element = ElementDsc.createElement(root);
+      ReactElement element = ElementDsc.createElement(root, this);
       return(element);
    };
    setComponentFcn(fcn);

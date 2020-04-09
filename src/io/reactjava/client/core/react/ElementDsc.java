@@ -31,8 +31,9 @@ public Object           type;          // type                                //
 public IConfiguration   configuration; // configuration                       //
 public P                props;         // properties                          //
 public String           value;         // value                               //
-public ReactElement childrenElem;  // children element                    //
+public ElementDsc       parent;        // parent                              //
 public List<ElementDsc> children;      // children                            //
+public ReactElement     childrenElem;  // children element                    //
                                        // protected instance variables -------//
                                        // (none)                              //
 /*------------------------------------------------------------------------------
@@ -109,6 +110,7 @@ public static <P extends Properties> ElementDsc create(
    ElementDsc dsc = new ElementDsc();
    dsc.type       = type;
    dsc.props      = props;
+   dsc.parent     = parent;
    dsc.children   = new ArrayList<ElementDsc>();
    if (children != null)
    {
@@ -135,17 +137,39 @@ public static <P extends Properties> ElementDsc create(
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public static ReactElement createElement(
+protected static ReactElement createElement(
    ElementDsc root)
 {
+   return(createElement(root, null));
+}
+/*------------------------------------------------------------------------------
+
+@name       createElement - create element from the specified root descriptor
+                                                                              */
+                                                                             /**
+            Create element from the specified root descriptor.
+
+@return     element from the specified root descriptor
+
+@history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static ReactElement createElement(
+   ElementDsc root,
+   Component  component)
+{
+                                       // invoke any render editors           //
+   root = component != null ? component.invokeRenderEditors(root) : root;
+
    List<ReactElement> childList = new ArrayList<>();
    for (ElementDsc childDsc : (List<ElementDsc>)root.children)
    {
       childList.add(createElement(childDsc));
    }
    ReactElement[] children = childList.toArray(new ReactElement[childList.size()]);
-
-   ReactElement element = null;
+   ReactElement   element  = null;
    try
    {
       if (root.type instanceof String)
@@ -199,5 +223,46 @@ public static ReactElement createElement(
    }
 
    return(element);
+}
+/*------------------------------------------------------------------------------
+
+@name       getElementDscById - get element descriptor with specified id
+                                                                              */
+                                                                             /**
+            Get element descriptor with specified id from branch rooted at this.
+
+@return     Element descriptor with specified id from branch rooted at this.
+
+@param      id    target id
+
+@history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public ElementDsc getElementDscById(
+   String id)
+{
+   ElementDsc elementDsc = null;
+   if (id != null)
+   {
+      if (id.equals(props.getString("id")))
+      {
+         elementDsc = this;
+      }
+      else if (children != null)
+      {
+         for (ElementDsc child : children)
+         {
+            elementDsc = child.getElementDscById(id);
+            if (elementDsc != null)
+            {
+               break;
+            }
+         }
+      }
+   }
+
+   return(elementDsc);
 }
 }//====================================// end ElementDsc ---------------------//

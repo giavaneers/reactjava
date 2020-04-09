@@ -20,15 +20,16 @@ import com.google.gwt.core.client.Callback;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.Element;
 import elemental2.dom.Event;
-import elemental2.dom.EventListener;
-import elemental2.dom.EventTarget;
 import elemental2.dom.HTMLElement;
 import elemental2.promise.Promise;
 import io.reactjava.client.core.react.Component;
+import io.reactjava.client.core.react.ElementDsc;
 import io.reactjava.client.core.react.INativeEffectHandler;
 import io.reactjava.client.core.react.INativeEventHandler;
-import io.reactjava.client.core.react.INativeFunction1Arg;
+import io.reactjava.client.core.react.INativeFunction;
 import io.reactjava.client.core.react.NativeObject;
+import io.reactjava.client.core.react.Properties;
+import io.reactjava.client.core.react.ReactJava;
 import io.reactjava.client.core.react.Utilities;
 import io.reactjava.client.core.rxjs.observable.Observable;
 import io.reactjava.client.core.rxjs.observable.Subscriber;
@@ -36,7 +37,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 import jsinterop.base.Js;
                                        // PDFViewer ==========================//
 public class PDFViewer extends Component
@@ -63,12 +63,15 @@ public static final String kELEMENT_ID_VIEWER                       =
    "viewer";
 public static final String kELEMENT_ID_VIEWER_CONTAINER             =
    "viewerContainer";
-public static final String kELEMENT_ID_VIEWER_CONTAINER_PARENT      =
-   "viewerContainerParent";
 public static final String kELEMENT_ID_VIEWER_CONTAINER_GRANDPARENT =
    "viewerContainerGrandparent";
+public static final String kELEMENT_ID_VIEWER_CONTAINER_PARENT      =
+   "viewerContainerParent";
 
 public static final String kPROPERTY_BOOKMARKS     = "bookmarks";
+public static final String kPROPERTY_COVER         = "cover";
+public static final String kPROPERTY_COVER_TOP_PX  = "covertoppx";
+public static final String kPROPERTY_PDF_OPTIONS   = "pdfoptions";
 public static final String kPROPERTY_PDF_URL       = "pdfurl";
 public static final String kPROPERTY_SCROLL_SRC_ID = "scrollsrcid";
 public static final String kPROPERTY_VIEWERSTYLE   = "viewerstyle";
@@ -80,8 +83,8 @@ public static final int kLINK_TARGET_NONE   = 0;
 public static final int kLINK_TARGET_SELF   = 1;
 public static final int kLINK_TARGET_BLANK  = 2;
 public static final int kLINK_TARGET_PARENT = 3;
-
 public static final int kLINK_TARGET_TOP    = 4;
+
                                        // class variables ------------------- //
                                        // shared instance                     //
 public  static PDFViewer  sharedInstance;
@@ -139,66 +142,6 @@ public INativeEventHandler clickHandler = (Event e) ->
 };
 /*------------------------------------------------------------------------------
 
-@name       addEventListener - add event listener
-                                                                              */
-                                                                             /**
-            Add event listener with any specified debounce interval and
-            and specified value filter.
-
-@param      eventName            event name
-@param      debounceInterval     debounce msec
-@param      eventTarget          target element; if null -> window
-@param      supplier             any function producing filter that must change
-@param      listener             event listener
-
-@history    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-protected void addEventListener(
-   final String        eventName,
-   EventTarget         eventTarget,
-   final int           debounceInterval,
-   final Supplier      filter,
-   final EventListener listener)
-{
-   if (eventTarget == null)
-   {
-      eventTarget = DomGlobal.window;
-   }
-   eventTarget.addEventListener(eventName, new EventListener()
-   {
-      long   last;
-      long   now;
-      Object lastValue;
-      Object val;
-
-      public void handleEvent(Event e)
-      {
-         now = System.currentTimeMillis();
-         val = filter != null ? filter.get() : null;
-
-         if ((last == 0 || (now - last) > debounceInterval)
-               && (lastValue == null || !lastValue.equals(val)))
-         {
-            lastValue = val;
-            last      = now;
-            try
-            {
-               listener.handleEvent(e);
-            }
-            catch(Throwable t)
-            {
-               kLOGGER.logError(
-                  "PDFViewer.addEventListener(): handleEvent threw " + t);
-            }
-         }
-      }
-   });
-};
-/*------------------------------------------------------------------------------
-
 @name       addViewerContainerElement - get the pdf viewer
                                                                               */
                                                                              /**
@@ -211,20 +154,28 @@ protected void addEventListener(
 //------------------------------------------------------------------------------
 protected void addViewerContainerElement()
 {
-   PDFViewerNative pdfViewer = getPDFViewerCached();
-   if (pdfViewer != null)
+   PDFViewerNative pdfViewerCached = getPDFViewerCached();
+
+   Element containerParentCached =
+      pdfViewerCached != null
+         ? pdfViewerCached.getViewerContainerParentElement() : null;
+
+   if (pdfViewerCached != null && containerParentCached != null)
    {
                                        // add the archived native viewer      //
       HTMLElement grandparent =
          (HTMLElement)DomGlobal.document.getElementById(
-            "viewerContainerGrandparent");
+            kELEMENT_ID_VIEWER_CONTAINER_GRANDPARENT);
 
-      grandparent.appendChild(pdfViewer.getViewerContainerParentElement());
-      this.pdfViewerNative = pdfViewer;
-      if (getDocumentURLHash() == null)
-      {
-         setPDFViewerReady();
-      }
+      Element current = getViewerContainerParentElement();
+
+      assert current != null : "current container parent element is null";
+
+                                       // replace the current with the cached //
+      grandparent.replaceChild(containerParentCached, current);
+
+      this.pdfViewerNative = pdfViewerCached;
+      navigateToHash();
    }
    else
    {
@@ -263,15 +214,13 @@ protected void cachePDFViewerNative(
 //------------------------------------------------------------------------------
 protected void cacheViewerContainerParentElement()
 {
-   Element viewerContainerParent =
-      DomGlobal.document.getElementById(kELEMENT_ID_VIEWER_CONTAINER_PARENT);
-
+   Element viewerContainerParent = getViewerContainerParentElement();
    if (viewerContainerParent != null)
    {
-      PDFViewerNative pdfViewer = getPDFViewerCached();
-      if (pdfViewer != null)
+      PDFViewerNative pdfViewerCached = getPDFViewerCached();
+      if (pdfViewerCached != null)
       {
-         pdfViewer.setViewerContainerParentElement(viewerContainerParent);
+         pdfViewerCached.setViewerContainerParentElement(viewerContainerParent);
       }
    }
 };
@@ -313,7 +262,7 @@ protected void createPDFViewerNative()
    pdfLinkService.setViewer(pdfViewer);
                                        // window resize event handler ensures //
                                        // always 'page-width'                 //
-   addEventListener("resize", null, 250,
+   Utilities.addEventListener("resize", null, 250,
       () -> DomGlobal.document.documentElement.clientWidth,
       (Event e) ->
       {
@@ -339,7 +288,7 @@ protected void createPDFViewerNative()
                                                                              /**
             Provide a default elementId.
 
-@returns    a default elementId, or null if none.
+@return     a default elementId, or null if none.
 
 @history    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
 
@@ -384,20 +333,21 @@ public Observable<List<List<Bookmark>>> getBookmarks()
          }
          else if (pdfDocument != null)
          {
-            pdfDocument.getBookmarks().subscribe(
-               (List<List<Bookmark>> bookmarks) ->
-               {
-                  kLOGGER.logInfo(
-                     "PDFViewer.getBookmarks(): "
-                   + "initialized bookmarks.size()=" + bookmarks.size());
+            getSubscriptions().add(
+               pdfDocument.getBookmarks().subscribe(
+                  (List<List<Bookmark>> bookmarks) ->
+                  {
+                     kLOGGER.logInfo(
+                        "PDFViewer.getBookmarks(): "
+                      + "initialized bookmarks.size()=" + bookmarks.size());
 
-                  subscriber.next(bookmarks);
-                  subscriber.complete();
-               },
-               error ->
-               {
-                  subscriber.error(error);
-               });
+                     subscriber.next(bookmarks);
+                     subscriber.complete();
+                  },
+                  error ->
+                  {
+                     subscriber.error(error);
+                  }));
          }
          else
          {
@@ -422,7 +372,7 @@ public Observable<List<List<Bookmark>>> getBookmarks()
 //------------------------------------------------------------------------------
 public String getDocumentURL()
 {
-   return(props().getString(kPROPERTY_PDF_URL));
+   return(getPDFOptions().getString(kPROPERTY_PDF_URL));
 }
 /*------------------------------------------------------------------------------
 
@@ -503,6 +453,58 @@ public static Observable<PDFViewer> getInstance()
 }
 /*------------------------------------------------------------------------------
 
+@name       getCover - get any cover
+                                                                              */
+                                                                             /**
+            Get any cover, either a color or an image url
+
+@return     any cover, or null if none
+
+@history    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public String getCover()
+{
+   return(getPDFOptions().getString(kPROPERTY_COVER));
+}
+/*------------------------------------------------------------------------------
+
+@name       getCoverTopPx - get any cover top specification
+                                                                              */
+                                                                             /**
+            Get any cover top specification
+
+@return     any cover top specification
+
+@history    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public String getCoverTopPx()
+{
+   return(getPDFOptions().getString(kPROPERTY_COVER_TOP_PX));
+}
+/*------------------------------------------------------------------------------
+
+@name       getPDFOptions - get pdf options
+                                                                              */
+                                                                             /**
+            Get pdf options
+
+@history    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public NativeObject getPDFOptions()
+{
+   return((NativeObject)props().get(kPROPERTY_PDF_OPTIONS));
+}
+/*------------------------------------------------------------------------------
+
 @name       getPDFPage - get the current pdf page
                                                                               */
                                                                              /**
@@ -546,6 +548,24 @@ public void getPDFPage(
       {
          return(null);
       });
+}
+/*------------------------------------------------------------------------------
+
+@name       getPDFReady - get whether the pdf ready state is non-null
+                                                                              */
+                                                                             /**
+            Get whether the pdf ready state is non-null.
+
+@return     true iff the pdf ready state is non-null
+
+@history    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected boolean getPDFReady()
+{
+   return(getState(kSTATE_PDF_READY) != null);
 }
 /*------------------------------------------------------------------------------
 
@@ -643,25 +663,40 @@ public Observable<String> getPDFViewerReady()
 //------------------------------------------------------------------------------
 public INativeEffectHandler handleEffect = () ->
 {
-   setSharedInstance(this);
-   injectPdfJsScriptsAndCSS();
+   if (!getPDFReady())
+   {
+      registerRenderEditor();
+      setSharedInstance(this);
+      injectPdfJsScriptsAndCSS();
+   }
+   else
+   {
+      Component.forId(
+         ViewerCover.kCOMPONENT_ID_VIEWER_COVER).setState(
+            ViewerCover.kSTATE_SHOW, false);
+   }
+                                       // no cleanup function                 //
+   return(INativeEffectHandler.kNO_CLEANUP_FCN);
 };
 /*------------------------------------------------------------------------------
 
-@name       onDocumentLoadSuccess - onDocumentLoadSuccess event handler
+@name       getScrollEventSrcElement - get scroll event src element
                                                                               */
                                                                              /**
-            onDocumentLoadSuccess event handler as a public instance variable.
+            Get scroll event src element.
 
 @history    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public INativeFunction1Arg<Integer> onDocumentLoadSuccess = (Integer numPages) ->
+public Element getScrollEventSrcElement()
 {
-   setState("numPages", numPages);
-};
+   Element element =
+      DomGlobal.document.getElementById(getScrollEventSrcElementId());
+
+   return(element);
+}
 /*------------------------------------------------------------------------------
 
 @name       getScrollEventSrcElementId - get scroll event src elementId
@@ -676,7 +711,7 @@ public INativeFunction1Arg<Integer> onDocumentLoadSuccess = (Integer numPages) -
 //------------------------------------------------------------------------------
 public String getScrollEventSrcElementId()
 {
-   String id = props().getString(kPROPERTY_SCROLL_SRC_ID);
+   String id = getPDFOptions().getString(kPROPERTY_SCROLL_SRC_ID);
    if (id == null)
    {
       id = kELEMENT_ID_VIEWER_CONTAINER_PARENT;
@@ -768,6 +803,38 @@ protected Element getViewerContainerParentCached()
 }
 /*------------------------------------------------------------------------------
 
+@name       getViewerContainerParentElement - get viewer container parent elem
+                                                                              */
+                                                                             /**
+            Get viewer container parent element.
+
+@history    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected Element getViewerContainerParentElement()
+{
+   return(DomGlobal.document.getElementById(kELEMENT_ID_VIEWER_CONTAINER_PARENT));
+}
+/*------------------------------------------------------------------------------
+
+@name       getViewerStyle - get viewer style
+                                                                              */
+                                                                             /**
+            Get viewer style.
+
+@history    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected NativeObject getViewerStyle()
+{
+   return((NativeObject)getPDFOptions().get(kPROPERTY_VIEWERSTYLE));
+}
+/*------------------------------------------------------------------------------
+
 @name       injectPdfJsScriptsAndCSS - inject pdfjs scripts and css
                                                                               */
                                                                              /**
@@ -813,7 +880,7 @@ protected void injectPdfJsScriptsAndCSS()
                                                                              /**
             Navigate to specified bookmark.
 
-@params     bookmark    destination, such as
+@param      bookmark    destination, such as
                            ["{"num":157,"gen":0},{"name":"XYZ"},72,720,0]
 
 @history    Thu Feb 27, 2020 10:30:00 (Giavaneers - LBM) created
@@ -833,7 +900,7 @@ public void navigateTo(
                                                                              /**
             Navigate to specified destination.
 
-@params     destination    destination, such as
+@param      destination    destination, such as
                            [{"num":157,"gen":0},{"name":"XYZ"},72,720,0]
 
 @history    Thu Feb 27, 2020 10:30:00 (Giavaneers - LBM) created
@@ -872,17 +939,9 @@ public void navigateToHash()
       if (bookmark != null)
       {
          navigateTo(bookmark.dest);
-         //DomGlobal.setTimeout((eTimeout) ->
-         //{
-         //   setPDFViewerReady();
-         //}, 5000);
-         setPDFViewerReady();
-      }
-      else
-      {
-         setPDFViewerReady();
       }
    }
+   setPDFViewerReady();
 }
 /*------------------------------------------------------------------------------
 
@@ -904,6 +963,40 @@ protected void pdfViewerReadySubscriberResolve(
 }
 /*------------------------------------------------------------------------------
 
+@name       registerRenderEditor - register render editor of scroll src parent
+                                                                              */
+                                                                             /**
+            Register render editor of scroll src parent.
+
+@history    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected void registerRenderEditor()
+{
+   if (kELEMENT_ID_VIEWER_CONTAINER_PARENT != getScrollEventSrcElementId())
+   {
+      Component target           = null;
+      Element   scrollSrcElement = getScrollEventSrcElement();
+      if (scrollSrcElement != null)
+      {
+         target = Component.forElement((Element)scrollSrcElement.parentNode);
+      }
+      if (target != null)
+      {
+                                       // same editorId across instances      //
+         String editorId = getClass().getName();
+
+         RenderEditFunction fcn =
+            (RenderEditFunction)target.getRenderEditors().get(editorId);
+
+         target.addRenderEditor(editorId, renderEditFunction);
+      }
+   }
+}
+/*------------------------------------------------------------------------------
+
 @name       render - render component
                                                                               */
                                                                              /**
@@ -918,20 +1011,17 @@ protected void pdfViewerReadySubscriberResolve(
 public final void render()
 {
    useState(kSTATE_PDF_READY, null);
-                                       // passing an empty set of dependencies//
-                                       // causes the effect handler to be     //
-                                       // invoked only when mounted and       //
-                                       // unmounted, not on update as would   //
-                                       // occurr on using the single argument //
-                                       // useEffect() method                  //
-   useEffect(handleEffect, new Object[0]);
+   useEffect(handleEffect);
 
-   NativeObject viewerStyle = (NativeObject)props().get(kPROPERTY_VIEWERSTYLE);
+   boolean bPDFReady = getPDFReady();
+
+   NativeObject viewerStyle = getViewerStyle();
    if (viewerStyle == null)
    {
       viewerStyle = new NativeObject();
    }
-   if (getState(kSTATE_PDF_READY) == null)
+
+   if (!bPDFReady)
    {
       kLOGGER.logInfo("PDFViewer.render(): moving top off the display");
 
@@ -955,10 +1045,22 @@ public final void render()
             <div id={kELEMENT_ID_VIEWER} class="pdfViewer"></div>
          </div>
 --*/
+      cacheViewerContainerParentElement();
    }
-   cacheViewerContainerParentElement();
 /*--
       </div>
+--*/
+   if (kELEMENT_ID_VIEWER_CONTAINER_PARENT == getScrollEventSrcElementId())
+   {
+/*--
+      <ViewerCover
+         coverstyle={getViewerStyle()}
+         cover={getCover()}
+         scrollsrcid={getScrollEventSrcElementId()}
+      />
+--*/
+   }
+/*--
    </div>
 --*/
 }
@@ -1396,6 +1498,49 @@ public void renderCSS()
 
 --*/
 }
+/*------------------------------------------------------------------------------
+
+@name       renderEditFunction - render edit function
+                                                                              */
+                                                                             /**
+            Render edit function.
+
+@history    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public RenderEditFunction renderEditFunction =
+   (Component component, ElementDsc root) ->
+   {
+      String     scrollEvtSrcId  = getScrollEventSrcElementId();
+      ElementDsc scrollEvtSrcDsc = root.getElementDscById(scrollEvtSrcId);
+      if (scrollEvtSrcDsc != null)
+      {
+         ElementDsc   parentDsc  = scrollEvtSrcDsc.parent;
+         NativeObject coverStyle =
+            NativeObject.with(
+               "position", "absolute",
+               "overflow", "auto",
+               "top",      getCoverTopPx(),
+               "bottom",   "0px",
+               "left",     "0px",
+               "width",    "100%");
+
+         ElementDsc.create(
+            parentDsc,
+            ReactJava.getNativeFunctionalComponent(ViewerCover.class.getName()),
+            new ViewerCover().initialize(
+               Properties.with(
+                  "rjcomponentid", root.props.getString("rjcomponentid"),
+                  "coverstyle",    coverStyle,
+                  "cover",         getCover(),
+                  "scrollsrcid",   getScrollEventSrcElementId(),
+                  "id",            getNextId())));
+      }
+
+      return(root);
+   };
 /*------------------------------------------------------------------------------
 
 @name       setPDFViewer - set the native pdf viewer

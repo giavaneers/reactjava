@@ -24,6 +24,9 @@ import com.google.gwt.typedarrays.client.Uint8ArrayNative;
 import com.google.gwt.typedarrays.shared.Uint8Array;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.Element;
+import elemental2.dom.Event;
+import elemental2.dom.EventListener;
+import elemental2.dom.EventTarget;
 import elemental2.dom.HTMLDocument;
 import elemental2.core.JsObject;
 import elemental2.dom.HTMLElement;
@@ -37,7 +40,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-                                       // Utilities ==========================//
+import java.util.function.Supplier;
+
+// Utilities ==========================//
 public class Utilities
 {
                                        // class constants --------------------//
@@ -51,7 +56,151 @@ public static final String  kREGEX_ZERO_OR_MORE_WHITESPACE = "\\s*";
 public static final String  kREGEX_ONE_OR_MORE_NON_WHITESPACE  = "\\S+";
 public static final String  kREGEX_ZERO_OR_MORE_NON_WHITESPACE = "\\S*";
 
-
+public static final List<String> kCSS_COLORS =
+   new ArrayList<>(
+      Arrays.asList(
+         "aliceblue",
+         "antiquewhite",
+         "aqua",
+         "aquamarine",
+         "azure",
+         "beige",
+         "bisque",
+         "black",
+         "blanchedalmond",
+         "blue",
+         "blueviolet",
+         "brown",
+         "burlywood",
+         "cadetblue",
+         "chartreuse",
+         "chocolate",
+         "coral",
+         "cornflowerblue",
+         "cornsilk",
+         "crimson",
+         "cyan",
+         "darkblue",
+         "darkcyan",
+         "darkgoldenrod",
+         "darkgray",
+         "darkgreen",
+         "darkkhaki",
+         "darkmagenta",
+         "darkolivegreen",
+         "darkorange",
+         "darkorchid",
+         "darkred",
+         "darksalmon",
+         "darkseagreen",
+         "darkslateblue",
+         "darkslategray",
+         "darkturquoise",
+         "darkviolet",
+         "deeppink",
+         "deepskyblue",
+         "dimgray",
+         "dodgerblue",
+         "firebrick",
+         "floralwhite",
+         "forestgreen",
+         "fuchsia",
+         "gainsboro",
+         "ghostwhite",
+         "gold",
+         "goldenrod",
+         "gray",
+         "green",
+         "greenyellow",
+         "honeydew",
+         "hotpink",
+         "indianred",
+         "indigo",
+         "ivory",
+         "khaki",
+         "lavender",
+         "lavenderblush",
+         "lawngreen",
+         "lemonchiffon",
+         "lightblue",
+         "lightcoral",
+         "lightcyan",
+         "lightgoldenrodyellow",
+         "lightgreen",
+         "lightgrey",
+         "lightpink",
+         "lightsalmon",
+         "lightseagreen",
+         "lightskyblue",
+         "lightslategray",
+         "lightsteelblue",
+         "lightyellow",
+         "lime",
+         "limegreen",
+         "linen",
+         "magenta",
+         "maroon",
+         "mediumaquamarine",
+         "mediumblue",
+         "mediumorchid",
+         "mediumpurple",
+         "mediumseagreen",
+         "mediumslateblue",
+         "mediumspringgreen",
+         "mediumturquoise",
+         "mediumvioletred",
+         "midnightblue",
+         "mintcream",
+         "mistyrose",
+         "moccasin",
+         "navajowhite",
+         "navy",
+         "navyblue",
+         "oldlace",
+         "olive",
+         "olivedrab",
+         "orange",
+         "orangered",
+         "orchid",
+         "palegoldenrod",
+         "palegreen",
+         "paleturquoise",
+         "palevioletred",
+         "papayawhip",
+         "peachpuff",
+         "peru",
+         "pink",
+         "plum",
+         "powderblue",
+         "purple",
+         "red",
+         "rosybrown",
+         "royalblue",
+         "saddlebrown",
+         "salmon",
+         "sandybrown",
+         "seagreen",
+         "seashell",
+         "sienna",
+         "silver",
+         "skyblue",
+         "slateblue",
+         "slategray",
+         "snow",
+         "springgreen",
+         "steelblue",
+         "tan",
+         "teal",
+         "thistle",
+         "tomato",
+         "transparent",
+         "turquoise",
+         "violet",
+         "wheat",
+         "white",
+         "whitesmoke",
+         "yellow",
+         "yellowgreen"));
                                        // class variables ------------------- //
                                        // map of script by path               //
 protected static Map<String,String> scriptByPath;
@@ -82,6 +231,66 @@ protected static List<String>       injectedRsrcURLs;
 protected Utilities()
 {
 }
+/*------------------------------------------------------------------------------
+
+@name       addEventListener - add event listener
+                                                                              */
+                                                                             /**
+            Add event listener with any specified debounce interval and
+            and specified value filter.
+
+@param      eventName            event name
+@param      eventTarget          target element; if null -> window
+@param      debounceInterval     debounce msec
+@param      filter               any function producing filter that must change
+@param      listener             event listener
+
+@history    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static void addEventListener(
+   final String        eventName,
+   EventTarget eventTarget,
+   final int           debounceInterval,
+   final Supplier filter,
+   final EventListener listener)
+{
+   if (eventTarget == null)
+   {
+      eventTarget = DomGlobal.window;
+   }
+   eventTarget.addEventListener(eventName, new EventListener()
+   {
+      long   last;
+      long   now;
+      Object lastValue;
+      Object val;
+
+      public void handleEvent(Event e)
+      {
+         now = System.currentTimeMillis();
+         val = filter != null ? filter.get() : null;
+
+         if ((last == 0 || (now - last) > debounceInterval)
+               && (lastValue == null || !lastValue.equals(val)))
+         {
+            lastValue = val;
+            last      = now;
+            try
+            {
+               listener.handleEvent(e);
+            }
+            catch(Throwable t)
+            {
+               kLOGGER.logError(
+                  "Utilities.addEventListener(): handleEvent threw " + t);
+            }
+         }
+      }
+   });
+};
 /*------------------------------------------------------------------------------
 
 @name       bytesToUint8Array - get Uint8Array from byte array

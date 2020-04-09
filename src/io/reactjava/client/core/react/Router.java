@@ -113,6 +113,8 @@ protected static IConfiguration     configuration;
 protected static Map<String,String> urlParameters;
                                        // parameters map url                  //
 protected static String             parametersURL;
+                                       // react shadow dom head               //
+protected static ReactElement       shadowDOMRoot;
 
                                        // public instance variables --------- //
                                        // (none)                              //
@@ -345,6 +347,22 @@ public static String getPath()
 }
 /*------------------------------------------------------------------------------
 
+@name       getShadowDOMRoot - get shadow dom root
+                                                                              */
+                                                                             /**
+            Get shadow dom root.
+
+@history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static ReactElement getShadowDOMRoot()
+{
+   return(shadowDOMRoot);
+}
+/*------------------------------------------------------------------------------
+
 @name       getURLParameters - get current location url parameters
                                                                               */
                                                                              /**
@@ -516,7 +534,9 @@ public static ReactElement render()
       {
          if (element != null)
          {
-            ReactDOM.render(element, DomGlobal.document.getElementById("root"));
+            shadowDOMRoot =
+               ReactDOM.render(
+                  element, DomGlobal.document.getElementById("root"));
          }
 
          String anchorElementId = getHashAnchorElementId();

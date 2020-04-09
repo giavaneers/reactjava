@@ -51,6 +51,8 @@ public class Prism extends Component
 public INativeEffectHandler handleEffect = () ->
 {
    PrismNative.highlightAllUnder(getDOMElement());
+                                       // no cleanup function                 //
+   return(INativeEffectHandler.kNO_CLEANUP_FCN);
 };
 /*------------------------------------------------------------------------------
 

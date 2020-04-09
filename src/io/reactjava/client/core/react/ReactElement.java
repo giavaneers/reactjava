@@ -15,9 +15,11 @@ notes:
                                        // package --------------------------- //
 package io.reactjava.client.core.react;
                                        // imports --------------------------- //
+import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
+import jsinterop.base.Js;
 
 @JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "Object")
 public class ReactElement
@@ -48,4 +50,43 @@ public Properties props;               // native properties                   //
 //------------------------------------------------------------------------------
 public static native void forceUpdate();
 
+/*------------------------------------------------------------------------------
+
+@name       getChildren - get children elements
+                                                                              */
+                                                                             /**
+            Get children elements.
+
+@return     children elements
+
+@history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+@JsOverlay
+public final ReactElement[] getChildren()
+{
+   return(Js.uncheckedCast(props.get("children")));
+}
+/*------------------------------------------------------------------------------
+
+@name       setChildren - set children elements
+                                                                              */
+                                                                             /**
+            Set children elements.
+
+@param      children    children elements
+
+@history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+@JsOverlay
+public final void setChildren(
+   ReactElement[] children)
+{
+   props.set("children", children);
+}
 }//====================================// end ReactElement ------------------------//

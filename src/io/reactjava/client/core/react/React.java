@@ -131,24 +131,6 @@ public static native <P extends Properties> ReactElement createElement(
                                                                              /**
             useEffect hook.
 
-@param      effectHandler     effect function to be invoked when component
-                              mounted, unmounted, and updated.
-
-@history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public static native void useEffect(
-   INativeEffectHandler effectHandler);
-
-/*------------------------------------------------------------------------------
-
-@name       useEffect - useEffect hook
-                                                                              */
-                                                                             /**
-            useEffect hook.
-
 @param      effectHandler     effect function.
 
 @param      dependencies      array of property and state values when changed

@@ -18,14 +18,23 @@ package io.reactjava.client.core.react;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.Element;
 import elemental2.dom.Node;
+import elemental2.promise.Promise;
+import io.reactjava.client.core.react.ElementDsc;
 import io.reactjava.client.core.react.IConfiguration.ICloudServices;
+import io.reactjava.client.core.react.INativeEffectHandler;
+import io.reactjava.client.core.react.IUITheme;
+import io.reactjava.client.core.react.ReactElement;
+import io.reactjava.client.core.rxjs.subscription.Subscription;
+import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
                                        // Component ==========================//
 public abstract class Component<P extends Properties>
 {
                                        // class constants --------------------//
-                                       // (none)                              //
+public static final String  kPROMISE_CANCELLED = "promise cancelled";
+
                                        // class variables                     //
 protected static int        nextId;    // next elementId to be autoassigned   //
                                        // protected instance variables ------ //
@@ -66,6 +75,62 @@ public Component()
                                                                               */
 //------------------------------------------------------------------------------
 public Component(P initialProps)
+{
+}
+/*------------------------------------------------------------------------------
+
+@name       addRenderEditor - add render editor
+                                                                              */
+                                                                             /**
+            Add render editor.
+
+@return     true iff render editor was not already registered.
+
+@param      editorId    editor identifier (typically component classname)
+@param      editFcn     edit function
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public boolean addRenderEditor(
+   String             editorId,
+   RenderEditFunction editFcn)
+{
+   return(true);
+}
+/*------------------------------------------------------------------------------
+
+@name       cancelPromises - cancel promises
+                                                                              */
+                                                                             /**
+            Cancel any promises
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected void cancelPromises()
+{
+}
+/*------------------------------------------------------------------------------
+
+@name       cancelSubscriptions - cancel subscriptions
+                                                                              */
+                                                                             /**
+            Cancel any subscriptions
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected void cancelSubscriptions()
 {
 }
 /*------------------------------------------------------------------------------
@@ -239,6 +304,44 @@ protected ICloudServices getCloudServicesConfig()
 }
 /*------------------------------------------------------------------------------
 
+@name       getDismounted - get whether component has been dismounted
+                                                                              */
+                                                                             /**
+            Get whether component has been dismounted as indicated explicitly
+            by the component previously.
+
+@return     whether component has been dismounted.
+
+@history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected boolean getDismounted()
+{
+   return(false);
+}
+/*------------------------------------------------------------------------------
+
+@name       getMounted - get whether component is mounted
+                                                                              */
+                                                                             /**
+            Get whether whether component is mounted as indicated explicitly
+            by the component previously.
+
+@return     whether component is mounted.
+
+@history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public boolean getMounted()
+{
+   return(true);
+}
+/*------------------------------------------------------------------------------
+
 @name       getNavRoutes - get routes for component
                                                                               */
                                                                              /**
@@ -276,6 +379,43 @@ protected Map<String,Class> getNavRoutes()
 protected static String getNextId()
 {
    return("@" + ++nextId);
+}
+/*------------------------------------------------------------------------------
+
+@name       getPromises - get promises
+                                                                              */
+                                                                             /**
+            Get promises
+
+@return     promises
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public List<Promise> getPromises()
+{
+   return(null);
+}
+/*------------------------------------------------------------------------------
+
+@name       getReactElement - get result of render
+                                                                              */
+                                                                             /**
+            Get result of component function invocation
+
+@return     result of component function invocation
+
+@history    Thu Sep 7, 2017 08:46:23 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public ReactElement getReactElement()
+{
+   return(null);
 }
 /*------------------------------------------------------------------------------
 
@@ -373,6 +513,25 @@ protected RefMgr getRefMgr()
 //------------------------------------------------------------------------------
 protected String getRefString(
    String key)
+{
+   return(null);
+}
+/*------------------------------------------------------------------------------
+
+@name       getRenderEditors - get render editors
+                                                                              */
+                                                                             /**
+            Get render editors.
+
+@return     render editors
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public Map<String,RenderEditFunction> getRenderEditors()
 {
    return(null);
 }
@@ -477,6 +636,25 @@ protected String getStateString(
 }
 /*------------------------------------------------------------------------------
 
+@name       getSubscriptions - get subscriptions
+                                                                              */
+                                                                             /**
+            Get subscriptions
+
+@return     subscriptions
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public List<Subscription> getSubscriptions()
+{
+   return(null);
+}
+/*------------------------------------------------------------------------------
+
 @name       getTheme - get theme
                                                                               */
                                                                              /**
@@ -549,6 +727,27 @@ protected void initConfiguration()
 //------------------------------------------------------------------------------
 protected void initTheme()
 {
+}
+/*------------------------------------------------------------------------------
+
+@name       invokeRenderEditors - invoke any render editors
+                                                                              */
+                                                                             /**
+            Invoke any render editors.
+
+@return     Edited root element descriptor
+
+@param      root           element descriptor root
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected ElementDsc invokeRenderEditors(
+   ElementDsc root)
+{
+   return(null);
 }
 /*------------------------------------------------------------------------------
 
@@ -673,6 +872,25 @@ protected void setComponentFcn(
 //------------------------------------------------------------------------------
 protected void setId(
    String id)
+{
+}
+/*------------------------------------------------------------------------------
+
+@name       setMounted - set whether component is mounted
+                                                                              */
+                                                                             /**
+            Set whether the component is mounted. This is typically set
+            in a useEffect cleanup function.
+
+@param      bDismounted    whether component has been dismounted.
+
+@history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected void setMounted(
+   boolean bMounted)
 {
 }
 /*------------------------------------------------------------------------------
@@ -974,6 +1192,21 @@ protected void useRef(
 {
 }
 }//====================================// end RefMgr =========================//
+/*==============================================================================
+
+name:       RenderEditFunction - a generic BiFunction wrapper
+
+purpose:    A generic BiFunction wrapper
+
+history:    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
+
+notes:
+
+==============================================================================*/
+public interface RenderEditFunction
+   extends BiFunction<Component,ElementDsc,ElementDsc>
+{
+}//====================================// end RenderEditFunction =============//
 /*==============================================================================
 
 name:       StateMgr - properties

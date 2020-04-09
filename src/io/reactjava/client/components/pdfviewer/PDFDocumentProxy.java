@@ -32,6 +32,8 @@ public class PDFDocumentProxy
                                        // pdfInfo                             //
 @JsProperty public NativeObject   _pdfInfo;
                                        // protected instance variables -------//
+                                       // associated pdfViewer                //
+protected PDFViewer               pdfViewer;
                                        // annotations by page                 //
 protected NativeObject[][]        annotations;
                                        // sorted lists of named dst by page   //
@@ -182,20 +184,20 @@ public final Observable<List<List<Bookmark>>> getBookmarks()
          else
          {
                                        // initial request                     //
-            getExplicitDestinations().subscribe(
-               (List<List<Destination>> explicitDestinations) ->
-               {
+            pdfViewer.getSubscriptions().add(
+               getExplicitDestinations().subscribe(
+                  (List<List<Destination>> explicitDestinations) ->
+                  {
                                        // the bookmarks are available when    //
                                        // the explicit destinations are       //
                                        // available                           //
-                  subscriber.next(bookmarks);
-                  subscriber.complete();
-               },
-               error ->
-               {
-                  subscriber.error(error);
-               });
-
+                     subscriber.next(bookmarks);
+                     subscriber.complete();
+                  },
+                  error ->
+                  {
+                     subscriber.error(error);
+                  }));
          }
          return(subscriber);
       });
@@ -271,17 +273,17 @@ protected final Observable<List<List<Destination>>> getExplicitDestinations()
          else
          {
                                        // initial request                     //
-            getAnnotations().subscribe(
-               (NativeObject[][] documentAnnotations) ->
-               {
-                  getExplicitDestinationsAnnotationsHandler(
-                     subscriber, documentAnnotations);
-               },
-               error ->
-               {
-                  subscriber.error(error);
-               });
-
+            pdfViewer.getSubscriptions().add(
+               getAnnotations().subscribe(
+                  (NativeObject[][] documentAnnotations) ->
+                  {
+                     getExplicitDestinationsAnnotationsHandler(
+                        subscriber, documentAnnotations);
+                  },
+                  error ->
+                  {
+                     subscriber.error(error);
+                  }));
          }
          return(subscriber);
       });
@@ -406,29 +408,30 @@ protected final void getExplicitDestinationsSetBookmarksText(
 {
                                        // get the page contents to find the   //
                                        // bookmark text                       //
-   getPageTextContent(pageIndex).subscribe(
-      (TextContent textContent) ->
-      {
-         for (Bookmark bookmark : bookmarksLst.get(pageIndex))
+   pdfViewer.getSubscriptions().add(
+      getPageTextContent(pageIndex).subscribe(
+         (TextContent textContent) ->
          {
+            for (Bookmark bookmark : bookmarksLst.get(pageIndex))
+            {
                                        // assign the bookmark text            //
-            bookmark.setTextContent(textContent);
-         }
+               bookmark.setTextContent(textContent);
+            }
 
-         if (++pagesProcessed[0] == bookmarksLst.size())
-         {
+            if (++pagesProcessed[0] == bookmarksLst.size())
+            {
                                        // signal all bookmarks and            //
                                        // destinations complete               //
-            bookmarks            = bookmarksLst;
-            explicitDestinations = destinations;
-            subscriber.next(explicitDestinations);
-            subscriber.complete();
-         }
-      },
-      error ->
-      {
-         subscriber.error(error);
-      });
+               bookmarks            = bookmarksLst;
+               explicitDestinations = destinations;
+               subscriber.next(explicitDestinations);
+               subscriber.complete();
+            }
+         },
+         error ->
+         {
+            subscriber.error(error);
+         }));
 };
 /*------------------------------------------------------------------------------
 
@@ -643,33 +646,35 @@ public final void initialize(
    PDFViewer      pdfViewer,
    PDFLinkService pdfLinkService)
 {
-   PDFViewerNative pdfViewerNative = pdfLinkService.pdfViewer;
+   this.pdfViewer = pdfViewer;
 
+   PDFViewerNative pdfViewerNative = pdfLinkService.pdfViewer;
    pdfLinkService.setDocument(this, null);
    pdfViewerNative.setDocument(this);
 
    if (bookmarks == null)
    {
                                        // initialize bookmarks                //
-      getBookmarks().subscribe(
-         (List<List<Bookmark>> bookmarks) ->
-         {
-                                       // notify all subscribers              //
-            List<Subscriber<List<List<Bookmark>>>> subscribers =
-               pdfViewer.getSubscribersBookmarks();
-
-            while(subscribers.size() > 0)
+      pdfViewer.getSubscriptions().add(
+         getBookmarks().subscribe(
+            (List<List<Bookmark>> bookmarks) ->
             {
-               Subscriber<List<List<Bookmark>>> subscriber =
-                  subscribers.remove(0);
+                                       // notify all subscribers              //
+               List<Subscriber<List<List<Bookmark>>>> subscribers =
+                  pdfViewer.getSubscribersBookmarks();
 
-               subscriber.next(bookmarks);
-               subscriber.complete();
-            }
+               while(subscribers.size() > 0)
+               {
+                  Subscriber<List<List<Bookmark>>> subscriber =
+                     subscribers.remove(0);
+
+                  subscriber.next(bookmarks);
+                  subscriber.complete();
+               }
                                        // navigate to any hash                //
-            pdfViewer.navigateToHash();
-         },
-         error ->{});
+               pdfViewer.navigateToHash();
+            },
+            error ->{}));
    }
    pdfViewer.setPDFViewer(pdfViewerNative);
 }

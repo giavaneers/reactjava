@@ -16,21 +16,23 @@ notes:
 package io.reactjava.client.core.react;
                                        // imports --------------------------- //
 import com.giavaneers.util.gwt.Logger;
-import elemental2.core.JsArray;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.Element;
 import elemental2.dom.HTMLBodyElement;
 import elemental2.dom.HTMLElement;
 import elemental2.dom.HTMLStyleElement;
 import elemental2.dom.Node;
+import elemental2.promise.Promise;
 import io.reactjava.client.core.react.IConfiguration.ICloudServices;
 import io.reactjava.client.core.react.SEOInfo.SEOPageInfo;
+import io.reactjava.client.core.rxjs.subscription.Subscription;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
 import jsinterop.base.Js;
 import jsinterop.base.JsArrayLike;
 import jsinterop.base.JsPropertyMap;
@@ -40,32 +42,41 @@ public abstract class Component<P extends Properties>
                                        // class constants --------------------//
 public static final boolean   kSRCCFG_USE_STATE_HOOK = true;
 public static final String    kFORCE_UPDATE_KEY      = "builtinForceUpdate";
+public static final String    kPROMISE_CANCELLED     = "promise cancelled";
 
 protected static final Logger kLOGGER = Logger.newInstance();
 
                                        // class variables                     //
-protected static int   nextId;         // next elementId to be autoassigned   //
+protected static int    nextId;        // next elementId to be autoassigned   //
 private   static Map<String,Component> // map of component by id              //
-                       componentById;
+                        componentById;
                                        // map of stylesheet by component class//
 protected static Map<String,String>
-                       injectedStylesheets;
-
+                        injectedStylesheets;
                                        // protected instance variables ------ //
-protected RefMgr refMgr;         // component ref manager               //
-protected StateMgr stateMgr;       // component state manager             //
-protected ReactElement reactElement;   // react element                       //
-protected String       css;            // css                                 //
+protected boolean       bDismounted;   // whether is dismounted               //
+protected RefMgr        refMgr;        // component ref manager               //
+protected StateMgr      stateMgr;      // component state manager             //
+protected ReactElement  reactElement;  // react element                       //
+protected String        css;           // css                                 //
                                        // css injected styleId                //
-protected String       cssInjectedStyleId;
+protected String        cssInjectedStyleId;
                                        // list of injected styleIds           //
-protected List<String> injectedStyleIds;
+protected List<String>  injectedStyleIds;
+                                       // render editors                      //
+protected Map<String,RenderEditFunction>
+                        renderEditors;
+                                       // promises list (deprecated)          //
+protected List<Promise> promises;
+                                       // subscriptions list (deprecated)     //
+protected List<Subscription>
+                        subscriptions;
                                        // private instance variables -------- //
                                        // component function                  //
                                        // private to force access through     //
                                        // accessors to support JSXTransform   //
 private java.util.function.Function<Properties, ReactElement>
-                       componentFcn;
+                        componentFcn;
                                        // private to approximate immutable    //
                                        // renamed from 'props' to avoid       //
                                        // minified confusion with react       //
@@ -73,7 +84,7 @@ private java.util.function.Function<Properties, ReactElement>
                                        // variable should appear last - see   //
                                        // ReactJava.                          //
                                        // getNativeComponentPropertiesFieldname()//
-private   P            componentProperties;
+private   P             componentProperties;
 
 /*------------------------------------------------------------------------------
 
@@ -108,6 +119,81 @@ public Component()
 public Component(P initialProps)
 {
    initialize(initialProps);
+}
+/*------------------------------------------------------------------------------
+
+@name       addRenderEditor - add render editor
+                                                                              */
+                                                                             /**
+            Add render editor.
+
+@return     true iff render editor was not already registered.
+
+@param      editorId    editor identifier (typically component classname)
+@param      editFcn     edit function
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public boolean addRenderEditor(
+   String             editorId,
+   RenderEditFunction editFcn)
+{
+   boolean bAdded = getRenderEditors().put(editorId, editFcn) == null;
+   if (bAdded)
+   {
+                                       // force update so render editor can   //
+                                       // be invoked                          //
+      forceUpdate();
+   }
+   return(bAdded);
+}
+/*------------------------------------------------------------------------------
+
+@name       cancelPromises - cancel promises
+                                                                              */
+                                                                             /**
+            Cancel any promises
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@deprecated
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected void cancelPromises()
+{
+   for (Promise promise : getPromises())
+   {
+      promise.reject(kPROMISE_CANCELLED);
+   }
+}
+/*------------------------------------------------------------------------------
+
+@name       cancelSubscriptions - cancel subscriptions
+                                                                              */
+                                                                             /**
+            Cancel any subscriptions
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@deprecated
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected void cancelSubscriptions()
+{
+   for (Subscription subscription : getSubscriptions())
+   {
+      subscription.unsubscribe();
+   }
 }
 /*------------------------------------------------------------------------------
 
@@ -375,9 +461,10 @@ public static Component forElement(
    }
 
    HTMLElement htmlElement = (HTMLElement)element;
+   String      componentId = htmlElement.getAttribute("rjcomponentid");
 
-   Component component =
-      htmlElement.id != null ? getComponentByIdMap().get(htmlElement.id) : null;
+   Component component   =
+      componentId != null ? getComponentByIdMap().get(componentId) : null;
 
    return(component);
 }
@@ -564,6 +651,25 @@ public static Map<String,String> getInjectedStylesheets()
 }
 /*------------------------------------------------------------------------------
 
+@name       getMounted - get whether component is mounted
+                                                                              */
+                                                                             /**
+            Get whether whether component is mounted as indicated explicitly
+            by the component previously.
+
+@return     whether component is mounted.
+
+@history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public boolean getMounted()
+{
+   return(!bDismounted);
+}
+/*------------------------------------------------------------------------------
+
 @name       getNavRoutes - get routes for component
                                                                               */
                                                                              /**
@@ -599,6 +705,50 @@ protected Map<String,Class> getNavRoutes()
 protected static String getNextId()
 {
    return("rjAuto" + ++nextId);
+}
+/*------------------------------------------------------------------------------
+
+@name       getPromises - get promises
+                                                                              */
+                                                                             /**
+            Get promises
+
+@return     promises
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@deprecated
+
+@notes
+
+
+                                                                              */
+//------------------------------------------------------------------------------
+public List<Promise> getPromises()
+{
+   if (promises == null)
+   {
+      promises = new ArrayList<>();
+   }
+   return(promises);
+}
+/*------------------------------------------------------------------------------
+
+@name       getReactElement - get result of render
+                                                                              */
+                                                                             /**
+            Get result of component function invocation
+
+@return     result of component function invocation
+
+@history    Thu Sep 7, 2017 08:46:23 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public ReactElement getReactElement()
+{
+   return(reactElement);
 }
 /*------------------------------------------------------------------------------
 
@@ -724,6 +874,29 @@ protected String getRefString(
    String key)
 {
    return((String)getRef(key));
+}
+/*------------------------------------------------------------------------------
+
+@name       getRenderEditors - get render editors
+                                                                              */
+                                                                             /**
+            Get render editors.
+
+@return     render editors
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public Map<String,RenderEditFunction> getRenderEditors()
+{
+   if (renderEditors == null)
+   {
+      renderEditors = new HashMap<>();
+   }
+   return(renderEditors);
 }
 /*------------------------------------------------------------------------------
 
@@ -855,6 +1028,31 @@ protected String getStyleId()
    }
 
    return(styleId);
+}
+/*------------------------------------------------------------------------------
+
+@name       getSubscriptions - get subscriptions
+                                                                              */
+                                                                             /**
+            Get subscriptions
+
+@return     subscriptions
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@deprecated
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public List<Subscription> getSubscriptions()
+{
+   if (subscriptions == null)
+   {
+      subscriptions = new ArrayList<>();
+   }
+   return(subscriptions);
 }
 /*------------------------------------------------------------------------------
 
@@ -1003,6 +1201,32 @@ protected void initTheme()
 }
 /*------------------------------------------------------------------------------
 
+@name       invokeRenderEditors - invoke any render editors
+                                                                              */
+                                                                             /**
+            Invoke any render editors.
+
+@return     Edited root element descriptor
+
+@param      root           element descriptor root
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected ElementDsc invokeRenderEditors(
+   ElementDsc root)
+{
+   ElementDsc edited = root;
+   for (RenderEditFunction editFcn : getRenderEditors().values())
+   {
+      edited = editFcn.apply(this, edited);
+   }
+   return(edited);
+}
+/*------------------------------------------------------------------------------
+
 @name       preRender - component pre-render processing
                                                                               */
                                                                              /**
@@ -1145,18 +1369,21 @@ protected void registerId(
    Properties props)
 {
    String id = props().getString("id");
-   if (id == null || id.startsWith("rjAuto"))
+   if (id == null)
    {
-      id = defaultElementId();
-      if (id != null)
+      throw new IllegalStateException("id may not be null");
+   }
+   if (id.startsWith("rjAuto"))
+   {
+      String defaultId = defaultElementId();
+      if (defaultId != null)
       {
-         props().set("id", id);
+         props().set("id", defaultId);
+         id = defaultId;
       }
    }
-   if (id != null)
-   {
-      putComponentById(id, this);
-   }
+
+   putComponentById(id, this);
 }
 /*------------------------------------------------------------------------------
 
@@ -1242,6 +1469,26 @@ protected void setComponentFcn(
 }
 /*------------------------------------------------------------------------------
 
+@name       setMounted - set whether component is mounted
+                                                                              */
+                                                                             /**
+            Set whether the component is mounted. This is typically set
+            in a useEffect cleanup function.
+
+@param      bDismounted    whether component has been dismounted.
+
+@history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected void setMounted(
+   boolean bMounted)
+{
+   this.bDismounted = !bMounted;
+}
+/*------------------------------------------------------------------------------
+
 @name       setRef - set ref value
                                                                               */
                                                                              /**
@@ -1268,10 +1515,10 @@ public void setRef(
 }
 /*------------------------------------------------------------------------------
 
-@name       setState - set theme
+@name       setState - set state
                                                                               */
                                                                              /**
-            Set theme.
+            Set state.
 
 @param      key      key
 @param      value    value
@@ -1288,11 +1535,20 @@ public void setState(
 {
    if (kSRCCFG_USE_STATE_HOOK)
    {
-      // see issue #37
-      // getStateMgr().setState(key, value) does not currently propogate the
-      // render to the children, which has taken a while to debug
-      // unsuccessfully, so for now force an update instead...
-      getStateMgr().setState(key, value);
+      if (getMounted())
+      {
+         // see issue #37
+         // getStateMgr().setState(key, value) does not currently propogate the
+         // render to the children, which has taken a while to debug
+         // unsuccessfully, so for now force an update instead...
+         getStateMgr().setState(key, value);
+      }
+      else
+      {
+         kLOGGER.logWarning(
+            "Component.setState(): ignored since component is not mounted, "
+               + getClass().getName());
+      }
    }
 }
 /*------------------------------------------------------------------------------
@@ -1336,7 +1592,7 @@ protected IUITheme setTheme(
 protected void useEffect(
    INativeEffectHandler effectHandler)
 {
-   React.useEffect(effectHandler);
+   useEffect(effectHandler, null);
 }
 /*------------------------------------------------------------------------------
 
@@ -1362,7 +1618,33 @@ protected void useEffect(
    INativeEffectHandler effectHandler,
    Object[]             dependencies)
 {
-   React.useEffect(effectHandler, dependencies);
+   React.useEffect(
+      effectHandler,
+      dependencies != null ? dependencies : Js.uncheckedCast(Js.undefined()));
+}
+/*------------------------------------------------------------------------------
+
+@name       useEffectTrackDismounted - built-in useEffect hook
+                                                                              */
+                                                                             /**
+            Built-in useEffect hook to track when the component is dismounted.
+
+@history    Sat May 13, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected void useEffectTrackDismounted()
+{
+   useEffect(() ->
+   {
+      setMounted(true);
+      return(() ->
+      {
+                                       // cleanup function                    //
+         setMounted(false);
+      });
+   });
 }
 /*------------------------------------------------------------------------------
 
@@ -1581,6 +1863,21 @@ protected void useRef(
    ref.put(key, React.useRef(value));
 }
 }//====================================// end RefMgr =========================//
+/*==============================================================================
+
+name:       RenderEditFunction - a generic BiFunction wrapper
+
+purpose:    A generic BiFunction wrapper
+
+history:    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
+
+notes:
+
+==============================================================================*/
+public interface RenderEditFunction
+   extends BiFunction<Component,ElementDsc,ElementDsc>
+{
+}//====================================// end RenderEditFunction =============//
 /*==============================================================================
 
 name:       StateMgr - state manager

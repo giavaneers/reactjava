@@ -49,7 +49,7 @@ import org.jsoup.nodes.TextNode;
 import org.jsoup.parser.ParseSettings;
 import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
-                                       // JSXTransform ====================//
+                                       // JSXTransform =======================//
 public class JSXTransform implements IJSXTransform
 {
                                        // class constants --------------------//
@@ -69,8 +69,7 @@ public static final String kINLINE_BODY_DEFAULT =
 
 public static final String kINLINE_FTR =
    "if(root != null){element="
- + "io.reactjava.client.core.react.ElementDsc.createElement(root);}"
- //+ "setId(element.props.getString(\"id\"));}"
+ + "io.reactjava.client.core.react.ElementDsc.createElement(root, this);}"
  + "return(element);};"
  + "setComponentFcn(fcn);";
 
@@ -82,6 +81,7 @@ public static final String kINLINE_HDR =
  + "<io.reactjava.client.core.react.Properties,"
  + "io.reactjava.client.core.react.ReactElement> fcn="
  + "(props) ->{"
+ + "String rjcomponentid = props.getString(\"id\");"
  + "io.reactjava.client.core.react.ReactElement element = null;"
  + "java.util.Stack<io.reactjava.client.core.react.ElementDsc> parents="
  + "new java.util.Stack<>();"
@@ -2418,6 +2418,11 @@ public String parseElementAttributes(
       String    attVal = att.getValue();
       String    value  = attVal;
 
+      if (iAtt == 0)
+      {
+                                       // add the componentId as an attribute //
+         properties += "\"rjcomponentid\", rjcomponentid, ";
+      }
       if (iAtt > 0)
       {
          properties += ", ";
@@ -4488,4 +4493,4 @@ public MarkupDsc(
    this.idxEnd  = idxEnd;
 }
 }//====================================// end MarkupDsc ======================//
-}//====================================// end JSXTransform ================//
+}//====================================// end JSXTransform ===================//

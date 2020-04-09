@@ -22,10 +22,13 @@ notes:
 package io.reactjava.client.components.generalpage;
 
                                        // imports --------------------------- //
+import elemental2.core.JsObject;
 import io.reactjava.client.components.pdfviewer.PDFViewer;
 import io.reactjava.client.core.react.Component;
 import io.reactjava.client.core.react.IUITheme;
+import io.reactjava.client.core.react.NativeObject;
 import io.reactjava.client.core.react.Properties;
+import io.reactjava.client.core.react.Utilities;
 import java.util.ArrayList;
 import java.util.List;
                                        // ContentPage ========================//
@@ -72,6 +75,50 @@ protected List<ContentDsc> getContent()
 }
 /*------------------------------------------------------------------------------
 
+@name       getContentProperties - get any content properties
+                                                                              */
+                                                                             /**
+            Get any content properties.
+
+@return     any content properties, or null if none
+
+@history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected Properties getContentProperties()
+{
+   Properties properties = new Properties();
+   for (ContentDsc dsc : getContent())
+   {
+      if (dsc.type == ContentDsc.kTYPE_PROPERTIES)
+      {
+         properties = dsc.properties;
+         break;
+      }
+   }
+   return(properties);
+}
+/*------------------------------------------------------------------------------
+
+@name       getPDFOptions - get pdf options
+                                                                              */
+                                                                             /**
+            Get pdf options
+
+@history    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public NativeObject getPDFOptions()
+{
+   return((NativeObject)props().get(PDFViewer.kPROPERTY_PDF_OPTIONS));
+}
+/*------------------------------------------------------------------------------
+
 @name       render - render component
                                                                               */
                                                                              /**
@@ -84,14 +131,12 @@ protected List<ContentDsc> getContent()
 //------------------------------------------------------------------------------
 public final void render()
 {
-   String pdfURL = props().getString(PDFViewer.kPROPERTY_PDF_URL);
-   if (pdfURL != null)
+   if (getPDFOptions() != null)
    {
-     Object bookmarks   = props().get(PDFViewer.kPROPERTY_BOOKMARKS);
-     Object scrollSrcId =
-        props().get(PDFViewer.kPROPERTY_SCROLL_SRC_ID);
+                                    // account for any properties from a      //
+                                    // manifest to any specified pdf options  //
 /*--
-      <PDFViewer pdfurl={pdfURL} bookmarks={bookmarks} scrollsrcid={scrollSrcId}/>
+      <PDFViewer pdfoptions={resolvePDFOptions()} />
 --*/
    }
    else
@@ -161,6 +206,41 @@ public void renderCSS()
    }
 --*/
 }
+/*------------------------------------------------------------------------------
+
+@name       resolvePDFOptions - resolve pdf options
+                                                                              */
+                                                                             /**
+            Account for any properties from a manifest to any specified pdf
+            options.
+
+@history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected NativeObject resolvePDFOptions()
+{
+   NativeObject pdfOptions = getPDFOptions();
+   Properties   properties = getContentProperties();
+
+   Object bookmarks = pdfOptions.get(PDFViewer.kPROPERTY_BOOKMARKS);
+   if (bookmarks == null)
+   {
+      pdfOptions.set(
+         PDFViewer.kPROPERTY_BOOKMARKS,
+         properties.get(PDFViewer.kPROPERTY_BOOKMARKS));
+   }
+   Object cover = pdfOptions.get(PDFViewer.kPROPERTY_COVER);
+   if (cover == null)
+   {
+      pdfOptions.set(
+         PDFViewer.kPROPERTY_COVER,
+         properties.get(PDFViewer.kPROPERTY_COVER));
+   }
+
+   return(pdfOptions);
+}
 /*==============================================================================
 
 name:       ContentDsc - content descriptor
@@ -176,13 +256,14 @@ public static class ContentDsc
 {
                                        // constants ------------------------- //
                                        // type                                //
-public static final int    kTYPE_BODY      = 1;
-public static final int    kTYPE_CAPTION   = 2;
-public static final int    kTYPE_CODE      = 3;
-public static final int    kTYPE_IMAGE     = 4;
-public static final int    kTYPE_TITLE     = 5;
-public static final int    kTYPE_REFERENCE = 6;
-public static final int    kTYPE_URL       = 7;
+public static final int    kTYPE_BODY       = 1;
+public static final int    kTYPE_CAPTION    = 2;
+public static final int    kTYPE_CODE       = 3;
+public static final int    kTYPE_IMAGE      = 4;
+public static final int    kTYPE_PROPERTIES = 5;
+public static final int    kTYPE_REFERENCE  = 6;
+public static final int    kTYPE_TITLE      = 7;
+public static final int    kTYPE_URL        = 8;
 
                                        // tokens                              //
 public static final String kTOKEN_BODY      = ".body";
@@ -195,11 +276,12 @@ public static final String kTOKEN_REFERENCE = ".reference";
 public static final String kTOKEN_URL       = ".url";
 
                                        // class variables ------------------- //
-public static Properties   manifests;  // getManifests map                       //
+public static Properties   manifests;  // getManifests map                    //
                                        // public instance variables --------- //
 public int                 type;       // type                                //
 public String              text;       // content                             //
 public String              id;         // elementId                           //
+public Properties          properties; // properties                          //
                                        // protected instance variables ------ //
                                        // (none)                              //
 
@@ -236,46 +318,57 @@ public ContentDsc()
 //------------------------------------------------------------------------------
 public ContentDsc(
    int    type,
-   String text)
+   Object val)
 {
    this.type = type;
-   this.text = text;
-
-   if (text != null && text.length() > 0)
+   if (val instanceof Properties)
    {
-      if (kTYPE_REFERENCE == type)
+      this.properties = (Properties)val;
+   }
+   else if (val instanceof String)
+   {
+      this.text = (String)val;
+
+      if (text != null && text.length() > 0)
       {
+         if (kTYPE_REFERENCE == type)
+         {
                                        // example:                            //
                                        // <a href="path">Getting Started</a>  //
-         int idxBeg = text.indexOf('"', text.indexOf("href"));
-         if (idxBeg < 0)
-         {
-            throw new IllegalStateException("format for reference unknown");
-         }
-         int idxEnd = text.indexOf('"', idxBeg + 1);
-         if (idxEnd < 0)
-         {
-            throw new IllegalStateException("format for reference unknown");
-         }
-         this.id = text.substring(idxBeg + 1, idxEnd).trim();
+            int idxBeg = text.indexOf('"', text.indexOf("href"));
+            if (idxBeg < 0)
+            {
+               throw new IllegalStateException("format for reference unknown");
+            }
+            int idxEnd = text.indexOf('"', idxBeg + 1);
+            if (idxEnd < 0)
+            {
+               throw new IllegalStateException("format for reference unknown");
+            }
+            this.id = text.substring(idxBeg + 1, idxEnd).trim();
 
-         idxBeg = text.indexOf('>', idxEnd);
-         if (idxBeg < 0)
-         {
-            throw new IllegalStateException("format for reference unknown");
-         }
-         idxEnd = text.indexOf('<', idxBeg);
-         if (idxEnd < 0)
-         {
-            throw new IllegalStateException("format for reference unknown");
-         }
+            idxBeg = text.indexOf('>', idxEnd);
+            if (idxBeg < 0)
+            {
+               throw new IllegalStateException("format for reference unknown");
+            }
+            idxEnd = text.indexOf('<', idxBeg);
+            if (idxEnd < 0)
+            {
+               throw new IllegalStateException("format for reference unknown");
+            }
 
-         this.text = text.substring(idxBeg + 1, idxEnd).trim();
+            this.text = text.substring(idxBeg + 1, idxEnd).trim();
+         }
+         else
+         {
+            this.id = Integer.toString(text.hashCode());
+         }
       }
-      else
-      {
-         this.id = Integer.toString(text.hashCode());
-      }
+   }
+   else
+   {
+      throw new IllegalArgumentException("Must be String or Properties");
    }
 }
 /*------------------------------------------------------------------------------
@@ -330,10 +423,13 @@ public static List<ContentDsc> parse(
    int              idxBeg  = -1;
    int              idxEnd  = 0;
    int              type;
+   String           key;
+   Properties       properties = new Properties();
 
    while(raw != null)
    {
       type   = 0;
+      key    = null;
       idxBeg = raw.indexOf('.', idxEnd);
       if (idxBeg < 0)
       {
@@ -377,8 +473,9 @@ public static List<ContentDsc> parse(
       }
       else
       {
-         idxEnd++;
-         continue;
+         key     = chase.split(Utilities.kREGEX_ONE_OR_MORE_WHITESPACE)[0];
+         idxBeg += key.length();
+         key     = key.substring(1);
       }
 
       idxEnd = raw.indexOf(kTOKEN_END, idxBeg);
@@ -387,8 +484,22 @@ public static List<ContentDsc> parse(
          throw new IllegalStateException("No matching '.end' token found");
       }
 
-      content.add(new ContentDsc(type, raw.substring(idxBeg, idxEnd).trim()));
+      String value = raw.substring(idxBeg, idxEnd).trim();
+      if (key != null)
+      {
+         properties = Properties.with(properties, key, value);
+      }
+      else
+      {
+         content.add(new ContentDsc(type, value));
+      }
+
       idxEnd += kTOKEN_END.length();
+   }
+
+   if (JsObject.keys(properties).length > 0)
+   {
+      content.add(new ContentDsc(kTYPE_PROPERTIES, properties));
    }
 
    return(content);

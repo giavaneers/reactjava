@@ -19,9 +19,16 @@ notes:
 package io.reactjava.client.core.react;
                                        // imports --------------------------- //
 import jsinterop.annotations.JsFunction;
+import jsinterop.annotations.JsOverlay;
+import jsinterop.base.Js;
                                        // INativeEffectHandler ===============//
 @JsFunction
 public interface INativeEffectHandler
 {
-   void handleEffect();
+                                       // indicates no cleanup function       //
+   @JsOverlay
+   INativeFunction kNO_CLEANUP_FCN = Js.uncheckedCast(Js.undefined());
+
+                                       // returns optional cleanup function   //
+   INativeFunction handleEffect();
 }//====================================// end INativeEffectHandler ===========//

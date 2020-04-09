@@ -558,6 +558,69 @@ public static String getNativeComponentPropertiesFieldname(
 }
 /*------------------------------------------------------------------------------
 
+@name       getNativeFunctionalComponent - get native component
+                                                                              */
+                                                                             /**
+            Get native component for specified component classname.
+
+@return     native component for specified component classname
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static <P extends Properties> INativeFunctionalComponent getNativeFunctionalComponent(
+   String classname)
+{
+   Component component = getComponentFactory(classname).apply(new Properties());
+   return(getNativeFunctionalComponent(component));
+}
+/*------------------------------------------------------------------------------
+
+@name       getNativeFunctionalComponent - get native component
+                                                                              */
+                                                                             /**
+            Get native component for specified ReactJava component.
+
+@return     native component for specified ReactJava component
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static <P extends Properties> INativeFunctionalComponent getNativeFunctionalComponent(
+   Component component)
+{
+   return((props) ->
+   {
+                                       // assign the private instance variable//
+      JsPropertyMap<Object> map = Js.asPropertyMap(component);
+      map.set(getNativeComponentPropertiesFieldname(map), props);
+
+      Function<P,ReactElement> fcn = getComponentFcn(component);
+      if (fcn != null)
+      {
+                                       // pre-render processing               //
+         component.preRender(props);
+                                       // built-in useEffect()                //
+         component.useEffectTrackDismounted();
+                                       // invoke the component function       //
+         component.reactElement = fcn.apply((P)props);
+
+                                       // update any styles                   //
+         component.ensureStyles();
+                                       // post-render processing              //
+         component.postRender();
+      }
+      return(component.reactElement);
+   });
+}
+/*------------------------------------------------------------------------------
+
 @name       getPlatformProvider - get platform provider
                                                                               */
                                                                              /**
@@ -628,67 +691,6 @@ public static Function<Properties,IProvider> getProvider(
       (Function<Properties,IProvider>)ReactGeneratedCode.getFactory(classname);
 
    return(factory);
-}
-/*------------------------------------------------------------------------------
-
-@name       getNativeFunctionalComponent - get native component
-                                                                              */
-                                                                             /**
-            Get native component for specified component classname.
-
-@return     native component for specified component classname
-
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-
-                                                                              */
-//------------------------------------------------------------------------------
-public static <P extends Properties> INativeFunctionalComponent getNativeFunctionalComponent(
-   String classname)
-{
-   Component component = getComponentFactory(classname).apply(new Properties());
-   return(getNativeFunctionalComponent(component));
-}
-/*------------------------------------------------------------------------------
-
-@name       getNativeFunctionalComponent - get native component
-                                                                              */
-                                                                             /**
-            Get native component for specified ReactJava component.
-
-@return     native component for specified ReactJava component
-
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-
-                                                                              */
-//------------------------------------------------------------------------------
-public static <P extends Properties> INativeFunctionalComponent getNativeFunctionalComponent(
-   Component component)
-{
-   return((props) ->
-   {
-                                       // assign the private instance variable//
-      JsPropertyMap<Object> map = Js.asPropertyMap(component);
-      map.set(getNativeComponentPropertiesFieldname(map), props);
-
-      Function<P,ReactElement> fcn = getComponentFcn(component);
-      if (fcn != null)
-      {
-                                       // pre-render processing               //
-         component.preRender(props);
-                                       // invoke the component function       //
-         component.reactElement = fcn.apply((P)props);
-
-                                       // update any styles                   //
-         component.ensureStyles();
-                                       // post-render processing              //
-         component.postRender();
-      }
-      return(component.reactElement);
-   });
 }
 /*------------------------------------------------------------------------------
 

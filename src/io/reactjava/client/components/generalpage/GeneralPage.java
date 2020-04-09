@@ -23,6 +23,7 @@ package io.reactjava.client.components.generalpage;
                                        // imports --------------------------- //
 import com.giavaneers.util.gwt.Logger;
 import elemental2.dom.DomGlobal;
+import elemental2.dom.Element;
 import elemental2.dom.HTMLElement;
 import io.reactjava.client.components.generalpage.ContentPage.ContentDsc;
 import io.reactjava.client.components.generalpage.Descriptors.AppBarDsc;
@@ -31,7 +32,9 @@ import io.reactjava.client.components.generalpage.Descriptors.PageDsc;
 import io.reactjava.client.components.pdfviewer.PDFViewer;
 import io.reactjava.client.core.react.Component;
 import io.reactjava.client.core.react.INativeEffectHandler;
+import io.reactjava.client.core.react.INativeFunction;
 import io.reactjava.client.core.react.IUITheme;
+import io.reactjava.client.core.react.NativeObject;
 import io.reactjava.client.core.react.Properties;
 import io.reactjava.client.core.react.Router;
 import io.reactjava.client.core.react.Utilities;
@@ -61,8 +64,8 @@ public static final String  kSTATE_SIDE_DRAWER_OPEN = "sideDrawerOpen";
                                        // (none)                              //
                                        // public instance variables --------- //
                                        // protected instance variables -------//
-protected AppBarDsc appBarDsc; // app bar descriptor                  //
-protected PageDsc pageDsc;   // page descriptor                     //
+protected AppBarDsc appBarDsc;         // app bar descriptor                  //
+protected PageDsc   pageDsc;           // page descriptor                     //
                                        // private instance variables -------- //
                                        // (none)                              //
 /*------------------------------------------------------------------------------
@@ -132,7 +135,7 @@ protected List<ContentDsc> getContent()
             },
             error ->
             {
-                                       // ignore                              //
+                                    // ignore                              //
                kLOGGER.logError(error.toString());
             });
       }
@@ -179,6 +182,34 @@ protected String getContentPDFURL()
 }
 /*------------------------------------------------------------------------------
 
+@name       getContentProperties - get any content properties
+                                                                              */
+                                                                             /**
+            Get any content properties.
+
+@return     any content properties, or null if none
+
+@history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected Properties getContentProperties()
+{
+   Properties properties = new Properties();
+   for (ContentDsc dsc : getContent())
+   {
+      if (dsc.type == ContentDsc.kTYPE_PROPERTIES)
+      {
+         properties = dsc.properties;
+         break;
+      }
+   }
+   return(properties);
+}
+/*------------------------------------------------------------------------------
+
 @name       getContentStateValue - get content state value
                                                                               */
                                                                              /**
@@ -195,6 +226,30 @@ protected String getContentPDFURL()
 protected List<ContentDsc> getContentStateValue()
 {
    return((List<ContentDsc>)getState("content"));
+}
+/*------------------------------------------------------------------------------
+
+@name       getCover - get any PDFViewer cover
+                                                                              */
+                                                                             /**
+            Get any PDFViewer cover.
+
+@return     any PDFViewer cover
+
+@history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected String getCover()
+{
+   String cover = props().getString(PDFViewer.kPROPERTY_COVER);
+   if (cover == null)
+   {
+      cover = (String)getContentProperties().get("cover");
+   }
+   return(cover);
 }
 /*------------------------------------------------------------------------------
 
@@ -321,6 +376,35 @@ protected PageDsc getPageDsc()
 }
 /*------------------------------------------------------------------------------
 
+@name       getPDFOptions - get any pdf options                                */
+                                                                             /**
+            Get any pdf options .
+
+@return     any pdf options
+
+@history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected NativeObject getPDFOptions()
+{
+   NativeObject pdfOptions = new NativeObject();
+   String       pdfURL     = getContentPDFURL();
+   if (pdfURL != null)
+   {
+      pdfOptions =
+         NativeObject.with(
+            PDFViewer.kPROPERTY_COVER,         "#bdcff1",
+            PDFViewer.kPROPERTY_COVER_TOP_PX, "70px",
+            PDFViewer.kPROPERTY_PDF_URL,       pdfURL,
+            PDFViewer.kPROPERTY_SCROLL_SRC_ID, "main");
+   }
+   return(pdfOptions);
+}
+/*------------------------------------------------------------------------------
+
 @name       getPDFViewer - get any PDFViewer
                                                                               */
                                                                              /**
@@ -343,37 +427,6 @@ protected PDFViewer getPDFViewer()
 }
 /*------------------------------------------------------------------------------
 
-@name       handleEffect - handleEffect handler
-                                                                              */
-                                                                             /**
-            handleEffect handler as a public instance variable.
-
-@history    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public INativeEffectHandler handleEffect = () ->
-{
-   PDFViewer.getInstance().subscribe(
-      (PDFViewer pdfViewer) ->
-      {
-         pdfViewer.getPDFViewerReady().subscribe(
-            (String readyMsg) ->
-            {
-                                       // now that the PDFViewer is ready,    //
-                                       // move main back onto the display     //
-               HTMLElement main =
-                  (HTMLElement)DomGlobal.document.getElementById("main");
-
-               main.style.top = "70px";
-            },
-            error ->{});
-      },
-      error ->{});
-};
-/*------------------------------------------------------------------------------
-
 @name       render - render component
                                                                               */
                                                                              /**
@@ -382,7 +435,6 @@ public INativeEffectHandler handleEffect = () ->
 @history    Thu Feb 14, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
-               viewerstyle={NativeObject.with("top", "70px")}
                                                                               */
 //------------------------------------------------------------------------------
 public final void render()
@@ -390,27 +442,19 @@ public final void render()
    useState(kSTATE_ANCHOR, "");
    useState(kSTATE_CONTENT, getContent());
    useState(kSTATE_SIDE_DRAWER_OPEN, false);
-                                       // passing an empty set of dependencies//
-                                       // causes the effect handler to be     //
-                                       // invoked only when mounted and       //
-                                       // unmounted, not on update as would   //
-                                       // occurr on using the single argument //
-                                       // useEffect() method                  //
-   useEffect(handleEffect, new Object[0]);
 
    List<ContentDsc> content = getContentStateValue();
    if (content != null)
    {
-      String       pdfURL      = getContentPDFURL();
-      String       mainClass   = willRenderPDF() ? "mainClassPDF" : " layout";
-      FooterDsc    footerDsc   = getPageDsc().footer;
+      FooterDsc footerDsc = getPageDsc().footer;
+      String    mainClass = willRenderPDF() ? "mainClassPDF" : " layout";
  /*--
       <div class="generalpagecontainer">
                                        <!-- App Bar --------------------------->
          <GeneralAppBar appbardsc={getAppBarDsc()} />
          <main id="main" class={mainClass}>
                                        <!-- Content --------------------------->
-            <ContentPage content={content} pdfurl={pdfURL} scrollsrcid="main" />
+            <ContentPage content={content} pdfoptions={getPDFOptions()} />
 --*/
       if (footerDsc != null)
       {
@@ -432,7 +476,6 @@ public final void render()
 --*/
          }
       }
-
       if (getPageDsc().bMenuButton)
       {
  /*--
@@ -441,7 +484,7 @@ public final void render()
             id="drawer"
             openhandler={openHandler}
             content={content}
-            pdfurl={pdfURL}
+            pdfurl={getContentPDFURL()}
             displayhash={props().get("displayhash")}
          />
 --*/
@@ -468,10 +511,6 @@ public final void render()
 @history    Thu Feb 14, 2019 10:30:00 (Giavaneers - LBM) created
 
 @notes
-   body
-   {
-      overflow-y:      {bodyOverflow};
-   }
                                                                               */
 //------------------------------------------------------------------------------
 public void renderCSS()
@@ -490,7 +529,7 @@ public void renderCSS()
    {
       position:        absolute;
       overflow:        auto;
-      top:             10000px;
+      top:             70px;
       bottom:          0px;
       left:            0px;
       width:           100%;
