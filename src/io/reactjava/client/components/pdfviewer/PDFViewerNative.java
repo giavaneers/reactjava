@@ -1,22 +1,26 @@
-package io.reactjava.client.components.pdfviewer;
+/*==============================================================================
 
+name:       PDFViewerNative
+
+purpose:    Native pdfjs viewer api
+
+history:    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
+
+notes:
+                        COPYRIGHT (c) BY GIAVANEERS, INC.
+         This source code is licensed under the MIT license found in the
+             LICENSE file in the root directory of this source tree.
+
+==============================================================================*/
+                                       // package --------------------------- //
+package io.reactjava.client.components.pdfviewer;
+                                       // imports --------------------------- //
 import elemental2.dom.Element;
 import io.reactjava.client.core.react.NativeObject;
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
-
-/*==============================================================================
-
-name:       PDFViewerNative - native pdfjs viewer api
-
-purpose:    Native pdfjs viewer api
-
-history:    Thu Feb 27, 2020 10:30:00 (Giavaneers - LBM) created
-
-notes:
-
-==============================================================================*/
+                                       // PDFViewerNative ====================//
 @JsType(isNative = true, namespace = "pdfjsViewer", name="PDFViewer")
 public class PDFViewerNative
 {

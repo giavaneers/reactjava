@@ -21,6 +21,7 @@
  */
 package io.reactjava.client.core.rxjs.observable;
 
+import elemental2.promise.Promise;
 import io.reactjava.client.core.rxjs.functions.Action0;
 import io.reactjava.client.core.rxjs.functions.Action1;
 import io.reactjava.client.core.rxjs.functions.Func1;
@@ -55,6 +56,9 @@ public class Observable<T> {
     public native static <R> Observable<R> fromEvent(Element target, String eventName);
 
     public native static <R> Observable<R> fromEvent(Element target, String eventName, boolean useCapture);
+
+                                       // added 200413 LBM                    //
+    public native static <R> Observable<R> fromPromise(Promise<R> promise);
 
     public native static <R> Observable<R> create(OnSubscribe<? extends R> onSubscribe);
 

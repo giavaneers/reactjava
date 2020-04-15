@@ -1,7 +1,6 @@
-package io.reactjava.client.components.pdfviewer;
 /*==============================================================================
 
-name:       Transform - transform
+name:       Transform.java
 
 purpose:    Transform converting pdf coordinate system to the normal canvas
             like coordinates taking in account scale and rotation  and offset.
@@ -18,8 +17,16 @@ purpose:    Transform converting pdf coordinate system to the normal canvas
 history:    Thu Feb 27, 2020 10:30:00 (Giavaneers - LBM) created
 
 notes:
+                        COPYRIGHT (c) BY GIAVANEERS, INC.
+         This source code is licensed under the MIT license found in the
+             LICENSE file in the root directory of this source tree.
 
 ==============================================================================*/
+                                       // package --------------------------- //
+package io.reactjava.client.components.pdfviewer;
+                                       // imports --------------------------- //
+                                       // (none)                              //
+                                       // Transform ==========================//
 public class Transform
 {
                                        // constants ------------------------- //

@@ -137,7 +137,7 @@ public static <P extends Properties> ElementDsc create(
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-protected static ReactElement createElement(
+public static ReactElement createElement(
    ElementDsc root)
 {
    return(createElement(root, null));

@@ -1,26 +1,30 @@
-package io.reactjava.client.components.pdfviewer;
+/*==============================================================================
 
+name:       PDFDocumentProxy.java
+
+purpose:    Native pdfjs api
+
+history:    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
+
+notes:
+                        COPYRIGHT (c) BY GIAVANEERS, INC.
+         This source code is licensed under the MIT license found in the
+             LICENSE file in the root directory of this source tree.
+
+==============================================================================*/
+                                       // package --------------------------- //
+package io.reactjava.client.components.pdfviewer;
+                                       // imports --------------------------- //
 import elemental2.promise.Promise;
 import io.reactjava.client.core.react.NativeObject;
-import io.reactjava.client.core.rxjs.observable.Observable;
+import io.reactjava.client.core.react.Observable;
 import io.reactjava.client.core.rxjs.observable.Subscriber;
 import java.util.ArrayList;
 import java.util.List;
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
-
-/*==============================================================================
-
-name:       PDFDocumentProxy - native pdfjs api
-
-purpose:    Native pdfjs api
-
-history:    Thu Feb 27, 2020 10:30:00 (Giavaneers - LBM) created
-
-notes:
-
-==============================================================================*/
+                                       // PDFDocumentProxy ===================//
 @JsType(isNative  = true, namespace = "pdfjsLib")
 public class PDFDocumentProxy
 {
@@ -95,6 +99,7 @@ public final Observable<NativeObject[][]> getAnnotations()
             for (int pageNum = 1; pageNum <= annotations.length; pageNum ++)
             {
                getAnnotations(annotations, pageNum).subscribe(
+                  pdfViewer,
                   (Integer pageNumDone) ->
                   {
                      if (++pageCompletedCount[0] == annotations.length)
@@ -184,20 +189,20 @@ public final Observable<List<List<Bookmark>>> getBookmarks()
          else
          {
                                        // initial request                     //
-            pdfViewer.getSubscriptions().add(
-               getExplicitDestinations().subscribe(
-                  (List<List<Destination>> explicitDestinations) ->
-                  {
+            getExplicitDestinations().subscribe(
+               pdfViewer,
+               (List<List<Destination>> explicitDestinations) ->
+               {
                                        // the bookmarks are available when    //
                                        // the explicit destinations are       //
                                        // available                           //
-                     subscriber.next(bookmarks);
-                     subscriber.complete();
-                  },
-                  error ->
-                  {
-                     subscriber.error(error);
-                  }));
+                  subscriber.next(bookmarks);
+                  subscriber.complete();
+               },
+               error ->
+               {
+                  subscriber.error(error);
+               });
          }
          return(subscriber);
       });
@@ -250,9 +255,6 @@ protected native Promise getDestinations();
 
 @return     Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
 
-@param      bReturnDestinations     if true, return explicit destinations;
-                                    otherwise, return bookmarks
-
 @history    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -273,17 +275,17 @@ protected final Observable<List<List<Destination>>> getExplicitDestinations()
          else
          {
                                        // initial request                     //
-            pdfViewer.getSubscriptions().add(
-               getAnnotations().subscribe(
-                  (NativeObject[][] documentAnnotations) ->
-                  {
-                     getExplicitDestinationsAnnotationsHandler(
-                        subscriber, documentAnnotations);
-                  },
-                  error ->
-                  {
-                     subscriber.error(error);
-                  }));
+            getAnnotations().subscribe(
+               pdfViewer,
+               (NativeObject[][] documentAnnotations) ->
+               {
+                  getExplicitDestinationsAnnotationsHandler(
+                     subscriber, documentAnnotations);
+               },
+               error ->
+               {
+                  subscriber.error(error);
+               });
          }
          return(subscriber);
       });
@@ -297,10 +299,8 @@ protected final Observable<List<List<Destination>>> getExplicitDestinations()
                                                                              /**
             getAnnotations() handler for getExplicitDestinations() method.
 
-@return     Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
-
-@param      bReturnDestinations     if true, return explicit destinations;
-                                    otherwise, return bookmarks
+@param      subscriber              subscriber
+@param      documentAnnotations     document annotations
 
 @history    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
 
@@ -388,10 +388,11 @@ protected final void getExplicitDestinationsAnnotationsHandler(
                                                                              /**
             getAnnotations() handler for getExplicitDestinations() method.
 
-@return     Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
-
-@param      bReturnDestinations     if true, return explicit destinations;
-                                    otherwise, return bookmarks
+@param      subscriber        subscriber
+@param      bookmarksLst      bokmarks list
+@param      destinations      destinations
+@param      pageIndex         page index
+@param      pagesProcessed    pages processed
 
 @history    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
 
@@ -408,30 +409,30 @@ protected final void getExplicitDestinationsSetBookmarksText(
 {
                                        // get the page contents to find the   //
                                        // bookmark text                       //
-   pdfViewer.getSubscriptions().add(
-      getPageTextContent(pageIndex).subscribe(
-         (TextContent textContent) ->
+   getPageTextContent(pageIndex).subscribe(
+      pdfViewer,
+      (TextContent textContent) ->
+      {
+         for (Bookmark bookmark : bookmarksLst.get(pageIndex))
          {
-            for (Bookmark bookmark : bookmarksLst.get(pageIndex))
-            {
                                        // assign the bookmark text            //
-               bookmark.setTextContent(textContent);
-            }
+            bookmark.setTextContent(textContent);
+         }
 
-            if (++pagesProcessed[0] == bookmarksLst.size())
-            {
+         if (++pagesProcessed[0] == bookmarksLst.size())
+         {
                                        // signal all bookmarks and            //
                                        // destinations complete               //
-               bookmarks            = bookmarksLst;
-               explicitDestinations = destinations;
-               subscriber.next(explicitDestinations);
-               subscriber.complete();
-            }
-         },
-         error ->
-         {
-            subscriber.error(error);
-         }));
+            bookmarks            = bookmarksLst;
+            explicitDestinations = destinations;
+            subscriber.next(explicitDestinations);
+            subscriber.complete();
+         }
+      },
+      error ->
+      {
+         subscriber.error(error);
+      });
 };
 /*------------------------------------------------------------------------------
 
@@ -440,10 +441,9 @@ protected final void getExplicitDestinationsSetBookmarksText(
                                                                              /**
             getAnnotations() handler for getExplicitDestinations() method.
 
-@return     Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
-
-@param      bReturnDestinations     if true, return explicit destinations;
-                                    otherwise, return bookmarks
+@param      subscriber        subscriber
+@param      bookmarksLst      bookmarks list
+@param      destinations      destinations
 
 @history    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
 
@@ -563,7 +563,7 @@ public native Promise<PDFPageProxy> getPage(
             Get page index for specified destination reference. Page index is
             zero based. See Destination for destRef.
 
-@return     a Promise<int> for the specified index
+@return     a Promise for the specified index
 
 @param      destRef     ex: {num: 183, gen:0}
 
@@ -634,7 +634,8 @@ public final Observable<TextContent> getPageTextContent(
                                                                              /**
             Initialize
 
-@param      number of pages
+@param      pdfViewer         pdfViewer instance
+@param      pdfLinkService    pdfLinkService instance
 
 @history    Thu Feb 27, 2020 10:30:00 (Giavaneers - LBM) created
 
@@ -655,26 +656,26 @@ public final void initialize(
    if (bookmarks == null)
    {
                                        // initialize bookmarks                //
-      pdfViewer.getSubscriptions().add(
-         getBookmarks().subscribe(
-            (List<List<Bookmark>> bookmarks) ->
-            {
+      getBookmarks().subscribe(
+         pdfViewer,
+         (List<List<Bookmark>> bookmarks) ->
+         {
                                        // notify all subscribers              //
-               List<Subscriber<List<List<Bookmark>>>> subscribers =
-                  pdfViewer.getSubscribersBookmarks();
+            List<Subscriber<List<List<Bookmark>>>> subscribers =
+               pdfViewer.getSubscribersBookmarks();
 
-               while(subscribers.size() > 0)
-               {
-                  Subscriber<List<List<Bookmark>>> subscriber =
-                     subscribers.remove(0);
+            while(subscribers.size() > 0)
+            {
+               Subscriber<List<List<Bookmark>>> subscriber =
+                  subscribers.remove(0);
 
-                  subscriber.next(bookmarks);
-                  subscriber.complete();
-               }
+               subscriber.next(bookmarks);
+               subscriber.complete();
+            }
                                        // navigate to any hash                //
-               pdfViewer.navigateToHash();
-            },
-            error ->{}));
+            pdfViewer.navigateToHash();
+         },
+         error ->{});
    }
    pdfViewer.setPDFViewer(pdfViewerNative);
 }

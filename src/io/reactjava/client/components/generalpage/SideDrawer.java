@@ -26,13 +26,13 @@ import elemental2.dom.Event;
 import io.reactjava.client.components.generalpage.ContentPage.ContentDsc;
 import io.reactjava.client.components.pdfviewer.Bookmark;
 import io.reactjava.client.components.pdfviewer.PDFViewer;
-import io.reactjava.client.components.pdfviewer.ViewerCover;
 import io.reactjava.client.core.react.Component;
-import io.reactjava.client.core.react.INativeEffectHandler;
 import io.reactjava.client.core.react.INativeEventHandler;
 import io.reactjava.client.core.react.INativeFunction;
+import io.reactjava.client.core.react.INativeFunction1Arg;
 import io.reactjava.client.core.react.NativeObject;
-import io.reactjava.client.core.rxjs.subscription.Subscription;
+import io.reactjava.client.core.rxjs.functions.Action1;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -103,9 +103,11 @@ protected List<List<Bookmark>> getBookmarks()
    if (bookmarks == null)
    {
       PDFViewer.getInstance().subscribe(
+         this,
          (PDFViewer pdfViewer) ->
          {
             pdfViewer.getBookmarks().subscribe(
+               this,
                (List<List<Bookmark>> viewerBookmarks) ->
                {
                   setState("bookmarks", viewerBookmarks);
@@ -113,6 +115,8 @@ protected List<List<Bookmark>> getBookmarks()
                error ->{});
          },
          error ->{});
+
+      bookmarks = new ArrayList<>();
    }
 
    return(bookmarks);

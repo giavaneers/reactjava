@@ -1,8 +1,8 @@
 /*==============================================================================
 
-name:       PDFHistory.java
+name:       Observable.java
 
-purpose:    Native pdfjs history api
+purpose:    Observable
 
 history:    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
 
@@ -13,174 +13,201 @@ notes:
 
 ==============================================================================*/
                                        // package --------------------------- //
-package io.reactjava.client.components.pdfviewer;
+package io.reactjava.client.core.react;
                                        // imports --------------------------- //
-import io.reactjava.client.core.react.NativeObject;
+import elemental2.promise.Promise;
+import io.reactjava.client.core.rxjs.functions.Action0;
+import io.reactjava.client.core.rxjs.functions.Action1;
+import io.reactjava.client.core.rxjs.observable.Observer;
+import io.reactjava.client.core.rxjs.observable.OnSubscribe;
+import io.reactjava.client.core.rxjs.subscription.Subscription;
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
-                                       // PDFHistory =========================//
-@JsType(isNative  = true, namespace = "pdfjsViewer")
-public class PDFHistory
+import jsinterop.base.Js;
+                                       // Observable =========================//
+@JsType(namespace = "ReactJava", isNative = true)
+public class Observable<T>
+   extends io.reactjava.client.core.rxjs.observable.Observable<T>
 {
                                        // constants ------------------------- //
                                        // (none)                              //
                                        // class variables ------------------- //
                                        // (none)                              //
                                        // public instance variables --------- //
-                                       // link service                        //
-@JsProperty public PDFLinkService linkService;
+@JsProperty Promise promise;           // property on PromiseObservable       //
                                        // protected instance variables -------//
+                                       // (none)                              //
                                        // private instance variables -------- //
                                        // (none)                              //
 
 /*------------------------------------------------------------------------------
 
-@name       PDFHistory - default constructor
+@name       create - create
                                                                               */
                                                                              /**
-            Default constructor
+            Create.
 
-@history    Thu Feb 27, 2020 10:30:00 (Giavaneers - LBM) created
+@param      onSubscribe    on subscribe
 
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-private PDFHistory()
-{
-}
-/*------------------------------------------------------------------------------
-
-@name       PDFHistory - constructor
-                                                                              */
-                                                                             /**
-            Constructor
-
-@param      props    props
-
-@history    Wed Apr 27, 2016 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-private PDFHistory(
-   NativeObject args)
-{
-}
-/*------------------------------------------------------------------------------
-
-@name       navigateTo - navigate to specified explicit destination
-                                                                              */
-                                                                             /**
-            Navigate to specified explicit destination.
-
-@params     destination    destination, such as
-                           [{"num":157,"gen":0},{"name":"XYZ"},72,720,0]
-
-@history    Thu Feb 27, 2020 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public native void navigateTo(
-   Destination destination);
-
-/*------------------------------------------------------------------------------
-
-@name       newInstance - new instance for specified link service
-                                                                              */
-                                                                             /**
-            New instance for specified link service.
-
-@params     linkService    link service
-
-@history    Thu Feb 27, 2020 10:30:00 (Giavaneers - LBM) created
+@history    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
 @JsOverlay
-public static PDFHistory newInstance(
-   PDFLinkService linkService)
+public static <R> Observable<R> create(
+   OnSubscribe<? extends R> onSubscribe)
 {
-   return(new PDFHistory(NativeObject.with("linkService", linkService)));
+   return(
+      Js.uncheckedCast(
+         io.reactjava.client.core.rxjs.observable.Observable.create(
+            onSubscribe)));
 }
 /*------------------------------------------------------------------------------
 
-@name       newInstance - new instance for specified link service and event bus
+@name       create - create
                                                                               */
                                                                              /**
-            New instance for specified link service and event bus.
+            Create.
 
-@params     linkService    link service
-@params     eventBus       eventBus
+@param      promise      promise
 
-@history    Thu Feb 27, 2020 10:30:00 (Giavaneers - LBM) created
+@history    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
 @JsOverlay
-public static PDFHistory newInstance(
-   PDFLinkService linkService,
-   EventBus       eventBus)
+public static <R> Observable<R> fromPromise(
+   Promise<R> promise)
 {
-   PDFHistory history =
-      new PDFHistory(NativeObject.with(
-         "linkService", linkService, "eventBus", eventBus));
-
-   return(history);
+   return(
+      Js.uncheckedCast(
+         io.reactjava.client.core.rxjs.observable.Observable.fromPromise(
+            promise)));
 }
 /*------------------------------------------------------------------------------
 
-@name       setDocument - assign document
+@name       subscribe - subscribe
                                                                               */
                                                                              /**
-            Assign document.
+            Create.
 
-@params     document    target document
+@return     subscription
 
-@history    Thu Feb 27, 2020 10:30:00 (Giavaneers - LBM) created
+@param      subscriber  subscribing component
+@param      onNext      onNext
+
+@history    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public native void setDocument(
-   PDFDocumentProxy document,
-   String           url);
+@JsOverlay
+public final Subscription subscribe(
+   Component          subscriber,
+   Action1<? super T> onNext)
+{
+   Subscription subscription =
+      subscriber.getMounted()
+         ? subscriber.addSubscription(super.subscribe(onNext))
+         : null;
 
+   return(subscription);
+}
 /*------------------------------------------------------------------------------
 
-@name       setHistory - assign history
+@name       subscribe - subscribe
                                                                               */
                                                                              /**
-            Assign history.
+            Create.
 
-@params     history     target history
+@return     subscription
 
-@history    Thu Feb 27, 2020 10:30:00 (Giavaneers - LBM) created
+@param      subscriber  subscribing component
+@param      onNext      onNext
+@param      onError     onError
+
+@history    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public native void setHistory(
-   PDFHistory history);
+@JsOverlay
+public final Subscription subscribe(
+   Component          subscriber,
+   Action1<? super T> onNext,
+   Action1<?>         onError)
+{
+   Subscription subscription =
+      subscriber.getMounted()
+         ? subscriber.addSubscription(super.subscribe(onNext, onError))
+         : null;
 
+   return(subscription);
+}
 /*------------------------------------------------------------------------------
 
-@name       setViewer - assign viewer
+@name       subscribe - subscribe
                                                                               */
                                                                              /**
-            Assign viewer.
+            Create.
 
-@params     viewer      target viewer
+@return     subscription
 
-@history    Thu Feb 27, 2020 10:30:00 (Giavaneers - LBM) created
+@param      subscriber     subscribing component
+@param      onNext         onNext
+@param      onError        onError
+@param      onCompleted    onCompleted
+
+@history    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public native void setViewer(
-   PDFViewerNative viewer);
+@JsOverlay
+public final Subscription subscribe(
+   Component          subscriber,
+   Action1<? super T> onNext,
+   Action1<?>         onError,
+   Action0            onCompleted)
+{
+   Subscription subscription =
+      subscriber.getMounted()
+         ? subscriber.addSubscription(
+            super.subscribe(onNext, onError, onCompleted))
+         : null;
 
-}//====================================// end PDFHistory ---------------------//
+   return(subscription);
+}
+/*------------------------------------------------------------------------------
+
+@name       subscribe - subscribe
+                                                                              */
+                                                                             /**
+            Create.
+
+@return     subscription
+
+@param      subscriber  subscribing component
+@param      observer    observer
+
+@history    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+@JsOverlay
+public final Subscription subscribe(
+   Component subscriber,
+   Observer  observer)
+{
+    Subscription subscription =
+      subscriber.getMounted()
+         ? subscriber.addSubscription(super.subscribe(observer))
+         : null;
+
+  return(subscription);
+}
+}//====================================// end Observable ---------------------//

@@ -1,21 +1,29 @@
-package io.reactjava.client.components.pdfviewer;
-
-import elemental2.core.JsArray;
-import io.reactjava.client.core.react.NativeObject;
-import jsinterop.annotations.JsProperty;
-import jsinterop.base.Js;
-
 /*==============================================================================
 
-name:       TextContent - pdf page text content
+name:       TextContent.java
 
 purpose:    pdf page text content
 
-history:    Thu Feb 27, 2020 10:30:00 (Giavaneers - LBM) created
+history:    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
 
 notes:
+                        COPYRIGHT (c) BY GIAVANEERS, INC.
+         This source code is licensed under the MIT license found in the
+             LICENSE file in the root directory of this source tree.
 
 ==============================================================================*/
+                                       // package --------------------------- //
+package io.reactjava.client.components.pdfviewer;
+                                       // imports --------------------------- //
+import elemental2.core.JsArray;
+import io.reactjava.client.core.react.NativeObject;
+import jsinterop.annotations.JsOverlay;
+import jsinterop.annotations.JsPackage;
+import jsinterop.annotations.JsProperty;
+import jsinterop.annotations.JsType;
+import jsinterop.base.Js;
+                                       // TextContent ========================//
+@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "Object")
 public class TextContent extends NativeObject
 {
                                        // constants ------------------------- //
@@ -26,11 +34,10 @@ public class TextContent extends NativeObject
                                        // (none)                              //
                                        // protected instance variables -------//
                                        // array of text items                 //
-public @JsProperty
-                                       JsArray<TextContentItem> items;
+public @JsProperty JsArray<TextContentItem>
+                                items;
                                        // styles                              //
-public @JsProperty
-                                       NativeObject      styles;
+public @JsProperty NativeObject styles;
                                        // private instance variables -------- //
                                        // (none)                              //
 
@@ -61,7 +68,8 @@ private TextContent()
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public static String toString(
+@JsOverlay
+ public static String toString(
    TextContent textContent)
 {
    String s = "";

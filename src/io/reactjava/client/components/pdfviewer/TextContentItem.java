@@ -1,19 +1,27 @@
-package io.reactjava.client.components.pdfviewer;
-
-import io.reactjava.client.core.react.NativeObject;
-import jsinterop.annotations.JsProperty;
-
 /*==============================================================================
 
-name:       TextContentItem - pdf page text content item
+name:       TextContentItem.java
 
 purpose:    pdf page text content item
 
-history:    Thu Feb 27, 2020 10:30:00 (Giavaneers - LBM) created
+history:    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
 
 notes:
+                        COPYRIGHT (c) BY GIAVANEERS, INC.
+         This source code is licensed under the MIT license found in the
+             LICENSE file in the root directory of this source tree.
 
 ==============================================================================*/
+                                       // package --------------------------- //
+package io.reactjava.client.components.pdfviewer;
+                                       // imports --------------------------- //
+import io.reactjava.client.core.react.NativeObject;
+import jsinterop.annotations.JsOverlay;
+import jsinterop.annotations.JsPackage;
+import jsinterop.annotations.JsProperty;
+import jsinterop.annotations.JsType;
+                                       // TextContentItem ====================//
+@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "Object")
 public class TextContentItem extends NativeObject
 {
                                        // constants ------------------------- //
@@ -23,8 +31,7 @@ public class TextContentItem extends NativeObject
                                        // public instance variables --------- //
                                        // (none)                              //
                                        // protected instance variables -------//
-public @JsProperty
-                                       String   str;       // text string                         //
+public @JsProperty String   str;       // text string                         //
 public @JsProperty String   dir;       // layout : {"ltr", ...}               //
 public @JsProperty double   width;     // width                               //
 public @JsProperty double   height;    // height                              //
@@ -60,6 +67,7 @@ private TextContentItem()
 @notes
                                                                               */
 //------------------------------------------------------------------------------
+@JsOverlay
 public static String toString(
    TextContentItem item)
 {
@@ -77,6 +85,7 @@ public static String toString(
 @notes
                                                                               */
 //------------------------------------------------------------------------------
+@JsOverlay
 public static String toString(
    TextContentItem item,
    int             pageIndex)

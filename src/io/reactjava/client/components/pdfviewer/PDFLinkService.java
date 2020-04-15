@@ -1,21 +1,26 @@
-package io.reactjava.client.components.pdfviewer;
-
-import io.reactjava.client.core.react.NativeObject;
-import jsinterop.annotations.JsOverlay;
-import jsinterop.annotations.JsProperty;
-import jsinterop.annotations.JsType;
-
 /*==============================================================================
 
-name:       PDFLinkService - native pdfjs link service api
+name:       PDFLinkService.java
 
 purpose:    Native pdfjs link service api
 
-history:    Thu Feb 27, 2020 10:30:00 (Giavaneers - LBM) created
+history:    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
 
 notes:
+                        COPYRIGHT (c) BY GIAVANEERS, INC.
+         This source code is licensed under the MIT license found in the
+             LICENSE file in the root directory of this source tree.
 
 ==============================================================================*/
+                                       // package --------------------------- //
+package io.reactjava.client.components.pdfviewer;
+                                       // imports --------------------------- //
+import io.reactjava.client.core.react.NativeObject;
+import jsinterop.annotations.JsOverlay;
+import jsinterop.annotations.JsPackage;
+import jsinterop.annotations.JsProperty;
+import jsinterop.annotations.JsType;
+                                       // PDFLinkService =====================//
 @JsType(isNative  = true, namespace = "pdfjsViewer")
 public class PDFLinkService
 {

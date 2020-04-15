@@ -24,7 +24,12 @@ import io.reactjava.client.core.react.IConfiguration.ICloudServices;
 import io.reactjava.client.core.react.INativeEffectHandler;
 import io.reactjava.client.core.react.IUITheme;
 import io.reactjava.client.core.react.ReactElement;
+import io.reactjava.client.core.rxjs.functions.Action0;
+import io.reactjava.client.core.rxjs.functions.Action1;
+import io.reactjava.client.core.rxjs.observable.Observable;
+import io.reactjava.client.core.rxjs.observable.Observer;
 import io.reactjava.client.core.rxjs.subscription.Subscription;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -100,10 +105,13 @@ public boolean addRenderEditor(
 }
 /*------------------------------------------------------------------------------
 
-@name       cancelPromises - cancel promises
+@name       addSubscription - add subscription
                                                                               */
                                                                              /**
-            Cancel any promises
+            Add subscription.
+
+@param      subscription      subscription
+@param      promise           any promise property of the associated Observable
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -111,8 +119,10 @@ public boolean addRenderEditor(
 
                                                                               */
 //------------------------------------------------------------------------------
-protected void cancelPromises()
+public Subscription addSubscription(
+   Subscription subscription)
 {
+   return(null);
 }
 /*------------------------------------------------------------------------------
 
@@ -357,25 +367,6 @@ protected Map<String,Class> getNavRoutes()
 protected static String getNextId()
 {
    return("@" + ++nextId);
-}
-/*------------------------------------------------------------------------------
-
-@name       getPromises - get promises
-                                                                              */
-                                                                             /**
-            Get promises
-
-@return     promises
-
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-
-                                                                              */
-//------------------------------------------------------------------------------
-public List<Promise> getPromises()
-{
-   return(null);
 }
 /*------------------------------------------------------------------------------
 
@@ -627,7 +618,7 @@ protected String getStateString(
 
                                                                               */
 //------------------------------------------------------------------------------
-public List<Subscription> getSubscriptions()
+protected List<Subscription> getSubscriptions()
 {
    return(null);
 }
@@ -932,6 +923,116 @@ public void setState(
 //------------------------------------------------------------------------------
 public IUITheme setTheme(
    IUITheme theme)
+{
+   return(null);
+}
+/*------------------------------------------------------------------------------
+
+@name       subscribe - subscribe to specified Observable
+                                                                              */
+                                                                             /**
+            Subscribe to specified Observable. Using this method instead of the
+            direct invocation of rxjx.Observable allows built-in cancellation
+            of all subscriptions when the subscriber is dismounted.
+
+@return     theme
+
+@param      observable     target observable
+@param      onNext         onNext handler
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public <T> Subscription subscribe(
+   Observable<T>      observable,
+   Action1<? super T> onNext)
+{
+   return(null);
+}
+/*------------------------------------------------------------------------------
+
+@name       subscribe - subscribe to specified Observable
+                                                                              */
+                                                                             /**
+            Subscribe to specified Observable. Using this method instead of the
+            direct invocation of rxjx.Observable allows built-in cancellation
+            of all subscriptions when the subscriber is dismounted.
+
+@return     theme
+
+@param      observable     target observable
+@param      onNext         onNext handler
+@param      onError        onError handler
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public <T> Subscription subscribe(
+   Observable<T>      observable,
+   Action1<? super T> onNext,
+   Action1<?>         onError)
+{
+   return(null);
+}
+/*------------------------------------------------------------------------------
+
+@name       subscribe - subscribe to specified Observable
+                                                                              */
+                                                                             /**
+            Subscribe to specified Observable. Using this method instead of the
+            direct invocation of rxjx.Observable allows built-in cancellation
+            of all subscriptions when the subscriber is dismounted.
+
+@return     theme
+
+@param      observable     target observable
+@param      observer       observer
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public <T> Subscription subscribe(
+   Observable<T> observable,
+   Observer<? super T> observer)
+{
+   return(null);
+}
+/*------------------------------------------------------------------------------
+
+@name       subscribe - subscribe to specified Observable
+                                                                              */
+                                                                             /**
+            Subscribe to specified Observable. Using this method instead of the
+            direct invocation of rxjx.Observable allows built-in cancellation
+            of all subscriptions when the subscriber is dismounted.
+
+@return     theme
+
+@param      observable     target observable
+@param      onNext         onNext handler
+@param      onError        onError handler
+@param      onCompleted    onCompleted handler
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public <T> Subscription subscribe(
+   Observable<T>      observable,
+   Action1<? super T> onNext,
+   Action1<?>         onError,
+   Action0            onCompleted)
 {
    return(null);
 }

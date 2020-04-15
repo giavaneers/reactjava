@@ -23,16 +23,12 @@ package io.reactjava.client.components.generalpage;
                                        // imports --------------------------- //
 import com.giavaneers.util.gwt.Logger;
 import elemental2.dom.DomGlobal;
-import elemental2.dom.Element;
-import elemental2.dom.HTMLElement;
 import io.reactjava.client.components.generalpage.ContentPage.ContentDsc;
 import io.reactjava.client.components.generalpage.Descriptors.AppBarDsc;
 import io.reactjava.client.components.generalpage.Descriptors.FooterDsc;
 import io.reactjava.client.components.generalpage.Descriptors.PageDsc;
 import io.reactjava.client.components.pdfviewer.PDFViewer;
 import io.reactjava.client.core.react.Component;
-import io.reactjava.client.core.react.INativeEffectHandler;
-import io.reactjava.client.core.react.INativeFunction;
 import io.reactjava.client.core.react.IUITheme;
 import io.reactjava.client.core.react.NativeObject;
 import io.reactjava.client.core.react.Properties;

@@ -1,21 +1,24 @@
-package io.reactjava.client.components.pdfviewer;
-
-import elemental2.core.Global;
-import java.util.HashMap;
-import java.util.Map;
-import jsinterop.base.Js;
-
 /*==============================================================================
 
-name:       Bookmark - bookmark
+name:       Bookmark.java
 
 purpose:    Tuple of Destination with associated text
 
-history:    Thu Feb 27, 2020 10:30:00 (Giavaneers - LBM) created
+history:    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
 
 notes:
+                        COPYRIGHT (c) BY GIAVANEERS, INC.
+         This source code is licensed under the MIT license found in the
+             LICENSE file in the root directory of this source tree.
 
 ==============================================================================*/
+                                       // package --------------------------- //
+package io.reactjava.client.components.pdfviewer;
+                                       // imports --------------------------- //
+import elemental2.core.Global;
+import java.util.HashMap;
+import java.util.Map;
+                                       // PDFHistory =========================//
 public class Bookmark implements Comparable<Bookmark>
 {
                                        // class constants --------------------//
@@ -226,7 +229,7 @@ public void setTextContent(
    {
                                        // items are sorted by pdf coordinate  //
                                        // y, top of the page to the bottom    //
-      TextContentItem item  = Js.uncheckedCast(pageContent.items.getAt(i));
+      TextContentItem item  = (TextContentItem)pageContent.items.getAt(i);
       double          itemY = item.transform[5];
 
       if (itemY <= destY)

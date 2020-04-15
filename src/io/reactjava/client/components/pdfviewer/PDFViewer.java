@@ -2,7 +2,7 @@
 
 name:       PDFViewer.java
 
-purpose:    PDFViewer, supporting the following properties:
+purpose:    PDFViewer for ReactJava using pdf.js
 
 history:    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
 
@@ -21,17 +21,15 @@ import elemental2.dom.DomGlobal;
 import elemental2.dom.Element;
 import elemental2.dom.Event;
 import elemental2.dom.HTMLElement;
-import elemental2.promise.Promise;
 import io.reactjava.client.core.react.Component;
 import io.reactjava.client.core.react.ElementDsc;
 import io.reactjava.client.core.react.INativeEffectHandler;
 import io.reactjava.client.core.react.INativeEventHandler;
-import io.reactjava.client.core.react.INativeFunction;
 import io.reactjava.client.core.react.NativeObject;
+import io.reactjava.client.core.react.Observable;
 import io.reactjava.client.core.react.Properties;
 import io.reactjava.client.core.react.ReactJava;
 import io.reactjava.client.core.react.Utilities;
-import io.reactjava.client.core.rxjs.observable.Observable;
 import io.reactjava.client.core.rxjs.observable.Subscriber;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,6 +44,7 @@ public static final Logger kLOGGER = Logger.newInstance();
 
                                        // options --------------------------- //
 public static final String kPDFJS_CDN_URL =
+   //"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.2.228/pdf.min.js";
    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.2.228/pdf.js";
    //"pdfs/dist/pdf.js";
 
@@ -270,16 +269,19 @@ protected void createPDFViewerNative()
          pdfViewer.update();
       });
                                        // load the document                   //
-   Promise<PDFDocumentProxy> promise =
-      PDFJS.getDocument(getDocumentURLBase()).promise;
-
-   promise.then(
-      (PDFDocumentProxy pdfDocument) ->
-      {
-         pdfDocument.initialize(this, pdfLinkService);
-         return(promise);
-      },
-      error -> null);
+   Observable.fromPromise(
+      PDFJS.getDocument(getDocumentURLBase()).promise).subscribe(
+         this,
+         (PDFDocumentProxy pdfDocument) ->
+         {
+                                       // pdfViewer may have been dismounted  //
+                                       // before the promise was resolved     //
+            pdfDocument.initialize(this, pdfLinkService);
+         },
+         error ->
+         {
+            error = error;
+         });
 };
 /*------------------------------------------------------------------------------
 
@@ -333,21 +335,21 @@ public Observable<List<List<Bookmark>>> getBookmarks()
          }
          else if (pdfDocument != null)
          {
-            getSubscriptions().add(
-               pdfDocument.getBookmarks().subscribe(
-                  (List<List<Bookmark>> bookmarks) ->
-                  {
-                     kLOGGER.logInfo(
-                        "PDFViewer.getBookmarks(): "
-                      + "initialized bookmarks.size()=" + bookmarks.size());
+            pdfDocument.getBookmarks().subscribe(
+               this,
+               (List<List<Bookmark>> bookmarks) ->
+               {
+                  kLOGGER.logInfo(
+                     "PDFViewer.getBookmarks(): "
+                   + "initialized bookmarks.size()=" + bookmarks.size());
 
-                     subscriber.next(bookmarks);
-                     subscriber.complete();
-                  },
-                  error ->
-                  {
-                     subscriber.error(error);
-                  }));
+                  subscriber.next(bookmarks);
+                  subscriber.complete();
+               },
+               error ->
+               {
+                  subscriber.error(error);
+               });
          }
          else
          {
@@ -536,18 +538,14 @@ public void getPDFPage(
    int pageNum)
 {
    PDFDocumentProxy pdfDocument = Js.uncheckedCast(getState("pdfDocument"));
-   Promise promise = pdfDocument.getPage(pageNum);
-   promise.then(
-      (page) ->
+   Observable.fromPromise(pdfDocument.getPage(pageNum)).subscribe(
+      this,
+      (PDFPageProxy page) ->
       {
                                        // will generate a render() invocation //
          setState("pdfPage", page);
-         return(promise);
       },
-      error ->
-      {
-         return(null);
-      });
+      error -> {});
 }
 /*------------------------------------------------------------------------------
 

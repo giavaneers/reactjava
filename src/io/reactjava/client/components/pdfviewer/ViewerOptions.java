@@ -1,5 +1,20 @@
-package io.reactjava.client.components.pdfviewer;
+/*==============================================================================
 
+name:       ViewerOptions.java
+
+purpose:    Native pdfjs viewer options api
+
+history:    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
+
+notes:
+                        COPYRIGHT (c) BY GIAVANEERS, INC.
+         This source code is licensed under the MIT license found in the
+             LICENSE file in the root directory of this source tree.
+
+==============================================================================*/
+                                       // package --------------------------- //
+package io.reactjava.client.components.pdfviewer;
+                                       // imports --------------------------- //
 import elemental2.dom.Element;
 import elemental2.dom.HTMLDivElement;
 import io.reactjava.client.core.react.NativeObject;
@@ -7,18 +22,7 @@ import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
-
-/*==============================================================================
-
-name:       ViewerOptions - native pdfjs viewer options api
-
-purpose:    Native pdfjs viewer options api
-
-history:    Thu Feb 27, 2020 10:30:00 (Giavaneers - LBM) created
-
-notes:
-
-==============================================================================*/
+                                       // ViewerOptions ======================//
 @JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "Object")
 public class ViewerOptions extends NativeObject
 {
@@ -27,10 +31,9 @@ public class ViewerOptions extends NativeObject
                                        // class variables ------------------- //
                                        // (none)                              //
                                        // public instance variables --------- //
-@JsProperty                            // container for the viewer element    //
-public HTMLDivElement container;
-@JsProperty                            // application event bus               //
-public EventBus       eventBus;
+@JsProperty public HTMLDivElement container;
+                                       // application event bus               //
+@JsProperty public EventBus       eventBus;
                                        // protected instance variables -------//
                                        // (none)                              //
                                        // private instance variables -------- //

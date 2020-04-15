@@ -1,26 +1,30 @@
-package io.reactjava.client.components.pdfviewer;
+/*==============================================================================
 
+name:       PDFPageProxy
+
+purpose:    Native pdfjs api
+
+history:    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
+
+notes:
+                        COPYRIGHT (c) BY GIAVANEERS, INC.
+         This source code is licensed under the MIT license found in the
+             LICENSE file in the root directory of this source tree.
+
+==============================================================================*/
+                                       // package --------------------------- //
+package io.reactjava.client.components.pdfviewer;
+                                       // imports --------------------------- //
 import elemental2.promise.Promise;
 import io.reactjava.client.core.react.NativeObject;
-import io.reactjava.client.core.rxjs.observable.Observable;
+import io.reactjava.client.core.react.Observable;
 import io.reactjava.client.core.rxjs.observable.Subscriber;
 import java.util.ArrayList;
 import java.util.List;
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
-
-/*==============================================================================
-
-name:       PDFPageProxy - native pdfjs api
-
-purpose:    Native pdfjs api
-
-history:    Thu Feb 27, 2020 10:30:00 (Giavaneers - LBM) created
-
-notes:
-
-==============================================================================*/
+                                       // PDFPageProxy =====================//
 @JsType(isNative  = true, namespace = "pdfjsLib")
 public class PDFPageProxy
 {
@@ -86,6 +90,7 @@ protected final Observable<List<Destination>> getExplicitDestinations()
       (Subscriber<List<Destination>> subscriber) ->
       {
          pdfDocument.getAnnotations().subscribe(
+            pdfDocument.pdfViewer,
             (NativeObject[][] annotations) ->
             {
                List<Destination> destinations = new ArrayList<>();

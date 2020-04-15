@@ -1,22 +1,26 @@
-package io.reactjava.client.components.pdfviewer;
+/*==============================================================================
 
+name:       Destination.java
+
+purpose:    Navigable destination
+
+history:    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
+
+notes:
+                        COPYRIGHT (c) BY GIAVANEERS, INC.
+         This source code is licensed under the MIT license found in the
+             LICENSE file in the root directory of this source tree.
+
+==============================================================================*/
+                                       // package --------------------------- //
+package io.reactjava.client.components.pdfviewer;
+                                       // imports --------------------------- //
 import elemental2.core.JsArray;
 import io.reactjava.client.core.react.NativeObject;
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;
-
-/*==============================================================================
-
-name:       Destination - navigable destination
-
-purpose:    Navigable destination
-
-history:    Thu Feb 27, 2020 10:30:00 (Giavaneers - LBM) created
-
-notes:
-
-==============================================================================*/
+                                       // Destination ========================//
 @JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "Array")
 public class Destination extends JsArray
 {

@@ -25,6 +25,7 @@ import elemental2.dom.Node;
 import elemental2.promise.Promise;
 import io.reactjava.client.core.react.IConfiguration.ICloudServices;
 import io.reactjava.client.core.react.SEOInfo.SEOPageInfo;
+import io.reactjava.client.core.rxjs.observable.Subscriber;
 import io.reactjava.client.core.rxjs.subscription.Subscription;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -66,9 +67,7 @@ protected List<String>  injectedStyleIds;
                                        // render editors                      //
 protected Map<String,RenderEditFunction>
                         renderEditors;
-                                       // promises list (deprecated)          //
-protected List<Promise> promises;
-                                       // subscriptions list (deprecated)     //
+                                       // subscriptions list                  //
 protected List<Subscription>
                         subscriptions;
                                        // private instance variables -------- //
@@ -153,25 +152,25 @@ public boolean addRenderEditor(
 }
 /*------------------------------------------------------------------------------
 
-@name       cancelPromises - cancel promises
+@name       addSubscription - add subscription
                                                                               */
                                                                              /**
-            Cancel any promises
+            Add subscription.
+
+@param      subscription      subscription
+@param      promise           any promise property of the associated Observable
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
-
-@deprecated
 
 @notes
 
                                                                               */
 //------------------------------------------------------------------------------
-protected void cancelPromises()
+public Subscription addSubscription(
+   Subscription subscription)
 {
-   for (Promise promise : getPromises())
-   {
-      promise.reject(kPROMISE_CANCELLED);
-   }
+   getSubscriptions().add(subscription);
+   return(subscription);
 }
 /*------------------------------------------------------------------------------
 
@@ -182,17 +181,19 @@ protected void cancelPromises()
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
-@deprecated
-
 @notes
 
                                                                               */
 //------------------------------------------------------------------------------
 protected void cancelSubscriptions()
 {
-   for (Subscription subscription : getSubscriptions())
+   List<Subscription> subscriptions = getSubscriptions();
+   while(subscriptions.size() > 0)
    {
-      subscription.unsubscribe();
+      Subscription subscription = subscriptions.remove(0);
+      {
+         subscription.unsubscribe();
+      }
    }
 }
 /*------------------------------------------------------------------------------
@@ -708,32 +709,6 @@ protected static String getNextId()
 }
 /*------------------------------------------------------------------------------
 
-@name       getPromises - get promises
-                                                                              */
-                                                                             /**
-            Get promises
-
-@return     promises
-
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
-
-@deprecated
-
-@notes
-
-
-                                                                              */
-//------------------------------------------------------------------------------
-public List<Promise> getPromises()
-{
-   if (promises == null)
-   {
-      promises = new ArrayList<>();
-   }
-   return(promises);
-}
-/*------------------------------------------------------------------------------
-
 @name       getReactElement - get result of render
                                                                               */
                                                                              /**
@@ -1040,13 +1015,11 @@ protected String getStyleId()
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
-@deprecated
-
 @notes
 
                                                                               */
 //------------------------------------------------------------------------------
-public List<Subscription> getSubscriptions()
+protected List<Subscription> getSubscriptions()
 {
    if (subscriptions == null)
    {
@@ -1475,7 +1448,7 @@ protected void setComponentFcn(
             Set whether the component is mounted. This is typically set
             in a useEffect cleanup function.
 
-@param      bDismounted    whether component has been dismounted.
+@param      bMounted    whether component has been dismounted.
 
 @history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -1643,6 +1616,7 @@ protected void useEffectTrackDismounted()
       {
                                        // cleanup function                    //
          setMounted(false);
+         cancelSubscriptions();
       });
    });
 }

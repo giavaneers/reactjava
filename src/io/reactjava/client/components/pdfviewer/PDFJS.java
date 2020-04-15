@@ -1,20 +1,24 @@
-package io.reactjava.client.components.pdfviewer;
-
-import jsinterop.annotations.JsPackage;
-import jsinterop.annotations.JsProperty;
-import jsinterop.annotations.JsType;
-
 /*==============================================================================
 
-name:       PDFJS - native pdfjs api
+name:       PDFJS.java
 
 purpose:    Native pdfjs api
 
-history:    Thu Feb 27, 2020 10:30:00 (Giavaneers - LBM) created
+history:    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
 
 notes:
+                        COPYRIGHT (c) BY GIAVANEERS, INC.
+         This source code is licensed under the MIT license found in the
+             LICENSE file in the root directory of this source tree.
 
 ==============================================================================*/
+                                       // package --------------------------- //
+package io.reactjava.client.components.pdfviewer;
+                                       // imports --------------------------- //
+import jsinterop.annotations.JsPackage;
+import jsinterop.annotations.JsProperty;
+import jsinterop.annotations.JsType;
+                                       // PDFJS ==============================//
 @JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "pdfjsLib")
 public class PDFJS
 {
