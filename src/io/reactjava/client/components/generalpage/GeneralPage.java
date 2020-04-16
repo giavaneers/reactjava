@@ -288,7 +288,13 @@ public Consumer<Map<String,Object>> openHandler = (Map<String,Object> args) ->
    Boolean bOpenDrawer = (Boolean)args.get("bOpen");
    if (bOpenDrawer != null && bOpenDrawer)
    {
-      Component.forId("drawer").setState("show", true);
+      Component.forClass(SideDrawer.class).subscribe(
+         this,
+         (Component component) ->
+         {
+            component.setState("show", true);
+         },
+         error -> {});
    }
    else
    {
@@ -305,7 +311,7 @@ public Consumer<Map<String,Object>> openHandler = (Map<String,Object> args) ->
       else if (id.startsWith("bookmark:"))
       {
                                        // ex: bookmark:{157,0,'XYZ',72,720,0} //
-         getPDFViewer().navigateTo(id);
+         pdfFViewerNavigateToBookmark(id);
       }
       else if (Utilities.isURL(id))
       {
@@ -401,12 +407,12 @@ protected NativeObject getPDFOptions()
 }
 /*------------------------------------------------------------------------------
 
-@name       getPDFViewer - get any PDFViewer
+@name       pdfFViewerNavigateToBookmark - pdfViewer navigate to bookmark
                                                                               */
                                                                              /**
-            Get any PDFViewer.
+            PDFViewer navigate to specified bookmark
 
-@return     any PDFViewer
+@param      bookmark    target bookmark, ex: "bookmark:{157,0,'XYZ',72,720,0}"
 
 @history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
 
@@ -414,12 +420,16 @@ protected NativeObject getPDFOptions()
 
                                                                               */
 //------------------------------------------------------------------------------
-protected PDFViewer getPDFViewer()
+protected void pdfFViewerNavigateToBookmark(
+   String bookmark)
 {
-   PDFViewer pdfViewer =
-      (PDFViewer)Component.forId(PDFViewer.kCOMPONENT_ID_PDF_VIEWER);
-
-   return(pdfViewer);
+   Component.forClass(PDFViewer.class).subscribe(
+      this,
+      (Component pdfViewer) ->
+      {
+         ((PDFViewer)pdfViewer).navigateTo(bookmark);
+      },
+      error -> {});
 }
 /*------------------------------------------------------------------------------
 
@@ -477,7 +487,6 @@ public final void render()
  /*--
                                        <!-- Side Drawer ----------------------->
          <SideDrawer
-            id="drawer"
             openhandler={openHandler}
             content={content}
             pdfurl={getContentPDFURL()}

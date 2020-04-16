@@ -87,9 +87,6 @@ public static final int kLINK_TARGET_TOP    = 4;
                                        // class variables ------------------- //
                                        // shared instance                     //
 public  static PDFViewer  sharedInstance;
-                                       // instance subscribers                //
-protected static List<Subscriber<PDFViewer>>
-                          instanceSubscribers;
                                        // map of native pdf viewer by url     //
 protected static Map<String,PDFViewerNative>
                           pdfViewerNativeByURL;
@@ -423,38 +420,6 @@ public String getDocumentURLHash()
 }
 /*------------------------------------------------------------------------------
 
-@name       getInstance - get new instance
-                                                                              */
-                                                                             /**
-            Get new instance.
-
-@history    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public static Observable<PDFViewer> getInstance()
-{
-   Observable<PDFViewer> observable = Observable.create(
-      (Subscriber<PDFViewer> subscriber) ->
-      {
-         PDFViewer pdfViewer = sharedInstance();
-         if (pdfViewer != null)
-         {
-            subscriber.next(pdfViewer);
-            subscriber.complete();
-         }
-         else
-         {
-            getSubscribersInstance().add(subscriber);
-         }
-         return(subscriber);
-      });
-
-   return(observable);
-}
-/*------------------------------------------------------------------------------
-
 @name       getCover - get any cover
                                                                               */
                                                                              /**
@@ -669,9 +634,13 @@ public INativeEffectHandler handleEffect = () ->
    }
    else
    {
-      Component.forId(
-         ViewerCover.kCOMPONENT_ID_VIEWER_COVER).setState(
-            ViewerCover.kSTATE_SHOW, false);
+      Component.forClass(ViewerCover.class).subscribe(
+         this,
+         (Component component) ->
+         {
+            component.setState(ViewerCover.kSTATE_SHOW, false);
+         },
+         error -> {});
    }
                                        // no cleanup function                 //
    return(INativeEffectHandler.kNO_CLEANUP_FCN);
@@ -735,26 +704,6 @@ protected List<Subscriber<List<List<Bookmark>>>> getSubscribersBookmarks()
       bookmarkSubscribers = new ArrayList<>();
    }
    return(bookmarkSubscribers);
-}
-/*------------------------------------------------------------------------------
-
-@name       getSubscribersInstance - get new instance subscribers
-                                                                              */
-                                                                             /**
-            Get new instance subscribers.
-
-@history    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-protected static List<Subscriber<PDFViewer>> getSubscribersInstance()
-{
-   if (instanceSubscribers == null)
-   {
-      instanceSubscribers = new ArrayList<>();
-   }
-   return(instanceSubscribers);
 }
 /*------------------------------------------------------------------------------
 
@@ -1604,14 +1553,6 @@ protected static void setSharedInstance(
    PDFViewer pdfViewer)
 {
    sharedInstance = pdfViewer;
-                                       // notify all subscribers              //
-   List<Subscriber<PDFViewer>> subscribers = getSubscribersInstance();
-   while(subscribers.size() > 0)
-   {
-      Subscriber<PDFViewer> subscriber = subscribers.remove(0);
-      subscriber.next(pdfViewer);
-      subscriber.complete();
-   }
 }
 /*------------------------------------------------------------------------------
 

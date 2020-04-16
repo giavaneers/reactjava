@@ -22,7 +22,6 @@ import elemental2.dom.HTMLBodyElement;
 import elemental2.dom.HTMLElement;
 import elemental2.dom.HTMLStyleElement;
 import elemental2.dom.Node;
-import elemental2.promise.Promise;
 import io.reactjava.client.core.react.IConfiguration.ICloudServices;
 import io.reactjava.client.core.react.SEOInfo.SEOPageInfo;
 import io.reactjava.client.core.rxjs.observable.Subscriber;
@@ -51,6 +50,9 @@ protected static final Logger kLOGGER = Logger.newInstance();
 protected static int    nextId;        // next elementId to be autoassigned   //
 private   static Map<String,Component> // map of component by id              //
                         componentById;
+                                       // map of component by id  subscribers //
+private   static Map<String,List<Subscriber<Component>>>
+                        componentByIdSubscribers;
                                        // map of stylesheet by component class//
 protected static Map<String,String>
                         injectedStylesheets;
@@ -195,6 +197,8 @@ protected void cancelSubscriptions()
          subscription.unsubscribe();
       }
    }
+   removeComponentByIdSubscribers(props().getString("id"));
+   removeComponentByIdSubscribers(getClass().getName());
 }
 /*------------------------------------------------------------------------------
 
@@ -438,6 +442,27 @@ public void forceUpdate()
 }
 /*------------------------------------------------------------------------------
 
+@name       forClass - get component by specified class
+                                                                              */
+                                                                             /**
+            Get component by specified class.
+
+@return     component by specified class or null if not found
+
+@history    Fri Nov 08, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static Observable<Component> forClass(
+   Class clas)
+{
+                                       // the id map is multipurpose          //
+   return(forId(clas.getName()));
+}
+/*------------------------------------------------------------------------------
+
 @name       forElement - get component for specified element
                                                                               */
                                                                              /**
@@ -484,10 +509,26 @@ public static Component forElement(
 
                                                                               */
 //------------------------------------------------------------------------------
-public static Component forId(
+public static Observable<Component> forId(
    String id)
 {
-   return(getComponentByIdMap().get(id));
+   Observable<Component> observable = Observable.create(
+      (Subscriber<Component> subscriber) ->
+      {
+         Component component = getComponentByIdMap().get(id);
+         if (component != null)
+         {
+            subscriber.next(component);
+            subscriber.complete();
+         }
+         else
+         {
+            putComponentByIdSubscriber(id, subscriber);
+         }
+         return(subscriber);
+      });
+
+   return(observable);
 }
 /*------------------------------------------------------------------------------
 
@@ -511,6 +552,29 @@ public static Map<String,Component> getComponentByIdMap()
       componentById = new HashMap<>();
    }
    return(componentById);
+}
+/*------------------------------------------------------------------------------
+
+@name       getComponentByIdSubscribers - get map of component by id subscribers
+                                                                              */
+                                                                             /**
+            Get map of component by id subscribers.
+
+@return     map of component by id subscribers
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected static Map<String,List<Subscriber<Component>>> getComponentByIdSubscribers()
+{
+   if (componentByIdSubscribers == null)
+   {
+      componentByIdSubscribers = new HashMap<>();
+   }
+   return(componentByIdSubscribers);
 }
 /*------------------------------------------------------------------------------
 
@@ -1293,6 +1357,85 @@ public static void putComponentById(
    kLOGGER.logInfo(
       "Component.putComponentById(): "
     + "component=" + componentClass + ", id=" + id + ", " + previousDsc);
+
+                                       // forId() subscribers                 //
+   List<Subscriber<Component>> subscribers =
+      getComponentByIdSubscribers().get(id);
+
+   if (subscribers != null)
+   {
+      while (subscribers.size() > 0)
+      {
+         Subscriber<Component> subscriber = subscribers.remove(0);
+         subscriber.next(component);
+         subscriber.complete();
+      }
+   }
+
+   getComponentByIdMap().put(componentClass, component);
+
+                                       // forClass() subscribers              //
+   subscribers = getComponentByIdSubscribers().get(componentClass);
+   if (subscribers != null)
+   {
+      while (subscribers.size() > 0)
+      {
+         Subscriber<Component> subscriber = subscribers.remove(0);
+         subscriber.next(component);
+         subscriber.complete();
+      }
+   }
+}
+/*------------------------------------------------------------------------------
+
+@name       putComponentByIdSubscriber - put map of component by id subscriber
+                                                                              */
+                                                                             /**
+            Put map of component by id subscriber.
+
+@param      id             id
+@param      subscriber     subscriber
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static void putComponentByIdSubscriber(
+   String     id,
+   Subscriber subscriber)
+{
+   List<Subscriber<Component>> subscribers = getComponentByIdSubscribers().get(id);
+   if (subscribers == null)
+   {
+      subscribers = new ArrayList<>();
+      getComponentByIdSubscribers().put(id, subscribers);
+   }
+   if (!subscribers.contains(subscriber))
+   {
+      subscribers.add(subscriber);
+   }
+}
+/*------------------------------------------------------------------------------
+
+@name       removeComponentByIdSubscribers - remove subscribers for id
+                                                                              */
+                                                                             /**
+            Remove subscribers for id.
+
+@param      id    id
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected static void removeComponentByIdSubscribers(
+   String id)
+{
+   getComponentByIdSubscribers().remove(id);
 }
 /*------------------------------------------------------------------------------
 

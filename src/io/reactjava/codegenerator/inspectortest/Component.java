@@ -18,16 +18,16 @@ package io.reactjava.codegenerator.inspectortest;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.Element;
 import elemental2.dom.Node;
-import elemental2.promise.Promise;
 import io.reactjava.client.core.react.ElementDsc;
 import io.reactjava.client.core.react.IConfiguration.ICloudServices;
 import io.reactjava.client.core.react.INativeEffectHandler;
 import io.reactjava.client.core.react.IUITheme;
+import io.reactjava.client.core.react.Observable;
 import io.reactjava.client.core.react.ReactElement;
 import io.reactjava.client.core.rxjs.functions.Action0;
 import io.reactjava.client.core.rxjs.functions.Action1;
-import io.reactjava.client.core.rxjs.observable.Observable;
 import io.reactjava.client.core.rxjs.observable.Observer;
+import io.reactjava.client.core.rxjs.observable.Subscriber;
 import io.reactjava.client.core.rxjs.subscription.Subscription;
 import java.util.HashMap;
 import java.util.List;
@@ -176,6 +176,26 @@ public void forceUpdate()
 }
 /*------------------------------------------------------------------------------
 
+@name       forClass - get component by specified class
+                                                                              */
+                                                                             /**
+            Get component by specified class.
+
+@return     component by specified class or null if not found
+
+@history    Fri Nov 08, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static Observable<io.reactjava.client.core.react.Component> forClass(
+   Class clas)
+{
+   return(null);
+}
+/*------------------------------------------------------------------------------
+
 @name       forElement - get component for specified element
                                                                               */
                                                                              /**
@@ -211,7 +231,7 @@ public static Component forElement(
 
                                                                               */
 //------------------------------------------------------------------------------
-public static Component forId(
+public static Observable<io.reactjava.client.core.react.Component> forId(
    String id)
 {
    return(null);

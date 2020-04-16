@@ -209,9 +209,9 @@ public static Destination newInstance(
    int    refNum,
    int    generation,
    String name,
-   int    num1,
-   int    num2,
-   int    num3)
+   double num1,
+   double num2,
+   double num3)
 {
    return(newInstance(refNum, generation, name, num1, num2, num3, -1));
 }
@@ -251,10 +251,10 @@ public static Destination newInstance(
    int    refNum,
    int    generation,
    String name,
-   int    num1,
-   int    num2,
-   int    num3,
-   int    num4)
+   double num1,
+   double num2,
+   double num3,
+   double num4)
 {
    Destination destination = new Destination();
    destination.setAt(0, NativeObject.with("num", refNum, "gen", generation));
@@ -320,9 +320,9 @@ public static Destination newInstance(
             Integer.parseInt(splits[0].trim()),
             Integer.parseInt(splits[1].trim()),
             splits[2].trim().replace("'", ""),
-            Integer.parseInt(splits[3].trim()),
-            Integer.parseInt(splits[4].trim()),
-            Integer.parseInt(splits[5].trim()));
+            Double.parseDouble(splits[3].trim()),
+            Double.parseDouble(splits[4].trim()),
+            Double.parseDouble(splits[5].trim()));
    }
 
    return(destination);

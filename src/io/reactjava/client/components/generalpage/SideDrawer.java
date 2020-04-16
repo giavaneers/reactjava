@@ -31,6 +31,7 @@ import io.reactjava.client.core.react.INativeEventHandler;
 import io.reactjava.client.core.react.INativeFunction;
 import io.reactjava.client.core.react.INativeFunction1Arg;
 import io.reactjava.client.core.react.NativeObject;
+import io.reactjava.client.core.react.Observable;
 import io.reactjava.client.core.rxjs.functions.Action1;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -102,11 +103,12 @@ protected List<List<Bookmark>> getBookmarks()
    List<List<Bookmark>> bookmarks = (List<List<Bookmark>>)getState("bookmarks");
    if (bookmarks == null)
    {
-      PDFViewer.getInstance().subscribe(
+      bookmarks = new ArrayList<>();
+      Component.forClass(PDFViewer.class).subscribe(
          this,
-         (PDFViewer pdfViewer) ->
+         (Component pdfViewer) ->
          {
-            pdfViewer.getBookmarks().subscribe(
+            ((PDFViewer)pdfViewer).getBookmarks().subscribe(
                this,
                (List<List<Bookmark>> viewerBookmarks) ->
                {
@@ -115,8 +117,6 @@ protected List<List<Bookmark>> getBookmarks()
                error ->{});
          },
          error ->{});
-
-      bookmarks = new ArrayList<>();
    }
 
    return(bookmarks);
