@@ -1867,7 +1867,7 @@ public static GoogleCloudStorageManagerBase gcsManager()
    if (gcsManager == null)
    {
       File projectDir  = new File(System.getProperty("user.dir"));
-      File rsrcKeyDir  = new File(projectDir, toOSPath("resourcesPrivate/keys"));
+      File rsrcKeyDir  = new File(projectDir, toOSPath("private/keys"));
       File rsrcKey     = new File(rsrcKeyDir, kSERVICE_ACCOUNT_PRIVATE_KEY_NAME);
 
       InputStream svcAcctPrivateInputStream =
