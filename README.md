@@ -12,5 +12,9 @@ Despite its initial focus on computer science education, it has emerged as a too
 
 The [ReactJava Developer Guide](https://reactjava.io/#userGuide) is the central resource for those wishing to learn how to create a React application with Java. The [Getting Started](https://reactjava.io/#getStarted) section will help you get up and running right away with [create-reactjava-app](https://www.npmjs.com/package/create-reactjava-app).
 
+## Examples
+
+The [ReactJava Developer Guide](https://reactjava.io/#userGuide) includes an extensive set of examples. You can also browse the [example sources](https://github.com/giavaneers/reactjavaexamples).
+
 ## License
 [MIT](https://github.com/giavaneers/reactjava/blob/master/LICENSE)
