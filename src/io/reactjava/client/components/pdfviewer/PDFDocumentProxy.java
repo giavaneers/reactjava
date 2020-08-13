@@ -18,7 +18,7 @@ package io.reactjava.client.components.pdfviewer;
 import elemental2.promise.Promise;
 import io.reactjava.client.core.react.NativeObject;
 import io.reactjava.client.core.react.Observable;
-import io.reactjava.client.core.rxjs.observable.Subscriber;
+import io.reactjava.client.core.react.Subscriber;
 import java.util.ArrayList;
 import java.util.List;
 import jsinterop.annotations.JsOverlay;

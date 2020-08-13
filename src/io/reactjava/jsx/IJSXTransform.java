@@ -43,125 +43,6 @@ String  kJSX_REGEXP_END = "--\\*/";
 String  kJAVA_STRING_BEG = "%javaStringBeg%";
 String  kJAVA_STRING_END = "%javaStringEnd%";
 
-Map<String,String> kREACT_TAGS =
-   new HashMap<String,String>()
-   {{
-      put("React.Fragment", "Fragment");
-      put("react.fragment", "Fragment");
-      put("Fragment",       "Fragment");
-   }};
-
-Map<String,String> kSTD_TAGS =
-   new HashMap<String,String>()
-   {{
-      put("a",         "a");
-      put("abbr",      "abbr");
-      put("acronym",   "acronym");
-      put("article",   "article");
-      put("audio",     "audio");
-      put("b",         "b");
-      put("bdo",       "bdo");
-      put("big",       "big");
-      put("br",        "br");
-      put("button",    "button");
-      put("canvas",    "canvas");
-      put("caption",   "caption");
-      put("cite",      "cite");
-      put("code",      "code");
-      put("col",       "col");
-      put("colgroup",  "colgroup");
-      put("dfn",       "dfn");
-      put("div",       "div");
-      put("em",        "em");
-      put("footer",    "footer");
-      put("form",      "form");
-      put("fragment",  "fragment");
-      put("header",    "header");
-      put("h1",        "h1");
-      put("h2",        "h2");
-      put("h3",        "h3");
-      put("h4",        "h4");
-      put("h5",        "h5");
-      put("h6",        "h6");
-      put("i",         "i");
-      put("iframe",    "iframe");
-      put("img",       "img");
-      put("input",     "input");
-      put("kbd",       "kbd");
-      put("label",     "label");
-      put("li",        "li");
-      put("main",      "main");
-      put("map",       "map");
-      put("object",    "object");
-      put("ol",        "ol");
-      put("pre",       "pre");
-      put("option",    "option");
-      put("optgroup",  "optgroup");
-      put("p",         "p");
-      put("q",         "q");
-      put("samp",      "samp");
-      put("script",    "script");
-      put("section",   "section");
-      put("select",    "select");
-      put("small",     "small");
-      put("source",    "source");
-      put("span",      "span");
-      put("strong",    "strong");
-      put("sub",       "sub");
-      put("sup",       "sup");
-      put("table",     "table");
-      put("td",        "td");
-      put("textarea",  "textarea");
-      put("th",        "th");
-      put("time",      "time");
-      put("tr",        "tr");
-      put("tt",        "tt");
-      put("strictMode","strictMode");
-      put("ul",        "ul");
-      put("var",       "var");
-		                                 // svg related elements                //
-      put("circle",    "circle");
-      put("polygon",   "polygon");
-      put("svg",       "svg");
-   }};
-
-Map<String,String> kINLINE_TAGS =
-   new HashMap<String,String>()
-   {{
-      put("a",         "a");
-      put("abbr",      "abbr");
-      put("acronym",   "acronym");
-      put("b",         "b");
-      put("bdo",       "bdo");
-      put("big",       "big");
-      put("br",        "br");
-      put("button",    "button");
-      put("cite",      "cite");
-      put("code",      "code");
-      put("dfn",       "dfn");
-      put("em",        "em");
-      put("i",         "i");
-      put("img",       "img");
-      put("input",     "input");
-      put("kbd",       "kbd");
-      put("label",     "label");
-      put("map",       "map");
-      put("object",    "object");
-      put("q",         "q");
-      put("samp",      "samp");
-      put("script",    "script");
-      put("select",    "select");
-      put("small",     "small");
-      put("span",      "span");
-      put("strong",    "strong");
-      put("sub",       "sub");
-      put("sup",       "sup");
-      put("textarea",  "textarea");
-      put("time",      "time");
-      put("tt",        "tt");
-      put("var",       "var");
-   }};
-
 String[] kFILTER_UNSUPPORTED =
 {
    "com.giavaneers.net",
@@ -177,6 +58,196 @@ String[] kFILTER_UNSUPPORTED =
    "jsinterop",
    "org.jsoup"
 };
+
+Map<String,String> kREACT_TAGS =
+   new HashMap<String,String>()
+   {{
+      put("React.Fragment", "Fragment");
+      put("react.fragment", "Fragment");
+      put("Fragment",       "Fragment");
+   }};
+
+Map<String,String> kSTD_TAGS =
+   new HashMap<String,String>()
+   {{
+      put("a",         "a");
+      put("abbr",      "abbr");
+      put("acronym",   "acronym");
+      put("app",       "app");
+      put("applet",    "applet");
+      put("area",      "area");
+      put("article",   "article");
+      put("aside",     "aside");
+      put("audio",     "audio");
+      put("b",         "b");
+      put("base",      "base");
+      put("basefont",  "basefont");
+      put("bdi",       "bdi");
+      put("bdo",       "bdo");
+      put("bgsound",   "bgsound");
+      put("big",       "big");
+      put("blink",     "blink");
+      put("blockquote","blockquote");
+      put("body",      "body");
+      put("br",        "br");
+      put("button",    "button");
+      put("canvas",    "canvas");
+      put("caption",   "caption");
+      put("center",    "center");
+      put("cite",      "cite");
+      put("code",      "code");
+      put("col",       "col");
+      put("colgroup",  "colgroup");
+      put("comment",   "comment");
+      put("datalist",  "datalist");
+      put("dd",        "dd");
+      put("del",       "del");
+      put("details",   "details");
+      put("dfn",       "dfn");
+      put("dialog",    "dialog");
+      put("dir",       "dir");
+      put("div",       "div");
+      put("dl",        "dl");
+      put("dt",        "dt");
+      put("em",        "em");
+      put("embed",     "embed");
+      put("fieldset",  "fieldset");
+      put("figcaption","figcaption");
+      put("figure",    "figure");
+      put("font",      "font");
+      put("footer",    "footer");
+      put("form",      "form");
+      put("fragment",  "fragment");
+      put("frame",     "frame");
+      put("frameset",  "frameset");
+      put("head",      "head");
+      put("header",    "header");
+      put("h1",        "h1");
+      put("h2",        "h2");
+      put("h3",        "h3");
+      put("h4",        "h4");
+      put("h5",        "h5");
+      put("h6",        "h6");
+      put("hr",        "hr");
+      put("html",      "html");
+      put("hype",      "hype");
+      put("i",         "i");
+      put("iframe",    "iframe");
+      put("img",       "img");
+      put("input",     "input");
+      put("ins",       "ins");
+      put("isindex",   "isindex");
+      put("kbd",       "kbd");
+      put("keygen",    "keygen");
+      put("label",     "label");
+      put("legend",    "legend");
+      put("li",        "li");
+      put("link",      "link");
+      put("listing",   "listing");
+      put("main",      "main");
+      put("map",       "map");
+      put("mark",      "mark");
+      put("marquee",   "marquee");
+      put("menu",      "menu");
+      put("menuitem",  "menuitem");
+      put("meta",      "meta");
+      put("meter",     "meter");
+      put("multicol",  "multicol");
+      put("nav",       "nav");
+      put("nobr",      "nobr");
+      put("noembed",   "noembed");
+      put("noframes",  "noframes");
+      put("noscript",  "noscript");
+      put("object",    "object");
+      put("ol",        "ol");
+      put("option",    "option");
+      put("optgroup",  "optgroup");
+      put("output",    "output");
+      put("p",         "p");
+      put("param",     "param");
+      put("plaintext", "plaintext");
+      put("pre",       "pre");
+      put("progress",  "progress");
+      put("q",         "q");
+      put("rp",        "rp");
+      put("rt",        "rt");
+      put("ruby",      "ruby");
+      put("s",         "s");
+      put("samp",      "samp");
+      put("script",    "script");
+      put("section",   "section");
+      put("select",    "select");
+      put("small",     "small");
+      put("sound",     "sound");
+      put("source",    "source");
+      put("spacer",    "spacer");
+      put("span",      "span");
+      put("strong",    "strong");
+      put("style",     "style");
+      put("sub",       "sub");
+      put("summary",   "summary");
+      put("sup",       "sup");
+      put("table",     "table");
+      put("tbody",     "tbody");
+      put("td",        "td");
+      put("textarea",  "textarea");
+      put("tfoot",     "tfoot");
+      put("th",        "th");
+      put("thead",     "thead");
+      put("time",      "time");
+      put("title",     "title");
+      put("tr",        "tr");
+      put("track",     "track");
+      put("tt",        "tt");
+      put("strictMode","strictMode");
+      put("u",         "u");
+      put("ul",        "ul");
+      put("var",       "var");
+      put("video",     "video");
+      put("wbr",       "wbr");
+      put("xmp",       "xmp");
+		                                 // svg related elements                //
+      put("circle",    "circle");
+      put("polygon",   "polygon");
+      put("svg",       "svg");
+   }};
+
+public static final Map<String,String> kINLINE_TAGS =
+   new HashMap<String,String>()
+   {{
+      put("a",         "a");
+      put("abbr",      "abbr");
+      put("acronym",   "acronym");
+      put("b",         "b");
+      put("bdo",       "bdo");
+      put("big",       "big");
+      put("br",        "br");
+      put("button",    "button");
+      put("cite",      "cite");
+      put("code",      "code");
+      put("dfn",       "dfn");
+      put("em",        "em");
+      put("i",         "i");
+      put("img",       "img");
+      put("input",     "input");
+      put("kbd",       "kbd");
+      put("label",     "label");
+      put("map",       "map");
+      put("object",    "object");
+      put("q",         "q");
+      put("samp",      "samp");
+      put("script",    "script");
+      put("select",    "select");
+      put("small",     "small");
+      put("span",      "span");
+      put("strong",    "strong");
+      put("sub",       "sub");
+      put("sup",       "sup");
+      put("textarea",  "textarea");
+      put("time",      "time");
+      put("tt",        "tt");
+      put("var",       "var");
+   }};
                                        // class variables ------------------- //
                                        // (none)                              //
 

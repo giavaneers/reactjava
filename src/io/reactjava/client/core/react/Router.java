@@ -185,7 +185,7 @@ public static Component componentForHash(
 
       if (factory != null)
       {
-         component = factory.apply(props);
+         component = Component.newInstance(classname, props);
 
                                        // assign any nested routes            //
          configuration.setNavRoutesNested(component.getNavRoutes());

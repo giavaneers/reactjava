@@ -15,8 +15,10 @@ history:    Fri Nov 09, 2018 10:30:00 (Giavaneers - LBM) created
 package io.reactjava.client.providers.http;
                                        // imports --------------------------- //
 import com.giavaneers.util.gwt.APIRequestor;
+import elemental2.core.ArrayBuffer;
+import elemental2.core.Uint8Array;
+import io.reactjava.client.core.react.Observable;
 import io.reactjava.client.providers.http.IHttpResponse.ResponseType;
-import io.reactjava.client.core.rxjs.observable.Observable;
 
                                        // IHttpClient ========================//
 public interface IHttpClient extends IHttpClientBase
@@ -59,6 +61,40 @@ Observable<HttpResponse> send();
 //------------------------------------------------------------------------------
 Observable<HttpResponse> send(
    byte[] bytes);
+
+/*------------------------------------------------------------------------------
+
+@name       send - send the request
+                                                                              */
+                                                                             /**
+            Send the request.
+
+@return     void
+
+@history    Fri Nov 09, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+Observable<HttpResponse> send(
+   ArrayBuffer arrayBuffer);
+
+/*------------------------------------------------------------------------------
+
+@name       send - send the request
+                                                                              */
+                                                                             /**
+            Send the request.
+
+@return     void
+
+@history    Fri Nov 09, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+Observable<HttpResponse> send(
+   Uint8Array uint8Array);
 
 /*------------------------------------------------------------------------------
 

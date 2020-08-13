@@ -16,6 +16,8 @@ notes:
 package io.reactjava.client.providers.http;
                                        // imports --------------------------- //
 import com.giavaneers.util.gwt.APIRequestor;
+import elemental2.core.ArrayBuffer;
+import elemental2.core.Uint8Array;
 import io.reactjava.client.providers.http.HttpClientBase.JsXMLHttpRequest;
 import io.reactjava.client.providers.http.IHttpResponse.ResponseType;
 import io.reactjava.client.core.react.IProvider;
@@ -311,6 +313,40 @@ public void send(
 //------------------------------------------------------------------------------
 Object send(
    byte[] bytes);
+
+/*------------------------------------------------------------------------------
+
+@name       send - send the request
+                                                                              */
+                                                                             /**
+            Send the request.
+
+@return     void
+
+@history    Fri Nov 09, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+Object send(
+   ArrayBuffer arrayBuffer);
+
+/*------------------------------------------------------------------------------
+
+@name       send - send the request
+                                                                              */
+                                                                             /**
+            Send the request.
+
+@return     void
+
+@history    Fri Nov 09, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+Object send(
+   Uint8Array uint8Array);
 
 /*------------------------------------------------------------------------------
 

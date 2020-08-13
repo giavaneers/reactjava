@@ -41,16 +41,59 @@ public class Properties extends JsObject
 @name       Properties - default constructor
                                                                               */
                                                                              /**
-            Default constructor
+            Default constructor, package-private
 
 @history    Mon Aug 28, 2017 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public Properties()
+Properties()
 {
    super();
+}
+/*------------------------------------------------------------------------------
+
+@name       equivalent - standard equals() method, renamed
+                                                                              */
+                                                                             /**
+            Standard equals() method, renamed since a 'JsOverlay method cannot
+            be nor override a JsProperty or a JsMethod'.
+
+@return     value of specified property, or null if not found.
+
+@param      propertyName      property name
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+@JsOverlay
+public final boolean equivalent(
+   Object obj)
+{
+   Properties candidate = null;
+   boolean    bEquals   = obj instanceof Properties;
+   if (bEquals)
+   {
+      candidate = (Properties)obj;
+      bEquals   = size() == candidate.size();
+   }
+   if (bEquals)
+   {
+      JsPropertyMap thisMap      = Js.asPropertyMap(this);
+      JsPropertyMap candidateMap = Js.asPropertyMap(candidate);
+      for (String key : keys(this))
+      {
+         if (!thisMap.get(key).equals(candidateMap.get(key)))
+         {
+            bEquals = false;
+            break;
+         }
+      }
+   }
+   return(bEquals);
 }
 /*------------------------------------------------------------------------------
 
@@ -220,7 +263,11 @@ public final double getDouble(
    double doubleValue;
 
    Object value = get(propertyName);
-   if (value instanceof String)
+   if (value == null)
+   {
+      doubleValue = 0;
+   }
+   else if (value instanceof String)
    {
       doubleValue = Double.parseDouble((String)value);
    }
@@ -294,7 +341,11 @@ public final int getInt(
    int intValue;
 
    Object value = get(propertyName);
-   if (value instanceof String)
+   if (value == null)
+   {
+      intValue = 0;
+   }
+   else if (value instanceof String)
    {
       intValue = Integer.parseInt((String)value);
    }
@@ -328,6 +379,44 @@ public final String getString(
 }
 /*------------------------------------------------------------------------------
 
+@name       isEmpty - test whether has no entrries
+                                                                              */
+                                                                             /**
+            Test whether has no entrries
+
+@return     true iff has no entries
+
+@history    Mon Aug 10, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+@JsOverlay
+public final boolean isEmpty()
+{
+   return(JsObject.keys(this).length == 0);
+}
+/*------------------------------------------------------------------------------
+
+@name       newInstance - factory method
+                                                                              */
+                                                                             /**
+            Factory method
+
+@return     new instance
+
+@history    Mon Aug 10, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+@JsOverlay
+public static final Properties newInstance()
+{
+   return(new Properties());
+}
+/*------------------------------------------------------------------------------
+
 @name       remove - remove specified property
                                                                               */
                                                                              /**
@@ -356,7 +445,7 @@ public final Object remove(
 @name       set - set value of specified property
                                                                               */
                                                                              /**
-            Set value of specified property
+            Set value of specified property. Package-private.
 
 @return     void
 
@@ -369,7 +458,7 @@ public final Object remove(
                                                                               */
 //------------------------------------------------------------------------------
 @JsOverlay
-protected final Properties set(
+final Properties set(
    String propertyName,
    Object value)
 {
@@ -415,7 +504,7 @@ protected final Properties set(
 @name       setComponent - set component for these properties
                                                                               */
                                                                              /**
-            Set component for these properties
+            Set component for these properties. . Package-private.
 
 @return     void
 
@@ -427,7 +516,7 @@ protected final Properties set(
                                                                               */
 //------------------------------------------------------------------------------
 @JsOverlay
-public final Properties setComponent(
+final Properties setComponent(
    Component value)
 {
    set("component", value);
@@ -438,7 +527,7 @@ public final Properties setComponent(
 @name       setConfiguration - set application configuration
                                                                               */
                                                                              /**
-            Set application configuration
+            Set application configuration. Package-private.
 
 @return     void
 
@@ -450,11 +539,30 @@ public final Properties setComponent(
                                                                               */
 //------------------------------------------------------------------------------
 @JsOverlay
-protected final Properties setConfiguration(
+final Properties setConfiguration(
    IConfiguration value)
 {
    set("configuration", value);
    return(this);
+}
+/*------------------------------------------------------------------------------
+
+@name       size - get number of entries
+                                                                              */
+                                                                             /**
+            Get number of entries.
+
+@return     number of entries
+
+@history    Mon Aug 10, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+@JsOverlay
+public final int size()
+{
+   return(JsObject.keys(this).length);
 }
 /*------------------------------------------------------------------------------
 
@@ -518,7 +626,7 @@ public final NativeObject toNativeObject()
                                                                               */
 //------------------------------------------------------------------------------
 @JsOverlay
-public static Properties with(Object... args)
+public static final Properties with(Object... args)
 {
    int i = 0;
    Properties props = new Properties();
@@ -574,7 +682,7 @@ public static Properties with(Object... args)
                                                                               */
 //------------------------------------------------------------------------------
 @JsOverlay
-public static Properties without(Properties ref, String... keys)
+public static final Properties without(Properties ref, String... keys)
 {
    if (ref == null)
    {

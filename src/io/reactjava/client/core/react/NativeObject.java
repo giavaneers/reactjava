@@ -21,9 +21,7 @@ import java.util.Map;
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;
-import jsinterop.base.Any;
 import jsinterop.base.Js;
-import jsinterop.base.JsForEachCallbackFn;
 import jsinterop.base.JsPropertyMap;
                                        // NativeObject =======================//
 @JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "Object")
@@ -254,8 +252,8 @@ public final NativeObject set(
       }
       else if (value instanceof Number)
       {
-                                          // perhaps there is some way to use the//
-                                          // @DoNotAutobox annotation instead... //
+                                       // perhaps there is some way to use the//
+                                       // @DoNotAutobox annotation instead... //
          if (value instanceof Integer)
          {
             map.set(propertyName, ((Integer)value).intValue());
@@ -294,15 +292,10 @@ public final NativeObject set(
 @JsOverlay
 public final Map<String,Object> toMap()
 {
-   Map<String,Object>  map      = new HashMap<>();
-   JsForEachCallbackFn callback = new JsForEachCallbackFn()
-   {
-      public void onKey(String key)
-      {
-         map.put(key, get(key));
-      }
-   };
-   Js.asPropertyMap(this).forEach(callback);
+   Map<String,Object> map = new HashMap<>();
+
+   Js.asPropertyMap(this).forEach(key -> map.put(key, get(key)));
+
    return(map);
 }
 /*------------------------------------------------------------------------------
@@ -371,15 +364,10 @@ public static NativeObject with(Object... args)
    }
    else if (args[0] instanceof NativeObject)
    {
-      NativeObject        template = (NativeObject)args[0];
-      JsForEachCallbackFn callback = new JsForEachCallbackFn()
-      {
-         public void onKey(String key)
-         {
-            o.set(key, template.get(key));
-         }
-      };
-      Js.asPropertyMap((NativeObject)args[0]).forEach(callback);
+      NativeObject template = (NativeObject)args[0];
+
+      Js.asPropertyMap(args[0]).forEach(key -> o.set(key, template.get(key)));
+
       i++;
    }
    for (; i < args.length; i++)
@@ -424,15 +412,9 @@ public static NativeObject without(NativeObject ref, String... keys)
       throw new IllegalArgumentException("Reference may not be null");
    }
 
-   NativeObject        o        = new NativeObject();
-   JsForEachCallbackFn callback = new JsForEachCallbackFn()
-   {
-      public void onKey(String key)
-      {
-         o.set(key, ref.get(key));
-      }
-   };
-   Js.asPropertyMap(ref).forEach(callback);
+   NativeObject o = new NativeObject();
+
+   Js.asPropertyMap(ref).forEach((String key) -> o.set(key, ref.get(key)));
 
    for (int i = 0; i < keys.length; i++)
    {

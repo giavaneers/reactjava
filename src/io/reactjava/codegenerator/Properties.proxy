@@ -43,7 +43,7 @@ public class Properties extends HashMap
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public Properties()
+Properties()
 {
 }
 /*------------------------------------------------------------------------------
@@ -292,6 +292,24 @@ public final String getString(
    String propertyName)
 {
    return((String)get(propertyName));
+}
+/*------------------------------------------------------------------------------
+
+@name       newInstance - factory method
+                                                                              */
+                                                                             /**
+            Factory method
+
+@return     new instance
+
+@history    Mon Aug 10, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static final Properties newInstance()
+{
+   return(new Properties());
 }
 /*------------------------------------------------------------------------------
 

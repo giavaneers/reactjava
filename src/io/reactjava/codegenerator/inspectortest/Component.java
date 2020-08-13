@@ -669,7 +669,7 @@ public IUITheme getTheme()
 }
 /*------------------------------------------------------------------------------
 
-@name       initialize - set properties
+@name       initializeInternal - set properties
                                                                               */
                                                                              /**
             Set properties.
@@ -682,7 +682,7 @@ public IUITheme getTheme()
 
                                                                               */
 //------------------------------------------------------------------------------
-public P initialize(
+P initializeInternal(
    P initialProps)
 {
    return(initialProps);
@@ -871,7 +871,7 @@ protected void setId(
             Set whether the component is mounted. This is typically set
             in a useEffect cleanup function.
 
-@param      bDismounted    whether component has been dismounted.
+@param      bMounted    whether component has been dismounted.
 
 @history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
 

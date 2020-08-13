@@ -19,7 +19,6 @@ import elemental2.promise.Promise;
 import io.reactjava.client.core.rxjs.functions.Action0;
 import io.reactjava.client.core.rxjs.functions.Action1;
 import io.reactjava.client.core.rxjs.observable.Observer;
-import io.reactjava.client.core.rxjs.observable.OnSubscribe;
 import io.reactjava.client.core.rxjs.subscription.Subscription;
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsProperty;
@@ -35,7 +34,8 @@ public class Observable<T>
                                        // class variables ------------------- //
                                        // (none)                              //
                                        // public instance variables --------- //
-@JsProperty Promise promise;           // property on PromiseObservable       //
+@JsProperty
+public Promise promise;                // property on PromiseObservable       //
                                        // protected instance variables -------//
                                        // (none)                              //
                                        // private instance variables -------- //
@@ -55,15 +55,9 @@ public class Observable<T>
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-@JsOverlay
-public static <R> Observable<R> create(
-   OnSubscribe<? extends R> onSubscribe)
-{
-   return(
-      Js.uncheckedCast(
-         io.reactjava.client.core.rxjs.observable.Observable.create(
-            onSubscribe)));
-}
+public native static <R> Observable<R> create(
+   OnSubscribe<? extends R> onSubscribe);
+
 /*------------------------------------------------------------------------------
 
 @name       create - create
@@ -79,8 +73,8 @@ public static <R> Observable<R> create(
                                                                               */
 //------------------------------------------------------------------------------
 @JsOverlay
-public static <R> Observable<R> fromPromise(
-   Promise<R> promise)
+public static <T> Observable<T> fromPromise(
+   Promise<T> promise)
 {
    return(
       Js.uncheckedCast(

@@ -223,8 +223,9 @@ public ContentBodyDsc(
    String   text)
 {
    this.tag   = tag;
-   this.props = atts != null ? Properties.with((Object[])atts) : new Properties();
    this.text  = text;
+   this.props =
+      atts != null ? Properties.with((Object[])atts) : Properties.newInstance();
 }
 /*------------------------------------------------------------------------------
 

@@ -193,7 +193,7 @@ protected String getContentPDFURL()
 //------------------------------------------------------------------------------
 protected Properties getContentProperties()
 {
-   Properties properties = new Properties();
+   Properties properties = Properties.newInstance();
    for (ContentDsc dsc : getContent())
    {
       if (dsc.type == ContentDsc.kTYPE_PROPERTIES)

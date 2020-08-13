@@ -90,7 +90,7 @@ protected List<ContentDsc> getContent()
 //------------------------------------------------------------------------------
 protected Properties getContentProperties()
 {
-   Properties properties = new Properties();
+   Properties properties = Properties.newInstance();
    for (ContentDsc dsc : getContent())
    {
       if (dsc.type == ContentDsc.kTYPE_PROPERTIES)
@@ -424,7 +424,7 @@ public static List<ContentDsc> parse(
    int              idxEnd  = 0;
    int              type;
    String           key;
-   Properties       properties = new Properties();
+   Properties       properties = Properties.newInstance();
 
    while(raw != null)
    {

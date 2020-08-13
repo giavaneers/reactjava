@@ -30,19 +30,24 @@ import elemental2.dom.EventTarget;
 import elemental2.dom.HTMLDocument;
 import elemental2.core.JsObject;
 import elemental2.dom.HTMLElement;
+import io.reactjava.client.providers.http.HttpClient;
 import io.reactjava.client.providers.http.HttpClientBase;
+import io.reactjava.client.providers.http.HttpResponse;
 import io.reactjava.client.providers.http.IHttpResponse;
 import io.reactjava.client.providers.http.IHttpResponse.ResponseType;
 import io.reactjava.client.core.resources.javascript.IJavascriptResources;
 import io.reactjava.client.core.resources.javascript.JavascriptResources;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
-
-// Utilities ==========================//
+                                       // Utilities ==========================//
 public class Utilities
 {
                                        // class constants --------------------//
@@ -795,6 +800,44 @@ public static native int getObjectIntValueNative(
                                                                              /**
             Get specified url as string.
 
+@return     and observable for the string
+
+@param      url         specified url
+
+@history    Mon May 19, 2014 18:00:00 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static Observable<String> getURLAsString(
+   String url)
+{
+   Observable<String> observable = Observable.create(
+      (Subscriber<String> subscriber) ->
+      {
+         HttpClient.get(url).subscribe(
+            (HttpResponse rsp) ->
+            {
+               String content = rsp.getText();
+               subscriber.next(content);
+               subscriber.complete();
+            },
+            (Throwable error) ->
+            {
+               kLOGGER.logError(error);
+            });
+         return(subscriber);
+      });
+
+   return(observable);
+}
+/*------------------------------------------------------------------------------
+
+@name       getURLAsString - get specified url as string
+                                                                              */
+                                                                             /**
+            Get specified url as string.
+
 @param      url         specified url
 @param      callback    completion callback
 
@@ -1403,13 +1446,15 @@ public static Map<String,String> scriptByPath()
 
             If the specified url is a relative url, generates an absolute url
             using the current location; otherwise, if the specified url is an
-            absolute url, returns it unchanged, and if the specified url is not
-            a url, returns null.
+            absolute url, returns it unchanged.
 
-@return     an absolute url from specified url, or null if the specified is not
-            a url
+@return     an absolute url from specified url, or null iff url is null
 
 @history    Sun Mar 31, 2019 10:30:00 (Giavaneers - LBM) created
+            Fri May 22, 2020 10:30:00 (Giavaneers - LBM) modified to assume
+               the specified url is always a url, so never returns null as it
+               use to do if the specified url was not already absolute and
+               did not contain a '/' character.
 
 @notes
 
@@ -1418,23 +1463,41 @@ public static Map<String,String> scriptByPath()
 public static String toAbsoluteURL(
    String url)
 {
-   String absolute = null;
-   if (url == null)
+   String absolute = url;
+   String search;
+   if (url != null)
    {
-   }
-   else if (url.startsWith("http://") || url.startsWith("https://"))
-   {
-      absolute = url;
-   }
-   else if ((url.indexOf('/') >= 0
-               && url.indexOf('\n') < 0
-               && url.indexOf('\t') < 0
-               && url.indexOf('\r') < 0
-               && url.indexOf(' ') < 0))
-   {
-                                       // relative url                        //
-      absolute = DomGlobal.window.location.getHref();
-      absolute = absolute.substring(0, absolute.lastIndexOf('/') + 1) + url;
+      if (url.indexOf('\n') >= 0
+            || url.indexOf('\t') >= 0
+            && url.indexOf('\r') >= 0
+            && url.indexOf(' ') >= 0)
+      {
+         throw new IllegalArgumentException("URL may not contain whitespace");
+      }
+                                          // translate some urls from url params //
+      url = url.replace(']','/');
+
+      if (url.startsWith("http://") || url.startsWith("https://"))
+      {
+         absolute = url;
+      }
+      else
+      {
+                                          // relative url                        //
+         absolute = DomGlobal.window.location.getHref();
+         search   = DomGlobal.window.location.getSearch();
+         if (search.length() > 0)
+         {
+                                          // remove any query string             //
+            absolute = absolute.substring(0, absolute.indexOf(search));
+            if (absolute.endsWith("/"))
+            {
+               absolute = absolute.substring(0, absolute.length() - 1);
+            }
+         }
+
+         absolute = absolute.substring(0, absolute.lastIndexOf('/') + 1) + url;
+      }
    }
 
    return(absolute);

@@ -14,11 +14,12 @@ history:    Fri Nov 09, 2018 10:30:00 (Giavaneers - LBM) created
                                        // package --------------------------- //
 package io.reactjava.client.providers.http;
 
-import com.google.gwt.typedarrays.shared.ArrayBuffer;
-import com.google.gwt.typedarrays.shared.TypedArrays;
+import elemental2.core.ArrayBuffer;
+import elemental2.core.Uint8Array;
 import io.reactjava.client.providers.http.HttpClientBase.JsXMLHttpRequest;
 import java.util.HashMap;
 import java.util.Map;
+import jsinterop.base.Js;
                                        // imports --------------------------- //
                                        // (none)                              //
                                        // HttpResponse =======================//
@@ -84,22 +85,39 @@ public IHttpClientBase getClient()
 
                                                                               */
 //------------------------------------------------------------------------------
-public byte[] getBytes()
+public ArrayBuffer getArrayBuffer()
 {
-   byte[]           bytes = null;
-   JsXMLHttpRequest xhr   = getClient().getXHR();
-   ResponseType     type  = ResponseType.fromString(xhr.getResponseType());
+   ArrayBuffer      buffer = null;
+   JsXMLHttpRequest xhr    = getClient().getXHR();
+   ResponseType     type   = ResponseType.fromString(xhr.getResponseType());
 
    if (type == ResponseType.kARRAYBUFFER)
    {
-      ArrayBuffer buffer = xhr.getResponse();
-      int         length = buffer != null ? buffer.byteLength() : 0;
-      if (length > 0)
-      {
-         bytes =
-            HttpClientBase.uint8ArrayToBytes(
-               TypedArrays.createUint8Array(buffer));
-      }
+      buffer = xhr.getResponse();
+   }
+   return(buffer);
+}
+/*------------------------------------------------------------------------------
+
+@name       getBytes - get response data
+                                                                              */
+                                                                             /**
+            Get response data.
+
+@return     response data
+
+@history    Fri Nov 09, 2018 10:30:00 (Giavaneers - LBM) created
+
+                                                                              */
+//------------------------------------------------------------------------------
+public byte[] getBytes()
+{
+   byte[]      bytes  = null;
+   ArrayBuffer buffer = getArrayBuffer();
+   if (buffer!= null)
+   {
+      Uint8Array uint8Array = new Uint8Array(buffer);
+      bytes = Js.uncheckedCast(uint8Array);
    }
    return(bytes);
 }

@@ -25,6 +25,7 @@ package io.reactjava.client.core.react;
                                        // imports --------------------------- //
 import com.google.gwt.core.client.EntryPoint;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
                                        // AppComponentTemplate ============== //
 public class AppComponentTemplate<P extends Properties>
@@ -71,6 +72,25 @@ public AppComponentTemplate()
 public AppComponentTemplate(P props)
 {
    super(props);
+}
+/*------------------------------------------------------------------------------
+
+@name       getCustomJavascripts - get custom javascripts
+                                                                              */
+                                                                             /**
+            Get custom javascripts. This method is typically invoked at
+            boot time.
+
+@return     ordered list of javascript urls
+
+@history    Fri May 22, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected List<String> getCustomJavascripts()
+{
+   return(new ArrayList<>());
 }
 /*------------------------------------------------------------------------------
 
@@ -212,15 +232,40 @@ protected void initConfiguration()
    {
       IConfiguration.assignSharedInstance(this);
    }
+
+   Collection<String> bundleScripts =
+      Configuration.sharedInstance.getBundleScripts();
+
+   for (String custom : getCustomJavascripts())
+   {
+      bundleScripts.add(Utilities.toAbsoluteURL(custom));
+   }
    super.initConfiguration();
 }
 /*------------------------------------------------------------------------------
 
-@name       initialize - initialize
+@name       initializeProperties - initialize properties
                                                                               */
                                                                              /**
-            Initialize. This override of the default assigns an id which isn't
-            otherwise done for an app.
+            Initialize properties. This override of the default assigns an id
+            which isn't otherwise done for an app as well as assigning any url
+            parameters to the app as properties.
+
+            This method will be invoked two times on startup: the first time
+            before ReactJava has been booted when GWT constructs an instance of
+            the target App class in preparation for invoking onModuleLoad(),
+
+               com_google_gwt_lang_Cast_castTo__
+               Ljava_lang_Object_2L
+               com_google_gwt_core_client_JavaScriptObject_2Ljava_lang_Object_2(
+                  new io_reactjava_client_examples_hellowworld_App_App__V, 41)
+                  .onModuleLoad__V();
+
+            and the second time in the thread of invocation of onModuleLoad()
+            in which invocation of ReactJava.boot() ultimately results in
+            ReactRouter.render() invoking ReactRouter.componentForHash()
+            invoking the component factory default constructor found from
+            ReactJava.getComponentFactory(classname).
 
 @return     component properties
 
@@ -232,19 +277,24 @@ protected void initConfiguration()
 
                                                                               */
 //------------------------------------------------------------------------------
-public P initialize(
+@Override
+P initializeProperties(
    P initialProps)
 {
-   P props = super.initialize(initialProps);
-                                       // assign the app id                   //
-   props.set("id", getClass().getName());
-                                       // assign any url parameters as props  //
-   for (String propertyName : Router.getURLParameters().keySet())
+   if (ReactJava.bBooted)
    {
-      props().set(propertyName, Router.getURLParameter(propertyName));
+                                       // assign the app id                   //
+      newInstanceProperties.set("id", getClass().getName());
+
+                                       // assign any url parameters as props  //
+      for (String propertyName : Router.getURLParameters().keySet())
+      {
+         newInstanceProperties.set(
+            propertyName, Router.getURLParameter(propertyName));
+      }
    }
 
-   return(props);
+   return(super.initializeProperties(initialProps));
 }
 /*------------------------------------------------------------------------------
 

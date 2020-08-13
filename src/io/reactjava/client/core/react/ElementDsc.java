@@ -18,12 +18,15 @@ package io.reactjava.client.core.react;
 import com.giavaneers.util.gwt.Logger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
-                                        // ElementDsc ========================//
+import java.util.Map;
+                                       // ElementDsc ========================//
 public class ElementDsc<P extends Properties>
 {
                                        // constants ------------------------- //
 private static final Logger kLOGGER  = Logger.newInstance();
+
                                        // class variables ------------------- //
                                        // (none)                              //
                                        // public instance variables --------- //
@@ -77,6 +80,21 @@ public static <P extends Properties> ElementDsc create(
    Object     type,
    P          props)
 {
+   if (type instanceof String)
+   {
+                                       // creating a component                //
+      Component component = Component.newInstance((String)type, props);
+      if (component != null)
+      {
+          type = ReactJava.componentRender(component);
+
+                                       // properties to use should be the     //
+                                       // properties of an instance of the    //
+                                       // specified classname after being     //
+                                       // initialized                         //
+           props = (P)component.componentProperties;
+      }
+   }
    return(create(parent, type, props, (ElementDsc[])null));
 }
 public static <P extends Properties> ElementDsc create(

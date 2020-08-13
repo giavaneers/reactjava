@@ -51,7 +51,7 @@ static
 
 @return     void
 
-@param      className      app class name
+@param      classname      app class name
 
 @history    Tue May 15, 2017 10:30:00 (Giavaneers - LBM) created
 
@@ -60,12 +60,11 @@ static
 //------------------------------------------------------------------------------
 @JsMethod
 public static ReactElement boot(
-   String className)
+   String classname)
 {
    return(
       ReactJava.boot(
-      (AppComponentTemplate)ReactJava.getComponentFactory(
-         className).apply(null)));
+         (AppComponentTemplate)Component.newInstance(classname, null)));
 }
 /*------------------------------------------------------------------------------
 

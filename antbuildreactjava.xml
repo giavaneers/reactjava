@@ -1,0 +1,70 @@
+<project default="assignPlatformWeb">
+   <target name="assignPlatformWeb">
+      <record name="antlog.assignPlatformWeb.txt"/>
+      <java classname="io.reactjava.codegenerator.JavascriptBundler">
+         <arg value="PlatformWeb"/>
+         <classpath>
+            <pathelement location="war/WEB-INF/lib/reactjava.jar"/>
+            <pathelement path="${java.class.path}"/>
+         </classpath>
+      </java>
+   </target>
+   <target name="assignPlatformIOS">
+      <java classname="io.reactjava.codegenerator.JavascriptBundler">
+         <arg value="PlatformIOS"/>
+         <classpath>
+            <pathelement location="war/WEB-INF/lib/reactjava.jar"/>
+            <pathelement path="${java.class.path}"/>
+         </classpath>
+      </java>
+   </target>
+   <target name="createGWTLibrary">
+      <java classname="io.reactjava.codegenerator.JavascriptBundler">
+         <arg value="CreateGWTLibrary"/>
+         <classpath>
+            <pathelement location="war/WEB-INF/lib/reactjava.jar"/>
+            <pathelement path="${java.class.path}"/>
+         </classpath>
+      </java>
+   </target>
+   <target name="deleteTempGWTCache">
+      <record name="antlog.deleteTempGWTCache.txt"/>
+      <java classname="io.reactjava.codegenerator.JavascriptBundler">
+         <arg value="DeleteTempGWTCache"/>
+         <classpath>
+            <pathelement location="war/WEB-INF/lib/reactjava.jar"/>
+            <pathelement path="${java.class.path}"/>
+         </classpath>
+      </java>
+   </target>
+   <target name="jsxTransform">
+      <record name="antlog.jsxTransform.txt"/>
+      <java classname="io.reactjava.codegenerator.JavascriptBundler">
+         <arg value="jsxTransform"/>
+         <classpath>
+            <pathelement location="war/WEB-INF/lib/reactjava.jar"/>
+            <pathelement path="${java.class.path}"/>
+         </classpath>
+      </java>
+   </target>
+   <target name="shadowToSrc">
+      <record name="antlog.shadowToSrc.txt"/>
+      <java classname="io.reactjava.codegenerator.JavascriptBundler">
+         <arg value="ShadowToSrc"/>
+         <classpath>
+            <pathelement location="war/WEB-INF/lib/reactjava.jar"/>
+            <pathelement path="${java.class.path}"/>
+         </classpath>
+      </java>
+   </target>
+   <target name="srcToShadow">
+      <record name="antlog.srcToShadow.txt"/>
+      <java classname="io.reactjava.codegenerator.JavascriptBundler">
+         <arg value="SrcToShadow"/>
+         <classpath>
+            <pathelement location="war/WEB-INF/lib/reactjava.jar"/>
+            <pathelement path="${java.class.path}"/>
+         </classpath>
+      </java>
+   </target>
+</project>

@@ -16,6 +16,7 @@ notes:
 package io.reactjava.client.core.react;
                                        // imports --------------------------- //
 import com.giavaneers.util.gwt.Logger;
+import elemental2.core.JsObject;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.Element;
 import elemental2.dom.HTMLBodyElement;
@@ -24,7 +25,6 @@ import elemental2.dom.HTMLStyleElement;
 import elemental2.dom.Node;
 import io.reactjava.client.core.react.IConfiguration.ICloudServices;
 import io.reactjava.client.core.react.SEOInfo.SEOPageInfo;
-import io.reactjava.client.core.rxjs.observable.Subscriber;
 import io.reactjava.client.core.rxjs.subscription.Subscription;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import jsinterop.base.Js;
 import jsinterop.base.JsArrayLike;
 import jsinterop.base.JsPropertyMap;
@@ -47,45 +48,49 @@ public static final String    kPROMISE_CANCELLED     = "promise cancelled";
 protected static final Logger kLOGGER = Logger.newInstance();
 
                                        // class variables                     //
-protected static int    nextId;        // next elementId to be autoassigned   //
+protected static int   nextId;         // next elementId to be autoassigned   //
 private   static Map<String,Component> // map of component by id              //
-                        componentById;
+                       componentById;
                                        // map of component by id  subscribers //
 private   static Map<String,List<Subscriber<Component>>>
-                        componentByIdSubscribers;
+                       componentByIdSubscribers;
                                        // map of stylesheet by component class//
 protected static Map<String,String>
-                        injectedStylesheets;
+                       injectedStylesheets;
+
+                                       // static field to hold any new        //
+                                       // instance properties (see            //
+                                       // newInstance()                       //
+protected static Properties
+                       newInstanceProperties;
+
                                        // protected instance variables ------ //
-protected boolean       bDismounted;   // whether is dismounted               //
-protected RefMgr        refMgr;        // component ref manager               //
-protected StateMgr      stateMgr;      // component state manager             //
-protected ReactElement  reactElement;  // react element                       //
-protected String        css;           // css                                 //
+protected boolean      bDismounted;    // whether is dismounted               //
+protected RefMgr       refMgr;         // component ref manager               //
+protected StateMgr     stateMgr;       // component state manager             //
+protected ReactElement reactElement;   // react element                       //
+protected String       css;            // css                                 //
                                        // css injected styleId                //
-protected String        cssInjectedStyleId;
+protected String       cssInjectedStyleId;
                                        // list of injected styleIds           //
-protected List<String>  injectedStyleIds;
+protected List<String> injectedStyleIds;
                                        // render editors                      //
 protected Map<String,RenderEditFunction>
-                        renderEditors;
+                       renderEditors;
                                        // subscriptions list                  //
 protected List<Subscription>
-                        subscriptions;
+                       subscriptions;
                                        // private instance variables -------- //
                                        // component function                  //
                                        // private to force access through     //
                                        // accessors to support JSXTransform   //
 private java.util.function.Function<Properties, ReactElement>
-                        componentFcn;
-                                       // private to approximate immutable    //
-                                       // renamed from 'props' to avoid       //
-                                       // minified confusion with react       //
-                                       // 'props'; note, this instance        //
-                                       // variable should appear last - see   //
-                                       // ReactJava.                          //
-                                       // getNativeComponentPropertiesFieldname()//
-private   P             componentProperties;
+                       componentFcn;
+                                       // 200810 - made final package-private //
+                                       // to make immutable and renamed from  //
+                                       // 'props' to avoid  minified          //
+                                       // confusion with react 'props'        //
+final P                componentProperties;
 
 /*------------------------------------------------------------------------------
 
@@ -101,7 +106,8 @@ private   P             componentProperties;
 //------------------------------------------------------------------------------
 public Component()
 {
-   initialize(null);
+   this.componentProperties = initializeProperties(null);
+   initializeInternal();
 }
 /*------------------------------------------------------------------------------
 
@@ -119,7 +125,8 @@ public Component()
 //------------------------------------------------------------------------------
 public Component(P initialProps)
 {
-   initialize(initialProps);
+   this.componentProperties = initializeProperties(initialProps);
+   initializeInternal();
 }
 /*------------------------------------------------------------------------------
 
@@ -160,7 +167,6 @@ public boolean addRenderEditor(
             Add subscription.
 
 @param      subscription      subscription
-@param      promise           any promise property of the associated Observable
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -1136,13 +1142,13 @@ protected void initialize()
 }
 /*------------------------------------------------------------------------------
 
-@name       initialize - initialize
+@name       initializeInternal - internal initialize method
                                                                               */
                                                                              /**
-            Initialize. This method is invoked in the constructor(P componentProperties),
-            so be careful that any referenced instance variables have been
-            initialized. Specifically, in Java, the order for initialization
-            statements is as follows:
+            Internal initialize method. This method is invoked in the
+            constructor, so be careful that any referenced instance variables
+            have been initialized. Specifically, in Java, the order for
+            initialization statements is as follows:
 
                1. static variables and static initializers in order of
                   appearance in the source.
@@ -1152,12 +1158,34 @@ protected void initialize()
 
                3. constructors.
 
-            This method is public so it can be invoked by the JSX component
-            function.
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
-@return     component properties
+@notes
 
-@param      initialProps      initial properties
+                                                                              */
+//------------------------------------------------------------------------------
+void initializeInternal()
+{
+   initConfiguration();
+   initTheme();
+
+   if (newInstanceProperties != null)
+   {
+                                       // ensure ReactJava window variable    //
+                                       // for debugging purposes              //
+
+      JsObject reactJava = ReactJava.getReactJavaWindowVariable();
+
+                                       // allow a subclass to override        //
+      initialize();
+   }
+}
+/*------------------------------------------------------------------------------
+
+@name       initializeProperties - initialize properties
+                                                                              */
+                                                                             /**
+            Initialize properties.
 
 @history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
 
@@ -1165,24 +1193,17 @@ protected void initialize()
 
                                                                               */
 //------------------------------------------------------------------------------
-public P initialize(
+P initializeProperties(
    P initialProps)
 {
-   this.componentProperties =
-      initialProps != null ? initialProps : (P)new Properties();
+   P properties =
+      initialProps != null
+         ? initialProps
+         : newInstanceProperties != null
+            ? (P)newInstanceProperties : (P)new Properties();
 
-   this.componentProperties.setComponent(this);
-
-   initConfiguration();
-   initTheme();
-
-   if (initialProps != null)
-   {
-                                       // allow a subclass to override        //
-      initialize();
-   }
-
-   return(this.componentProperties);
+   properties.setComponent(this);
+   return(properties);
 }
 /*------------------------------------------------------------------------------
 
@@ -1262,6 +1283,50 @@ protected ElementDsc invokeRenderEditors(
    }
    return(edited);
 }
+/*------------------------------------------------------------------------------
+
+@name       newInstance - factory method
+                                                                              */
+                                                                             /**
+            Package private factory method allowing componentProperties field
+            to be final.
+
+@return     new component instance, or null if factory not found
+
+@param      classname      classname
+@param      props          any props
+
+@history    Tue Aug 11, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+static Component newInstance(
+   String     classname,
+   Properties props)
+{
+   synchronized(Component.class)
+   {
+                                       // 'synchronized' has no real effect   //
+                                       // in ReactJava, but it's included here//
+                                       // for readability                     //
+      Component newInstance = null;
+
+      Function<Properties,Component> fcn =
+         ReactJava.getComponentFactory(classname);
+
+      if (fcn != null)
+      {
+         newInstanceProperties = props;
+         newInstance = fcn.apply(null);
+         newInstanceProperties = null;
+      }
+
+      return(newInstance);
+   }
+}
+/*------------------------------------------------------------------------------
 /*------------------------------------------------------------------------------
 
 @name       preRender - component pre-render processing

@@ -689,7 +689,7 @@ public IUITheme getTheme()
 }
 /*------------------------------------------------------------------------------
 
-@name       initialize - set properties
+@name       initializeInternal - set properties
                                                                               */
                                                                              /**
             Set properties.
@@ -702,7 +702,7 @@ public IUITheme getTheme()
 
                                                                               */
 //------------------------------------------------------------------------------
-public P initialize(
+P initializeInternal(
    P initialProps)
 {
    return(initialProps);

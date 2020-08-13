@@ -23,6 +23,7 @@ import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinte
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.TreeLogger.Type;
 import com.google.gwt.dev.util.log.PrintWriterTreeLogger;
+import io.reactjava.client.core.react.ElementDsc;
 import io.reactjava.client.providers.platform.IPlatform;
 import io.reactjava.client.core.react.AppComponentTemplate;
 import io.reactjava.client.core.react.Component;
@@ -802,7 +803,9 @@ public static boolean getIsLibraryTagName(
 public static boolean getIsReactTagName(
    String tagName)
 {
-   boolean bReactTagName = tagName != null && kREACT_TAGS.get(tagName) != null;
+   boolean bReactTagName =
+      tagName != null && kREACT_TAGS.get(tagName) != null;
+
    if (bReactTagName)
    {
                                        // at runtime, React objects if        //
@@ -1193,9 +1196,6 @@ public void handleElement(
       }
       else
       {
-         //String componentClassname =
-         //   components != null ? components.get(tagName) : null;
-
          TypeDsc component = getComponentForTagName(tagName, classname, logger);
          if (component == null)
          {
@@ -1209,24 +1209,26 @@ public void handleElement(
 
          String componentClassname = IPreprocessor.getClassname(component.type);
 
-         write(
-            buf,
-            "io.reactjava.client.core.react.ReactJava.getNativeFunctionalComponent(\""
-          + componentClassname
-          + "\"),");
-
-         writeNewline(buf);
+         //LBM-START 200810
+         //write(
+         //   buf,
+         //   "io.reactjava.client.core.react.ReactJava.getNativeFunctionalComponent(\""
+         // + componentClassname
+         // + "\"),");
+         //
+         //writeNewline(buf);
+         //
          //write(
          //   buf,
          //   "new "
          // + componentClassname
-         // + "(" + tagProperties + ").props()");
+         // + "().initializeInternal(" + tagProperties + ")");
 
-         write(
-            buf,
-            "new "
-          + componentClassname
-          + "().initialize(" + tagProperties + ")");
+         write(buf, "\"" + componentClassname + "\",");
+         writeNewline(buf);
+         write(buf, tagProperties);
+
+         //LBM-END 200810
       }
    }
 
@@ -1392,7 +1394,8 @@ public Node handleText(
    Node         parent           = textNode.parent();
    String       parentName       = parent.nodeName();
    String       parentClassname  = parent.attributes().get("className");
-   boolean      bSpan            = "span".equals(parentName);
+   boolean      bSpanParent      = "span".equals(parentName);
+   boolean      bOptionParent    = "option".equals(parentName);
    boolean      bReactNativeText = "ReactNative.Text".equals(parentName);
    boolean      bPrism           =
       "code".equals(parentName)
@@ -1411,7 +1414,7 @@ public Node handleText(
                                        // text node has been processed        //
       retVal = null;
    }
-   else if (!bSpan && !bPrism && !bReactNativeText)
+   else if (!bSpanParent && !bOptionParent && !bPrism && !bReactNativeText)
    {
                                        // wrap in a span tag so any sibling   //
                                        // nodes like <code> or <strong> will  //

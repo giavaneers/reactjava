@@ -56,12 +56,12 @@ package io.reactjava.client.providers.http;
                                        // imports --------------------------- //
 import com.giavaneers.util.gwt.APIRequestor;
 import com.giavaneers.util.gwt.Logger;
+import elemental2.core.ArrayBuffer;
+import elemental2.core.Uint8Array;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
-import com.google.gwt.typedarrays.shared.ArrayBuffer;
-import com.google.gwt.typedarrays.shared.Uint8Array;
 import io.reactjava.client.providers.http.HttpClientBase.JsXMLHttpRequest.IReadyStateChangedHandler;
 import io.reactjava.client.providers.http.IHttpResponse.ResponseType;
 import io.reactjava.client.core.react.NativeObject;
@@ -75,7 +75,8 @@ import jsinterop.annotations.JsMethod;
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsProperty;
-                                       // HttpClientBase ========================//
+import jsinterop.base.Js;
+                                    // HttpClientBase ========================//
 public class HttpClientBase implements IHttpClientBase
 {
                                        // constants ------------------------- //
@@ -202,40 +203,11 @@ public HttpClientBase(
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public static com.google.gwt.typedarrays.client.Uint8ArrayNative bytesToUint8Array(
+public static Uint8Array bytesToUint8Array(
    byte[] bytes)
 {
-   return(bytesToUint8Array(bytes, 0, bytes.length));
-}
-/*------------------------------------------------------------------------------
-
-@name       bytesToUint8Array - get Uint8Array from byte array
-                                                                              */
-                                                                             /**
-            Get Uint8Array from byte array.
-
-@return     Uint8Array from byte array
-
-@param      bytes    byte array
-
-@history    Mon Aug 28, 2017 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public static com.google.gwt.typedarrays.client.Uint8ArrayNative bytesToUint8Array(
-   byte[] bytes,
-   int    offset,
-   int    length)
-{
-   com.google.gwt.typedarrays.client.Uint8ArrayNative aBytes = com.google.gwt
-   .typedarrays.client.Uint8ArrayNative.create(length);
-   for (int i = 0, iMax = length; i < iMax; i++, offset++)
-   {
-      aBytes.set(i, bytes[offset]);
-   }
-
-   return(aBytes);
+   Uint8Array uint8Array = Js.uncheckedCast(bytes);
+   return(uint8Array);
 }
 /*------------------------------------------------------------------------------
 
@@ -629,7 +601,7 @@ public void send(
 
 @return     void
 
-@history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
+@history    Fri Nov 09, 2018 10:30:00 (Giavaneers - LBM) created
 
 @notes
                                                                               */
@@ -637,7 +609,27 @@ public void send(
 public Object send(
    byte[] bytes)
 {
-   if (bytes != null)
+   Uint8Array uint8Array = bytes != null ? Js.uncheckedCast(bytes) : null;
+   return(send(uint8Array));
+}
+/*------------------------------------------------------------------------------
+
+@name       send - send the request
+                                                                              */
+                                                                             /**
+            Send the request.
+
+@return     void
+
+@history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public Object send(
+   Uint8Array uint8Array)
+{
+   if (uint8Array != null)
    {
       String method = getMethod();
       if (method != null && !kPOST.equals(method) && !kPUT.equals(method))
@@ -651,7 +643,6 @@ public Object send(
       open();
    }
 
-   final Uint8Array data = bytes != null ? bytesToUint8Array(bytes) : null;
    if (getReadyStateChangedListener() == null)
    {
       props().set(
@@ -665,9 +656,31 @@ public Object send(
 
    //kLOGGER.logInfo("HttpClientBase.send(): xhr.send() on APIRequestor.");
 
-   getXHR().send(data);
+   getXHR().send(uint8Array);
 
    return(null);
+}
+/*------------------------------------------------------------------------------
+
+@name       send - send the request
+                                                                              */
+                                                                             /**
+            Send the request.
+
+@return     void
+
+@history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public Object send(
+   ArrayBuffer arrayBuffer)
+{
+   Uint8Array uint8Array =
+      arrayBuffer != null ? new Uint8Array(arrayBuffer) : null;
+
+   return(send(uint8Array));
 }
 /*------------------------------------------------------------------------------
 
@@ -930,31 +943,32 @@ public IHttpClientBase setURL(
                                                                               */
 //------------------------------------------------------------------------------
 public static byte[] uint8ArrayToBytes(
-   Uint8Array aBytes)
+   Uint8Array uint8Array)
 {
-   byte[] bytes = new byte[0];
-   try
-   {
-      bytes = new byte[aBytes != null ? aBytes.length() : 0];
-   }
-   catch(StringIndexOutOfBoundsException e)
-   {
-      e = e;
-      throw e;
-   }
-
-   for (int i = 0, iMax = bytes.length; i < iMax; i++)
-   {
-      try
-      {
-         bytes[i] = (byte)aBytes.get(i);
-      }
-      catch(StringIndexOutOfBoundsException e)
-      {
-         e = e;
-         throw e;
-      }
-   }
+   //byte[] bytes = new byte[0];
+   //try
+   //{
+   //   bytes = new byte[uint8Array != null ? uint8Array.length() : 0];
+   //}
+   //catch(StringIndexOutOfBoundsException e)
+   //{
+   //   e = e;
+   //   throw e;
+   //}
+   //
+   //for (int i = 0, iMax = bytes.length; i < iMax; i++)
+   //{
+   //   try
+   //   {
+   //      bytes[i] = (byte)uint8Array.get(i);
+   //   }
+   //   catch(StringIndexOutOfBoundsException e)
+   //   {
+   //      e = e;
+   //      throw e;
+   //   }
+   //}
+   byte[] bytes = Js.uncheckedCast(uint8Array);
    return(bytes);
 }
 /*==============================================================================

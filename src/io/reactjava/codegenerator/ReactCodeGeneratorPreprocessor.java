@@ -32,18 +32,27 @@ public class ReactCodeGeneratorPreprocessor implements IPreprocessor
                                        // copy of generated                   //
 protected static final List<String> kFACTORY_MAP_KEYS = new ArrayList<>();
 
+//protected static final String kFACTORY_MAP_COMPONENT_ENTRY =
+//   "\n"
+// + "   kFACTORY_MAP.put(\n"
+// + "      \"%classname%\",\n"
+// + "      (Function<Properties,Component>)(props) ->\n"
+// + "      {\n"
+// + "         Component component = new %classname%();\n"
+// + "         if (props != null)\n"
+// + "         {\n"
+// + "            component.initializeInternal(props);\n"
+// + "         }\n"
+// + "         return(component);\n"
+// + "      });\n";
+
 protected static final String kFACTORY_MAP_COMPONENT_ENTRY =
    "\n"
  + "   kFACTORY_MAP.put(\n"
  + "      \"%classname%\",\n"
  + "      (Function<Properties,Component>)(props) ->\n"
  + "      {\n"
- + "         Component component = new %classname%();\n"
- + "         if (props != null)\n"
- + "         {\n"
- + "            component.initialize(props);\n"
- + "         }\n"
- + "         return(component);\n"
+ + "         return(new %classname%());\n"
  + "      });\n";
 
 protected static final String kFACTORY_MAP_PROVIDER_ENTRY =
@@ -183,10 +192,15 @@ public byte[] process(
             "ReactCodeGeneratorPreprocessor.process(): "
           + "adding FactoryMap entry for " + componentClassname);
 
-         mapEntries +=
+         String mapEntry =
             kFACTORY_MAP_COMPONENT_ENTRY.replace(
                "%classname%", componentClassname);
 
+         logger.log(
+            logger.INFO,
+            "ReactCodeGeneratorPreprocessor.process(): map entry:\n" + mapEntry);
+
+         mapEntries += mapEntry;
                                        // save the entry so it can be checked //
                                        // in ReactCodeGenerator               //
                                        // checkComponentFactoryMap()          //

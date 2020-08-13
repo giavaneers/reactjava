@@ -17,25 +17,19 @@ package io.reactjava.client.core.react;
                                        // imports --------------------------- //
 import com.giavaneers.util.gwt.APIRequestor;
 import com.giavaneers.util.gwt.Logger;
+import elemental2.core.JsObject;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.Element;
-import elemental2.dom.HTMLBodyElement;
 import elemental2.dom.HTMLLinkElement;
 import elemental2.dom.HTMLMetaElement;
 import elemental2.dom.HTMLScriptElement;
-import elemental2.dom.HTMLStyleElement;
 import elemental2.dom.HTMLTitleElement;
 import elemental2.dom.NodeList;
 import elemental2.dom.StyleSheet;
 import io.reactjava.client.providers.platform.web.PlatformWeb;
-import io.reactjava.client.core.react.SEOInfo.SEOPageInfo;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import jsinterop.base.Js;
-import jsinterop.base.JsForEachCallbackFn;
-import jsinterop.base.JsPropertyMap;
                                        // ReactJava ==========================//
 public class ReactJava
 {
@@ -53,6 +47,8 @@ public static final String kHEAD_ELEM_TYPE_SCRIPT     = "script";
 public static final String kHEAD_ELEM_TYPE_STRUCTURED = "structured";
 
                                        // class variables ------------------- //
+                                       // whether booted                      //
+protected static boolean             bBooted;
                                        // whether initialized                 //
 protected static boolean             bInitialized;
 
@@ -122,6 +118,7 @@ protected static void addBaseTag()
 public static ReactElement boot(
    AppComponentTemplate app)
 {
+   bBooted = true;
                                        // add base tag to document if required//
    addBaseTag();
 
@@ -163,6 +160,44 @@ public static ReactElement boot(
    return(renderElement[0]);
 }
 /*------------------------------------------------------------------------------
+
+@name       componentRender - component render process
+                                                                              */
+                                                                             /**
+            Component render process.
+
+@return     native component for specified ReactJava component
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static <P extends Properties> INativeFunctionalComponent componentRender(
+   Component component)
+{
+   return((props) ->
+   {
+      Function<P,ReactElement> fcn = getComponentFcn(component);
+      if (fcn != null)
+      {
+                                       // pre-render processing               //
+         component.preRender(props);
+                                       // built-in useEffect()                //
+         component.useEffectTrackDismounted();
+                                       // invoke the component function       //
+         component.reactElement = fcn.apply((P)props);
+
+                                       // update any styles                   //
+         component.ensureStyles();
+                                       // post-render processing              //
+         component.postRender();
+      }
+      return(component.reactElement);
+   });
+}
+ /*------------------------------------------------------------------------------
 
 @name       createElement - create react element of the component class
                                                                               */
@@ -228,16 +263,7 @@ public static <P extends Properties> ReactElement createElement(
    Class          type,
    IConfiguration configuration)
 {
-   ReactElement element;
-   Properties props     = Properties.with("configuration", configuration);
-   String     classname = type.getName();
-   Component  component = getComponentFactory(classname).apply(props);
-
-   element =
-      createElement(
-         getNativeFunctionalComponent(component), component.props());
-
-   return(element);
+   return(createElement(type, configuration, new ReactElement[0]));
 }
 
 public static <P extends Properties> ReactElement createElement(
@@ -246,12 +272,14 @@ public static <P extends Properties> ReactElement createElement(
    ReactElement element;
    Properties props     = Properties.with("configuration", configuration);
    String     classname = type.getName();
-   Component  component = getComponentFactory(classname).apply(props);
+   Component  component = Component.newInstance(classname, props);
+   if (component == null)
+   {
+      throw new IllegalStateException("No factory method found for "+classname);
+   }
 
    element =
-      createElement(
-         getNativeFunctionalComponent(component), component.props(),
-         children);
+      createElement( componentRender(component), component.props(), children);
 
    return(element);
 }
@@ -276,7 +304,7 @@ public static <P extends Properties> ReactElement createElement(
    Component  component)
 {
    Properties   props   = component.props();
-   ReactElement element = createElement(getNativeFunctionalComponent(component), props);
+   ReactElement element = createElement(componentRender(component), props);
 
    return(element);
 }
@@ -531,94 +559,31 @@ public static boolean getIsWebPlatform()
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public static String getNativeComponentPropertiesFieldname(
-   JsPropertyMap<Object> componentMap)
-{
-   if (nativeComponentPropertiesFieldname == null)
-   {
-      JsForEachCallbackFn callback = new JsForEachCallbackFn()
-      {
-         public void onKey(String key)
-         {
-            if (nativeComponentPropertiesFieldname == null)
-            {
-                                       // since the instance variable is last //
-                                       // in the source, it is first here...  //
-               nativeComponentPropertiesFieldname = key;
-
-               //kLOGGER.logInfo(
-               //   "ReactJava.getNativeComponentPropertiesFieldname(): ="
-               //      + key);
-            }
-         }
-      };
-      componentMap.forEach(callback);
-   }
-   return(nativeComponentPropertiesFieldname);
-}
-/*------------------------------------------------------------------------------
-
-@name       getNativeFunctionalComponent - get native component
-                                                                              */
-                                                                             /**
-            Get native component for specified component classname.
-
-@return     native component for specified component classname
-
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-
-                                                                              */
-//------------------------------------------------------------------------------
-public static <P extends Properties> INativeFunctionalComponent getNativeFunctionalComponent(
-   String classname)
-{
-   Component component = getComponentFactory(classname).apply(new Properties());
-   return(getNativeFunctionalComponent(component));
-}
-/*------------------------------------------------------------------------------
-
-@name       getNativeFunctionalComponent - get native component
-                                                                              */
-                                                                             /**
-            Get native component for specified ReactJava component.
-
-@return     native component for specified ReactJava component
-
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-
-                                                                              */
-//------------------------------------------------------------------------------
-public static <P extends Properties> INativeFunctionalComponent getNativeFunctionalComponent(
-   Component component)
-{
-   return((props) ->
-   {
-                                       // assign the private instance variable//
-      JsPropertyMap<Object> map = Js.asPropertyMap(component);
-      map.set(getNativeComponentPropertiesFieldname(map), props);
-
-      Function<P,ReactElement> fcn = getComponentFcn(component);
-      if (fcn != null)
-      {
-                                       // pre-render processing               //
-         component.preRender(props);
-                                       // built-in useEffect()                //
-         component.useEffectTrackDismounted();
-                                       // invoke the component function       //
-         component.reactElement = fcn.apply((P)props);
-
-                                       // update any styles                   //
-         component.ensureStyles();
-                                       // post-render processing              //
-         component.postRender();
-      }
-      return(component.reactElement);
-   });
-}
+//public static String getNativeComponentPropertiesFieldname(
+//   JsPropertyMap<Object> componentMap)
+//{
+//   if (nativeComponentPropertiesFieldname == null)
+//   {
+//      JsForEachCallbackFn callback = new JsForEachCallbackFn()
+//      {
+//         public void onKey(String key)
+//         {
+//            if (nativeComponentPropertiesFieldname == null)
+//            {
+//                                       // since the instance variable is last //
+//                                       // in the source, it is first here...  //
+//               nativeComponentPropertiesFieldname = key;
+//
+//               //kLOGGER.logInfo(
+//               //   "ReactJava.getNativeComponentPropertiesFieldname(): ="
+//               //      + key);
+//            }
+//         }
+//      };
+//      componentMap.forEach(callback);
+//   }
+//   return(nativeComponentPropertiesFieldname);
+//}
 /*------------------------------------------------------------------------------
 
 @name       getPlatformProvider - get platform provider
@@ -692,6 +657,25 @@ public static Function<Properties,IProvider> getProvider(
 
    return(factory);
 }
+/*------------------------------------------------------------------------------
+
+@name       getReactJavaWindowVariable - get ReactJava widow variable
+                                                                              */
+                                                                             /**
+            Get ReactJava widow variable. Primarily for debugging purposes
+            to ensure the ReactJava window variable has been initialized and
+            its contents can be verified.
+
+@history    Fri May 15, 2020 08:46:23 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static native JsObject getReactJavaWindowVariable()
+/*-{
+    var reactJava = $wnd.ReactJava;
+    return(reactJava);
+}-*/;
 /*------------------------------------------------------------------------------
 
 @name       initialize - initialize

@@ -49,7 +49,7 @@ public static final String  kPROPERTY_COVERSTYLE = "coverstyle";
                                                                              /**
             Provide a default elementId.
 
-@returns    a default elementId, or null if none.
+@return     a default elementId, or null if none.
 
 @history    Mon Feb 24, 2020 10:30:00 (Giavaneers - LBM) created
 

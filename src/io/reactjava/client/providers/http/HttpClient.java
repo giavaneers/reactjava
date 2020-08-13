@@ -44,10 +44,12 @@ package io.reactjava.client.providers.http;
 import com.giavaneers.util.gwt.APIRequestor;
 import com.giavaneers.util.gwt.Logger;
 import com.google.gwt.http.client.URL;
+import elemental2.core.ArrayBuffer;
+import elemental2.core.Uint8Array;
+import io.reactjava.client.core.react.Observable;
+import io.reactjava.client.core.react.Subscriber;
 import io.reactjava.client.providers.http.IHttpResponse.ResponseType;
-import io.reactjava.client.core.rxjs.observable.Observable;
-import io.reactjava.client.core.rxjs.observable.Subscriber;
-
+import jsinterop.base.Js;
                                        // HttpClient =========================//
 public class HttpClient extends HttpClientBase implements IHttpClient
 {
@@ -199,14 +201,50 @@ public Observable<HttpResponse> send()
 public Observable<HttpResponse> send(
    byte[] bytes)
 {
-   //kLOGGER.logInfo("HttpClient.send(): waiting for subscribe.");
+   Uint8Array uint8Array = Js.uncheckedCast(bytes);
+   return(send(uint8Array));
+}
+/*------------------------------------------------------------------------------
 
-   Observable<HttpResponse> observable = Observable.create(observer ->
+@name       send - send the request
+                                                                              */
+                                                                             /**
+            Send the request.
+
+@return     void
+
+@history    Fri Nov 09, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public Observable<HttpResponse> send(
+   ArrayBuffer arrayBuffer)
+{
+   return(send(new Uint8Array(arrayBuffer)));
+}
+/*------------------------------------------------------------------------------
+
+@name       send - send the request
+                                                                              */
+                                                                             /**
+            Send the request.
+
+@return     void
+
+@history    Fri Nov 09, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public Observable<HttpResponse> send(
+   Uint8Array uint8Array)
+{
+   Observable<HttpResponse> observable = Observable.create(
+      (Subscriber<HttpResponse> subscriber) ->
    {
       if (getReadyStateChangedListener() == null)
       {
-         Subscriber subscriber = observer;
-
          props.set(
             kKEY_RDY_STATE_CHANGED_LISTENER,
             new DefaultReadyStateChangeListener(this, subscriber));
@@ -216,8 +254,8 @@ public Observable<HttpResponse> send(
             //  + getReadyStateChangedListener());
       }
 
-      super.send(bytes);
-      return(observer);
+      super.send(uint8Array);
+      return(subscriber);
    });
 
    return(observable);

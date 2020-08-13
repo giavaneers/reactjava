@@ -20,6 +20,7 @@ import io.reactjava.client.core.react.SEOInfo;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
                                        // AppComponentTemplate ============== //
 public class AppComponentTemplate<P extends Properties> extends Component<P>
 {
@@ -94,6 +95,25 @@ public AppComponentTemplate(P props)
 protected ICloudServices getCloudServicesConfig()
 {
    return(cloudServicesConfig);
+}
+/*------------------------------------------------------------------------------
+
+@name       getCustomJavascripts - get custom javascripts
+                                                                              */
+                                                                             /**
+            Get custom javascripts. This method is typically invoked at
+            boot time.
+
+@return     ordered list of javascript urls
+
+@history    Fri May 22, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected List<String> getCustomJavascripts()
+{
+   return(null);
 }
 /*------------------------------------------------------------------------------
 

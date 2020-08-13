@@ -27,10 +27,10 @@ import io.reactjava.client.core.react.INativeEffectHandler;
 import io.reactjava.client.core.react.INativeEventHandler;
 import io.reactjava.client.core.react.NativeObject;
 import io.reactjava.client.core.react.Observable;
+import io.reactjava.client.core.react.Subscriber;
 import io.reactjava.client.core.react.Properties;
 import io.reactjava.client.core.react.ReactJava;
 import io.reactjava.client.core.react.Utilities;
-import io.reactjava.client.core.rxjs.observable.Subscriber;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -1474,16 +1474,26 @@ public RenderEditFunction renderEditFunction =
                "left",     "0px",
                "width",    "100%");
 
+         //ElementDsc.create(
+         //   parentDsc,
+         //   ReactJava.getNativeFunctionalComponent(ViewerCover.class.getName()),
+         //   new ViewerCover().initializeInternal(
+         //      Properties.with(
+         //         "rjcomponentid", root.props.getString("rjcomponentid"),
+         //         "coverstyle",    coverStyle,
+         //         "cover",         getCover(),
+         //         "scrollsrcid",   getScrollEventSrcElementId(),
+         //         "id",            getNextId())));
+
          ElementDsc.create(
             parentDsc,
-            ReactJava.getNativeFunctionalComponent(ViewerCover.class.getName()),
-            new ViewerCover().initialize(
-               Properties.with(
-                  "rjcomponentid", root.props.getString("rjcomponentid"),
-                  "coverstyle",    coverStyle,
-                  "cover",         getCover(),
-                  "scrollsrcid",   getScrollEventSrcElementId(),
-                  "id",            getNextId())));
+            ViewerCover.class.getName(),
+            Properties.with(
+               "rjcomponentid", root.props.getString("rjcomponentid"),
+               "coverstyle",    coverStyle,
+               "cover",         getCover(),
+               "scrollsrcid",   getScrollEventSrcElementId(),
+               "id",            getNextId()));
       }
 
       return(root);
