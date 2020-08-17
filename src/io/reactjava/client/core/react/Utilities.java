@@ -22,13 +22,13 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.ScriptInjector;
 import com.google.gwt.typedarrays.client.Uint8ArrayNative;
 import com.google.gwt.typedarrays.shared.Uint8Array;
+import elemental2.core.JsObject;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.Element;
 import elemental2.dom.Event;
 import elemental2.dom.EventListener;
 import elemental2.dom.EventTarget;
 import elemental2.dom.HTMLDocument;
-import elemental2.core.JsObject;
 import elemental2.dom.HTMLElement;
 import io.reactjava.client.providers.http.HttpClient;
 import io.reactjava.client.providers.http.HttpClientBase;
@@ -37,16 +37,13 @@ import io.reactjava.client.providers.http.IHttpResponse;
 import io.reactjava.client.providers.http.IHttpResponse.ResponseType;
 import io.reactjava.client.core.resources.javascript.IJavascriptResources;
 import io.reactjava.client.core.resources.javascript.JavascriptResources;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import jsinterop.base.Js;
                                        // Utilities ==========================//
 public class Utilities
 {
@@ -60,6 +57,9 @@ public static final String  kREGEX_ZERO_OR_MORE_WHITESPACE = "\\s*";
 
 public static final String  kREGEX_ONE_OR_MORE_NON_WHITESPACE  = "\\S+";
 public static final String  kREGEX_ZERO_OR_MORE_NON_WHITESPACE = "\\S*";
+
+public static final String  kREGEX_AS_DELIMETER =
+   kREGEX_ONE_OR_MORE_WHITESPACE + "as" + kREGEX_ONE_OR_MORE_WHITESPACE;
 
 public static final List<String> kCSS_COLORS =
    new ArrayList<>(
@@ -296,6 +296,29 @@ public static void addEventListener(
       }
    });
 };
+/*------------------------------------------------------------------------------
+
+@name       assignReactJavaWindowVariable - assign ReactJava window variable
+                                                                              */
+                                                                             /**
+            Assign ReactJava window variable.
+
+@param      windowVarName     existing window variable name which is to be the
+                              value of the new ReactJava window variable.
+
+@history    Sat Aug 15, 2020 08:46:23 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static  void assignReactJavaWindowVariable(
+   String windowVarName)
+{
+   NativeObject windowObject = Js.uncheckedCast(DomGlobal.window);
+   Object       windowVarVal = windowObject.get(windowVarName);
+   NativeObject ReactJava    = Js.uncheckedCast(windowObject.get("ReactJava"));
+   ReactJava.set(windowVarName, windowVarVal);
+}
 /*------------------------------------------------------------------------------
 
 @name       bytesToUint8Array - get Uint8Array from byte array
@@ -1274,6 +1297,23 @@ public static void injectScriptsAndCSS(
             else
             {
                String injected = injectRsrcURLs.get(counter);
+
+                                       // check for ReactJava var assignment  //
+               String[] splits = injected.split(kREGEX_AS_DELIMETER);
+               if (splits.length > 1)
+               {
+                  String rjVarName = splits[1];
+                  int    idx        = rjVarName.indexOf('.');
+                  if (idx < 0)
+                  {
+                     throw new IllegalStateException(
+                        "Window variable assignment " + rjVarName
+                      + "should be of the form 'ReactJava.[varName]'");
+                  }
+                  String windowVar = rjVarName.substring(idx + 1);
+                  assignReactJavaWindowVariable(windowVar);
+               }
+
                getInjectedRsrcURLs().add(injected);
                kLOGGER.logInfo("Successfully loaded " + injected);
             }
@@ -1312,6 +1352,13 @@ public static void injectScriptsAndCSS(
                            IJavascriptResources.kSCRIPT_PLAT_PAKO);
 
                kLOGGER.logInfo("Loading " + injectURL);
+
+                                       // check for ReactJava var assignment  //
+               String[] splits = injectURL.split(kREGEX_AS_DELIMETER);
+               if (splits.length > 1)
+               {
+                  injectURL = splits[0];
+               }
 
                if (getInjectedRsrcURLs().contains(injectURL))
                {
@@ -1356,6 +1403,11 @@ public static void injectScriptsAndCSS(
                {
                   injectScriptLoadLazyCompressed(injectURL, thisCallback);
                }
+                                       // ensure ReactJava window variable    //
+                                       // for debugging purposes              //
+
+               JsObject reactJava = ReactJava.getReactJavaWindowVariable();
+               int      dummy     = 0;
             }
          }
       };

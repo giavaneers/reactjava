@@ -212,25 +212,6 @@ public INativeEffectHandler handleEffect = () ->
 };
 /*------------------------------------------------------------------------------
 
-@name       initialize - initialize
-                                                                              */
-                                                                             /**
-            Initialize. This method is invoked in the constructor prior to
-            initial rendering. This is the initialize method typically
-            overridden by subclasses.
-
-@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-
-                                                                              */
-//------------------------------------------------------------------------------
-protected void initialize()
-{
-   int dummy = 0;
-}
-/*------------------------------------------------------------------------------
-
 @name       launch - launch component
                                                                               */
                                                                              /**
@@ -256,7 +237,6 @@ protected void launch()
 // configureSamplesDropDown();
 
    loadStructure(props().getString("target"));
-   loop();
    //                                    // make display visible                //
    //HTMLElement speckContainer =
    //   (HTMLElement)DomGlobal.document.getElementById("speck-container");
@@ -294,6 +274,8 @@ protected void loadStructure(
       View.center(view, system);
 
       bNeedReset = true;
+                                       // start animation loop                //
+      loop();
    }
 };
 /*------------------------------------------------------------------------------
@@ -582,6 +564,9 @@ public final void render()
                                                                              /**
             Get component css.
 
+            This #speck-container and #render-container setup so #render-canvas
+            is the larget square to fit the container width.
+
 @history    Thu Jun 25, 2020 10:30:00 (Giavaneers - LBM) created
 
 @notes
@@ -593,18 +578,32 @@ public void renderCSS()
 /*--
 #speck-container
 {
-   font-family: 'Open Sans', sans-serif;
-   font-size: 16px;
-   margin: 0px;
+   margin:              0px;
+   box-sizing:          border-box;
+   max-width:           100%;
+   height:              calc(100vh - 16px);
+   resize:              horizontal;
+   overflow:            hidden;
+   font-family:         'Open Sans', sans-serif;
+   font-size:           16px;
    -webkit-user-select: none;
-   background: url('images/noise.png');
-   background-color: rgba(255,255,255,0.5);
+   background:          url('images/noise.png');
+   background-color:    rgba(255,255,255,0.5);
+
 }
 
 #render-container
 {
-   background: radial-gradient(#fff, #aaa);
-   position: fixed;
+   position:       fixed;
+   width:          100%;
+   padding-bottom: 100%;
+   background:     radial-gradient(#fff, #aaa);
+}
+
+#renderer-canvas
+{
+   width:  100%;
+   height: 100%;
 }
 
 #controls-container
@@ -612,12 +611,6 @@ public void renderCSS()
    position: fixed;
    overflow-y: auto;
    width: 550px;
-}
-
-#renderer-canvas
-{
-   width: 100%;
-   height: 100%;
 }
 
 #controls-menu
