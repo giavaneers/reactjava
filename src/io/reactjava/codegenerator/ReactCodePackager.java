@@ -210,6 +210,42 @@ public ReactCodePackager()
 }
 /*------------------------------------------------------------------------------
 
+@name       addEmbeddedResource - add embedded resource
+                                                                              */
+                                                                             /**
+            Add embedded resource with specified pathname.
+
+            The specified pathname describes the source path and optionally the
+            desired name of the associated external separated by the word 'as'
+            as a delimiter which is ignored by this implementation.
+
+@return     true iff specified resource is retrieved
+
+@param      rsrcPath    resource pathname
+@param      logger      logger
+
+@history    Wed Aug 19, 2020 18:00:00 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected boolean addEmbeddedResource(
+   String         rsrcPath,
+   IConfiguration configuration,
+   TreeLogger     logger)
+   throws         Exception
+{
+   String regex =
+      Utilities.kREGEX_ONE_OR_MORE_WHITESPACE
+    + "as"
+    + Utilities.kREGEX_ONE_OR_MORE_WHITESPACE;
+
+   rsrcPath = rsrcPath.split(regex)[0];
+
+   return(true);
+}
+/*------------------------------------------------------------------------------
+
 @name       addImportedNodeModuleJavascript - add imported node module script
                                                                               */
                                                                              /**
@@ -258,7 +294,8 @@ protected boolean addImportedNodeModuleJavascript(
          IConfiguration.getDependencies().put(moduleName, path);
       }
    }
-    boolean bFound = path != null;
+
+   boolean bFound = path != null;
 
    logger.log(TreeLogger.INFO,
       "ReactCodePackager.addImportedNodeModuleJavascript(): module=" + module
@@ -2192,6 +2229,54 @@ public String getSourceForClassname(
 }
 /*------------------------------------------------------------------------------
 
+@name       handleEmbeddedResources - add embedded resources
+                                                                              */
+                                                                             /**
+            Add embedded resources.
+
+@param      embeddedResources    embedded resources
+@param      configuration        configuration
+@param      logger               logger
+
+@history    Sun Dec 02, 2018 18:00:00 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected void handleEmbeddedResources(
+   Collection<String> embeddedResources,
+   IConfiguration     configuration,
+   TreeLogger         logger)
+   throws             Exception
+{
+   if (embeddedResources.size() == 0)
+   {
+      logger.log(
+         TreeLogger.INFO,
+         "handleEmbeddedResources(): no embedded resources specified");
+   }
+   else
+   {
+      for (String resourceName : embeddedResources)
+      {
+         if (!resourceName.startsWith("embedded:"))
+         {
+            continue;
+         }
+
+         resourceName = resourceName.substring("embedded:".length());
+         if (!resourceName.endsWith(".js"))
+         {
+            throw new UnsupportedOperationException(
+               "Embedding support only for javascripts for now");
+         }
+
+         addEmbeddedResource(resourceName, configuration, logger);
+      }
+   }
+}
+/*------------------------------------------------------------------------------
+
 @name       handleImportedNodeModules - add imported node modules
                                                                               */
                                                                              /**
@@ -2263,7 +2348,7 @@ protected void handleImportedNodeModules(
 }
 /*------------------------------------------------------------------------------
 
-@name       handleImportedNodeModulesAndSEO - get imported node modules
+@name       handleAppInfo - get imported node modules
                                                                               */
                                                                              /**
             Get any imported node modules from the application class
@@ -2280,7 +2365,7 @@ protected void handleImportedNodeModules(
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-protected void handleImportedNodeModulesAndSEO(
+protected void handleAppInfo(
    Map<String,Map<String,JClassType>> typesMap,
    ModuleDef                          module,
    IConfiguration                     configuration,
@@ -2297,66 +2382,74 @@ protected void handleImportedNodeModulesAndSEO(
    {
       logger.log(
          TreeLogger.INFO,
-         "ReactCodePackager.handleImportedNodeModulesAndSEO(): "
+         "ReactCodePackager.handleAppInfo(): "
        + "checking for " + appClassname);
 
                                        // get the component imported modules  //
       Map<String,JClassType> appTypes = typesMap.get(kKEY_APP_TYPES);
 
-      String importedModulesAndSEO =
-         AppComponentInspector.getImportedModulesAndSEO(
+      String importedModulesAndEmbeddedResourcesAndSEO =
+         AppComponentInspector
+            .getAppInfoByJClassType(
             appClassname, appTypes, logger).trim();
 
       String parsedSEO =
-         handleImportedNodeModulesAndSEO(
-            importedModulesAndSEO, configuration, logger);
+         handleAppInfo(
+            importedModulesAndEmbeddedResourcesAndSEO, configuration, logger);
 
       handleSEOInfo(parsedSEO, module, logger);
    }
 }
 /*------------------------------------------------------------------------------
 
-@name       handleImportedNodeModulesAndSEO - get imported node modules
+@name       handleAppInfo - get app info
                                                                               */
                                                                              /**
             Get any imported node modules from the specified string.
 
-@param      importedModulesAndSEO   string representation
-@param      logger                  logger
+@param      importedModulesAndEmbeddedResourcesAndSEO    string representation
+@param      logger                                       logger
 
 @history    Sun Dec 02, 2018 18:00:00 (LBM) created.
 
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-protected String handleImportedNodeModulesAndSEO(
-   String         importedModulesAndSEO,
+protected String handleAppInfo(
+   String         importedModulesAndEmbeddedResourcesAndSEO,
    IConfiguration configuration,
    TreeLogger     logger)
    throws         Exception
 {
    logger.log(
       TreeLogger.INFO,
-      "ReactCodePackager.handleImportedNodeModulesAndSEO(): "
-    + "importedModulesAndSEO=" + importedModulesAndSEO);
+      "ReactCodePackager.handleImportedNodeModulesAndEmbeddedResourcesAndSEO(): "
+    + "importedModulesAndSEO=" + importedModulesAndEmbeddedResourcesAndSEO);
 
                                        // remove wrapping brackets            //
-   importedModulesAndSEO = importedModulesAndSEO.substring(1);
-   importedModulesAndSEO =
-      importedModulesAndSEO.substring(0, importedModulesAndSEO.length() - 1);
+   importedModulesAndEmbeddedResourcesAndSEO =
+      importedModulesAndEmbeddedResourcesAndSEO.substring(1);
+
+   importedModulesAndEmbeddedResourcesAndSEO =
+      importedModulesAndEmbeddedResourcesAndSEO.substring(
+         0, importedModulesAndEmbeddedResourcesAndSEO.length() - 1);
 
    logger.log(
       TreeLogger.INFO,
-      "ReactCodePackager.handleImportedNodeModulesAndSEO(): unwrapped="
-         + importedModulesAndSEO);
+      "ReactCodePackager.handleImportedNodeModulesAndEmbeddedResourcesAndSEO():"
+         + " unwrapped="
+         + importedModulesAndEmbeddedResourcesAndSEO);
+
                                        // separate the google analytics id    //
                                        // from the imported modules           //
+                                       // from the embedded resources         //
                                        // from the seo info                   //
-   String[] splits = importedModulesAndSEO.split("<delimiter>");
+   String[] splits =
+      importedModulesAndEmbeddedResourcesAndSEO.split("<delimiter>");
 
    logger.log(
       TreeLogger.INFO,
-      "ReactCodePackager.handleImportedNodeModulesAndSEO(): "
+      "ReactCodePackager.handleImportedNodeModulesAndEmbeddedResourcesAndSEO(): "
     + "splits.length=" + splits.length);
 
    String googleAnalyticsId = splits[0];
@@ -2367,13 +2460,13 @@ protected String handleImportedNodeModulesAndSEO(
 
    logger.log(
       TreeLogger.INFO,
-      "ReactCodePackager.handleImportedNodeModulesAndSEO(): "
+      "ReactCodePackager.handleImportedNodeModulesAndEmbeddedResourcesAndSEO(): "
     + "googleAnalyticsId=" + googleAnalyticsId);
 
    String splitModules = splits[1];
    logger.log(
       TreeLogger.INFO,
-      "ReactCodePackager.handleImportedNodeModulesAndSEO(): "
+      "ReactCodePackager.handleImportedNodeModulesAndEmbeddedResourcesAndSEO(): "
     + "splitModules=" + splitModules);
 
    Collection<String> importedModules = new ArrayList<>();
@@ -2391,7 +2484,10 @@ protected String handleImportedNodeModulesAndSEO(
 
    handleImportedNodeModules(importedModules, configuration, logger);
 
-   String splitSEO = splits[2];
+                                       // skip splits[2] embedded resources   //
+                                       // handled in                          //
+                                       // ReactCodeGeneratorPreProcessor      //
+   String splitSEO = splits[3];
    return(splitSEO);
 }
 /*------------------------------------------------------------------------------
@@ -2641,7 +2737,7 @@ public static void main(
           + "<delimiter>, "
           + "<SEOInfo>]";
 
-         new ReactCodePackager().handleImportedNodeModulesAndSEO(
+         new ReactCodePackager().handleAppInfo(
             importedModulesAndSEO, configuration, logger);
       }
       else
@@ -3067,7 +3163,7 @@ public void process(
 
    generateBootJs(providersAndComponents, logger);
 
-   handleImportedNodeModulesAndSEO(
+   handleAppInfo(
       providersAndComponents, module, configuration, logger);
 
                                        // copy all scripts and css to artifact//

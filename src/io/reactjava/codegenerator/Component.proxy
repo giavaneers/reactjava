@@ -351,6 +351,29 @@ protected boolean getDismounted()
 }
 /*------------------------------------------------------------------------------
 
+@name       getExportedResourceURL - get exported resource url
+                                                                              */
+                                                                             /**
+            Get exported resource url from module resource path relative to
+            specified <public path>.
+
+@return     exported resource url
+
+@param      rsrcPublicRelativePath     path to resource realative to module
+                                       specified public path
+
+@history    Sat Aug 22, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected String getExportedResourceURL(
+   String rsrcPublicRelativePath)
+{
+   return(null);
+}
+/*------------------------------------------------------------------------------
+
 @name       getMounted - get whether component is mounted
                                                                               */
                                                                              /**

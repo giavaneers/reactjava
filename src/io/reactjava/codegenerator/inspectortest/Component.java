@@ -15,6 +15,7 @@ notes:
                                        // package --------------------------- //
 package io.reactjava.codegenerator.inspectortest;
                                        // imports --------------------------- //
+import com.google.gwt.core.client.GWT;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.Element;
 import elemental2.dom.Node;
@@ -326,6 +327,29 @@ public Element getDOMParentElement()
                                                                               */
 //------------------------------------------------------------------------------
 protected ICloudServices getCloudServicesConfig()
+{
+   return(null);
+}
+/*------------------------------------------------------------------------------
+
+@name       getExportedResourceURL - get exported resource url
+                                                                              */
+                                                                             /**
+            Get exported resource url from module resource path relative to
+            specified <public path>.
+
+@return     exported resource url
+
+@param      rsrcPublicRelativePath     path to resource realative to module
+                                       specified public path
+
+@history    Sat Aug 22, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected String getExportedResourceURL(
+   String rsrcPublicRelativePath)
 {
    return(null);
 }

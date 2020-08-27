@@ -135,6 +135,7 @@ public static final List<String> kNO_RELAUNCH =
       add("buildgwtcodeserverjar");
       add("buildgwtdevjar");
       add("buildrelease");
+      add("buildreleasejar");
       add("creategwtlibrary");
       add("deletetempgwtcache");
       add("updatejarmanifest");
@@ -682,6 +683,155 @@ public static void buildGWTDevJar()
 }
 /*------------------------------------------------------------------------------
 
+@name       buildJar - build jar
+                                                                              */
+                                                                             /**
+            Generate jar
+
+@param      args, where
+
+               args[0]     manifest version
+               args[1]     main class
+               args[2]     name
+               args[3]     specification title
+               args[4]     specification version
+               args[5]     specification vendor
+               args[6]     implementation title
+               args[7]     implementation version
+               args[8]     implementation vendor
+               args[9]     destination jar path
+               args[10]    src classes path
+               args[...]   resource folder paths, one per arg
+
+
+
+@history    Mon Aug 18, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static void buildJar(
+   String[] args)
+   throws   Exception
+{
+   String timestamp =
+      new SimpleDateFormat(kDATE_FORMAT_PATTERN_VERSION).format(new Date());
+
+   String specificationVersionStamped =
+      args[4].endsWith(".") ? args[4] + timestamp : args[4];
+
+   String implementationVersionStamped =
+      args[7].endsWith(".") ? args[7] + timestamp : args[7];
+
+   Manifest manifest =
+      new Manifest()
+      {{
+         Attributes atts = getMainAttributes();
+         atts.putValue("Manifest-Version",       args[0]);
+         atts.putValue("Main-Class",             args[1]);
+         atts.putValue("Name",                   args[2]);
+         atts.putValue("Specification-Title",    args[3]);
+         atts.putValue("Specification-Version",  specificationVersionStamped);
+         atts.putValue("Specification-Vendor",   args[5]);
+         atts.putValue("Implementation-Title",   args[6]);
+         atts.putValue("Implementation-Version", implementationVersionStamped);
+         atts.putValue("Implementation-Vendor",  args[8]);
+      }};
+                                       // get any resource directories        //
+   String[] rsrcDirs = null;
+   if (args.length > 11)
+   {
+      rsrcDirs = new String[args.length - 11];
+      System.arraycopy(args, 11, rsrcDirs, 0, rsrcDirs.length);
+   }
+
+   buildJar(manifest, args[9], args[10], rsrcDirs);
+}
+/*------------------------------------------------------------------------------
+
+@name       buildJar - build jar
+                                                                              */
+                                                                             /**
+            Generate jar
+
+@history    Mon Aug 18, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static void buildJar(
+   Manifest  manifest,
+   String    dstJarPath,
+   String    outClassesPath,
+   String... rsrcDirs)
+   throws    Exception
+{
+   System.out.println("JavascriptBundler.buildJar(): entered");
+
+   File         projectDir   = new File(System.getProperty("user.dir"));
+   List<Path>   paths        = new ArrayList<>();
+   List<Path>   entries      = new ArrayList<>();
+   File         dstJar       = new File(dstJarPath);
+   List<String> rsrcDirPaths = new ArrayList<>();
+   if (rsrcDirs != null)
+   {
+      rsrcDirPaths.addAll(Arrays.asList(rsrcDirs));
+   }
+
+   List<String> bases =
+      new ArrayList<String>()
+      {{
+         add("src");
+         add("classes");
+         add(outClassesPath);
+         addAll(rsrcDirPaths);
+      }};
+
+   for (String base : bases)
+   {
+      File baseDir = new File(projectDir, base);
+      if (!baseDir.exists())
+      {
+         continue;
+      }
+
+      Path path = baseDir.toPath();
+      List<Path> basePaths =
+         Files.walk(path)
+           .filter(s -> !s.toString().endsWith(".DS_Store"))
+           .collect(toList());
+
+      for (Path basePath : basePaths)
+      {
+         if (basePath.toFile().isDirectory())
+         {
+            continue;
+         }
+
+         Path reference =
+            rsrcDirPaths.contains(base)
+               ? baseDir.getParentFile().toPath() : path;
+
+         Path entry = reference.relativize(basePath);
+
+         if ("META-INF/MANIFEST.MF".equals(entry.toString()))
+         {
+                                       // manifest is specified explicitly    //
+            continue;
+         }
+         if (!entries.contains(entry))
+         {
+            paths.add(basePath);
+            entries.add(entry);
+         }
+      }
+   }
+
+   jarFiles(dstJar, paths, entries, manifest);
+   System.out.println("JavascriptBundler.buildJar(): exiting");
+}
+/*------------------------------------------------------------------------------
+
 @name       buildReactJavaJar - build reactjava.jar
                                                                               */
                                                                              /**
@@ -697,50 +847,11 @@ public static void buildReactJavaJar()
 {
    System.out.println("JavascriptBundler.buildReactJavaJar(): entered");
 
-   File       projectDir = new File(System.getProperty("user.dir"));
-   List<Path> paths      = new ArrayList<Path>();
-   List<Path> entries    = new ArrayList<Path>();
+   buildJar(
+      kREACT_JAVA_JAR_MANIFEST,
+      "/Users/brianm/working/io/reactjava/lib/reactjava.jar",
+      "out/artifacts/ReactJava_war_exploded/WEB-INF/classes");
 
-   File dstJar =
-      new File("/Users/brianm/working/io/reactjava/lib/reactjava.jar");
-
-   String[] bases =
-   {
-      "src",
-      "classes",
-      "out/artifacts/ReactJava_war_exploded/WEB-INF/classes",
-   };
-
-   for (String base : bases)
-   {
-      Path path = new File(projectDir, base).toPath();
-      List<Path> basePaths =
-         Files.walk(path)
-           .filter(s -> !s.toString().endsWith(".DS_Store"))
-           .collect(toList());
-
-      for (Path basePath : basePaths)
-      {
-         if (basePath.toFile().isDirectory())
-         {
-            continue;
-         }
-
-         Path entry = path.relativize(basePath);
-         if ("META-INF/MANIFEST.MF".equals(entry.toString()))
-         {
-                                       // manifest is specified explicitly    //
-            continue;
-         }
-         if (!entries.contains(entry))
-         {
-            paths.add(basePath);
-            entries.add(entry);
-         }
-      }
-   }
-
-   jarFiles(dstJar, paths, entries, kREACT_JAVA_JAR_MANIFEST);
    System.out.println("JavascriptBundler.buildReactJavaJar(): exiting");
 }
 /*------------------------------------------------------------------------------
@@ -1535,6 +1646,16 @@ public static void doOp(
          }
          versionGWT = argsList.get(++i);
       }
+      else if ("buildreleasejar".equals(argLC))
+      {
+         if (argsList.size() < 12)
+         {
+            throw new IllegalArgumentException(
+               "buildreleasejar requires at least 11 arguments");
+         }
+         opcode = argLC;
+         break;
+      }
       else if (opcode == null)
       {
          opcode = argLC;
@@ -1573,6 +1694,13 @@ public static void doOp(
       case "buildrelease":
       {
          buildRelease();
+         break;
+      }
+      case "buildreleasejar":
+      {
+                                       // remove the opcode                   //
+         argsList.remove(0);
+         buildJar(argsList.toArray(new String[argsList.size()]));
          break;
       }
       case "creategwtlibrary":

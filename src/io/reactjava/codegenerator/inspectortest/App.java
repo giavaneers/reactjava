@@ -63,6 +63,27 @@ protected ICloudServices getCloudServicesConfig()
 }
 /*------------------------------------------------------------------------------
 
+@name       getCustomJavascripts - get custom javascripts
+                                                                              */
+                                                                             /**
+            Get custom javascripts. This method is typically invoked at
+            boot time.
+
+@return     ordered list of javascript urls
+
+@history    Fri May 22, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected List<String> getCustomJavascripts()
+{
+   return(Arrays.asList(
+      "embedded:javascript/tfjs-vis@1.4.0.umd.min.js as ReactJava.tfvis"
+   ));
+}
+/*------------------------------------------------------------------------------
+
 @name       getImportedNodeModules - get imported node modules
                                                                               */
                                                                              /**

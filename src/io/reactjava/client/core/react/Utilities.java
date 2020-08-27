@@ -1303,7 +1303,7 @@ public static void injectScriptsAndCSS(
                if (splits.length > 1)
                {
                   String rjVarName = splits[1];
-                  int    idx        = rjVarName.indexOf('.');
+                  int    idx       = rjVarName.indexOf('.');
                   if (idx < 0)
                   {
                      throw new IllegalStateException(
@@ -1526,21 +1526,24 @@ public static String toAbsoluteURL(
       {
          throw new IllegalArgumentException("URL may not contain whitespace");
       }
-                                          // translate some urls from url params //
+                                       // translate some urls from url params //
       url = url.replace(']','/');
 
-      if (url.startsWith("http://") || url.startsWith("https://"))
+      if (url.startsWith("http://")
+            || url.startsWith("https://")
+            || url.startsWith("jar:http://")
+            || url.startsWith("jar:https://"))
       {
          absolute = url;
       }
       else
       {
-                                          // relative url                        //
+                                       // relative url                        //
          absolute = DomGlobal.window.location.getHref();
          search   = DomGlobal.window.location.getSearch();
          if (search.length() > 0)
          {
-                                          // remove any query string             //
+                                       // remove any query string             //
             absolute = absolute.substring(0, absolute.indexOf(search));
             if (absolute.endsWith("/"))
             {

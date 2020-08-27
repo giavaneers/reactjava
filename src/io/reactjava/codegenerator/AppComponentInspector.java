@@ -23,12 +23,14 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.dev.util.log.PrintWriterTreeLogger;
 import io.reactjava.client.core.react.AppComponentTemplate;
 import io.reactjava.client.core.react.SEOInfo;
+import io.reactjava.codegenerator.IPreprocessor.TypeDsc;
 import io.reactjava.jsx.IConfiguration;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
                                        // AppComponentInspector ============= //
@@ -49,7 +51,7 @@ public static final String[] kPROXIES =
    "Properties.proxy"
 };
                                        // class variables ------------------- //
-                                       // (none)                              //
+protected static String[] parsedSplits;// parsed splits                       //
                                        // public instance variables --------- //
                                        // (none)                              //
                                        // protected instance variables -------//
@@ -155,14 +157,75 @@ public static String getCompileClasspath()
 }
 /*------------------------------------------------------------------------------
 
-@name       getImportedModulesAndSEO - get imported node modules
+@name       getAppInfoByTypeDsc - get app info
                                                                               */
                                                                              /**
-            Get imported node modules and page hashes. Typically invoked by the
-            ReactCodeGenerator at GWT compile time.
+            Get imported node modules, embedded resources and page hashes.
+            Typically invoked by the ReactCodeGenerator at GWT compile time.
 
-@return     collection of node module names to be imported by the target app
-            and page hashes.
+@return     collection of node module names to be imported by the target app,
+            embedded resource names, and page hashes.
+
+@param      app                        app
+@param      providersAndComponents     providers and components
+@param      logger                     logger
+
+@history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static String getAppInfoByTypeDsc(
+   TypeDsc                app,
+   Map<String,TypeDsc>    providersAndComponents,
+   TreeLogger             logger)
+   throws                 Exception
+{
+   String appClassname = IPreprocessor.getClassname(app.type);
+
+   logger.log(
+      logger.INFO,
+         "AppComponentInspector.getAppInfoByTypeDsc(): "
+       + "entered with appClassname=" + appClassname);
+
+   List<String> appClassnames = new ArrayList<>();
+   File         projectDir    = IConfiguration.getProjectDirectory("src", logger);
+
+                                       // the app classname is first          //
+   appClassnames.add(appClassname);
+
+   for (TypeDsc classType : providersAndComponents.values())
+   {
+      String classname = IPreprocessor.getClassname(classType.type);
+      if (!appClassname.equals(classname))
+      {
+                                       // verify the source exists and is not //
+                                       // an inner class of another source    //
+         String pathname = toPathname(classname) + ".java";
+         if (new File(projectDir, pathname).exists())
+         {
+            logger.log(
+               logger.INFO,
+               "AppComponentInspector.getAppInfoByTypeDsc(): "
+             + "adding " + classname);
+
+            appClassnames.add(classname);
+         }
+      }
+   }
+
+   return(getAppInfo(appClassnames, logger));
+}
+/*------------------------------------------------------------------------------
+
+@name       getAppInfoByJClassType - app info
+                                                                              */
+                                                                             /**
+            Get imported node modules, embedded resources and page hashes.
+            Typically invoked by the ReactCodeGenerator at GWT compile time.
+
+@return     collection of node module names to be imported by the target app,
+            embedded resource names, and page hashes.
 
 @param      appClassname      app classname
 @param      appTypes          app types
@@ -173,7 +236,7 @@ public static String getCompileClasspath()
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public static String getImportedModulesAndSEO(
+public static String getAppInfoByJClassType(
    String                 appClassname,
    Map<String,JClassType> appTypes,
    TreeLogger             logger)
@@ -181,7 +244,7 @@ public static String getImportedModulesAndSEO(
 {
    logger.log(
       logger.INFO,
-      "AppComponentInspector.getImportedModulesAndSEO(): "
+      "AppComponentInspector.getAppInfoByJClassType(): "
     + "entered with appClassname=" + appClassname);
 
    List<String> appClassnames = new ArrayList<>();
@@ -202,7 +265,7 @@ public static String getImportedModulesAndSEO(
          {
             logger.log(
                logger.INFO,
-               "AppComponentInspector.getImportedModulesAndSEO(): "
+               "AppComponentInspector.getAppInfoByJClassType(): "
              + "adding " + classname);
 
             appClassnames.add(classname);
@@ -210,16 +273,17 @@ public static String getImportedModulesAndSEO(
       }
    }
 
-   return(getImportedModulesAndSEO(appClassnames, logger));
+   return(getAppInfo(appClassnames, logger));
 }
 /*------------------------------------------------------------------------------
 
-@name       getImportedModulesAndSEO - get imported node modules
+@name       getAppInfo - get app info
                                                                               */
                                                                              /**
-            Get imported node modules and page hashes.
+            Get imported node modules, embedded resources and page hashes..
 
-@return     collection of node module names and page hashes
+@return     collection of node module names, embedded resource names and page
+            hashes
 
 @param      appClassnames     app classnames
 @param      logger            logger
@@ -229,11 +293,23 @@ public static String getImportedModulesAndSEO(
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public static String getImportedModulesAndSEO(
+public static String getAppInfo(
    List<String> appClassnames,
    TreeLogger   logger)
    throws       Exception
 {
+   String msg = "";
+   for (String appClassname : appClassnames)
+   {
+      msg += (msg.length() > 0 ? ", " : "") + appClassname;
+   }
+
+   msg =
+      "AppComponentInspector.getAppInfo(): entered with appClassnames=" + msg;
+
+   logger.log( logger.INFO, msg);
+                                       // clear any parsed splits             //
+   parsedSplits = null;
                                        // the app classname is first          //
    String appClassname = appClassnames.get(0);
    String classpath    = getCompileClasspath();
@@ -253,21 +329,155 @@ public static String getImportedModulesAndSEO(
 
    process.waitFor();
 
-   String result = new String(out.toByteArray(), "UTF-8");
+   String result = new String(out.toByteArray(), "UTF-8").trim();
 
    logger.log(
       logger.INFO,
-      "AppComponentInspector.getImportedModulesAndSEO(): "
-    + "result=" + result);
+      "AppComponentInspector.getAppInfo(): result=" + result);
 
    if (!result.contains(SEOInfo.kDELIMITER))
    {
       throw new IllegalStateException(
-         "AppComponentInspector.getImportedModulesAndSEO(): "
-       + "result indicates error");
+         "AppComponentInspector.getAppInfo(): result indicates error");
    }
 
    return(result);
+}
+/*------------------------------------------------------------------------------
+
+@name       getParsedAnalyticsId - get parsed google analytics id
+                                                                              */
+                                                                             /**
+            Get parsed google analytics id.
+
+@return     parsed google analytics id
+
+@param      appInfo     app info
+
+@history    Fri Aug 21, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static String getParsedAnalyticsId(
+   String     appInfo,
+   TreeLogger logger)
+{
+   if (parsedSplits == null)
+   {
+      parse(appInfo, logger);
+   }
+
+   String googleAnalyticsId = parsedSplits[0];
+   if (googleAnalyticsId != null && googleAnalyticsId.length() > 0)
+   {
+      googleAnalyticsId = googleAnalyticsId.split(",")[0].trim();
+   }
+   return(googleAnalyticsId);
+}
+/*------------------------------------------------------------------------------
+
+@name       getParsedEmbeddedResources - get parsed embedded resources
+                                                                              */
+                                                                             /**
+            Get parsed embedded resources.
+
+@return     parsed embedded resources
+
+@history    Fri Aug 21, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static Collection<String> getParsedEmbeddedResources(
+   String     appInfo,
+   TreeLogger logger)
+{
+   if (parsedSplits == null)
+   {
+      parse(appInfo, logger);
+   }
+
+   String splitResources = parsedSplits[2];
+
+   Collection<String> embeddedResources = new ArrayList<>();
+   if (splitResources != null && splitResources.length() > 0)
+   {
+      for (String split : splitResources.split(","))
+      {
+         split = split.trim();
+         if (split.length() > 0)
+         {
+            embeddedResources.add(split);
+         }
+      }
+   }
+
+   return(embeddedResources);
+}
+/*------------------------------------------------------------------------------
+
+@name       getParsedImportedNodeModules - get imported node modules
+                                                                              */
+                                                                             /**
+            Get parsed imported node modules.
+
+@return     imported node modules
+
+@history    Fri Aug 21, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static Collection<String> getParsedImportedNodeModules(
+   String     appInfo,
+   TreeLogger logger)
+{
+   if (parsedSplits == null)
+   {
+      parse(appInfo, logger);
+   }
+
+   String splitModules = parsedSplits[1];
+
+   Collection<String> importedModules = new ArrayList<>();
+   if (splitModules != null && splitModules.length() > 0)
+   {
+      for (String split : splitModules.split(","))
+      {
+         split = split.trim();
+         if (split.length() > 0)
+         {
+            importedModules.add(split);
+         }
+      }
+   }
+   return(importedModules);
+}
+/*------------------------------------------------------------------------------
+
+@name       getParsedSEOInfo - get parsed seo info
+                                                                              */
+                                                                             /**
+            Get parsed seo info.
+
+@return     seo info
+
+@history    Fri Aug 21, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static String getParsedSEOInfo(
+   String     appInfo,
+   TreeLogger logger)
+{
+   if (parsedSplits == null)
+   {
+      parse(appInfo, logger);
+   }
+
+   return(parsedSplits[3]);
 }
 /*------------------------------------------------------------------------------
 
@@ -291,7 +501,7 @@ public static void main(
       long start = System.currentTimeMillis();
 
       String importedModules =
-         AppComponentInspector.getImportedModulesAndSEO(
+         AppComponentInspector.getAppInfo(
             new ArrayList<>(Arrays.asList(args)), new PrintWriterTreeLogger());
 
       System.out.println("Exiting, duration=" + (System.currentTimeMillis() - start));
@@ -300,6 +510,52 @@ public static void main(
    catch(Exception e)
    {
       e.printStackTrace();
+   }
+}
+/*------------------------------------------------------------------------------
+
+@name       parse - parse response string
+                                                                              */
+                                                                             /**
+            Parse response string, returning splits, where
+
+            splits[0]      google analytics id
+            splits[1]      imported node modules
+            splits[2]      embedded resources
+            splits[3]      seo
+
+@param      appInfo     app info response string
+@param      logger      logger
+
+@history    Fri Aug 21, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected static void parse(
+   String     appInfo,
+   TreeLogger logger)
+{
+   logger.log( TreeLogger.INFO, "ReactCodePackager.parse(): appInfo=" + appInfo);
+
+   if (parsedSplits == null)
+   {
+                                       // remove wrapping brackets            //
+      appInfo = appInfo.substring(1);
+      appInfo = appInfo.substring(0, appInfo.length() - 1);
+
+      logger.log(
+         TreeLogger.INFO, "ReactCodePackager.parse(): unwrapped=" + appInfo);
+
+                                       // separate the google analytics id    //
+                                       // from the imported modules           //
+                                       // from the embedded resources         //
+                                       // from the seo info                   //
+      parsedSplits = appInfo.split("<delimiter>");
+
+      logger.log(
+         TreeLogger.INFO,
+         "ReactCodePackager.parse(): splits.length=" + parsedSplits.length);
    }
 }
 /*------------------------------------------------------------------------------

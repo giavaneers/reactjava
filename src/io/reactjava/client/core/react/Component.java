@@ -16,6 +16,7 @@ notes:
 package io.reactjava.client.core.react;
                                        // imports --------------------------- //
 import com.giavaneers.util.gwt.Logger;
+import com.google.gwt.core.client.GWT;
 import elemental2.core.JsObject;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.Element;
@@ -674,6 +675,29 @@ public Element getDOMParentElement()
 protected ICloudServices getCloudServicesConfig()
 {
    return(null);
+}
+/*------------------------------------------------------------------------------
+
+@name       getExportedResourceURL - get exported resource url
+                                                                              */
+                                                                             /**
+            Get exported resource url from module resource path relative to
+            specified 'public path' in nmodule gwt.xml file.
+
+@return     exported resource url
+
+@param      rsrcPublicRelativePath     path to resource realative to module
+                                       specified public path
+
+@history    Sat Aug 22, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected String getExportedResourceURL(
+   String rsrcPublicRelativePath)
+{
+   return(GWT.getModuleBaseURL() + rsrcPublicRelativePath);
 }
 /*------------------------------------------------------------------------------
 

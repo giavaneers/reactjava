@@ -26,7 +26,14 @@ public class ReactGeneratedCode
 public static final String kREACT_JAVA_DIR_NAME       = "reactjava";
 public static final String kIMPORTED_STYLESHEETS_LIST = "importedStyleSheets.txt";
 
+                                       // map of class constructors           //
 protected static final Map<String,Function> kFACTORY_MAP;
+
+                                       // not doing rsrc embedding this way...//
+//                                       // map of embedded resources whose     //
+//                                       // values holds both text and bytes as //
+//                                       // a UTF-8 string                      //
+//protected static final Map<String,String>   kRESOURCE_MAP;
 
                                        // class variables ------------------- //
                                        // none                                //
@@ -39,8 +46,11 @@ protected static final Map<String,Function> kFACTORY_MAP;
 static
 {
    kFACTORY_MAP = new HashMap<>();
+//%factoryMapEntries%
 
-//%entries%
+                                       // not doing rsrc embedding this way...//
+//   kRESOURCE_MAP = new HashMap<>();
+////%resourceMapEntries%
 }
 /*------------------------------------------------------------------------------
 
@@ -105,6 +115,47 @@ public static Map<String,Function> getFactoryMap()
 {
    return(kFACTORY_MAP);
 }
+/*------------------------------------------------------------------------------
+
+@name       getResource - get resource for specified name
+                                                                              */
+                                                                             /**
+            Get resource for specified name.
+
+@return     resource for specified name
+
+@param      resourceName      specified name
+
+@history    Wed Aug 19, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+                                       // not doing rsrc embedding this way...//
+//public static Object getResource(
+//   String resourceName)
+//{
+//   return(kRESOURCE_MAP.get(resourceName));
+//}
+/*------------------------------------------------------------------------------
+
+@name       getResourceMap - get resource map
+                                                                              */
+                                                                             /**
+            Get resource map.
+
+@return     resource map
+
+@history    Wed Aug 19, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+                                       // not doing rsrc embedding this way...//
+//public static Map<String,String> getResourceMap()
+//{
+//   return(kRESOURCE_MAP);
+//}
 /*------------------------------------------------------------------------------
 
 @name       getPlatformProvider - get platform provider to be injected

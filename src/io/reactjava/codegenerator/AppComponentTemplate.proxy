@@ -28,6 +28,7 @@ public class AppComponentTemplate<P extends Properties> extends Component<P>
 public static Collection<String> importedNodeModules;
 public static SEOInfo            seoInfo;
 public static ICloudServices     cloudServicesConfig;
+public static List<String>       embeddedResources;
 
                                        // class variables ------------------- //
                                        // (none)                              //
@@ -57,6 +58,11 @@ public AppComponentTemplate()
    importedNodeModules =
       importedNodeModules == null
          ? new ArrayList<>() : new ArrayList<>(importedNodeModules);
+
+   embeddedResources = getCustomJavascripts();
+   embeddedResources =
+      embeddedResources == null
+         ? new ArrayList<>() : new ArrayList<>(embeddedResources);
 
                                        // stop any subsequent operation       //
    throw new UnsupportedOperationException();
@@ -113,7 +119,7 @@ protected ICloudServices getCloudServicesConfig()
 //------------------------------------------------------------------------------
 protected List<String> getCustomJavascripts()
 {
-   return(null);
+   return(embeddedResources);
 }
 /*------------------------------------------------------------------------------
 
@@ -135,11 +141,11 @@ protected Collection<String> getImportedNodeModules()
 }
 /*------------------------------------------------------------------------------
 
-@name       getImportedNodeModulesAndSEO - imported modules and SEO info
+@name       getImportedNodeModulesAndEmbeddedResourcesAndSEO - app info
                                                                               */
                                                                              /**
-            Get googleAnalyticsId, imported modules and SEOInfo as a single
-            collection delimited by "<delimiter>" entries.
+            Get googleAnalyticsId, imported modules, embedded resources and
+            SEOInfo as a single collection delimited by "<delimiter>" entries.
 
 @return     collection of googleAnalyticsId, imported module names and SEOInfo
 
@@ -148,15 +154,15 @@ protected Collection<String> getImportedNodeModules()
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-protected static Collection<String> getImportedNodeModulesAndSEO()
+protected static Collection<String> getImportedNodeModulesAndEmbeddedResourcesAndSEO()
 {
-   Collection importedNodeModulesAndSEO = new ArrayList();
+   Collection importedNodeModulesAndEmbeddedResourcesAndSEO = new ArrayList();
    if (cloudServicesConfig != null)
    {
       String googleAnalyticsId = cloudServicesConfig.getTrackingId();
       if (googleAnalyticsId != null && googleAnalyticsId.length() > 0)
       {
-         importedNodeModulesAndSEO.add(googleAnalyticsId);
+         importedNodeModulesAndEmbeddedResourcesAndSEO.add(googleAnalyticsId);
 
                                        // automatically add the supporting    //
                                        // node module for posting events      //
@@ -164,17 +170,30 @@ protected static Collection<String> getImportedNodeModulesAndSEO()
       }
    }
 
-   importedNodeModulesAndSEO.add("<delimiter>");
+   importedNodeModulesAndEmbeddedResourcesAndSEO.add("<delimiter>");
    if (importedNodeModules != null)
    {
-      importedNodeModulesAndSEO.addAll(importedNodeModules);
+                                       // add imported node modules           //
+
+      importedNodeModulesAndEmbeddedResourcesAndSEO.addAll(importedNodeModules);
    }
 
-   importedNodeModulesAndSEO.add("<delimiter>");
-   importedNodeModulesAndSEO.add(
+   importedNodeModulesAndEmbeddedResourcesAndSEO.add("<delimiter>");
+   if (embeddedResources != null)
+   {
+                                       // add embedded resources              //
+                                       // (just javascripts for now)          //
+
+      importedNodeModulesAndEmbeddedResourcesAndSEO.addAll(embeddedResources);
+   }
+
+   importedNodeModulesAndEmbeddedResourcesAndSEO.add("<delimiter>");
+
+                                       // add any SEO info                    //
+   importedNodeModulesAndEmbeddedResourcesAndSEO.add(
       seoInfo != null ? seoInfo.toString() : SEOInfo.kNULL_VALUE);
 
-   return(importedNodeModulesAndSEO);
+   return(importedNodeModulesAndEmbeddedResourcesAndSEO);
 }
 /*------------------------------------------------------------------------------
 
@@ -234,7 +253,8 @@ public static void main(
          {
                                        // constructor should generate an error//
                                        // return result to invoker            //
-            System.out.println(getImportedNodeModulesAndSEO().toString());
+            System.out.println(
+               getImportedNodeModulesAndEmbeddedResourcesAndSEO().toString());
          }
       }
       catch(Exception e)
@@ -252,7 +272,8 @@ public static void main(
             {
                                        // constructor should generate an error//
                                        // return result to invoker            //
-               System.out.println(getImportedNodeModulesAndSEO().toString());
+               System.out.println(
+                  getImportedNodeModulesAndEmbeddedResourcesAndSEO().toString());
             }
          }
          catch(Exception ee)

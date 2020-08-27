@@ -57,6 +57,7 @@ public interface IPreprocessor
 {
                                        // class constants --------------------//
                                        // parsed map keys                     //
+String kKEY_PARSED_APPS                = "apps";
 String kKEY_PARSED_COMPONENTS          = "components";
 String kKEY_PARSED_PROVIDER_INTERFACES = "providerInterfaces";
 String kKEY_PARSED_PROVIDERS           = "providers";
@@ -114,7 +115,7 @@ static byte[] allPreprocessors(
    logger = getFileLogger(logger);
 
    logger.log(
-      logger.DEBUG,
+      logger.INFO,
       "IPreprocessor.allPreprocessors(): entered for " + classname);
 
                                        // parse each of the candidates,       //
@@ -130,7 +131,7 @@ static byte[] allPreprocessors(
             classname, processed, encoding, logger);
    }
 
-   logger.log(logger.DEBUG, "IPreprocessor.allPreprocessors(): exiting");
+   logger.log(logger.INFO, "IPreprocessor.allPreprocessors(): exiting");
    return(processed);
 }
 /*------------------------------------------------------------------------------
@@ -349,6 +350,7 @@ static MethodDeclaration getComponentRenderProcedure(
          }
 
          method = chase;
+         break;
       }
    }
    return(method);
@@ -481,6 +483,32 @@ static TypeDsc getImportForSimpleName(
 }
 /*------------------------------------------------------------------------------
 
+@name       getParsedApps - get map of parsed apps by classname
+                                                                              */
+                                                                             /**
+            Get map of parsed apps by classname.
+
+@return     map of parsed apps by classname
+
+@history    Thu Aug 20, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+static Map<String,TypeDsc> getParsedApps(
+   TreeLogger logger)
+{
+   Map<String,TypeDsc> apps = parsed.get(kKEY_PARSED_APPS);
+   if (apps.size() == 0)
+   {
+                                       // lazily create                       //
+      apps.putAll(
+         getAssignableTo(TypeDsc.kROOT_APP_COMPONENT_TEMPLATE_INSTANCE, logger));
+   }
+   return(apps);
+}
+/*------------------------------------------------------------------------------
+
 @name       getParsedComponents - get map of parsed components by classname
                                                                               */
                                                                              /**
@@ -510,12 +538,12 @@ static Map<String,TypeDsc> getParsedComponents(
 }
 /*------------------------------------------------------------------------------
 
-@name       getParsedComponents - get map of parsed components by classname
+@name       getParsedProviderInterfaces - get map of parsed provider interfaces
                                                                               */
                                                                              /**
-            Get map of parsed components by classname.
+            Get map of parsed provider interfaces by classname.
 
-@return     map of parsed components by classname
+@return     map of parsed provider interfaces by classname
 
 @history    Thu Jan 09, 2020 10:30:00 (Giavaneers - LBM) created
 
@@ -572,6 +600,29 @@ static Map<String,TypeDsc> getParsedProviders(
       }
    }
    return(providers);
+}
+/*------------------------------------------------------------------------------
+
+@name       getParsedProvidersAndComponents - get providers and components
+                                                                              */
+                                                                             /**
+            Get map of parsed providers and components by classname.
+
+@return     map of parsed providers and components by classname
+
+@history    Thu Aug 20, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+static Map<String,TypeDsc> getParsedProvidersAndComponents(
+   TreeLogger logger)
+{
+   Map<String,TypeDsc> providersAndComponents = new HashMap<>();
+   providersAndComponents.putAll(getParsedProviders(logger));
+   providersAndComponents.putAll(getParsedComponents(logger));
+
+   return(providersAndComponents);
 }
 /*------------------------------------------------------------------------------
 
@@ -739,12 +790,38 @@ static void initialize(
 }
 /*------------------------------------------------------------------------------
 
+@name       isAppComponent - test if is an app component
+                                                                              */
+                                                                             /**
+            Test whether the specified type is an app component, meaning it is
+            an instantiable subclass of AppComponentTemplate.
+
+@return     true iff the specified type is an instantiable app component.
+
+@param      type     target type
+
+@history    Sat Jan 11, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+static boolean isAppComponent(
+   TypeDsc type)
+{
+   boolean bInstantiable =
+      getParsedApps(null).get(getClassname(type.type)) != null
+         && !TypeDsc.kROOT_APP_COMPONENT_TEMPLATE_INSTANCE.equals(type)
+         && !type.type.isAbstract();
+
+   return(bInstantiable);
+}
+/*------------------------------------------------------------------------------
+
 @name       isInstantiatableComponent - test if is an instantiable component
                                                                               */
                                                                              /**
             Test whether the specified type is an instantiable component,
-            meaning it is a parsedComponent that is not abstract and if it has
-            a zero argument render() method, that method is final.
+            meaning it is a parsedComponent that is not abstract.
 
 @return     true iff the specified type is an instantiable component.
 
@@ -758,20 +835,40 @@ static void initialize(
 static boolean isInstantiatableComponent(
    TypeDsc type)
 {
-   boolean bInstantiable = false;
-
-   if (getParsedComponents(null).get(getClassname(type.type)) != null
+   boolean bInstantiable =
+      getParsedComponents(null).get(getClassname(type.type)) != null
          && !TypeDsc.kROOT_COMPONENT_INSTANCE.equals(type)
          && !TypeDsc.kROOT_APP_COMPONENT_TEMPLATE_INSTANCE.equals(type)
-         && !type.type.isAbstract())
-   {
-                                       // find any render() procedure         //
-      getComponentRenderProcedure(type);
-                                       // if no exception thrown...           //
-      bInstantiable = true;
-   }
+         && !type.type.isAbstract();
 
    return(bInstantiable);
+}
+/*------------------------------------------------------------------------------
+
+@name       isRenderableComponent - test if is a renderable component
+                                                                              */
+                                                                             /**
+            Test whether the specified type is a renderable component,
+            meaning it is an instantiable component that has a zero argument
+            final render() method.
+
+@return     true iff the specified type is a renderable component.
+
+@param      type     target type
+
+@history    Sat Jan 11, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+static boolean isRenderableComponent(
+   TypeDsc type)
+{
+   boolean bRenderable =
+      isInstantiatableComponent(type)
+         && getComponentRenderProcedure(type) != null;
+
+   return(bRenderable);
 }
 /*------------------------------------------------------------------------------
 
@@ -876,6 +973,7 @@ static void parseCandidates(
    {
       logger.log(logger.INFO, "IPreprocessor.parseCandidates(): entered");
 
+      parsed.put(kKEY_PARSED_APPS,                new HashMap<>());
       parsed.put(kKEY_PARSED_COMPONENTS,          new HashMap<>());
       parsed.put(kKEY_PARSED_PROVIDER_INTERFACES, new HashMap<>());
       parsed.put(kKEY_PARSED_PROVIDERS,           new HashMap<>());
