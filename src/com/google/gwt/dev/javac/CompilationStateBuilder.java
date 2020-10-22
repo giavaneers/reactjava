@@ -49,6 +49,8 @@ import com.google.gwt.thirdparty.guava.common.collect.Lists;
 import com.google.gwt.thirdparty.guava.common.collect.Maps;
 import com.google.gwt.thirdparty.guava.common.collect.Sets;
 
+import io.reactjava.compiler.codegenerator.IPreprocessor;
+import io.reactjava.compiler.codegenerator.JavascriptBundler;
 import java.net.URL;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
@@ -516,7 +518,7 @@ public class CompilationStateBuilder {
     try
     {
                                        // initialize all preprocessors        //
-       io.reactjava.codegenerator.IPreprocessor.initialize(logger);
+       IPreprocessor.initialize(logger);
     }
     catch(Exception e)
     {
@@ -533,8 +535,7 @@ public class CompilationStateBuilder {
        "com.giavaneers.util.core",
        "com.google",
        "io.reactjava.client.core",
-       "io.reactjava.codegenerator",
-       "io.reactjava.jsx",
+       "io.reactjava.compiler",
        "elemental2",
        "core",
        "java",
@@ -598,8 +599,7 @@ public class CompilationStateBuilder {
             {
               String source =
                  new String(
-                    io.reactjava.codegenerator.JavascriptBundler.getInputStreamBytes(
-                       new URL(url)),
+                    JavascriptBundler.getInputStreamBytes(new URL(url)),
                     "UTF-8");
 
               candidates.put(classname, source);

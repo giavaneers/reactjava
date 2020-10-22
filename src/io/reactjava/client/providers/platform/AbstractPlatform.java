@@ -16,11 +16,12 @@ notes:
 package io.reactjava.client.providers.platform;
                                        // imports --------------------------- //
 import io.reactjava.client.core.react.Properties;
+import io.reactjava.client.core.react.Provider;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
                                        // AbstractPlatform ===================//
-public abstract class AbstractPlatform implements IPlatform
+public abstract class AbstractPlatform extends Provider implements IPlatform
 {
                                        // class constants --------------------//
 public static final Set<String> kCSS_NUMERIC_PROPERTIES =

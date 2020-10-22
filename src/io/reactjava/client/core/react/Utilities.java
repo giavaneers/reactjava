@@ -19,9 +19,14 @@ import com.giavaneers.util.gwt.APIRequestor;
 import com.giavaneers.util.gwt.Logger;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.ScriptInjector;
+import com.google.gwt.core.client.ScriptInjector.FromString;
+import com.google.gwt.core.client.ScriptInjector.FromUrl;
+import com.google.gwt.storage.client.Storage;
 import com.google.gwt.typedarrays.client.Uint8ArrayNative;
 import com.google.gwt.typedarrays.shared.Uint8Array;
+import elemental2.core.JsError;
 import elemental2.core.JsObject;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.Element;
@@ -30,6 +35,7 @@ import elemental2.dom.EventListener;
 import elemental2.dom.EventTarget;
 import elemental2.dom.HTMLDocument;
 import elemental2.dom.HTMLElement;
+import elemental2.dom.HTMLScriptElement;
 import io.reactjava.client.providers.http.HttpClient;
 import io.reactjava.client.providers.http.HttpClientBase;
 import io.reactjava.client.providers.http.HttpResponse;
@@ -37,11 +43,18 @@ import io.reactjava.client.providers.http.IHttpResponse;
 import io.reactjava.client.providers.http.IHttpResponse.ResponseType;
 import io.reactjava.client.core.resources.javascript.IJavascriptResources;
 import io.reactjava.client.core.resources.javascript.JavascriptResources;
+import java.util.AbstractSequentialList;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.RandomAccess;
+import java.util.Set;
 import java.util.function.Supplier;
 import jsinterop.base.Js;
                                        // Utilities ==========================//
@@ -998,6 +1011,8 @@ public static void injectResourceLoadLazyCompressed(
       GWT.getModuleBaseForStaticFiles()
          + rsrcURL + "?" + System.currentTimeMillis();
 
+   final String resourceURL = rsrcURL;
+
    APIRequestor requestor = (Object rsp, Object token) ->
    {
       IHttpResponse response = (IHttpResponse)rsp;
@@ -1023,9 +1038,15 @@ public static void injectResourceLoadLazyCompressed(
             //      + script.substring(0, 300));
 
                                        // inject into the top window          //
-            ScriptInjector.fromString(script)
-               .setWindow(ScriptInjector.TOP_WINDOW)
-               .inject();
+            HTMLScriptElement scriptElement =
+               JavascriptInjector.fromString(script)
+                  .setWindow(JavascriptInjector.kTOP_WINDOW)
+                  .inject();
+
+            if (scriptElement == null)
+            {
+               throw new Exception("Unable to inject script " + resourceURL);
+            }
 
             callback.onSuccess(null);
          }
@@ -1060,10 +1081,11 @@ public static void injectResourceLoadLazyCompressed(
 public static void injectScript(
    String                   scriptURL,
    Callback<Void,Exception> callback)
+   throws                   Exception
 {
-   ScriptInjector.fromUrl(
+   JavascriptInjector.fromURL(
       scriptURL + "?" + System.currentTimeMillis()).setWindow(
-         ScriptInjector.TOP_WINDOW).setCallback(callback).inject();
+         JavascriptInjector.kTOP_WINDOW).setCallback(callback).inject();
 }
 /*------------------------------------------------------------------------------
 
@@ -1106,12 +1128,18 @@ public static void injectScriptAsResource(
                   callback.onFailure(e);
                }
             }
+            try
+            {
+               JavascriptInjector.fromString(
+                  (String)response).setWindow(
+                     JavascriptInjector.kTOP_WINDOW).inject();
 
-            ScriptInjector.fromString(
-               (String)response).setWindow(
-                  ScriptInjector.TOP_WINDOW).inject();
-
-            callback.onSuccess(null);
+               callback.onSuccess(null);
+            }
+            catch(Exception e)
+            {
+               callback.onFailure(e);
+            }
          }
       });
 }
@@ -1166,10 +1194,17 @@ public static void injectScriptLoadLazyUncompressed(
 
    scriptURL = GWT.getModuleBaseForStaticFiles() + scriptURL;
 
+   try
+   {
                         // inject into the top window          //
-   ScriptInjector.fromUrl(
-      scriptURL).setWindow(
-         ScriptInjector.TOP_WINDOW).setCallback(callback).inject();
+      JavascriptInjector.fromURL(
+         scriptURL).setWindow(
+            JavascriptInjector.kTOP_WINDOW).setCallback(callback).inject();
+   }
+   catch(Exception e)
+   {
+      callback.onFailure(e);
+   }
 }
 /*------------------------------------------------------------------------------
 
@@ -1222,14 +1257,22 @@ public static void injectScriptPreloaded(
    if (script == null)
    {
       kLOGGER.logWarning("injectScriptPreloaded(): script not found="+ scriptURL);
+      callback.onSuccess(null);
    }
    else
    {
-      ScriptInjector.fromString(
-         script + "?" + System.currentTimeMillis()).setWindow(
-            ScriptInjector.TOP_WINDOW).inject();
+      try
+      {
+         JavascriptInjector.fromString(
+            script + "?" + System.currentTimeMillis()).setWindow(
+               JavascriptInjector.kTOP_WINDOW).inject();
+         callback.onSuccess(null);
+      }
+      catch(Exception e)
+      {
+         callback.onFailure(e);
+      }
    }
-   callback.onSuccess(null);
 }
 /*------------------------------------------------------------------------------
 
@@ -1381,10 +1424,18 @@ public static void injectScriptsAndCSS(
                }
                else if (injectURL.startsWith("http"))
                {
+                  try
+                  {
                                        // inject into the top window          //
-                  ScriptInjector.fromUrl(
-                     injectURL + "?" + System.currentTimeMillis()).setWindow(
-                        ScriptInjector.TOP_WINDOW).setCallback(this).inject();
+                     JavascriptInjector.fromURL(
+                        injectURL + "?" + System.currentTimeMillis())
+                           .setWindow(JavascriptInjector.kTOP_WINDOW)
+                           .setCallback(this).inject();
+                  }
+                  catch(Exception e)
+                  {
+                     onFailure(e);
+                  }
                }
                else if (IJavascriptResources.kSRCCFG_SCRIPTS_AS_RESOURCES)
                {
@@ -1470,6 +1521,110 @@ public static boolean isURL(
 }
 /*------------------------------------------------------------------------------
 
+@name       localStorage - get local storage
+                                                                              */
+                                                                             /**
+            Get local storage
+
+@return     local storage, or null if not supported by the browser.
+
+@history    Tue Aug 29, 2017 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static native NativeObject localStorage()
+/*-{
+   return(typeof $wnd['localStorage'] != "undefined" ? $wnd['localStorage'] : null);
+}-*/;
+/*------------------------------------------------------------------------------
+
+@name       localStorageClear - clear local storage
+                                                                              */
+                                                                             /**
+            Clear local storage.
+
+@history    Tue Aug 29, 2017 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static void localStorageClear()
+{
+   NativeObject localStorage = localStorage();
+   if (localStorage == null)
+   {
+      throw new IllegalStateException("Web storage unsupported");
+   }
+   localStorage.clear();
+}
+/*------------------------------------------------------------------------------
+
+@name       localStorageGet - get storage item by name
+                                                                              */
+                                                                             /**
+            Get storage item by name.
+
+@return     Storage item value for specified name, or null if not found.
+
+@param      key      item name
+
+@history    Tue Aug 29, 2017 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static String localStorageGet(
+   String key)
+{
+   NativeObject localStorage = localStorage();
+   if (localStorage == null)
+   {
+      throw new IllegalStateException("Web storage unsupported");
+   }
+   String value = localStorage.getString(key);
+   if ("null".equals(value))
+   {
+      value = null;
+   }
+
+   return(value);
+}
+/*------------------------------------------------------------------------------
+
+@name       localStorageSet - set storage item for name
+                                                                              */
+                                                                             /**
+            Get storage item value for specified name.
+
+@return     true iff successful
+
+@param      key      item name
+@param      value    item value
+
+@history    Tue Aug 29, 2017 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static void localStorageSet(
+   String key,
+   String value)
+{
+   NativeObject localStorage = localStorage();
+   if (localStorage == null)
+   {
+      throw new IllegalStateException("Web storage unsupported");
+   }
+
+   localStorage.set(key, value);
+}
+/*------------------------------------------------------------------------------
+
 @name       scriptByPath - get map of script by path
                                                                               */
                                                                              /**
@@ -1485,7 +1640,7 @@ public static Map<String,String> scriptByPath()
 {
    if (scriptByPath == null)
    {
-      scriptByPath = new HashMap<String,String>();
+      scriptByPath = new HashMap<>();
    }
    return(scriptByPath);
 }
@@ -1601,4 +1756,680 @@ public static byte[] uint8ArrayToBytes(
    }
    return(bytes);
 }
+/*==============================================================================
+
+name:       HashList - a list with unique members and fast contains
+
+purpose:    A list with unique members and fast contains. Extends sequential
+            because it bases itself of the ListIterator(int) and size()
+            implementation.
+
+history:    Sat Sep 19, 2020 10:30:00 (Giavaneers - LBM) created
+
+notes:      heavily borrowed from
+            https://stackoverflow.com/questions/8099780/list-with-fast-contains
+
+==============================================================================*/
+public static class HashList<E>
+   extends AbstractSequentialList<E> implements RandomAccess
+{
+                                       // constants ------------------------- //
+                                       // (none)                              //
+                                       // class variables ------------------- //
+                                       // (none)                              //
+                                       // public instance variables --------- //
+                                       // (none)                              //
+                                       // protected instance variables ------ //
+protected List<E> list;                // the list                            //
+protected Set<E>  set;                 // a corresponding set                 //
+                                       // private instance variables -------- //
+                                       // (none)                              //
+
+/*------------------------------------------------------------------------------
+
+@name       HashList - default constructor
+                                                                              */
+                                                                             /**
+            Default constructor
+
+@history    Thu Jan 09, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public HashList()
+{
+   list = new ArrayList<>();
+   set  = new HashSet<>();
+}
+/*------------------------------------------------------------------------------
+
+@name       HashList - default constructor
+                                                                              */
+                                                                             /**
+            Default constructor
+
+@history    Thu Jan 09, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public HashList(
+   Collection<? extends E> c)
+{
+   this();
+   this.addAll(c);
+}
+/*------------------------------------------------------------------------------
+
+@name       add - standard add() method
+                                                                              */
+                                                                             /**
+            Standard add() method
+
+@return     true iff added
+
+@param      e  target object
+
+@history    Thu Jan 09, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public boolean add(
+   E e)
+{
+   return(e != null && !contains(e) && super.add(e));
+}
+/*------------------------------------------------------------------------------
+
+@name       addAll - standard addAll() method
+                                                                              */
+                                                                             /**
+            Standard addAll() method
+
+@return     true iff any were added
+
+@param      c     collection to add
+
+@history    Thu Jan 09, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public boolean addAll(
+   Collection<? extends E> c)
+{
+   boolean bRetVal = false;
+   for (E element : c)
+   {
+      bRetVal |= add(element);
+   }
+   return(bRetVal);
+}
+/*------------------------------------------------------------------------------
+
+@name       contains - standard contains() method
+                                                                              */
+                                                                             /**
+            Standard contains() method
+
+@return     true iff list contains specified object
+
+@param      o  target object
+
+@history    Thu Jan 09, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public boolean contains(
+   Object o)
+{
+                                       // set has fast contains               //
+  return(o != null && set.contains(o));
+}
+/*------------------------------------------------------------------------------
+
+@name       listIterator - standard listIterator() method
+                                                                              */
+                                                                             /**
+            Standard listIterator() method
+
+@return     list iterator
+
+@param      i     cursor
+
+@history    Thu Jan 09, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public ListIterator<E> listIterator(
+   int i)
+{
+   return new HashListIterator(list.listIterator(i));
+}
+/*------------------------------------------------------------------------------
+
+@name       size - standard size() method
+                                                                              */
+                                                                             /**
+            Standard size() method
+
+@return     size
+
+@history    Thu Jan 09, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public int size()
+{
+   return list.size();
+}
+/*==============================================================================
+
+name:       HashListIterator - list iterator
+
+purpose:    List iterator.
+
+history:    Sat Sep 19, 2020 10:30:00 (Giavaneers - LBM) created
+
+notes:
+
+==============================================================================*/
+protected class HashListIterator implements ListIterator<E>
+{
+                                       // constants ------------------------- //
+                                       // (none)                              //
+                                       // class variables ------------------- //
+                                       // (none)                              //
+                                       // public instance variables --------- //
+                                       // (none)                              //
+                                       // protected instance variables ------ //
+protected E               obj;
+protected ListIterator<E> iterator;
+
+/*------------------------------------------------------------------------------
+
+@name       ConIterator - constructor for specified iterator
+                                                                              */
+                                                                             /**
+            Constructor for specified iterator
+
+@param      iterator    iterator
+
+@history    Thu Jan 09, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected HashListIterator(
+   ListIterator<E> iterator)
+{
+   this.iterator = iterator;
+}
+/*------------------------------------------------------------------------------
+
+@name       add - standard add() method
+                                                                              */
+                                                                             /**
+            Standard add() method
+
+@param      t     element to add
+
+@history    Thu Jan 09, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public void add(E t)
+{
+   iterator.add(t);
+   set.add(t);
+}
+/*------------------------------------------------------------------------------
+
+@name       hasNext - standard hasNext() method
+                                                                              */
+                                                                             /**
+            Standard hasNext() method
+
+@return     true iff list contains another element in the forward direction.
+
+@history    Thu Jan 09, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public boolean hasNext()
+{
+   return iterator.hasNext();
+}
+/*------------------------------------------------------------------------------
+
+@name       hasPrevious - standard hasPrevious() method
+                                                                              */
+                                                                             /**
+            Standard hasPrevious() method
+
+@return     true iff list contains another element in the backward direction.
+
+@history    Thu Jan 09, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public boolean hasPrevious()
+{
+   return iterator.hasPrevious();
+}
+/*------------------------------------------------------------------------------
+
+@name       next - standard next() method
+                                                                              */
+                                                                             /**
+            Standard next() method
+
+@return     next element
+
+@history    Thu Jan 09, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public E next()
+{
+   return obj = iterator.next();
+}
+/*------------------------------------------------------------------------------
+
+@name       nextIndex - standard next() method
+                                                                              */
+                                                                             /**
+            Standard next() method
+
+@return     next index in the forward direction
+
+@history    Thu Jan 09, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public int nextIndex()
+{
+   return iterator.nextIndex();
+}
+/*------------------------------------------------------------------------------
+
+@name       previous - standard previous() method
+                                                                              */
+                                                                             /**
+            Standard previous() method
+
+@return     previous element
+
+@history    Thu Jan 09, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public E previous()
+{
+   return obj = iterator.previous();
+}
+/*------------------------------------------------------------------------------
+
+@name       previousIndex - standard previousIndex() method
+                                                                              */
+                                                                             /**
+            Standard previousIndex() method
+
+@return     previous index
+
+@history    Thu Jan 09, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public int previousIndex()
+{
+   return iterator.previousIndex();
+}
+/*------------------------------------------------------------------------------
+
+@name       remove - standard remove() method
+                                                                              */
+                                                                             /**
+            Standard remove() method. This implementation removes from both.
+
+@history    Thu Jan 09, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public void remove()
+{
+   iterator.remove();
+   set.remove(obj);
+}
+/*------------------------------------------------------------------------------
+
+@name       set - standard set() method
+                                                                              */
+                                                                             /**
+            Standard set() method
+
+@param      t     value to assign
+
+@history    Thu Jan 09, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public void set(E t)
+{
+   iterator.set(t);
+   set.remove(obj);
+   set.add(obj = t);
+}
+
+        //hasNext and hasPrevious + indexes still to be forwarded to it
+}//====================================// end HashListIterator ===============//
+}//====================================// end HashList =======================//
+/*==============================================================================
+
+name:       JavascriptInjector - javascript injector
+
+purpose:    Javascript injector/ currently wraps GWT JavascriptInjector, but is 
+            intended to be rewritten using elemental2.
+
+history:    Sat Sep 19, 2020 10:30:00 (Giavaneers - LBM) created
+
+notes:
+
+==============================================================================*/
+public static class JavascriptInjector
+{
+                                       // constants ------------------------- //
+public static final JavaScriptObject kTOP_WINDOW = ScriptInjector.TOP_WINDOW;
+
+                                       // class variables ------------------- //
+                                       // (none)                              //
+                                       // public instance variables --------- //
+                                       // (none)                              //
+                                       // protected instance variables ------ //
+                                       // (none)                              //                                       
+                                       
+/*------------------------------------------------------------------------------
+
+@name       fromString - create a string injector
+                                                                              */
+                                                                             /**
+            Create a string injector.
+
+@return     string injector
+
+@param      string      script string
+
+@history    Sat Sep 19, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static StringInjector fromString(
+   String string)
+{
+   return(new StringInjector(string));
+}
+/*------------------------------------------------------------------------------
+
+@name       fromURL - create a url injector
+                                                                              */
+                                                                             /**
+            Create a url injector.
+
+@return     url injector
+
+@param      url      url
+
+@history    Sat Sep 19, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static URLInjector fromURL(
+   String url)
+{
+   return(new URLInjector(url));
+}
+/*==============================================================================
+
+name:       StringInjector - javascript injector from string
+
+purpose:    Javascript injector from string.
+
+history:    Sat Sep 19, 2020 10:30:00 (Giavaneers - LBM) created
+
+notes:
+
+==============================================================================*/
+public static class StringInjector
+{
+                                       // constants ------------------------- //
+                                       // (none)                              //
+                                       // class variables ------------------- //
+                                       // (none)                              //
+                                       // public instance variables --------- //
+                                       // (none)                              //
+                                       // protected instance variables ------ //
+protected FromString fromString;       // from string                         //
+protected String     scriptString;     // script string                       //
+protected JavaScriptObject window;     // window                              //
+                                       
+/*------------------------------------------------------------------------------
+
+@name       StringInjector - constructor
+                                                                              */
+                                                                             /**
+            Constructor.
+
+@param      scriptString      scriptString
+
+@history    Sat Sep 19, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected StringInjector(
+   String scriptString)
+{
+   this.fromString   = ScriptInjector.fromString(scriptString);
+   this.scriptString = scriptString;
+}
+/*------------------------------------------------------------------------------
+
+@name       inject - inject the script
+                                                                              */
+                                                                             /**
+            Inject a script into the DOM. The JavaScript is evaluated and will be
+            available immediately when this call returns.
+
+            By default, the script is installed in the same window that the GWT
+            code is installed in.
+
+@return     injected script element
+
+@history    Sat Sep 19, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public HTMLScriptElement inject()
+   throws Exception
+{
+   String[] errorString = new String[1];
+   DomGlobal.window.onerror =
+      (String p0, String p1, double p2, double p3, JsError p4) ->
+      {
+         errorString[0] = p0;
+         return(null);
+      };
+
+   HTMLScriptElement scriptElement =
+      (HTMLScriptElement)DomGlobal.document.createElement("script");
+
+   scriptElement.text = scriptString;
+   DomGlobal.document.head.appendChild(scriptElement);
+   if (errorString[0] != null)
+   {
+      throw new Exception(errorString[0]);
+   }
+   return(scriptElement);
+}
+/*------------------------------------------------------------------------------
+
+@name       setWindow - assign window
+                                                                              */
+                                                                             /**
+            Specify which DOM window object to install the script tag in. To
+            install into the Top level window use JavascriptInjector.kTOP_WINDOW.
+
+@param      window      specifies which window to install in.
+
+@history    Sat Sep 19, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public StringInjector setWindow(JavaScriptObject window)
+{
+   fromString.setWindow(window);
+   this.window = window;
+   return(this);
+}
+}//====================================// end StringInjector =================//
+/*==============================================================================
+
+name:       URLInjector - javascript injector from url
+
+purpose:    Javascript injector from url.
+
+history:    Sat Sep 19, 2020 10:30:00 (Giavaneers - LBM) created
+
+notes:
+
+==============================================================================*/
+public static class URLInjector
+{
+                                       // constants ------------------------- //
+                                       // (none)                              //
+                                       // class variables ------------------- //
+                                       // (none)                              //
+                                       // public instance variables --------- //
+                                       // (none)                              //
+                                       // protected instance variables ------ //
+protected FromUrl fromUrl;             // from url                            //
+protected String  url;                 // url                                 //
+
+/*------------------------------------------------------------------------------
+
+@name       URLInjector - constructor
+                                                                              */
+                                                                             /**
+            Constructor.
+
+@param      url      url
+
+@history    Sat Sep 19, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected URLInjector(
+   String url)
+{
+   this.url     = url;
+   this.fromUrl = ScriptInjector.fromUrl(url);
+}
+/*------------------------------------------------------------------------------
+
+@name       inject - inject the script
+                                                                              */
+                                                                             /**
+            Inject a script into the DOM. The JavaScript is evaluated and will be
+            available immediately when this call returns.
+
+            By default, the script is installed in the same window that the GWT
+            code is installed in.
+
+@return     injected script element
+
+@history    Sat Sep 19, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public JavaScriptObject inject()
+   throws Exception
+{
+   JavaScriptObject scriptElement = null;
+   try
+   {
+      scriptElement = scriptElement = fromUrl.inject();
+   }
+   catch(Throwable t)
+   {
+      throw new Exception(t);
+   }
+   if (scriptElement == null)
+   {
+      throw new Exception("Cannot inject script url=" + url);
+   }
+   return(scriptElement);
+}
+/*------------------------------------------------------------------------------
+
+@name       setCallback - assign a callback
+                                                                              */
+                                                                             /**
+            Specify a callback to be invoked when the script is loaded or
+            loading encounters an error.
+
+@param      callback      callback that gets invoked asynchronously.
+
+@history    Sat Sep 19, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public URLInjector setCallback(
+   Callback<Void, Exception> callback)
+{
+   fromUrl.setCallback(callback);
+   return this;
+}
+/*------------------------------------------------------------------------------
+
+@name       setWindow - assign window
+                                                                              */
+                                                                             /**
+            Specify which DOM window object to install the script tag in. To
+            install into the Top level window use JavascriptInjector.kTOP_WINDOW.
+
+@param      window      specifies which window to install in.
+
+@history    Sat Sep 19, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public URLInjector setWindow(JavaScriptObject window)
+{
+   fromUrl.setWindow(window);
+   return(this);
+}
+}//====================================// end URLInjector ====================//
+}//====================================// end JavascriptInjector =============//
 }//====================================// end Utilities ======================//

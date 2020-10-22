@@ -16,27 +16,48 @@ notes:
 package io.reactjava.client.core.react;
                                        // imports --------------------------- //
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
                                        // SEOInfo =========================== //
 public class SEOInfo
 {
                                        // constants ------------------------- //
-public static final String kDELIMITER         = "<SEOInfo>";
-public static final String kNULL_VALUE        = kDELIMITER;
 public static final String kPAGE_HASH_DEFAULT = "";
+
+                                       // padeInfo indices                    //
+public static final int    kIDX_PAGEINFO_PAGE_HASH            = 0;
+public static final int    kIDX_PAGEINFO_TITLE                = 1;
+public static final int    kIDX_PAGEINFO_DESCRIPTION          = 2;
+public static final int    kIDX_PAGEINFO_STRUCTURED_DATA_TYPE = 3;
+public static final int    kIDX_PAGEINFO_STRUCTURED_DATA      = 4;
+public static final int    kNUM_PAGEINFO_MEMBERS              = 5;
 
                                        // class variables ------------------- //
                                        // (none)                              //
                                        // public instance variables --------- //
-                                       // deploy path; e.g.'http://myapp.com' //
-public String                  deployPath;
-                                       // default path hash value             //
-public String                  defaultPageHash;
-                                       // page infos                          //
-public Collection<SEOPageInfo> pageInfos;
+                                       // (none)                              //
+                                       // protected instance variables ------ //
+protected String     deployPath;       // deploy path; e.g.'http://myapp.com' //
+protected String     defaultPageHash;  // default path hash value             //
+protected String[][] pageInfos;        // page infos                          //
                                        // protected instance variables ------ //
                                        // (none)                              //
 
+/*------------------------------------------------------------------------------
+
+@name       SEOInfo - default constructor
+                                                                              */
+                                                                             /**
+            Default constructor.
+
+@history    Wed Jun 19, 2019 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+protected SEOInfo()
+{
+}
 /*------------------------------------------------------------------------------
 
 @name       SEOInfo - constructor for specified string
@@ -45,7 +66,7 @@ public Collection<SEOPageInfo> pageInfos;
             Constructor for specified string.
 
 @param      deployPath           SEO deploy path
-@param      defaultPageHash      default pagr hash
+@param      defaultPageHash      default page hash
 @param      pageInfos            collection of SEOPageInfo
 
 @history    Wed Jun 19, 2019 10:30:00 (Giavaneers - LBM) created
@@ -54,10 +75,10 @@ public Collection<SEOPageInfo> pageInfos;
 
                                                                               */
 //------------------------------------------------------------------------------
-public SEOInfo(
-   String                  deployPath,
-   String                  defaultPageHash,
-   Collection<SEOPageInfo> pageInfos)
+protected SEOInfo(
+   String     deployPath,
+   String     defaultPageHash,
+   String[][] pageInfos)
 {
    this.deployPath      = deployPath;
    this.defaultPageHash = defaultPageHash;
@@ -65,246 +86,87 @@ public SEOInfo(
    if (pageInfos != null)
    {
                                        // add a default if required           //
-      SEOPageInfo defaultPageInfo = null;
-      for (SEOPageInfo pageInfo : pageInfos)
+      String[] defaultPageInfoToAdd = null;
+      for (String[] pageInfo : pageInfos)
       {
-         if (pageInfo.pageHash.equals(kPAGE_HASH_DEFAULT))
+         if (pageInfo[kIDX_PAGEINFO_PAGE_HASH].equals(kPAGE_HASH_DEFAULT))
          {
                                        // already has a default entry         //
-            defaultPageInfo = null;
+            defaultPageInfoToAdd = null;
             break;
          }
-         else if (pageInfo.pageHash.equals(defaultPageHash))
+         else if (pageInfo[kIDX_PAGEINFO_PAGE_HASH].equals(defaultPageHash))
          {
                                        // found the default entry             //
-            defaultPageInfo = pageInfo;
+            defaultPageInfoToAdd = pageInfo;
+            break;
          }
       }
-      if (defaultPageInfo != null)
+      if (defaultPageInfoToAdd != null)
       {
-                                       // copy as the default                 //
-         pageInfos.add(
-            new SEOPageInfo(
-               kPAGE_HASH_DEFAULT,
-               defaultPageInfo.title,
-               defaultPageInfo.description,
-               defaultPageInfo.structuredDataType,
-               defaultPageInfo.structuredData));
+                                       // add as the default                  //
+         String[][] newPageInfos =
+            new String[this.pageInfos.length + 1][kNUM_PAGEINFO_MEMBERS];
+
+         System.arraycopy(
+            this.pageInfos, 0, newPageInfos, 0, this.pageInfos.length);
+
+         newPageInfos[this.pageInfos.length] = defaultPageInfoToAdd;
+         this.pageInfos = newPageInfos;
       }
    }
 }
 /*------------------------------------------------------------------------------
 
-@name       SEOInfo - constructor for specified string
+@name       newInstance - factory method parsed at compile time
                                                                               */
                                                                              /**
-            Constructor for specified string.
+            Factory method parsed at compile time.
 
-@param      seoInfo     SEO information string
+@param      args     array of StringLiteralLists
 
-@history    Wed Jun 19, 2019 10:30:00 (Giavaneers - LBM) created
+@history    Sat Sep 26, 2020 18:00:00 (LBM) created.
 
 @notes
-
                                                                               */
 //------------------------------------------------------------------------------
-public SEOInfo(
-   String seoInfo)
+public static SEOInfo newInstance(
+   StringLiteralList... args)
 {
-   this.pageInfos  = new ArrayList<>();
-   String[] splits = seoInfo.split(SEOInfo.kDELIMITER);
-   if (splits.length > 0)
+   if (args.length == 0 || args[0].elements.length != 2)
    {
-      this.deployPath = splits[0];
-      if (splits.length > 1)
+      throw new IllegalArgumentException(
+         "Must at least specify the deploy path and default page hash");
+   }
+   String deployPath      = args[0].elements[0];
+   String defaultPageHash = args[0].elements[1];
+
+   List<String[]> pageInfosList = new ArrayList<>();
+   for (int i = 1; i < args.length; i++)
+   {
+      StringLiteralList list = args[i];
+      if (list.elements.length != 3 && list.elements.length != 5)
       {
-         this.defaultPageHash = splits[1];
-         if (splits.length > 2)
+         throw new IllegalArgumentException(
+            "Each pageInfo specification must include "
+          + "either three or five arguments");
+      }
+
+      pageInfosList.add(
+         new String[]
          {
-            splits = splits[2].split(SEOPageInfo.kDELIMITER);
-            for (int i = 0; i < splits.length; i++)
-            {
-               pageInfos.add(new SEOPageInfo(splits[i]));
-            }
-         }
-      }
-   }
-}
-/*------------------------------------------------------------------------------
-
-@name       toString - standard toString method
-                                                                              */
-                                                                             /**
-            Standard toString method.
-
-@return     string representation which can be parsed by matching constructor.
-
-@history    Wed Jun 19, 2019 10:30:00 (Giavaneers - LBM) created
-
-@notes
-
-                                                                              */
-//------------------------------------------------------------------------------
-public String toString()
-{
-   String value  = (deployPath      != null ? deployPath      : "") + kDELIMITER;
-          value += (defaultPageHash != null ? defaultPageHash : "") + kDELIMITER;
-
-   if (pageInfos != null)
-   {
-      for (SEOPageInfo info : pageInfos)
-      {
-         value += info;
-      }
+            list.elements[0],
+            list.elements[1],
+            list.elements[2],
+            list.elements.length == 5 ? list.elements[3] : null,
+            list.elements.length == 5 ? list.elements[4] : null
+         });
    }
 
-   return(value);
+   String[][] pageInfos =
+      pageInfosList.toArray(
+         new String[pageInfosList.size()][kNUM_PAGEINFO_MEMBERS]);
+
+   return(new SEOInfo(deployPath, defaultPageHash, pageInfos));
 }
-/*==============================================================================
-
-name:       SEOPageInfo - SEO page information
-
-purpose:    SEO page information
-
-history:    Wed Jun 19, 2019 10:30:00 (Giavaneers - LBM) created
-
-notes:
-
-==============================================================================*/
-public static class SEOPageInfo
-{
-                                       // constants ------------------------- //
-public static final String kDELIMITER      = "<SEOPageInfo>";
-public static final String kDELIMITER_ELEM = "<SEOPageInfoElem>";
-                                       // class variables ------------------- //
-                                       // (none)                              //
-                                       // public instance variables --------- //
-public String pageHash;                // page hash                           //
-public String title;                   // title                               //
-public String description;             // description                         //
-public String structuredDataType;      // structured data type                //
-public String structuredData;          // structured data                 //
-                                       // protected instance variables ------ //
-                                       // (none)                              //
-
-/*------------------------------------------------------------------------------
-
-@name       SEOPageInfo - constructor for specified string
-                                                                              */
-                                                                             /**
-            Constructor.
-
-@param      pageHash       page hash
-@param      title          page title
-@param      description    page description
-
-@history    Wed Jun 19, 2019 10:30:00 (Giavaneers - LBM) created
-
-@notes
-
-                                                                              */
-//------------------------------------------------------------------------------
-public SEOPageInfo(
-   String pageHash,
-   String title,
-   String description)
-{
-   this(pageHash, title, description, null, null);
-}
-/*------------------------------------------------------------------------------
-
-@name       SEOPageInfo - constructor for specified string
-                                                                              */
-                                                                             /**
-            Constructor.
-
-@param      pageHash                page hash
-@param      title                   page title
-@param      description             page description
-@param      structuredDataType      page description
-@param      structuredData          page description
-
-@history    Wed Jun 19, 2019 10:30:00 (Giavaneers - LBM) created
-
-@notes
-
-                                                                              */
-//------------------------------------------------------------------------------
-public SEOPageInfo(
-   String pageHash,
-   String title,
-   String description,
-   String structuredDataType,
-   String structuredData)
-{
-   this.pageHash           = pageHash;
-   this.title              = title;
-   this.description        = description;
-   this.structuredDataType = structuredDataType;
-   this.structuredData     = structuredData;
-}
-/*------------------------------------------------------------------------------
-
-@name       SEOPageInfo - constructor for specified string
-                                                                              */
-                                                                             /**
-            Constructor for specified string.
-
-@param      infoString     SEO page information string
-
-@history    Wed Jun 19, 2019 10:30:00 (Giavaneers - LBM) created
-
-@notes
-
-                                                                              */
-//------------------------------------------------------------------------------
-protected SEOPageInfo(
-   String infoString)
-{
-   String[] splits = infoString.split(kDELIMITER_ELEM);
-   this.pageHash   = splits[0];
-   if (splits.length > 1)
-   {
-      this.title = splits[1];
-   }
-   if (splits.length > 2)
-   {
-      this.description = splits[2];
-   }
-   if (splits.length > 3)
-   {
-      this.structuredDataType = splits[3];
-   }
-   if (splits.length > 4)
-   {
-      this.structuredData = splits[4];
-   }
-}
-/*------------------------------------------------------------------------------
-
-@name       toString - standard toString method
-                                                                              */
-                                                                             /**
-            Standard toString method.
-
-@return     string representation which can be parsed by matching constructor.
-
-@history    Wed Jun 19, 2019 10:30:00 (Giavaneers - LBM) created
-
-@notes
-
-                                                                              */
-//------------------------------------------------------------------------------
-public String toString()
-{
-   String value =
-      (pageHash           != null ? pageHash           : "") + kDELIMITER_ELEM
-    + (title              != null ? title              : "") + kDELIMITER_ELEM
-    + (description        != null ? description        : "") + kDELIMITER_ELEM
-    + (structuredDataType != null ? structuredDataType : "") + kDELIMITER_ELEM
-    + (structuredData     != null ? structuredData     : "") + kDELIMITER;
-
-   return(value);
-}
-}//====================================// end SEOPageInfo ====================//
 }//====================================// end SEOInfo ========================//

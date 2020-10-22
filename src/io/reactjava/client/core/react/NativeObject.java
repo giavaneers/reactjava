@@ -55,6 +55,24 @@ public NativeObject()
 }
 /*------------------------------------------------------------------------------
 
+@name       clear - remove all properties
+                                                                              */
+                                                                             /**
+            Remove all properties
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+@JsOverlay
+public final void clear()
+{
+   final JsPropertyMap<Object> map = Js.asPropertyMap(this);
+   Js.asPropertyMap(this).forEach(key -> map.delete(key));
+}
+/*------------------------------------------------------------------------------
+
 @name       get - get value of specified property
                                                                               */
                                                                              /**

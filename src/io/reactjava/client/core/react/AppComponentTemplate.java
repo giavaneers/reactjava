@@ -94,69 +94,6 @@ protected List<String> getCustomJavascripts()
 }
 /*------------------------------------------------------------------------------
 
-@name       getImportedNodeModules - get imported node modules
-                                                                              */
-                                                                             /**
-            Get imported node modules. This method is typically invoked at
-            compile time.
-
-@return     ordered list of node module names of the folowing forms:
-
-               nodeModuleName[:javascript:css]
-
-               where,
-
-                  nodeModuleName is the name of the node module in the
-                  project node_modules directory
-
-                  :javascript is an optional qualifier indicating the 'main'
-                  module javascript is to be imported
-
-                  :css  is an optional qualifier indicating the 'style'
-                  module css is to be imported
-
-                  and if either ':css' or ':javascript' is included but the
-                  other is not, the other is not imported
-
-                  and if neither ':css' nor ':javascript' is included, the
-                  'main' module javascript is to be imported (the default case)
-
-               or nodeModuleName.js for a specific module script
-
-               or nodeModuleName.css for a specific module stylesheet
-
-            For examples,
-
-               'prismjs'
-                  specifies the default script for module 'prismjs' without
-                  any module css
-
-               'prismjs:javascript:css'
-                  specifies the default script for module 'prismjs' along with
-                  the default module css
-
-               'prismjs.components.prism-core',
-               'prismjs.components.prism-clike',
-               'prismjs.components.prism-java',
-               'prismjs.themes.prism-okaidia.css'
-                  specifies
-                     components.prism-core.js  of module 'prismjs', followed by
-                     components.prism-clike.js of module 'prismjs', followed by
-                     components.prism-java.js  of module 'prismjs'
-                  and
-                     themes.prism-okaidia.css  of module 'prismjs'
-
-@history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-protected List<String> getImportedNodeModules()
-{
-   return(new ArrayList<>());
-}
-/*------------------------------------------------------------------------------
-
 @name       getConfigurations - get array of configurations
                                                                               */
                                                                              /**
@@ -263,7 +200,7 @@ protected void initConfiguration()
 
             and the second time in the thread of invocation of onModuleLoad()
             in which invocation of ReactJava.boot() ultimately results in
-            ReactRouter.render() invoking ReactRouter.componentForHash()
+            ReactRouter.render(), invoking ReactRouter.componentForHash(),
             invoking the component factory default constructor found from
             ReactJava.getComponentFactory(classname).
 

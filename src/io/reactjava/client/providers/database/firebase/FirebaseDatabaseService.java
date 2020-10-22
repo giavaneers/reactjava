@@ -20,6 +20,7 @@ package io.reactjava.client.providers.database.firebase;
 
                                        // imports --------------------------- //
 import elemental2.promise.Promise;
+import io.reactjava.client.core.react.Provider;
 import io.reactjava.client.providers.auth.firebase.FirebaseCore;
 import io.reactjava.client.providers.database.IDatabaseService;
 import io.reactjava.client.providers.database.firebase.FirebaseDatabaseService.Reference.INativeEventCallback;
@@ -38,7 +39,7 @@ import jsinterop.base.Any;
 import jsinterop.base.Js;
                                        // FirebaseDatabaseService ============//
 @JsType                                // export to Javascript                //
-public class FirebaseDatabaseService implements IDatabaseService
+public class FirebaseDatabaseService extends Provider implements IDatabaseService
 {
                                        // class constants --------------------//
                                        // (none)

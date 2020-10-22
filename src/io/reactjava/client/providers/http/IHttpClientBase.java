@@ -22,7 +22,7 @@ import io.reactjava.client.providers.http.HttpClientBase.JsXMLHttpRequest;
 import io.reactjava.client.providers.http.IHttpResponse.ResponseType;
 import io.reactjava.client.core.react.IProvider;
 
-                                       // IHttpClientBase ========================//
+                                       // IHttpClientBase ====================//
 public interface IHttpClientBase extends IProvider
 {
                                        // constants ------------------------- //

@@ -49,6 +49,7 @@ import com.google.gwt.dev.util.log.speedtracer.CompilerEventType;
 import com.google.gwt.dev.util.log.speedtracer.SpeedTracerLogger;
 import com.google.gwt.dev.util.log.speedtracer.SpeedTracerLogger.Event;
 
+import io.reactjava.compiler.codegenerator.IPostprocessor;
 import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
@@ -259,7 +260,7 @@ public class Precompile {
 /* LBM-START */
       try
       {
-        io.reactjava.codegenerator.IPostprocessor.allPostprocessors(
+        IPostprocessor.allPostprocessors(
            logger, compilerContext, precompilationContext);
       }
       catch(Throwable t)

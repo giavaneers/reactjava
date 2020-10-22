@@ -104,6 +104,24 @@ public Collection<String> getBundleScripts()
 }
 /*------------------------------------------------------------------------------
 
+@name       getCloudServicesConfig - get cloud services configuration
+                                                                              */
+                                                                             /**
+            Get cloud services configuration.
+
+@return     cloud services configuration.
+
+@history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public ICloudServices getCloudServicesConfig()
+{
+   return((ICloudServices)get(kKEY_CLOUD_SERVICES_CONFIG));
+}
+/*------------------------------------------------------------------------------
+
 @name       getGlobalCSS - get global css
                                                                               */
                                                                              /**
@@ -139,24 +157,6 @@ public Collection<String> getGlobalImages()
 {
    Collection<String> globalCSS = (Collection<String>)get(kKEY_GLOBAL_IMAGES);
    return(globalCSS);
-}
-/*------------------------------------------------------------------------------
-
-@name       getGoogleAnalyticsId - get google analytics id
-                                                                              */
-                                                                             /**
-            Get google analytics id. This impementation is to be overridden.
-
-@return     google analytics id.
-
-@history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-public ICloudServices getCloudServicesConfig()
-{
-   return((ICloudServices)get(kKEY_CLOUD_SERVICES_CONFIG));
 }
 /*------------------------------------------------------------------------------
 
@@ -509,11 +509,17 @@ public Observable<IConfiguration> initializeCloudServices()
             FirebaseCore.configure(cloudServicesConfig).subscribe(
                response ->
                {
+                  kLOGGER.logInfo(
+                     "Configuration.initializeCloudServices(): successful");
+
                   subscriber.next(configuration);
                   subscriber.complete();
                },
                error ->
                {
+                  kLOGGER.logError(
+                     "Configuration.initializeCloudServices(): unsuccessful");
+
                   subscriber.error(error);
                });
          }

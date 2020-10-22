@@ -92,7 +92,7 @@ public static <P extends Properties> ElementDsc create(
                                        // properties of an instance of the    //
                                        // specified classname after being     //
                                        // initialized                         //
-           props = (P)component.componentProperties;
+          props = (P)component.componentProperties;
       }
    }
    return(create(parent, type, props, (ElementDsc[])null));

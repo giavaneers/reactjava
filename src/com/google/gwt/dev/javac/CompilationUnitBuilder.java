@@ -23,18 +23,9 @@
 package com.google.gwt.dev.javac;
 
 import com.google.gwt.dev.jjs.InternalCompilerException;
-import com.google.gwt.dev.jjs.ast.JDeclaredType;
-import com.google.gwt.dev.resource.Resource;
-import com.google.gwt.dev.util.Util;
 
+import io.reactjava.compiler.codegenerator.IPreprocessor;
 import java.util.Map;
-import org.eclipse.jdt.core.compiler.CategorizedProblem;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.List;
 
 /**
  * Builds a {@link com.google.gwt.dev.javac.CompilationUnit}.
@@ -175,7 +166,7 @@ public abstract class CompilationUnitBuilder {
       {
 /*LBM-START*/
         content =
-           io.reactjava.codegenerator.IPreprocessor.allPreprocessors(
+           IPreprocessor.allPreprocessors(
               getTypeName(),
               content,
               com.google.gwt.dev.util.Util.DEFAULT_ENCODING,

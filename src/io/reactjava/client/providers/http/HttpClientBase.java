@@ -62,6 +62,7 @@ import com.google.gwt.http.client.URL;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
+import io.reactjava.client.core.react.Provider;
 import io.reactjava.client.providers.http.HttpClientBase.JsXMLHttpRequest.IReadyStateChangedHandler;
 import io.reactjava.client.providers.http.IHttpResponse.ResponseType;
 import io.reactjava.client.core.react.NativeObject;
@@ -77,7 +78,7 @@ import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsProperty;
 import jsinterop.base.Js;
                                     // HttpClientBase ========================//
-public class HttpClientBase implements IHttpClientBase
+public class HttpClientBase extends Provider implements IHttpClientBase
 {
                                        // constants ------------------------- //
 private static final Logger kLOGGER = Logger.newInstance();

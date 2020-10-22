@@ -22,6 +22,7 @@ package io.reactjava.client.providers.auth.firebase;
 import com.giavaneers.util.gwt.Logger;
 import elemental2.core.JsObject;
 import elemental2.promise.Promise;
+import io.reactjava.client.core.react.Provider;
 import io.reactjava.client.providers.auth.IAuthenticationService;
 import io.reactjava.client.core.react.Properties;
 import io.reactjava.client.core.rxjs.observable.Observable;
@@ -32,7 +33,8 @@ import jsinterop.annotations.JsType;
 import jsinterop.base.Js;
                                        // FirebaseAuthenticationService ======//
 @JsType                                // export to Javascript                //
-public class FirebaseAuthenticationService implements IAuthenticationService
+public class FirebaseAuthenticationService
+   extends Provider implements IAuthenticationService
 {
                                        // class constants --------------------//
 private static final Logger kLOGGER = Logger.newInstance();

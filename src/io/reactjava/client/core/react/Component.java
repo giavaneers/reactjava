@@ -25,7 +25,6 @@ import elemental2.dom.HTMLElement;
 import elemental2.dom.HTMLStyleElement;
 import elemental2.dom.Node;
 import io.reactjava.client.core.react.IConfiguration.ICloudServices;
-import io.reactjava.client.core.react.SEOInfo.SEOPageInfo;
 import io.reactjava.client.core.rxjs.subscription.Subscription;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,7 +39,7 @@ import jsinterop.base.JsArrayLike;
 import jsinterop.base.JsPropertyMap;
                                        // Component ==========================//
 public abstract class Component<P extends Properties>
-{
+                                       {
                                        // class constants --------------------//
 public static final boolean   kSRCCFG_USE_STATE_HOOK = true;
 public static final String    kFORCE_UPDATE_KEY      = "builtinForceUpdate";
@@ -276,7 +275,7 @@ protected String cssSelectorForId()
 }
 /*------------------------------------------------------------------------------
 
-@name       componentDoSEOInfo - do any seoInfo processing for component
+@name       doSEOInfo - do any seoInfo processing for component
                                                                               */
                                                                              /**
             Do any seoInfo processing for specified component.
@@ -287,28 +286,31 @@ protected String cssSelectorForId()
 
                                                                               */
 //------------------------------------------------------------------------------
-public void doSEOInfo(
+protected void doSEOInfo(
    Properties props)
 {
    SEOInfo seoInfo = props.getConfiguration().getSEOInfo();
    if (seoInfo != null && seoInfo.pageInfos != null)
    {
       String pageHash = Router.getPath();
-      for (SEOPageInfo pageInfo : seoInfo.pageInfos)
+      for (String[] pageInfo : seoInfo.pageInfos)
       {
-         if (pageHash != null && pageHash.equals(pageInfo.pageHash))
+         if (pageHash != null
+               && pageHash.equals(pageInfo[SEOInfo.kIDX_PAGEINFO_PAGE_HASH]))
          {
-            if (pageInfo.title != null && pageInfo.title.length() > 0)
+            String title = pageInfo[SEOInfo.kIDX_PAGEINFO_TITLE];
+            if (title != null && title.length() > 0)
             {
                                        // assign the page title               //
                ReactJava.setHead(
                   NativeObject.with(
                      "type", ReactJava.kHEAD_ELEM_TYPE_TITLE,
                      "id",   "seo" + ReactJava.kHEAD_ELEM_TYPE_TITLE,
-                     "text", pageInfo.title));
+                     "text", title));
             }
-            if (pageInfo.description != null
-                  && pageInfo.description.length() > 0)
+
+            String description = pageInfo[SEOInfo.kIDX_PAGEINFO_DESCRIPTION];
+            if (description != null && description.length() > 0)
             {
                                        // assign the page description         //
                ReactJava.setHead(
@@ -316,20 +318,25 @@ public void doSEOInfo(
                      "type",   ReactJava.kHEAD_ELEM_TYPE_META,
                      "id",     "seo" + ReactJava.kHEAD_ELEM_TYPE_META,
                      "name",   "description",
-                     "content", pageInfo.description));
+                     "content", description));
             }
-            if (pageInfo.structuredDataType != null
-                  && pageInfo.structuredDataType.length() > 0
-                  && pageInfo.structuredData != null
-                  && pageInfo.structuredData.length() > 0)
+
+            String structuredDataType =
+               pageInfo[SEOInfo.kIDX_PAGEINFO_STRUCTURED_DATA_TYPE];
+
+            String structuredData =
+               pageInfo[SEOInfo.kIDX_PAGEINFO_STRUCTURED_DATA];
+
+            if (structuredDataType != null && structuredDataType.length() > 0
+                  && structuredData != null && structuredData.length() > 0)
             {
                                        // assign the structured data          //
                ReactJava.setHead(
                   NativeObject.with(
                      "type",               ReactJava.kHEAD_ELEM_TYPE_STRUCTURED,
                      "id",                 "seo" + ReactJava.kHEAD_ELEM_TYPE_STRUCTURED,
-                     "structuredDataType", pageInfo.structuredDataType,
-                     "structuredData",     pageInfo.structuredData));
+                     "structuredDataType", structuredDataType,
+                     "structuredData",     structuredData));
             }
 
             break;
@@ -539,6 +546,28 @@ public static Observable<Component> forId(
 }
 /*------------------------------------------------------------------------------
 
+@name       getCloudServicesConfig - get cloud services configuration
+                                                                              */
+                                                                             /**
+            Get cloud services configuration. This implementation is to be
+            overridden.
+
+            A method of Component rather than AppComponentTemplate per
+            Router.componentForHash().
+
+@return     cloud services configuration.
+
+@history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected ICloudServices getCloudServicesConfig()
+{
+   return(null);
+}
+/*------------------------------------------------------------------------------
+
 @name       getComponentByIdMap - get map of component by id
                                                                               */
                                                                              /**
@@ -659,30 +688,11 @@ public Element getDOMParentElement()
 }
 /*------------------------------------------------------------------------------
 
-@name       getCloudServicesConfig - get cloud services configuration
-                                                                              */
-                                                                             /**
-            Get cloud services configuration. This impementation is to be
-            overridden.
-
-@return     cloud services configuration.
-
-@history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
-
-@notes
-                                                                              */
-//------------------------------------------------------------------------------
-protected ICloudServices getCloudServicesConfig()
-{
-   return(null);
-}
-/*------------------------------------------------------------------------------
-
 @name       getExportedResourceURL - get exported resource url
                                                                               */
                                                                              /**
             Get exported resource url from module resource path relative to
-            specified 'public path' in nmodule gwt.xml file.
+            specified 'public path' in module gwt.xml file.
 
 @return     exported resource url
 
@@ -698,6 +708,69 @@ protected String getExportedResourceURL(
    String rsrcPublicRelativePath)
 {
    return(GWT.getModuleBaseURL() + rsrcPublicRelativePath);
+}
+/*------------------------------------------------------------------------------
+
+@name       getImportedNodeModules - get imported node modules
+                                                                              */
+                                                                             /**
+            Get imported node modules. This method is typically invoked at
+            compile time.
+
+@return     ordered list of node module names of the folowing forms:
+
+               nodeModuleName[:javascript:css]
+
+               where,
+
+                  nodeModuleName is the name of the node module in the
+                  project node_modules directory
+
+                  :javascript is an optional qualifier indicating the 'main'
+                  module javascript is to be imported
+
+                  :css is an optional qualifier indicating the 'style'
+                  module css is to be imported
+
+                  and if either ':css' or ':javascript' is included but the
+                  other is not, the other is not imported
+
+                  and if neither ':css' nor ':javascript' is included, the
+                  'main' module javascript is to be imported (the default case)
+
+               or nodeModuleName.js for a specific module script
+
+               or nodeModuleName.css for a specific module stylesheet
+
+            For examples,
+
+               'prismjs'
+                  specifies the default script for module 'prismjs' without
+                  any module css
+
+               'prismjs:javascript:css'
+                  specifies the default script for module 'prismjs' along with
+                  the default module css
+
+               'prismjs.components.prism-core',
+               'prismjs.components.prism-clike',
+               'prismjs.components.prism-java',
+               'prismjs.themes.prism-okaidia.css'
+                  specifies
+                     components.prism-core.js  of module 'prismjs', followed by
+                     components.prism-clike.js of module 'prismjs', followed by
+                     components.prism-java.js  of module 'prismjs'
+                  and
+                     themes.prism-okaidia.css  of module 'prismjs'
+
+@history    Sun Nov 02, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected StringLiteralList getImportedNodeModules()
+{
+   return(null);
 }
 /*------------------------------------------------------------------------------
 
@@ -1226,6 +1299,15 @@ P initializeProperties(
          : newInstanceProperties != null
             ? (P)newInstanceProperties : (P)new Properties();
 
+   if (properties.get("id") == null)
+   {
+      String id = getClass().getCanonicalName();
+      properties.set("id", id);
+
+      kLOGGER.logInfo(
+         "Component.initializeProperties(): assigning componentId=" + id);
+   }
+
    properties.setComponent(this);
    return(properties);
 }
@@ -1350,7 +1432,6 @@ static Component newInstance(
       return(newInstance);
    }
 }
-/*------------------------------------------------------------------------------
 /*------------------------------------------------------------------------------
 
 @name       preRender - component pre-render processing

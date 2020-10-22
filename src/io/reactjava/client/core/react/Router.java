@@ -109,6 +109,8 @@ public static final String  kPATH_DEFAULT   = "";
                                        // class variables ------------------- //
                                        // configuration                       //
 protected static IConfiguration     configuration;
+                                       // launch url                          //
+protected static String             launchURL;
                                        // url parameters map                  //
 protected static Map<String,String> urlParameters;
                                        // parameters map url                  //
@@ -323,6 +325,29 @@ public static String getHashAnchorElementId()
       anchorElementId = bracketSplits[1];
    }
    return(anchorElementId);
+}
+/*------------------------------------------------------------------------------
+
+@name       getLaunchURL - get original location url
+                                                                              */
+                                                                             /**
+            Get original location url.
+
+@return     original location url parameters
+
+@history    Mon May 21, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+
+                                                                              */
+//------------------------------------------------------------------------------
+public static String getLaunchURL()
+{
+   if (launchURL == null)
+   {
+      launchURL = DomGlobal.document.URL;
+   }
+   return(launchURL);
 }
 /*------------------------------------------------------------------------------
 

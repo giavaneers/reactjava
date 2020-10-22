@@ -121,6 +121,8 @@ public static ReactElement boot(
    bBooted = true;
                                        // add base tag to document if required//
    addBaseTag();
+                                       // ensure original launch url          //
+   Router.getLaunchURL();
 
    final ReactElement[] renderElement = new ReactElement[1];
 
@@ -712,22 +714,36 @@ protected static void initialize(
          configuration, null, requestToken,
          (Object response1, Object reqToken1) ->
          {
-            configuration.initialize().subscribe(
-               (Object rsp) ->
+            if (response1 instanceof Throwable)
+            {
+               if (requestor != null)
                {
-                  bInitialized = true;
-                  if (requestor != null)
+                  requestor.apiResponse((Throwable)response1, requestToken);
+               }
+            }
+            else
+            {
+                                       // ensure ReactJava window variable    //
+                                       // for debugging purposes              //
+               JsObject reactJava = ReactJava.getReactJavaWindowVariable();
+
+               configuration.initialize().subscribe(
+                  (Object rsp) ->
                   {
-                     requestor.apiResponse(response1, requestToken);
-                  }
-               },
-               (Object error) ->
-               {
-                  if (requestor != null)
+                     bInitialized = true;
+                     if (requestor != null)
+                     {
+                        requestor.apiResponse(response1, requestToken);
+                     }
+                  },
+                  (Object error) ->
                   {
-                     requestor.apiResponse(error, requestToken);
-                  }
-               });
+                     if (requestor != null)
+                     {
+                        requestor.apiResponse(error, requestToken);
+                     }
+                  });
+            }
          });
    }
 }

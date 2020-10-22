@@ -16,7 +16,7 @@ notes:
 package io.reactjava.client.core.react;
                                        // imports --------------------------- //
 import io.reactjava.client.providers.analytics.IAnalyticsService;
-import io.reactjava.client.providers.analytics.firebase.GoogleAnalyticsService;
+import io.reactjava.client.providers.analytics.google.GoogleAnalyticsService;
 import io.reactjava.client.providers.auth.IAuthenticationService;
 import io.reactjava.client.providers.auth.firebase.FirebaseAuthenticationService;
 import io.reactjava.client.providers.database.IDatabaseService;
@@ -39,7 +39,7 @@ public interface IConfiguration
 boolean kSRCCFG_RENDER_INLINE = true;
 boolean kSRCCFG_BUNDLE_SCRIPT = true;
                                        // jsinterop namespace and name        //
-String kJSINTEROP_NAMESPACE =
+String  kJSINTEROP_NAMESPACE =
    kSRCCFG_BUNDLE_SCRIPT ? "ReactJava" : JsPackage.GLOBAL;
 
                                        // standard keys                       //
@@ -232,16 +232,6 @@ static IConfiguration assignSharedInstance(
    if (cloudServicesConfig != null)
    {
       configuration.setCloudServicesConfig(cloudServicesConfig);
-   }
-                                       // imported node modules --------------//
-   Collection<String> importedModules = configuration.getImportedNodeModules();
-   if (importedModules == null)
-   {
-      importedModules = app.getImportedNodeModules();
-      if (importedModules != null && importedModules.size() > 0)
-      {
-         configuration.setImportedNodeModules(importedModules);
-      }
    }
                                        // assign the shared instance          //
    Configuration.sharedInstance = configuration;

@@ -3,13 +3,14 @@
   <component name="FacetManager">
     <facet type="gwt" name="GWT">
       <configuration>
-        <setting name="compilerParameters" value="-logLevel INFO -generateJsInteropExports -style DETAILED -workDir $USER_HOME$/Desktop/gwtDirs/workDir/ -war $USER_HOME$/Desktop/gwtDirs/war/ -gen $USER_HOME$/Desktop/gwtDirs/compilerOutput -deploy $USER_HOME$/Desktop/gwtDirs/deploy/ -extra $USER_HOME$/Desktop/gwtDirs/extra/" />
+        <setting name="compilerParameters" value="-logLevel DEBUG -generateJsInteropExports -style DETAILED -workDir $USER_HOME$/Desktop/gwtDirs/workDir/ -war $USER_HOME$/Desktop/gwtDirs/war/ -gen $USER_HOME$/Desktop/gwtDirs/compilerOutput -deploy $USER_HOME$/Desktop/gwtDirs/deploy/ -extra $USER_HOME$/Desktop/gwtDirs/extra/" />
         <setting name="compilerMaxHeapSize" value="3072" />
         <setting name="gwtScriptOutputStyle" value="DETAILED" />
-        <setting name="gwtSdkUrl" value="file://$APPLICATION_HOME_DIR$/gwt-2.8.2" />
+        <setting name="gwtSdkUrl" value="file://$USER_HOME$/.reactjava/gwt/gwt-2.8.2" />
         <setting name="webFacet" value="Web" />
         <packaging>
           <module name="React4Java" enabled="false" />
+          <module name="ReactJava" enabled="false" />
           <module name="com.JsInteropExample" path="/JsInteropExample" />
           <module name="com.giavaneers.Util" enabled="false" />
           <module name="com.google.gwt.core.AsyncFragmentLoader" enabled="false" />
@@ -79,8 +80,8 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="lib" level="project" />
-    <orderEntry type="library" name="gwt-user" level="project" />
     <orderEntry type="library" name="com.google.api-client:google-api-client:1.25.0" level="project" />
     <orderEntry type="library" name="com.google.cloud:google-cloud-storage:1.42.0" level="project" />
+    <orderEntry type="library" name="gwt-user" level="project" />
   </component>
 </module>

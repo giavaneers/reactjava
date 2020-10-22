@@ -1,43 +1,39 @@
 {
-  "name": "helloworldreactjava",
-  "version": "0.0.1",
-  "platform": "PlatformWeb",
-  "scripts": {
-    "start": "node node_modules/react-native/local-cli/cli.js start",
-    "test": "jest"
-  },
+  "name": "reactjava",
+  "version": "1.0.0",
+  "description": "[ReactJava](https://reactjava.io) provides the ability to create React web applications using the Java programming language.  In an upcoming release, it will also automatically port any ReactJava web application to iOS and Android for deployment as a native application on mobile devices.",
+  "main": "index.js",
   "dependencies": {
-    "@material-ui/core": "^3.9.4",
-    "@material-ui/icons": "^3.0.2",
+    "@material-ui/core": "^4.11.0",
+    "@material-ui/icons": "^4.9.1",
+    "babel-jest": "^24.5.0",
     "brfs": "^2.0.2",
     "browserify": "^16.5.1",
     "common-shakeify": "^0.6.2",
+    "core-js": "^3.6.5",
     "create-react-class": "^15.6.3",
     "envify": "^4.1.0",
     "googleapis": "^46.0.0",
     "jdeploy": "^1.0.21",
+    "jest": "^24.5.0",
+    "keyboardjs": "^2.6.4",
+    "lz-string": "^1.4.4",
     "pdfjs-dist": "^2.2.228",
     "prismjs": "^1.17.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-ga": "^2.7.0",
     "react-helmet": "^5.2.1",
-    "react-native": "^0.62.2",
+    "react-native": "^0.63.2",
+    "react-split-pane": "^0.1.92",
     "rxjs": "^5.5.11",
     "uglify-js": "^3.9.4",
     "uglifyjs": "^2.4.11"
   },
-  "devDependencies": {
-    "babel-jest": "^24.5.0",
-    "babel-preset-react-native": "5.0.2",
-    "jest": "^24.5.0",
-    "react-test-renderer": "16.4.1"
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "jest": {
-    "preset": "react-native"
-  },
-  "description": "New ReactJava Project Configuration",
-  "main": "index.js",
   "author": "",
   "license": "ISC"
 }

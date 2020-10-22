@@ -1,7 +1,7 @@
 <project default="publishJar">
    <target name="buildGWTDevJar">
       <record name="antlog.buildGWTDevJar.txt"/>
-      <java classname="io.reactjava.codegenerator.JavascriptBundler">
+      <java classname="io.reactjava.compiler.codegenerator.JavascriptBundler">
          <arg value="buildGWTDevJar"/>
          <classpath>
             <pathelement path="${java.class.path}"/>
@@ -12,18 +12,29 @@
    </target>
    <target name="buildRelease">
       <record name="antlog.buildRelease.txt"/>
-      <java classname="io.reactjava.codegenerator.JavascriptBundler">
+      <java classname="io.reactjava.compiler.codegenerator.JavascriptBundler">
          <arg value="BuildRelease"/>
          <classpath>
             <pathelement path="${java.class.path}"/>
             <pathelement location="out/production/ReactJava" />
+            <pathelement location="war/WEB-INF/lib/javaparser-core-3.15.9.jar" />
             <pathelement location="/Users/brianm/.reactjava/gwt/gwt-2.8.2/gwt-dev.jar" />
+         </classpath>
+      </java>
+   </target>
+   <target name="ensureReactJavaGWTDev">
+      <record name="antlog.ensureReactJavaGWTDev.txt"/>
+      <java classname="io.reactjava.compiler.codegenerator.JavascriptBundler">
+         <arg value="EnsureReactJavaGWTDev"/>
+         <classpath>
+            <pathelement path="${java.class.path}"/>
+            <pathelement location="out/production/ReactJava" />
          </classpath>
       </java>
    </target>
    <target name="updateJarManifest">
       <record name="antlog.updateJarManifest.txt"/>
-      <java classname="io.reactjava.codegenerator.JavascriptBundler">
+      <java classname="io.reactjava.compiler.codegenerator.JavascriptBundler">
          <arg value="UpdateJarManifest"/>
          <classpath>
             <pathelement path="${java.class.path}"/>
@@ -33,7 +44,7 @@
    </target>
    <target name="updateProjectTemplateResource">
       <record name="antlog.updateProjectTemplateResource.txt"/>
-      <java classname="io.reactjava.codegenerator.JavascriptBundler">
+      <java classname="io.reactjava.compiler.codegenerator.JavascriptBundler">
          <arg value="UpdateProjectTemplateResource"/>
          <classpath>
             <pathelement path="${java.class.path}"/>
@@ -43,7 +54,7 @@
    </target>
    <target name="publishJar">
       <record name="antlog.publishJar.txt"/>
-      <java classname="io.reactjava.codegenerator.JavascriptBundler">
+      <java classname="io.reactjava.compiler.codegenerator.JavascriptBundler">
          <arg value="PublishJar"/>
          <classpath>
             <pathelement path="${java.class.path}"/>

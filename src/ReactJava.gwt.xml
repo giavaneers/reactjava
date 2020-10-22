@@ -29,15 +29,14 @@
    <!-- on compilation of the GWT.create() invocation        -->
    <!-- in React.getReactJavaCodeGenerator()                 -->
    <!--
-   <generate-with class="io.reactjava.codegenerator.ReactCodePackager">
-     <when-type-assignable class="io.reactjava.client.coree.react.IReactCodeGenerator" />
+   <generate-with class="io.reactjava.compiler.codegenerator.ReactCodePackager">
+     <when-type-assignable class="io.reactjava.client.core.react.IReactCodeGenerator" />
    </generate-with>
    -->
 
 	<!-- transcode source paths -->
    <source path="com/giavaneers/util/" />
    <source path="elemental2/" />
-   <source path="io/reactjava/client/components/" />
    <source path="io/reactjava/client/core/react/" />
    <source path="io/reactjava/client/core/resources/" />
    <source path="io/reactjava/client/core/rxjs/" />
