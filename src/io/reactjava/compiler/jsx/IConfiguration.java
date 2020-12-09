@@ -61,7 +61,7 @@ Set<String>        dependenciesSetPrevious = new HashSet<String>();
 Map<String,String> dependencies = new HashMap<String,String>();
                                        // previous script dependencies by tag //
 Map<String,String> dependenciesPrevious = new HashMap<String,String>();
-                                       // for unit test purposes              //
+                                       // base project directory              //
 String             projectDirPath[] = {null};
 
 /*------------------------------------------------------------------------------
@@ -1301,7 +1301,7 @@ static File getProjectDirectory(
    File projectDir = null;
    if (path == null)
    {
-      path = projectDirPath[0];
+      path = getProjectDirectoryPath();
    }
    if (path == null)
    {
@@ -1340,6 +1340,8 @@ static File getProjectDirectory(
             logger.DEBUG,
             "jsx.IConfiguration.getProjectDirectory(): project path=" + path);
       }
+
+      setProjectDirectoryPath(path);
    }
    if (name == null)
    {
@@ -1386,7 +1388,26 @@ static File getProjectDirectory(
          }
       }
    }
+
    return(projectDir);
+}
+/*------------------------------------------------------------------------------
+
+@name       getProjectDirectoryPath - get project directory path
+                                                                              */
+                                                                             /**
+            Get base project directory path.
+
+@return     base project directory path.
+
+@history    Sat Nov 14, 2020 18:00:00 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+static String getProjectDirectoryPath()
+{
+   return(projectDirPath[0]);
 }
 /*------------------------------------------------------------------------------
 
@@ -1628,6 +1649,25 @@ public static void main(
    {
       e.printStackTrace();
    }
+}
+/*------------------------------------------------------------------------------
+
+@name       setProjectDirectoryPath - assign base project directory
+                                                                              */
+                                                                             /**
+            Assign base project directory .
+
+@param      projectDir     base project directory path.
+
+@history    Sat Nov 14, 2020 18:00:00 (LBM) created.
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+static void setProjectDirectoryPath(
+   String projectDir)
+{
+   projectDirPath[0] = projectDir;
 }
 /*------------------------------------------------------------------------------
 

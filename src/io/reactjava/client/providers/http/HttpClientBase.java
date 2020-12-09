@@ -608,6 +608,25 @@ public void send(
                                                                               */
 //------------------------------------------------------------------------------
 public Object send(
+   String body)
+{
+   return(send((Object)body));
+}
+/*------------------------------------------------------------------------------
+
+@name       send - send the request
+                                                                              */
+                                                                             /**
+            Send the request.
+
+@return     void
+
+@history    Fri Nov 09, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public Object send(
    byte[] bytes)
 {
    Uint8Array uint8Array = bytes != null ? Js.uncheckedCast(bytes) : null;
@@ -628,14 +647,14 @@ public Object send(
                                                                               */
 //------------------------------------------------------------------------------
 public Object send(
-   Uint8Array uint8Array)
+   Object body)
 {
-   if (uint8Array != null)
+   if (body != null)
    {
       String method = getMethod();
       if (method != null && !kPOST.equals(method) && !kPUT.equals(method))
       {
-         throw new IllegalArgumentException("Data must be null for " + method);
+         throw new IllegalArgumentException("Body must be null for " + method);
       }
    }
 
@@ -657,7 +676,7 @@ public Object send(
 
    //kLOGGER.logInfo("HttpClientBase.send(): xhr.send() on APIRequestor.");
 
-   getXHR().send(uint8Array);
+   getXHR().send(body);
 
    return(null);
 }
@@ -682,6 +701,25 @@ public Object send(
       arrayBuffer != null ? new Uint8Array(arrayBuffer) : null;
 
    return(send(uint8Array));
+}
+/*------------------------------------------------------------------------------
+
+@name       send - send the request
+                                                                              */
+                                                                             /**
+            Send the request.
+
+@return     void
+
+@history    Fri Nov 09, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public Object send(
+   Uint8Array uint8Array)
+{
+   return(send((Object)uint8Array));
 }
 /*------------------------------------------------------------------------------
 

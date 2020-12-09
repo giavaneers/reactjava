@@ -60,6 +60,23 @@ Observable<HttpResponse> send();
                                                                               */
 //------------------------------------------------------------------------------
 Observable<HttpResponse> send(
+   String data);
+
+/*------------------------------------------------------------------------------
+
+@name       send - send the request
+                                                                              */
+                                                                             /**
+            Send the request.
+
+@return     void
+
+@history    Fri Nov 09, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+Observable<HttpResponse> send(
    byte[] bytes);
 
 /*------------------------------------------------------------------------------

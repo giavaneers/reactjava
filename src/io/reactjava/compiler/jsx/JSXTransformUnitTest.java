@@ -129,7 +129,6 @@ public static boolean unitTest(
       String             src        = null;
       String             content    = null;
       String             projectDir = null;
-      TreeLogger logger     = new PrintWriterTreeLogger();
       boolean            bCapturing = false;
 
       Map<String,String> providerAndComponentCandidates = new HashMap<>();
@@ -504,9 +503,9 @@ public static boolean unitTest(
          }
       }
 
-      if (projectDir  != null)
+      if (projectDir != null)
       {
-         IConfiguration.projectDirPath[0] = projectDir;
+         IConfiguration.setProjectDirectoryPath(projectDir);
       }
 
       switch(testNum)

@@ -1818,70 +1818,120 @@ public static void doOp(
 public static void ensureReactJavaGWTDev()
    throws Exception
 {
+   ensureReactJavaGWTDev(null);
+}
+/*------------------------------------------------------------------------------
+
+@name       ensureReactJavaGWTDev - ensure ReactJava GWT development jar
+                                                                              */
+                                                                             /**
+            Ensure the target GWT SDK contains a ReactJava compatible
+            gwt-dev.jar. If not, modifies the target gwt-dev.jar to be React
+            Java compatible.
+
+            This approach allows a GWT SDK to be downloaded without
+            change from any source repository, rather than requiring a
+            repository being maintained specifically for ReactJava.
+
+@param      projectDir     any new project directory
+
+@history    Wed Oct 14, 2020 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static void ensureReactJavaGWTDev(
+   File   projectDir)
+   throws Exception
+{
    System.out.println(new Date().toString());
 
-   File projectIMLFile = IConfiguration.getProjectIMLFile(null);
-   if (projectIMLFile == null)
+                                       // save the base project directory     //
+   String projectDirPathSave = IConfiguration.getProjectDirectoryPath();
+   if (projectDir != null)
    {
-      throw new FileNotFoundException("Cannot find project IML file");
+      IConfiguration.setProjectDirectoryPath(projectDir.getAbsolutePath());
    }
-
-   String content = getFileAsString(projectIMLFile);
-   int    idxBeg  = content.indexOf("setting name=\"gwtSdkUrl\"");
-   if (idxBeg < 0)
+   try
    {
-      throw new IllegalStateException(
-         "Cannot find 'gwtSdkUrl' entry in project IML file");
-   }
+      File projectIMLFile = IConfiguration.getProjectIMLFile(null);
+      if (projectIMLFile == null)
+      {
+         throw new FileNotFoundException("Cannot find project IML file");
+      }
 
-   idxBeg = content.indexOf("value=\"", idxBeg) + "value=\"".length();
+      String content = getFileAsString(projectIMLFile);
+      int    idxBeg  = content.indexOf("setting name=\"gwtSdkUrl\"");
+      if (idxBeg < 0)
+      {
+         throw new IllegalStateException(
+            "Cannot find 'gwtSdkUrl' entry in project IML file");
+      }
 
-   String sdkURL = content.substring(idxBeg, content.indexOf('"', idxBeg));
-   if (!sdkURL.startsWith("file://"))
-   {
-      throw new UnsupportedOperationException(
-         "gwtSdkUrl must be a file url for now");
-   }
+      idxBeg = content.indexOf("value=\"", idxBeg) + "value=\"".length();
 
-   sdkURL = sdkURL.substring("file://".length());
-   sdkURL = sdkURL.replace("$USER_HOME$", System.getProperty("user.home"));
-   System.out.println("sdkURL=" + sdkURL);
+      String sdkURL = content.substring(idxBeg, content.indexOf('"', idxBeg));
+      if (!sdkURL.startsWith("file://"))
+      {
+         throw new UnsupportedOperationException(
+            "gwtSdkUrl must be a file url for now");
+      }
 
-   File gwtDevJarFile = new File(sdkURL, "gwt-dev.jar");
-   if (!gwtDevJarFile.exists())
-   {
-      throw new FileNotFoundException(gwtDevJarFile.getAbsolutePath());
-   }
+      sdkURL = sdkURL.substring("file://".length());
+      sdkURL = sdkURL.replace("$USER_HOME$", System.getProperty("user.home"));
+      System.out.println("sdkURL=" + sdkURL);
+
+      File gwtDevJarFile = new File(sdkURL, "gwt-dev.jar");
+      if (!gwtDevJarFile.exists())
+      {
+         throw new FileNotFoundException(gwtDevJarFile.getAbsolutePath());
+      }
                                        // check the current gwt-dev.jar to see//
                                        // if it supports the current release  //
-   JarFile  gwtDevJar        = new JarFile(gwtDevJarFile);
-   String   gwtDevJarVersion = null;
-   JarEntry gwtVersionEntry  = gwtDevJar.getJarEntry(kGWT_EMBEDDED_FILENAME);
-   if (gwtVersionEntry != null)
-   {
-      gwtDevJarVersion =
-         new String(getInputStreamBytes(
-            new BufferedInputStream(gwtDevJar.getInputStream(gwtVersionEntry))),
-            "UTF-8");
-   }
+      JarFile  gwtDevJar        = new JarFile(gwtDevJarFile);
+      String   gwtDevJarVersion = null;
+      JarEntry gwtVersionEntry  = gwtDevJar.getJarEntry(kGWT_EMBEDDED_FILENAME);
+      if (gwtVersionEntry != null)
+      {
+         gwtDevJarVersion =
+            new String(getInputStreamBytes(
+               new BufferedInputStream(
+                  gwtDevJar.getInputStream(gwtVersionEntry))),
+               "UTF-8");
+      }
 
-   File rjJarFile =
-      new File(IConfiguration.getWarLibraryDir(null), "reactjava.jar");
+      File rjJarFile =
+         new File(IConfiguration.getWarLibraryDir(null), "reactjava.jar");
 
-   if (!rjJarFile.exists())
-   {
-      throw new FileNotFoundException(rjJarFile.getAbsolutePath());
-   }
+      if (!rjJarFile.exists())
+      {
+         throw new FileNotFoundException(rjJarFile.getAbsolutePath());
+      }
 
-   JarFile rjJar     = new JarFile(rjJarFile);
-   String  rjVersion =
-      rjJar.getManifest().getMainAttributes().getValue("Specification-Version");
+      JarFile rjJar = new JarFile(rjJarFile);
+      String  rjVersion =
+         rjJar.getManifest()
+           .getMainAttributes()
+           .getValue("Specification-Version");
 
-   if (!rjVersion.equals(gwtDevJarVersion))
-   {
+      if (rjVersion.equals(gwtDevJarVersion))
+      {
+         System.out.println("Existing gwt-dev.jar is ReactJava compatible.");
+      }
+      else
+      {
+         System.out.println("Updating gwt-dev.jar to be ReactJava compatible.");
+
                                        // update the gwt-dev.jar with the     //
                                        // necessary classes from reactjava.jar//                       //
-      jarUpdate(gwtDevJarFile, rjJarFile, kGWT_DEV_JAR_ENHANCEMENTS, rjVersion);
+         jarUpdate(
+            gwtDevJarFile, rjJarFile, kGWT_DEV_JAR_ENHANCEMENTS, rjVersion);
+      }
+   }
+   finally
+   {
+                                       // restore the base project directory  //
+      IConfiguration.setProjectDirectoryPath(projectDirPathSave);
    }
 
    System.out.println("Done");
@@ -3010,10 +3060,6 @@ public static void gwtInitialize(
       src.delete();
                                        // delete any __MACOSX dir             //
       deleteDirectory(new File(gwtDir, "__MACOSX"));
-
-                                       // create the version file             //
-      //File gwtReleaseDir = new File(gwtDir, kGWT);
-      //writeFile(new File(gwtReleaseDir, kGWT_VERSION_FILENAME), installVersion);
 
       System.out.println("Done");
    }
@@ -4552,14 +4598,18 @@ public static void updateReactJavaCore(
    materialUIInitialize(projectDir);
                                        // initialize/update google analytics  //
    googleAnalyticsInitialize(projectDir);
-                                       // initialize/update core support      //
-   gwtInitialize(null);
                                        // copy project template               //
    copyProjectTemplate(projectDir, bUpdate);
 
+                                       // initialize/update core support      //
+   gwtInitialize(null);
                                        // initialize/update reactjava.jar     //
    copyReactJavaJarToProject(projectDir, version);
 
+                                       // modify the target gwt-dev.jar to be //
+                                       // ReactJava compatible                //
+   System.out.println("Ensuring gwt-dev.jar is ReactJava compatible.");
+   ensureReactJavaGWTDev(projectDir);
                                        // delete any temp directory           //
    deleteDirectory(getTempDir());
 

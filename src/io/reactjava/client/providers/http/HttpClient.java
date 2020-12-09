@@ -110,6 +110,36 @@ public static Observable<HttpResponse> get(
 }
 /*------------------------------------------------------------------------------
 
+@name       post - a convenience method to put to the specified url
+                                                                              */
+                                                                             /**
+            Post to the specified url.
+
+@return     An observable
+
+@param      url      target url
+@param      data     any payload
+
+@history    Fri Nov 09, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static Observable<HttpResponse> post(
+   String url,
+   String data)
+   throws Exception
+{
+   Observable<HttpResponse> observable =
+      new HttpClient()
+         .setURL(url)
+         .setMethod(kPOST)
+         .send(data);
+
+   return(observable);
+}
+/*------------------------------------------------------------------------------
+
 @name       post - a convenience method to post to the specified url
                                                                               */
                                                                              /**
@@ -133,6 +163,36 @@ public static Observable<HttpResponse> post(
       new HttpClient()
          .setURL(url)
          .setMethod(kPOST)
+         .send(data);
+
+   return(observable);
+}
+/*------------------------------------------------------------------------------
+
+@name       put - a convenience method to put to the specified url
+                                                                              */
+                                                                             /**
+            Put to the specified url.
+
+@return     An observable
+
+@param      url      target url
+@param      data     any payload
+
+@history    Fri Nov 09, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public static Observable<HttpResponse> put(
+   String url,
+   String data)
+   throws Exception
+{
+   Observable<HttpResponse> observable =
+      new HttpClient()
+         .setURL(url)
+         .setMethod(kPUT)
          .send(data);
 
    return(observable);
@@ -203,6 +263,43 @@ public Observable<HttpResponse> send(
 {
    Uint8Array uint8Array = Js.uncheckedCast(bytes);
    return(send(uint8Array));
+}
+/*------------------------------------------------------------------------------
+
+@name       send - send the request
+                                                                              */
+                                                                             /**
+            Send the request.
+
+@return     void
+
+@history    Fri Nov 09, 2018 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+public Observable<HttpResponse> send(
+   String body)
+{
+   Observable<HttpResponse> observable = Observable.create(
+      (Subscriber<HttpResponse> subscriber) ->
+   {
+      if (getReadyStateChangedListener() == null)
+      {
+         props.set(
+            kKEY_RDY_STATE_CHANGED_LISTENER,
+            new DefaultReadyStateChangeListener(this, subscriber));
+
+            //kLOGGER.logInfo(
+            //   "HttpClient.send(): assigned readyStateChangedListener="
+            //  + getReadyStateChangedListener());
+      }
+
+      super.send(body);
+      return(subscriber);
+   });
+
+   return(observable);
 }
 /*------------------------------------------------------------------------------
 
