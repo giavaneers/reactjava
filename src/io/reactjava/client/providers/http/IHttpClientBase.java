@@ -21,17 +21,27 @@ import elemental2.core.Uint8Array;
 import io.reactjava.client.providers.http.HttpClientBase.JsXMLHttpRequest;
 import io.reactjava.client.providers.http.IHttpResponse.ResponseType;
 import io.reactjava.client.core.react.IProvider;
-
+import java.util.ArrayList;
+import java.util.List;
                                        // IHttpClientBase ====================//
 public interface IHttpClientBase extends IProvider
 {
                                        // constants ------------------------- //
-public static final String kDELETE = "DELETE";
-public static final String kGET    = "GET";
-public static final String kOPTION = "OPTION";
-public static final String kPOST   = "POST";
-public static final String kPUT    = "PUT";
+String kDELETE = "DELETE";
+String kGET    = "GET";
+String kOPTION = "OPTION";
+String kPOST   = "POST";
+String kPUT    = "PUT";
 
+List<String> kMETHODS =
+   new ArrayList<String>()
+   {{
+      add(kDELETE);
+      add(kGET);
+      add(kOPTION);
+      add(kPOST);
+      add(kPUT);
+   }};
                                        // class variables ------------------- //
                                        // (none)                              //
                                        // (none)                              //
@@ -50,7 +60,7 @@ public static final String kPUT    = "PUT";
 @notes
                                                                               */
 //------------------------------------------------------------------------------
-public String getErrorReason();
+String getErrorReason();
 
 /*------------------------------------------------------------------------------
 
@@ -264,6 +274,27 @@ String getURL();
 //------------------------------------------------------------------------------
 JsXMLHttpRequest getXHR();
 
+/*------------------------------------------------------------------------------
+
+@name       isMethod - test whether candidate is a valid method
+                                                                              */
+                                                                             /**
+            Test whether candidate is a valid method.
+
+@return     true iff candidate is a valid method
+
+@param      candidate    candidate
+
+@history    Mon Jun 26, 2017 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+static boolean isMethod(
+   String candidate)
+{
+   return(kMETHODS.contains(candidate));
+}
 /*------------------------------------------------------------------------------
 
 @name       open - open the request

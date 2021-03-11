@@ -782,6 +782,10 @@ public IHttpClientBase setErrorReason(
 public IHttpClientBase setMethod(
    String method)
 {
+   if (!IHttpClientBase.isMethod(method))
+   {
+      throw new IllegalArgumentException("Unknown method: " + method);
+   }
    props().set(kKEY_METHOD, method);
    return(this);
 }
@@ -974,7 +978,7 @@ public IHttpClientBase setURL(
 
 @return     byte array from Uint8Array
 
-@param      aBytes      Uint8Array
+@param      uint8Array      Uint8Array
 
 @history    Mon Aug 28, 2017 10:30:00 (Giavaneers - LBM) created
 
@@ -1119,6 +1123,93 @@ public void onStateChanged()
 }
 /*------------------------------------------------------------------------------
 
+@name       parseJsonErrorResponse - parse json error response
+                                                                              */
+                                                                             /**
+            Parse json error response.
+
+            Handles any of two types:
+
+            1. IETF devised RFC 7807, which creates a generalized error-handling
+            schema which is composed of five parts:
+
+            type     a URI identifier that categorizes the error
+            title    a brief, human-readable message about the error
+            status   the HTTP response code (optional)
+            detail   a human-readable explanation of the error
+            instance a URI that identifies the specific occurrence of the error
+
+            2. Google Cloud API error syntax which is of the following form:
+
+               {
+                  "error": {
+                     "code": 401,
+                     "message": "Invalid Credentials",
+                     "errors": [
+                        {
+                           "message": "Invalid Credentials",
+                           "domain": "global",
+                           "reason": "authError",
+                           "locationType": "header",
+                           "location": "Authorization"
+                        }
+                     ]
+                  }
+               }
+
+@return     parsed error response, or null if not json or if one of the
+            supported types
+
+@history    Thu Mar 11, 2021 10:30:00 (Giavaneers - LBM) created
+
+@notes
+                                                                              */
+//------------------------------------------------------------------------------
+protected String parseJsonErrorResponse(
+   String unparsed)
+{
+   String parsed = null;
+   try
+   {
+      JSONValue  jsonValue  = JSONParser.parseStrict(unparsed);
+      JSONObject jsonObject = jsonValue.isObject();
+
+                                       // check for RFC 7807 format           //
+      JSONValue rfc7807Title = jsonObject.get("title");
+      if (rfc7807Title != null)
+      {
+         parsed = rfc7807Title.isString().stringValue();
+
+         JSONValue jsonDetail = jsonObject.get("detail");
+         if (jsonDetail != null)
+         {
+            parsed += " - " + jsonDetail.isString().stringValue();
+         }
+      }
+      else
+      {
+                                       // check for Google Cloud API format   //
+         JSONValue jsonError = jsonObject.get("error");
+         if (jsonError != null)
+         {
+            JSONObject error  = jsonError.isObject();
+            JSONValue jsonMsg = jsonObject.get("message");
+            if (jsonMsg != null)
+            {
+               parsed = jsonMsg.isString().stringValue();
+            }
+         }
+      }
+   }
+   catch(Exception e)
+   {
+                                       // not json or not a supported type    //
+   }
+
+   return(parsed);
+}
+/*------------------------------------------------------------------------------
+
 @name       processCompletion - processCompletion handler
                                                                               */
                                                                              /**
@@ -1182,21 +1273,7 @@ protected void processCompletion()
             String response = getClient().getXHR().getResponseText();
             if (response != null && response.length() > 0)
             {
-               try
-               {
-                  JSONValue  jsonValue  = JSONParser.parseStrict(response);
-                  JSONObject jsonObject = jsonValue.isObject();
-                  JSONValue  jsonError  = jsonObject.get("error");
-                  JSONValue  jsonErrors = jsonError.isObject().get("errors");
-                  JSONObject jsonItem   = jsonErrors.isArray().get(0).isObject();
-
-                  reason = jsonItem.get("message").isString().stringValue();
-               }
-               catch(Exception e)
-               {
-                                       // not json                            //
-                  reason = response;
-               }
+               reason = parseJsonErrorResponse(response);
             }
             if (reason == null || reason.length() == 0)
             {

@@ -1,0 +1,1 @@
+Do not include Base.gwt.xml in base/

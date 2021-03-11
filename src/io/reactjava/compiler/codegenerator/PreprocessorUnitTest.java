@@ -30,9 +30,54 @@ public static final Map<String,List<String>> kTEST_CONFIG_BY_TEST_NAME =
    new HashMap<String,List<String>>()
    {{
       put(
+         "Chat",
+         new ArrayList<>(Arrays.asList(
+            "io.reactjava.client.examples.chat.App",
+            "io.reactjava.client.examples.chat.Chat",
+            "io.reactjava.client.examples.chat.Login"
+         )));
+      put(
+         "DisplayCode",
+         new ArrayList<>(Arrays.asList(
+            "io.reactjava.client.examples.displaycode.App"
+         )));
+      put(
+         "GeneralPage",
+         new ArrayList<>(Arrays.asList(
+            "io.reactjava.client.examples.generalpage.App"
+         )));
+      put(
+         "HelloWorld",
+         new ArrayList<>(Arrays.asList(
+            "io.reactjava.client.examples.helloworld.App"
+         )));
+      put(
          "MaterialUITheme",
          new ArrayList<>(Arrays.asList(
             "io.reactjava.client.examples.materialui.theme.App"
+         )));
+      put(
+         "PDF",
+         new ArrayList<>(Arrays.asList(
+            "io.reactjava.client.examples.pdf.App",
+            "io.reactjava.client.examples.pdf.Drawer"
+         )));
+      put(
+         "PlatformsWebsite",
+         new ArrayList<>(Arrays.asList(
+            "com.giavaneers.web.platformswebsite.reactjava.AppReactJava",
+            "com.giavaneers.web.platformswebsite.general.AppBase",
+            "com.giavaneers.web.platformswebsite.general.LandingPage"
+         )));
+      put(
+         "SEO",
+         new ArrayList<>(Arrays.asList(
+            "io.reactjava.client.examples.seo.App"
+         )));
+      put(
+         "Speck",
+         new ArrayList<>(Arrays.asList(
+            "io.reactjava.client.examples.speck.App"
          )));
       put(
          "SplitPanel",
@@ -45,25 +90,9 @@ public static final Map<String,List<String>> kTEST_CONFIG_BY_TEST_NAME =
             "io.reactjava.client.components.splitpanel.SplitPanel"
          )));
       put(
-         "PDF",
+         "TextField",
          new ArrayList<>(Arrays.asList(
-            "io.reactjava.client.examples.pdf.App",
-            "io.reactjava.client.examples.pdf.Drawer"
-         )));
-      put(
-         "TwoSquaresOneFile",
-         new ArrayList<>(Arrays.asList(
-            "io.reactjava.client.examples.statevariable.twosquaresonefile.App"
-         )));
-      put(
-         "GeneralPage",
-         new ArrayList<>(Arrays.asList(
-            "io.reactjava.client.examples.generalpage.App"
-         )));
-      put(
-         "DisplayCode",
-         new ArrayList<>(Arrays.asList(
-            "io.reactjava.client.examples.displaycode.App"
+            "io.reactjava.client.examples.textfield.App"
          )));
       put(
          "ThreeByThreeStep05",
@@ -71,33 +100,9 @@ public static final Map<String,List<String>> kTEST_CONFIG_BY_TEST_NAME =
             "io.reactjava.client.examples.threebythree.step05.materialui.App"
          )));
       put(
-         "HelloWorld",
+         "TwoSquaresOneFile",
          new ArrayList<>(Arrays.asList(
-            "io.reactjava.client.examples.helloworld.App"
-         )));
-      put(
-         "Chat",
-         new ArrayList<>(Arrays.asList(
-            "io.reactjava.client.examples.chat.App",
-            "io.reactjava.client.examples.chat.Chat",
-            "io.reactjava.client.examples.chat.Login"
-         )));
-      put(
-         "Speck",
-         new ArrayList<>(Arrays.asList(
-            "io.reactjava.client.examples.speck.App"
-         )));
-      put(
-         "SEO",
-         new ArrayList<>(Arrays.asList(
-            "io.reactjava.client.examples.seo.App"
-         )));
-      put(
-         "PlatformsWebsite",
-         new ArrayList<>(Arrays.asList(
-            "com.giavaneers.web.platformswebsite.reactjava.AppReactJava",
-            "com.giavaneers.web.platformswebsite.general.AppBase",
-            "com.giavaneers.web.platformswebsite.general.LandingPage"
+            "io.reactjava.client.examples.statevariable.twosquaresonefile.App"
          )));
    }};
 
